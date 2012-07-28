@@ -1,0 +1,8 @@
+Server Keystore anlegen:
+keytool -genkey -alias server1 -keystore serveKeyStore -keyalg rsa -keysize 4096 -validity 365
+
+Oeffentliches Certifikat fuer Clients exportieren:
+keytool -export -alias server1 -keystore serveKeyStore -file server1.cert
+
+Certifikat des Servers in KeyStore des Clients importieren:
+keytool -import -alias server1-cert -file server1.cert -keystore clientKeyStore
