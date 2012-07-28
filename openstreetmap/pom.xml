@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese</groupId>
+		<artifactId>maven-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>openstreetmap</artifactId>
+	<packaging>jar</packaging>
+
+	<name>openstreetmap</name>
+	<description>Projekt fuer das Rendern von GEO Daten von http://www.openstreetmap.org</description>
+	<url>http://www.openstreetmap.org</url>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>assembly-parent</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>assembly-osmImpl.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!--dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+		</dependency-->
+		<dependency>
+			<groupId>net.sf.trove4j</groupId>
+			<artifactId>trove4j</artifactId>
+		</dependency>
+		<!--dependency>
+			<groupId>org.nuiton.thirdparty</groupId>
+			<artifactId>l2fprod-common</artifactId>
+			<version>0.1</version>
+			<scope>optional</scope>
+			</dependency>
+			<dependency>
+			<groupId>com.l2fprod.common</groupId>
+			<artifactId>l2fprod-common-shared</artifactId>
+			<version>6.9.1</version>
+			<scope>optional</scope>
+			</dependency -->
+	</dependencies>
+</project>
