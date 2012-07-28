@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese</groupId>
+		<artifactId>maven-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>javafx-demo</artifactId>
+	<packaging>jar</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>JavaFX-Demo</description>
+
+	<build>
+		<plugins>
+			<!--plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<configuration>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>false</overWriteSnapshots>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>JavaFX Package</id>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<taskdef name="jfxjar" classname="com.sun.javafx.tools.ant.FXJar"
+									classpathref="maven.compile.classpath" />
+
+								<jfxjar
+									destfile="${project.build.directory}/${project.build.finalName}-runnable">
+									<fileset dir="${project.build.directory}/classes" />
+									<application name="${project.name}"
+										mainClass="de.freese.javafx.TransitionRotate" />
+
+									<manifest>
+										<attribute name="Implementation-Vendor" value="${project.organization.name}" />
+										<attribute name="Implementation-Title" value="${project.name}" />
+										<attribute name="Implementation-Version" value="${project.version}" />
+										<attribute name="Build-Timestamp" value="${maven.build.timestamp}" />
+									</manifest>
+
+									<!--resources>
+										<fileset dir="${project.build.directory}" includes="*.jar"/>
+										<fileset dir="${project.build.directory}/dependency" includes="*.jar"/>
+										</resources -->
+								</jfxjar>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<!--dependencies>
+					<dependency>
+					<groupId>com.oracle</groupId>
+					<artifactId>javafx-ant</artifactId>
+					</dependency>
+					</dependencies -->
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>javafx</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>javafx-ant</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>
