@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese</groupId>
+		<artifactId>maven-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>apt-parent</artifactId>
+	<packaging>pom</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>Basis Projekt für JavaAnnotationProcesing</description>
+
+	<modules>
+		<module>apt-note</module>
+		<module>apt-test</module>
+	</modules>
+
+	<build>
+		<plugins>
+			<!--plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>apt-maven-plugin</artifactId>
+				<version>1.0-alpha-4</version>
+				<configuration>
+				<factory>de.freese.apt.note.NoteAnnotationProcessorFactory</factory>
+				</configuration>
+				<executions>
+				<execution>
+				<goals>
+				<goal>process</goal>
+				</goals>
+				</execution>
+				</executions>
+				</plugin -->
+			<!--annotationProcessors>
+				<param>de.freese.apt.note.NoteAnnotationProcessor</param>
+				</annotationProcessors>
+				<generatedSourcesDirectory>generated-sources/src/main/java</generatedSourcesDirectory -->
+			<!--plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+				<compilerVersion>1.7</compilerVersion>
+				<source>1.7</source>
+				<target>1.7</target>
+				</configuration>
+				<executions>
+				<execution>
+				<id>default-compile</id>
+				<configuration>
+				<compilerArgument>-proc:none</compilerArgument>
+				<includes>
+				<include>de/freese/apt/note/**</include>
+				</includes>
+				</configuration>
+				</execution>
+				<execution>
+				<id>compile-everything-else</id>
+				<configuration>
+				</configuration>
+				<phase>compile</phase>
+				<goals>
+				<goal>compile</goal>
+				</goals>
+				</execution>
+				</executions>
+				</plugin -->
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sun</groupId>
+			<artifactId>tools</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

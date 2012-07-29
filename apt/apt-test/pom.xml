@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese</groupId>
+		<artifactId>apt-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>apt-test</artifactId>
+	<packaging>jar</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>Test Projekt für JavaAnnotationProcesing</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerVersion>1.7</compilerVersion>
+					<source>1.7</source>
+					<target>1.7</target>
+					<debug>true</debug>
+					<optimize>true</optimize>
+					<!-- Annotation Processing abschalten -->
+					<compilerArgument>-proc:none</compilerArgument>
+					
+					<annotationProcessors>
+						<param>de.freese.apt.note.NoteAnnotationProcessor</param>
+					</annotationProcessors>
+					<generatedSourcesDirectory>generated/src/main/java</generatedSourcesDirectory>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>apt-note</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+</project>
