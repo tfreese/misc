@@ -1,0 +1,69 @@
+package command;
+
+import java.util.Calendar;
+import java.util.Date;
+
+/**
+ * @author Thomas Freese
+ */
+public class RunPattern
+{
+	/**
+     * 
+     */
+	private static Calendar dateCreator = Calendar.getInstance();
+
+	/**
+	 * @param year int
+	 * @param month int
+	 * @param day int
+	 * @param hour int
+	 * @param minute int
+	 * @return {@link Date}
+	 */
+	public static Date createDate(final int year, final int month, final int day, final int hour,
+									final int minute)
+	{
+		dateCreator.set(year, month, day, hour, minute);
+
+		return dateCreator.getTime();
+	}
+
+	/**
+	 * @param arguments String[]
+	 */
+	public static void main(final String[] arguments)
+	{
+		System.out.println("Example for the Command pattern");
+		System.out.println();
+		System.out.println("This sample will use a command class called");
+		System.out.println(" ChangeLocationCommand to update the location");
+		System.out.println(" of an Appointment object.");
+		System.out.println("The ChangeLocationCommand has the additional");
+		System.out.println(" ability to undo and redo commands, so it can");
+		System.out.println(" set the locaition back to its original value,");
+		System.out.println(" if desired.");
+		System.out.println();
+
+		System.out.println("Creating an Appointment for use in the demo");
+		Contact[] people =
+		{
+				new ContactImpl(), new ContactImpl()
+		};
+		Appointment appointment =
+				new Appointment("Java Twister Semi-Finals", people, new LocationImpl(""),
+						createDate(2001, 10, 31, 14, 30), createDate(2001, 10, 31, 14, 31));
+
+		System.out.println("Creating the ChangeLocationCommand");
+		ChangeLocationCommand cmd = new ChangeLocationCommand();
+
+		cmd.setAppointment(appointment);
+
+		System.out.println("Creating the GUI");
+		CommandGui application = new CommandGui(cmd);
+
+		application.setAppointment(appointment);
+		cmd.setLocationEditor(application);
+		application.createGui();
+	}
+}
