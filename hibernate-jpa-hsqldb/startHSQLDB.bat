@@ -1,0 +1,1 @@
+java -cp D:/maven-repository/org/hsqldb/hsqldb/2.2.6/hsqldb-2.2.6.jar org.hsqldb.Server

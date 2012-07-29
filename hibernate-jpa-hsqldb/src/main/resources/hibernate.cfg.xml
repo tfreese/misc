@@ -1,0 +1,12 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory><!-- name="testJPA" (mit JNDI)-->
+		<mapping package="de.freese.jpa.model"/>
+        <!--mapping class="de.freese.jpa.model.Person"/>
+        <mapping class="de.freese.jpa.model.Address"/-->
+		<!--mapping resource="test/animals/orm.xml"/-->				
+	</session-factory>
+</hibernate-configuration>
