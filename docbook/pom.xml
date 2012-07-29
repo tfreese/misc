@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese</groupId>
+		<artifactId>maven-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../maven-parent</relativePath>
+	</parent>
+
+	<!--groupId>de.freese</groupId -->
+	<artifactId>docbook</artifactId>
+	<!--version>0.0.1-SNAPSHOT</version -->
+	<packaging>pom</packaging>
+
+	<name>${project.artifactId}</name>
+	<description>DocBook Beispiel.</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-maven-plugin</artifactId>
+				<!--version>2.0.14</version -->
+				<dependencies>
+					<!-- DocBook-Version festlegen -->
+					<!--dependency>
+						<groupId>net.sf.docbook</groupId>
+						<artifactId>docbook-xml</artifactId>
+						<version>5.0-all</version>
+						<classifier>resources</classifier>
+						<type>zip</type>
+						<scope>runtime</scope>
+						</dependency -->
+
+					<!-- Ermöglicht Silbentrennung -->
+					<!--dependency>
+						<groupId>net.sf.offo</groupId>
+						<artifactId>fop-hyph</artifactId>
+						<version>2.0</version>
+						<scope>runtime</scope>
+						</dependency -->
+				</dependencies>
+
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<id>generate-userguide</id>
+						<goals>
+							<!-- Ausgaben erzeugen -->
+							<!--goal>generate-html</goal -->
+							<!--goal>generate-xhtml</goal -->
+							<goal>generate-pdf</goal>
+							<!--goal>generate-rtf</goal -->
+							<!--goal>generate-ebub</goal -->
+							<goal>generate-webhelp</goal>
+							<!--goal>generate-manpages</goal -->
+							<!--goal>generate-eclipse</goal -->
+							<!--goal>generate-javahelp</goal -->
+						</goals>
+						<configuration>
+							<!-- DocBook-Dokument angeben -->
+							<includes>mydocu.xml</includes>
+						</configuration>
+					</execution>
+				</executions>
+
+				<configuration>
+					<!-- Zielverzeichnis festlegen -->
+					<!--targetDirectory>${basedir}/target/docbkx</targetDirectory -->
+
+					<!--
+						Erlaubt Strukturierung einer XML-Datei ueber xi:include href="..."
+					-->
+					<xincludeSupported>true</xincludeSupported>
+
+					<!-- Eigene Styles fuer PDF -->
+					<foCustomization>${basedir}/src/docbkx/styles/mystyle-pdf.xsl</foCustomization>
+					<!-- Eigene Styles fuer HTML -->
+					<htmlCustomization>${basedir}/src/docbkx/styles/mystyle-html.xsl</htmlCustomization>
+					<!-- Eigene Styles fuer WebHelp -->
+					<webhelpCustomization>${basedir}/src/docbkx/styles/mystyle-webhelp.xsl</webhelpCustomization>
+					<!-- Eigene Styles fuer JavaHelp -->
+					<javahelpCustomization></javahelpCustomization>
+
+					<!-- Zusaetzliche XSLT Parameter -->
+					<customizationParameters>
+						<parameter>
+							<name>projectversion</name>
+							<value>${project.version}</value>
+						</parameter>
+					</customizationParameters>
+
+					<!-- Kopiert die notwendigen Sourcen -->
+					<preProcess>
+						<!--
+							Kopiert Bilder fuer die WebHelp-Version. Muss angepasst werden,
+							wenn sich der Name des DocBook-Dokuments ändert.
+						-->
+						<copy todir="${basedir}/target/docbkx/webhelp/mydocu/content/images">
+							<fileset dir="${basedir}/src/docbkx/images">
+								<exclude name="**/*.pdf" />
+							</fileset>
+						</copy>
+						<!-- Kopiert CSS-Styles fuer die WebHelp-Version -->
+						<!--copy file="${basedir}/src/docbkx/styles/webhelp-positioning.css"
+							tofile="${basedir}/target/docbkx/webhelp/mydocu/common/css/webhelp-positioning.css" 
+							/ -->
+					</preProcess>
+					<postProcess></postProcess>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<inherited>false</inherited>
+				<configuration>
+					<!--finalName></finalName -->
+				</configuration>
+				<executions>
+					<execution>
+						<id>assembly-parent</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptors>
+								<descriptor>assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.help</groupId>
+			<artifactId>javahelp</artifactId>
+			<version>2.0.05</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+</project>

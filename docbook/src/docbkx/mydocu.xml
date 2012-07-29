@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<book version="5.0" xmlns="http://docbook.org/ns/docbook"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude"
+	xmlns:svg="http://www.w3.org/2000/svg" xmlns:m="http://www.w3.org/1998/Math/MathML"
+	xmlns:html="http://www.w3.org/1999/xhtml" lang="de">
+
+	<!-- Import anderer Doku -->
+	<!--xi:include href="chapter1.xml" / -->
+
+	<info>
+		<title>My DocBook &amp; Apache Maven</title>
+		<subtitle>vom JavaMagazin 2012/07</subtitle>
+		<releaseinfo>
+			<?bookversion?>
+		</releaseinfo>
+		<pubdate>
+			<?dbtimestamp format="Y-m-d"?>
+		</pubdate>
+		<author>
+			<orgname>Thomas Freese</orgname>
+		</author>
+		<copyright>
+			<year><?dbtimestamp format="Y"?></year>
+			<holder>Thomas Freese</holder>
+        </copyright>		
+	</info>
+
+	<chapter lang="de">
+		<title>Erstes Kapitel</title>
+
+		<section>
+			<title>Ein Abschnitt</title>
+			<indexterm>
+				<primary>Kapitel 1</primary>
+				<secondary>Beispiel 1</secondary>       
+				<tertiary>Kap. 1</tertiary>
+				<see>Kapitel 2</see>
+			</indexterm>
+			
+			<para>Hello World</para>
+			<para>
+				Ein
+				<emphasis>zweiter</emphasis>
+				Absatz
+			</para>
+
+			<figure>
+				<title>DocBook</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata contentwidth="50mm" align="center"
+							fileref="images/docbook-logo.png"></imagedata>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</section>
+
+		<section>
+			<title>Noch ein Abschnitt</title>
+			<para>Hello World 2</para>
+
+			<figure>
+				<title>Maven</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata contentwidth="50mm" valign="middle"
+							fileref="images/maven_logo.gif"></imagedata>
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</section>
+	</chapter>
+	
+    <!--Stichwortverzeichniss-->
+    <index/>
+
+</book>
