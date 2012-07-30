@@ -11,11 +11,12 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>clean-webdav-maven-plugin</artifactId>
+	<groupId>de.freese.maven.plugin</groupId>
+	<artifactId>trim-repo-maven-plugin</artifactId>
 	<packaging>maven-plugin</packaging>
 
 	<name>${project.artifactId}</name>
-	<url>http://maven.apache.org</url>
+	<description>Removes old Snapshots.</description>
 
 	<dependencies>
 		<dependency>

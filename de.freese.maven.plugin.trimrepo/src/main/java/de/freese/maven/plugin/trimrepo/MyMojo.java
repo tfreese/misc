@@ -1,4 +1,4 @@
-package de.freese.maven.plugin.clean.webdav;
+package de.freese.maven.plugin.trimrepo;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation. Licensed under the Apache License, Version
