@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<project name="Global_Ant" default="dummy" basedir=".">
+
+	<property name="mainclass" value="" />
+	
+	<loadproperties srcFile="../ANT/build.properties"/>
+	
+	<!-- System-Kompilereinstellung, tools.jar muss im Classpath sein -->
+	<property name="build.compiler"
+	          value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+			  
+	<!-- Pruefen, ob die .cvspass Datei im USER-Verzeichnis liegt -->
+	<available file="${user.home}/.cvspass" property="cvspass.present" />			  
+
+	<!-- Timestamps initialisieren -->
+	<!-- DSTAMP=yyyyMMdd; TSTAMP=hhmm; TODAY=MMMM dd yyyy -->
+	<tstamp />	
+	
+	<target name="dummy">
+		
+	</target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: cvspass  
+          		  Die .cvspass Datei wird von ANT nur angelegt, wenn das Property
+          		  "cvspass.present" nicht existiert.                    
+         - - - - - - - - - - - - - - - - - -->
+	<target name="cvspass" unless="cvspass.present">
+		<cvspass cvsroot=":pserver:${cvs.user}@${cvs.server}:${cvs.repository}" password="${cvs.password}" />
+	</target>		
+	
+	<target name="cvsCheckOutProject" >
+		<cvs 
+			cvsRoot=":ext:${cvs.user}@${cvs.server}:${cvs.repository}"
+			command="checkout"
+			package="${project}"
+			tag="${cvs.tag}"
+			dest="${build.dir}" />
+
+  		<!--cvs
+			cvsRoot=":pserver:${cvs.user}@${cvs.server}:${cvs.repository}"
+            command="checkout"
+  			package="${project}"
+  			tag="${cvs.tag}"
+  			dest="${build.dir}"/-->
+	</target>	
+		
+	<target name="compileProject" >
+		<mkdir dir="${build.dir}/${project}/bin"/>
+		<javac
+			srcdir="${build.dir}/${project}/src"
+			destdir="${build.dir}/${project}/bin"
+			debug="on"
+			failonerror="true"
+			verbose="yes"
+			optimize="on"
+			compiler="javac1.4"
+			encoding="ISO-8859-1"
+			classpathref="classpath">
+		</javac>
+	</target>
+		
+	<target name="jarProject" >
+		<delete file="${build.dir}/${project}/${project}_*.jar"/>
+		<jar destfile="${build.dir}/${project}/${project}_${DSTAMP}.jar" basedir="${build.dir}/${project}/bin" compress="true">
+			<manifest>
+				<attribute name="By" value="Thomas Freese"/>
+  				<attribute name="Main-Class" value="${mainclass}"/>
+	    	</manifest>
+	    </jar>
+	</target>	
+		
+	<target name="javadocProject" >
+		<mkdir dir="${build.dir}/${project}/javadoc"/>
+        <javadoc
+			sourcepath="${build.dir}/${project}/src"
+			destdir="${build.dir}/${project}/javadoc"
+        	encoding="ISO-8859-1"
+			failonerror="true"
+        	access="public"
+        	use="true"
+        	notree="false"
+            nonavbar="false"
+            noindex="false"
+            splitindex="true"
+            author="true"
+            version="true"
+            nodeprecatedlist="false"
+            nodeprecated="false"
+            packagenames="de.*"
+			windowtitle="Meine API"
+			doctitle="Meine API"
+			bottom="Copyright &#169; Thomas Freese. All Rights Reserved."
+			classpathref="classpath">
+			
+            <link href="http://java.sun.com/j2se/1.4.2/docs/api"/>
+        </javadoc>
+	</target>			
+
+</project>

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<project name="EclipseClasspathTask" basedir="../" default="test">
+		
+	<path id="task.classpath">
+		<path location="bin"/>
+	</path>	
+	
+	<target name="test">
+		
+		<taskdef resource="de/freese/ant/task/eclipseclasspath.properties"
+			classpathref="task.classpath"/>
+		
+		<eclipsecp 
+			dir="."
+			pathid="classpath"
+			workspace="/home/tommy/workspace"
+			verbose="true"/>
+		
+		<mkdir dir="build"/>	
+		<javac srcdir="src" destdir="build" verbose="yes" classpathref="classpath">
+		</javac>
+	
+	</target>
+		
+</project>

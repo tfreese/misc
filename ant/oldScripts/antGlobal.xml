@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<project name="Global_Ant" default="init" xmlns:mylib="local_lib" basedir=".">
+
+	<loadproperties srcFile="global.properties" />
+	<typedef file="mylib.xml" uri="local_lib" />
+
+	<property name="target.cvs" value="${target}" />
+	<property name="target.main" value="${target}/${project}" />	
+	<property name="target.bin" value="${target.main}/bin" />
+	<property name="target.src" value="${target.main}/src" />
+	<property name="target.resources" value="${target.main}/resources" />
+	<property name="target.javadoc" value="${target.main}/javadoc" />
+	<property name="target.test.logs" value="${target.main}/test/testlogs" />
+	<property name="target.test.html" value="${target.main}/test/html" />
+
+	<!-- System-Kompilereinstellung, tools.jar muss im Classpath sein -->
+	<property name="build.compiler"
+	          value="org.eclipse.jdt.core.JDTCompilerAdapter" />
+
+	<!-- Timestamps initialisieren -->
+	<!-- DSTAMP=yyyyMMdd; TSTAMP=hhmm; TODAY=MMMM dd yyyy -->
+	<tstamp />
+	
+	<target name="init" description="Loeschen der Ursprungsdateien.">
+
+		<delete dir="${target.main}" />
+
+		<mkdir dir="${target.bin}" />
+		
+		<!-- Sources kopieren -->
+		<copy todir="${target.src}" overwrite="true">
+			<fileset dir="${project}/src">
+			</fileset>
+		</copy>
+
+	</target>
+	
+    <target name="debug" description="Ausgabe der Properties">    
+	    <echo message="cvs.server = ${cvs.server}" />
+	    <echo message="cvs.repository = ${cvs.repository}" />
+	    <echo message="cvs.user = ${cvs.user}" />
+	    <echo message="cvs.tag = ${cvs.tag}" />
+	    <echo message="target  = ${target}" />
+		<echo message="target.cvs = ${target.cvs}" />
+		<echo message="target.main = ${target.main}" />
+		<echo message="target.bin = ${target.bin}" />
+		<echo message="target.src = ${target.src}" />
+		<echo message="target.resources = ${target.resources}" />
+		<echo message="target.javadoc = ${target.javadoc}" />
+		<echo message="target.test.logs = ${target.test.logs}" />
+		<echo message="target.test.html = ${target.test.html}" />
+		<echo message="build.compiler = ${build.compiler}" />
+		<echo message="mainclass = ${mainclass}" />
+		
+		<!--echoproperties/-->
+    </target>	
+    
+	<target name="compile" description="Kompilierung.">
+		<!--record name="ant_compile.log" action="start"/-->
+		<mylib:my.javac />
+		<!--record name="ant_compile.log" action="stop"/-->
+		
+		<antcall target="javadoc" />
+	</target>
+
+	<target name="compileCVS"
+	        depends="cvsCheckOut"
+	        description="Kompilierung der CVS-Quellen.">
+	        
+	    <mkdir dir="${target.bin}" />
+
+		<!--record name="ant_compile.log" action="start"/-->
+		<mylib:my.javac />
+		<!--record name="ant_compile.log" action="stop"/-->
+		
+		<antcall target="javadoc" />
+	</target>
+
+	<target name="jar"
+	        depends="compile"
+	        description="Erzeugt Jar-File.">
+
+		<!-- Importiert keine Resourcen -->
+		<mylib:my.jar />
+	</target>
+	
+	<target name="jarCVS"
+	        depends="compileCVS"
+	        description="Erzeugt Jar-File aus den CVS-Quellen.">
+
+		<!-- Importiert keine Resourcen -->
+		<mylib:my.jar />
+	</target>
+
+	<target name="cvsCheckOut" description="Erzeugt Jar-File.">
+		<mylib:my.cvscheckout />
+	</target>
+
+	<target name="javadoc" description="Erzeugt Jar-File.">
+		<mylib:my.javadoc />
+	</target>    
+
+</project>
