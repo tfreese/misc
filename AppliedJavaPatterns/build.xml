@@ -18,7 +18,7 @@ und als WAR-File auf dem Server zu deployen.
 				includes="**/*.class"
 		    />
 			<manifest>
-				<attribute name="By" value="Thomas Freese, thomas@freese-home.de"/>
+				<attribute name="By" value="Thomas Freese"/>
 	    </manifest>
 	    </jar-->
 	</target>		

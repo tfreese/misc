@@ -8,8 +8,6 @@ TEL;CELL;VOICE:01520-9893906
 ADR;WORK:;;Oebisfelderstrasse;Wolfsburg
 LABEL;WORK;ENCODING=QUOTED-PRINTABLE:Oebisfelderstrasse=0D=0AWolfsburg
 BDAY:19750513
-EMAIL;PREF;INTERNET:thomas@freese-home.de
-EMAIL;INTERNET:extern.thomas.freese@volkswagen.de
-EMAIL;INTERNET:tfreese@auel.de
+EMAIL;PREF;INTERNET:commercial@freese-home.de
 REV:20111225T064820Z
 END:VCARD

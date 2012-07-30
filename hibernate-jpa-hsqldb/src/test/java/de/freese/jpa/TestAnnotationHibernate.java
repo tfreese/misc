@@ -16,23 +16,10 @@ import de.freese.jpa.model.Person;
 import de.freese.jpa.util.HibernateUtil;
 
 /**
- * @author Thomas Freese; thomas&#169;freese-home.de
+ * @author Thomas Freese
  */
 public class TestAnnotationHibernate
 {
-	/**
-     * 
-     */
-	private StopWatch timer = new StopWatch();
-
-	/**
-	 * Creates a new {@link TestAnnotationHibernate} object.
-	 */
-	public TestAnnotationHibernate()
-	{
-		super();
-	}
-
 	/**
 	 * @param args String[]
 	 * @throws Exception Falls was schief geht
@@ -56,6 +43,19 @@ public class TestAnnotationHibernate
 		testJPA.statistics();
 
 		testJPA.close();
+	}
+
+	/**
+     * 
+     */
+	private StopWatch timer = new StopWatch();
+
+	/**
+	 * Creates a new {@link TestAnnotationHibernate} object.
+	 */
+	public TestAnnotationHibernate()
+	{
+		super();
 	}
 
 	/**

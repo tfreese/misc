@@ -105,7 +105,7 @@ public class ReadIMAPMails
 		ReadIMAPMails readMail = new ReadIMAPMails();
 
 		// Calling processMail Function to read from IMAP Account
-		readMail.processMail("imap.1und1.de", "thomas@freese-home.de", "...", "INBOX");
+		readMail.processMail("imap.1und1.de", "...", "...", "INBOX");
 	}
 
 	/**
