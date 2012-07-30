@@ -9,7 +9,7 @@
 	</parent>
 
 	<groupId>de.freese.maven.plugin</groupId>
-	<artifactId>maven-plugin-test</artifactId>
+	<artifactId>maven-plugin-debug</artifactId>
 	<packaging>pom</packaging>
 
 	<name>${project.artifactId}</name>
