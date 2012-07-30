@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<logging>
+		<level>
+				<trace>true</trace>
+				<info>true</info>
+				<debug>true</debug>
+				<warn>true</warn>
+				<error>true</error>
+				<fatal>true</fatal>
+		</level>
+		
+		<showLogLocation>false</showLogLocation>
+
+		<destinations>
+				<destination class="de.freese.logging.destination.LoggingStandardOutDestination">
+						<active>true</active>
+						<attributes/>
+				</destination>
+
+				<destination class ="de.freese.logging.destination.LoggingFileDestination">
+						<active>false</active>
+						<attributes>
+							<file>/mnt/ramdisk/persistence.log</file>
+							<maxsize>5</maxsize><!-- MB -->
+							<append>true</append>
+						</attributes>
+				</destination>
+				
+				<destination class ="de.freese.logging.destination.LoggingSocketDestination">
+						<active>false</active>
+						<attributes>
+							<host>localhost</host>
+							<port>65123</port>
+						</attributes>
+				</destination>	
+										
+		</destinations>
+</logging>

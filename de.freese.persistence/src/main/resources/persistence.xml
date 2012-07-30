@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--DOCTYPE Jamafi SYSTEM "jamafi.dtd"-->
+
+<persistence>
+	
+	<datasource>
+		<key>test</key> <!-- MUSS immer vorhanden sein -->
+		<driver>org.gjt.mm.mysql.Driver</driver>
+		<url>jdbc:mysql://192.168.1.1:3306/test</url>
+		<user>mysql</user>
+		<password>mysql@mysql</password>
+	</datasource>
+	
+	<datasource>
+		<key>jamafiProxy</key>
+		<driver>org.gjt.mm.mysql.Driver</driver>
+		<url>jdbc:mysql://192.168.1.1:3306/jamafiProxy</url>
+		<user>jamafi</user>
+		<password>jamafi@mysql</password>
+	</datasource>
+	
+	<manager key="DenyDomainPM" class="test.de.freese.persistence.DenyDomainPM" datasourceKey="jamafiProxy"/>
+		
+</persistence>
