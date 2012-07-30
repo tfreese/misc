@@ -10,7 +10,7 @@
 
 	<groupId>de.freese.maven.plugin</groupId>
 	<artifactId>maven-plugin-test</artifactId>
-	<packaging>jar</packaging>
+	<packaging>pom</packaging>
 
 	<name>${project.artifactId}</name>
 	<description>Test-POM für eigene Plugins.</description>
