@@ -18,19 +18,19 @@
 	<description>Alles zum ausprobieren.</description>
 
 	<repositories>
-		<repository>
+		<!--repository>
 			<id>pentaho</id>
 			<name>Pentaho Data Integration</name>
 			<url>http://repository.pentaho.org/artifactory/repo</url>
 			<releases>
 				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
+				<updatePolicy>daily</updatePolicy>
 			</releases>
 			<snapshots>
 				<enabled>false</enabled>
-				<updatePolicy>never</updatePolicy>
+				<updatePolicy>daily</updatePolicy>
 			</snapshots>
-		</repository>
+		</repository-->
 	</repositories>
 
 	<dependencies>
