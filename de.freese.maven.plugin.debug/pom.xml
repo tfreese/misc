@@ -18,9 +18,9 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>${project.groupId}</groupId>
+				<groupId>de.freese.maven.plugin</groupId>
 				<artifactId>trim-repo-maven-plugin</artifactId>
-				<version>${project.version}</version>
+				<version>0.0.1-SNAPSHOT</version>
 				<configuration>
 					<host>https://sd2dav.1und1.de</host>
 					<rootPath>/maven/repository-snapshots</rootPath>
