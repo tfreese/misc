@@ -12,6 +12,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.NoMergePolicy;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
@@ -33,17 +34,20 @@ public class SimpleDemo
 	private static final Version VERSION = Version.LUCENE_36;
 
 	/**
-	 * @param w {@link IndexWriter}
+	 * @param indexWriter {@link IndexWriter}
 	 * @param value String
 	 * @throws IOException Falls was schief geht.
 	 */
-	private static void addDoc(final IndexWriter w, final String value) throws IOException
+	private static void addDoc(final IndexWriter indexWriter, final String value)
+		throws IOException
 	{
 		Document doc = new Document();
 		doc.add(new Field("title", value, Field.Store.YES, Field.Index.ANALYZED));
 		doc.add(new Field("length", Integer.toString(value.length()), Field.Store.YES,
 				Field.Index.NO));
-		w.addDocument(doc);
+		indexWriter.addDocument(doc);
+
+		indexWriter.commit();
 	}
 
 	/**
@@ -58,22 +62,43 @@ public class SimpleDemo
 		StandardAnalyzer analyzer = new StandardAnalyzer(VERSION);
 
 		// 1. create the index
-		Directory index = new RAMDirectory();
-		// Directory index = FSDirectory.open(new File("lucene-index/demo"));
+		Directory directory = new RAMDirectory();
+		// Directory directory = FSDirectory.open(new File("lucene-index/demo"));
 
 		// org.apache.lucene.store.jdbc.JdbcDirectory
 		// org.compass.core.lucene.util.LuceneUtils; RAMDirectory<->JdbcDirectory
 
 		IndexWriterConfig config = new IndexWriterConfig(VERSION, analyzer);
+		config.setMergePolicy(NoMergePolicy.NO_COMPOUND_FILES);
 
-		IndexWriter w = new IndexWriter(index, config);
-		addDoc(w, "Lucene in Action");
-		addDoc(w, "Lucene for Dummies");
-		addDoc(w, "Managing Gigabytes");
-		addDoc(w, "The Art of Computer Science");
+		// if (config.getMergePolicy() instanceof TieredMergePolicy)
+		// {
+		// ((TieredMergePolicy) config.getMergePolicy()).setUseCompoundFile(false);
+		// }
+		//
+		// if (config.getMergePolicy() instanceof LogMergePolicy)
+		// {
+		// ((LogMergePolicy) config.getMergePolicy()).setUseCompoundFile(false);
+		// }
+
+		IndexWriter indexWriter = new IndexWriter(directory, config);
+		addDoc(indexWriter, "Lucene in Action");
+		addDoc(indexWriter, "Lucene for Dummies");
+		addDoc(indexWriter, "Managing Gigabytes");
+		addDoc(indexWriter, "The Art of Computer Science");
 
 		// Index speichern.
-		w.close();
+		try
+		{
+			indexWriter.close();
+		}
+		finally
+		{
+			if (IndexWriter.isLocked(directory))
+			{
+				IndexWriter.unlock(directory);
+			}
+		}
 
 		// 2. query
 		String querystr = args.length > 0 ? args[0] : "lucene";
@@ -84,7 +109,7 @@ public class SimpleDemo
 
 		// 3. search
 		int hitsPerPage = 10;
-		IndexReader reader = IndexReader.open(index);
+		IndexReader reader = IndexReader.open(directory);
 		IndexSearcher searcher = new IndexSearcher(reader);
 		TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
 		searcher.search(q, collector);
