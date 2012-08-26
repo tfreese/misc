@@ -23,10 +23,8 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * Beispeile für JCE-API.
  * 
- * @author Thomas Freese
- * @see SSL.txt
+ * @author Thomas Freese see SSL.txt
  */
-@SuppressWarnings("javadoc")
 public class TestJCE
 {
 	/**

@@ -19,10 +19,8 @@ import javax.crypto.CipherOutputStream;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * @author Thomas Freese
- * @see SSL.txt
+ * @author Thomas Freese see SSL.txt
  */
-@SuppressWarnings("javadoc")
 public class TestKeystore
 {
 	/**
