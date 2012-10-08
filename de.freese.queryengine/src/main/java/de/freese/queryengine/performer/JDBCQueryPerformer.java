@@ -48,7 +48,6 @@ public class JDBCQueryPerformer implements IQueryPerformer
 		if (LOGGER.isDebugEnabled())
 		{
 			this.sqlFormatter.setFormatSQL(true);
-			this.sqlFormatter.setShowSQL(true);
 		}
 	}
 
