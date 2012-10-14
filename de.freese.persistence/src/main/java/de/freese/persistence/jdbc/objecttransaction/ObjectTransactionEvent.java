@@ -7,7 +7,7 @@ import java.util.EventListener;
 
 import javax.transaction.Status;
 
-import de.freese.base.utils.concurrent.event.ThreadQueueEvent;
+import de.freese.base.core.concurrent.event.ThreadQueueEvent;
 
 /**
  * ObjectTransactionEvent
@@ -33,7 +33,7 @@ public class ObjectTransactionEvent extends ThreadQueueEvent implements Status
 	}
 
 	/**
-	 * @see de.freese.base.utils.concurrent.event.ThreadQueueEvent#dispatch(java.util.EventListener)
+	 * @see de.freese.base.core.concurrent.event.ThreadQueueEvent#dispatch(java.util.EventListener)
 	 */
 	@Override
 	protected void dispatch(final EventListener listener)

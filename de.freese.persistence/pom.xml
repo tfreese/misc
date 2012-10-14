@@ -34,7 +34,7 @@
 		</dependency-->
 		<dependency>
 			<groupId>de.freese.base</groupId>
-			<artifactId>base-utils</artifactId>
+			<artifactId>base-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

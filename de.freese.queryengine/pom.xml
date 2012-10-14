@@ -20,7 +20,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>de.freese.base</groupId>
-			<artifactId>base-model</artifactId>
+			<artifactId>base-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>	
 		<dependency>

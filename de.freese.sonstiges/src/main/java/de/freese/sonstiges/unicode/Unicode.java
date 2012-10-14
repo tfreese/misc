@@ -1,6 +1,6 @@
 package de.freese.sonstiges.unicode;
 
-import de.freese.base.utils.math.ExtMath;
+import de.freese.base.core.math.ExtMath;
 
 /**
  * @author Thomas Freese

@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.freese.base.utils.pool.IDisposeableCallback;
-import de.freese.base.utils.pool.RoundRobinPool;
+import de.freese.base.core.pool.IDisposeableCallback;
+import de.freese.base.core.pool.RoundRobinPool;
 import de.freese.littlemina.core.session.IoSession;
 
 /**
@@ -42,7 +42,7 @@ public final class SimpleIoProcessorPool<T extends IoSession> extends
 		}
 
 		/**
-		 * @see de.freese.base.utils.pool.IDisposeableCallback#dispose(java.lang.Object)
+		 * @see de.freese.base.core.pool.IDisposeableCallback#dispose(java.lang.Object)
 		 */
 		@Override
 		public void dispose(final IoProcessor<T> object)
@@ -128,7 +128,7 @@ public final class SimpleIoProcessorPool<T extends IoSession> extends
 	}
 
 	/**
-	 * @see de.freese.base.utils.pool.RoundRobinPool#dispose()
+	 * @see de.freese.base.core.pool.RoundRobinPool#dispose()
 	 */
 	@Override
 	public void dispose()
@@ -158,7 +158,7 @@ public final class SimpleIoProcessorPool<T extends IoSession> extends
 	}
 
 	/**
-	 * @see de.freese.base.utils.pool.RoundRobinPool#fillPoolImpl()
+	 * @see de.freese.base.core.pool.RoundRobinPool#fillPoolImpl()
 	 */
 	@Override
 	protected void fillPoolImpl() throws Exception

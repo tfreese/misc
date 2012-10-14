@@ -5,7 +5,7 @@ package de.freese.queryengine.performer;
 
 import java.util.List;
 
-import de.freese.base.model.row.RowMetaAndData;
+import de.freese.base.core.model.row.RowMetaAndData;
 import de.freese.queryengine.Query;
 import de.freese.queryengine.transformer.IQueryTransformer;
 

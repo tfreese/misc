@@ -13,11 +13,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.freese.base.model.row.IValueMeta;
-import de.freese.base.model.row.RowMeta;
-import de.freese.base.model.row.RowMetaAndData;
-import de.freese.base.model.row.ValueMeta;
-import de.freese.base.model.row.ValueMetaType;
+import de.freese.base.core.model.row.IValueMeta;
+import de.freese.base.core.model.row.RowMeta;
+import de.freese.base.core.model.row.RowMetaAndData;
+import de.freese.base.core.model.row.ValueMeta;
+import de.freese.base.core.model.row.ValueMetaType;
 import de.freese.base.persistence.SQLFormatter;
 
 /**

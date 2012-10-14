@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 import javax.xml.stream.XMLStreamWriter;
 
-import de.freese.base.utils.xml.PrettyPrintXMLStreamWriter;
+import de.freese.base.core.xml.PrettyPrintXMLStreamWriter;
 
 /**
  * @author Thomas Freese

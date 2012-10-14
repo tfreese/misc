@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.freese.base.utils.concurrent.NamePreservingRunnable;
+import de.freese.base.core.concurrent.NamePreservingRunnable;
 import de.freese.littlemina.core.processor.IoProcessor;
 import de.freese.littlemina.core.session.NioSocketSession;
 

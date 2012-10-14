@@ -67,7 +67,12 @@
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
-		</dependency>		
+		</dependency>	
+		<dependency>
+			<groupId>de.freese.base</groupId>
+			<artifactId>base-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>				
 		<dependency>
 			<groupId>de.freese.base</groupId>
 			<artifactId>base-security</artifactId>
@@ -77,12 +82,7 @@
 			<groupId>de.freese.base</groupId>
 			<artifactId>base-swing</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
-		<dependency>
-			<groupId>de.freese.base</groupId>
-			<artifactId>base-utils</artifactId>
-			<version>${project.version}</version>
-		</dependency>					
+		</dependency>						
 		<dependency>
 			<groupId>de.huxhorn.sulky</groupId>
 			<artifactId>de.huxhorn.sulky.sounds-impl-jlayer</artifactId>

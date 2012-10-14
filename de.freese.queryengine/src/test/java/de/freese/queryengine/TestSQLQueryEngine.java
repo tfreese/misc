@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import de.freese.base.model.row.RowMetaAndData;
+import de.freese.base.core.model.row.RowMetaAndData;
 import de.freese.queryengine.condition.FieldCondition;
 import de.freese.queryengine.condition.Operator;
 import de.freese.queryengine.engine.DefaultQueryEngine;

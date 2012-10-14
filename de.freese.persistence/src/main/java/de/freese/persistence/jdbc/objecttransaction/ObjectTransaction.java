@@ -26,7 +26,7 @@ import javax.transaction.xa.XAResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.freese.base.utils.concurrent.event.ThreadQueueEventHandler;
+import de.freese.base.core.concurrent.event.ThreadQueueEventHandler;
 import de.freese.persistence.exception.PersistenceException;
 import de.freese.persistence.jdbc.model.AbstractJDBCPersistenceObject;
 import de.freese.persistence.jdbc.state.PersistenceStateEvent;
