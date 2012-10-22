@@ -121,6 +121,7 @@ public class MavenUpdates
 		InputStream stdIn = process.getInputStream();
 
 		System.out.println("The following dependencies in Dependencies have newer versions:");
+		System.out.println();
 
 		List<String> updateList = new ArrayList<>();
 		boolean print = false;
@@ -189,7 +190,7 @@ public class MavenUpdates
 				continue;
 			}
 
-			String splits[] = StringUtils.splitByWholeSeparator(update, " ..");
+			String[] splits = StringUtils.splitByWholeSeparator(update, " ..");
 
 			String coords = splits[0];
 			splits = StringUtils.splitByWholeSeparator(splits[1], ".. ");
@@ -198,10 +199,24 @@ public class MavenUpdates
 			updateSet.add(StringUtils.trim(update));
 		}
 
+		// for (String update : updateSet)
+		// {
+		// System.out.println(update);
+		// }
+
+		// Formattieren für tab. Darstellung.
+		List<String[]> rows = new ArrayList<>();
+
 		for (String update : updateSet)
 		{
-			System.out.println(update);
+			String[] splits = StringUtils.split(update, '\t');
+			rows.add(splits);
 		}
+
+		de.freese.base.core.StringUtils.print(new String[]
+		{
+				"Dependency", "Update"
+		}, rows, System.out, '.');
 
 		int exitVal = process.waitFor();
 		System.out.println("Exit value: " + exitVal);

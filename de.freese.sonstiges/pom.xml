@@ -33,6 +33,21 @@
 		</repository-->
 	</repositories>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-d=${directory}</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<!--dependency>
 			<groupId>${project.parent.groupId}</groupId>
@@ -76,7 +91,7 @@
 			<groupId>de.freese.base</groupId>
 			<artifactId>base-core</artifactId>
 			<version>${project.version}</version>
-		</dependency>				
+		</dependency>
 		<dependency>
 			<groupId>de.freese.base</groupId>
 			<artifactId>base-security</artifactId>
@@ -86,7 +101,7 @@
 			<groupId>de.freese.base</groupId>
 			<artifactId>base-swing</artifactId>
 			<version>${project.version}</version>
-		</dependency>						
+		</dependency>
 		<dependency>
 			<groupId>de.huxhorn.sulky</groupId>
 			<artifactId>de.huxhorn.sulky.sounds-impl-jlayer</artifactId>
@@ -94,7 +109,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>javax.jcr</groupId>
 			<artifactId>jcr</artifactId>
@@ -126,7 +141,7 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-vfs2</artifactId>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.apache.jackrabbit</groupId>
 			<artifactId>jackrabbit-core</artifactId>
@@ -191,7 +206,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-		</dependency>				
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -215,12 +230,12 @@
 			<artifactId>kettle-db</artifactId>
 			<version>4.3.0-stable</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 	</dependencies>
 
 </project>
