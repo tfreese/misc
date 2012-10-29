@@ -63,6 +63,45 @@ public class TestModeShape extends AbstractJcrTest
 			engine.shutdown();
 			engine.awaitTermination(5, TimeUnit.SECONDS);
 		}
+
+		// TODO Für modeshape 3.0.0
+		// AbstractJcrTest jcrTest = new TestModeShape();
+		//
+		// ModeShapeEngine engine = new ModeShapeEngine();
+		// engine.start();
+		//
+		// File configFile = new File("modeshape-config.xml");
+		// System.out.println(configFile.getAbsolutePath());
+		//
+		// RepositoryConfiguration config = RepositoryConfiguration.read(configFile);
+		// Problems problems = config.validate();
+		//
+		// if (problems.hasErrors())
+		// {
+		// System.err.println("Problems starting the engine.");
+		// System.err.println(problems);
+		// System.exit(-1);
+		// }
+		//
+		// Repository repository = engine.deploy(config);
+		//
+		// // Test
+		// repository = engine.getRepository("test");
+		//
+		// try
+		// {
+		// jcrTest.doExample(repository);
+		// }
+		// catch (Throwable th)
+		// {
+		// jcrTest.getLogger().error(null, th);
+		// }
+		// finally
+		// {
+		// jcrTest.shutdown();
+		//
+		// engine.shutdown().get();
+		// }
 	}
 
 	/**

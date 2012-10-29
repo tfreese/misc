@@ -17,32 +17,6 @@
 	<name>${project.artifactId}</name>
 	<description>Enthält nützliches für ANT.</description>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<inherited>true</inherited>
-				<configuration>
-					<compilerVersion>1.6</compilerVersion>
-					<source>1.6</source>
-					<target>1.6</target>
-					<debug>true</debug>
-					<optimize>true</optimize>
-					<fork>true</fork>
-					<meminitial>${compiler.mem.initial}</meminitial>
-					<maxmem>${compiler.mem.max}</maxmem>
-					<executable>${compiler.executable.1.6}</executable>
-					<verbose>${compiler.verbose}</verbose>
-					<failOnError>true</failOnError>
-					<compilerArguments>
-						<verbose />
-					</compilerArguments>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.ant</groupId>
