@@ -71,28 +71,28 @@ public class WebSocketServer
 	{
 		final ChannelGroup allChannels = new DefaultChannelGroup("websocket-server");
 
-		// Bereite den UDP/Datagram Channel vor
+		// Bereite den UDP/Datagram Channel vor.
 		final ConnectionlessBootstrap udpBootstrap =
 				new ConnectionlessBootstrap(new NioDatagramChannelFactory());
 		udpBootstrap.setOption("reuseAddress", Boolean.TRUE);
 
 		// Setzen der WebSocketBroadcastPipelineFactory die das Senden von UDP
-		// Nachrichten an die WebSocket Clients uebernimmt
+		// Nachrichten an die WebSocket Clients uebernimmt.
 		udpBootstrap.setPipelineFactory(new WebSocketBroadcastPipelineFactory(this.group));
 
-		// Binden des Sockets der die UDP Nachrichten entgegennimmt
+		// Binden des Sockets der die UDP Nachrichten entgegen nimmt.
 		Channel channel = udpBootstrap.bind(new InetSocketAddress(this.udpPort));
 		allChannels.add(channel);
 
-		// Bereite den Channel vor
+		// Bereite den Channel vor.
 		final ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory());
 		bootstrap.setOption("reuseAddress", Boolean.TRUE);
 
 		// Setzen der WebSocketPipelineFactory, die das Bearbeiten von HTTP
-		// und WebSocket Requests uebernimmt
+		// und WebSocket Requests uebernimmt.
 		bootstrap.setPipelineFactory(new WebSocketPipelineFactory(this.group));
 
-		// Binden des Sockets der nun bereit ist Requests entgegen zu nehmen
+		// Binden des Sockets der nun bereit ist Requests entgegen zu nehmen.
 		channel = bootstrap.bind(new InetSocketAddress(this.port));
 		allChannels.add(channel);
 

@@ -15,6 +15,8 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 
+import de.freese.sonstiges.ssl.bogus.BogusSSLContextFactory;
+
 /**
  * Creates a newly configured {@link ChannelPipeline} for a new channel.
  */
@@ -45,7 +47,7 @@ public class SecureChatServerPipelineFactory implements ChannelPipelineFactory
 		// Read SecureChatSslContextFactory
 		// if you need client certificate authentication.
 
-		SSLEngine engine = SecureChatSslContextFactory.getServerContext().createSSLEngine();
+		SSLEngine engine = BogusSSLContextFactory.getServerContext().createSSLEngine();
 		engine.setUseClientMode(false);
 
 		pipeline.addLast("ssl", new SslHandler(engine));

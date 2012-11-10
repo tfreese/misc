@@ -7,7 +7,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.freese.sonstiges.server.netty.securechat;
+package de.freese.sonstiges.ssl.bogus;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -22,8 +22,11 @@ import javax.net.ssl.X509TrustManager;
 
 /**
  * Bogus {@link TrustManagerFactorySpi} which accepts any certificate even if it is invalid.
+ * 
+ * @author Norman Maurer <norman@apache.org>
+ * @author Thomas Freese
  */
-public class SecureChatTrustManagerFactory extends TrustManagerFactorySpi
+public class BogusSSLTrustManagerFactory extends TrustManagerFactorySpi
 {
 	/**
 	 * 
@@ -80,9 +83,9 @@ public class SecureChatTrustManagerFactory extends TrustManagerFactorySpi
 	}
 
 	/**
-	 * Erstellt ein neues {@link SecureChatTrustManagerFactory} Object.
+	 * Erstellt ein neues {@link BogusSSLTrustManagerFactory} Object.
 	 */
-	public SecureChatTrustManagerFactory()
+	public BogusSSLTrustManagerFactory()
 	{
 		super();
 	}

@@ -166,15 +166,19 @@
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.codehaus.plexus</groupId>
-			<artifactId>plexus-container-default</artifactId>
-		</dependency>
 		<!--dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
 			<version>1.46</version>
-			</dependency -->
+			</dependency -->		
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-container-default</artifactId>
+		</dependency>
+	    <!--dependency>
+	      <groupId>org.eclipse.jetty.npn</groupId>
+	      <artifactId>npn-api</artifactId>
+	    </dependency-->			
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
@@ -203,6 +207,11 @@
 			<groupId>org.modeshape</groupId>
 			<artifactId>modeshape-connector-store-jpa</artifactId>
 		</dependency>
+		<dependency>
+		  <groupId>org.mortbay.jetty.npn</groupId>
+		  <artifactId>npn-boot</artifactId>
+		  <scope>runtime</scope>
+		</dependency>		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>

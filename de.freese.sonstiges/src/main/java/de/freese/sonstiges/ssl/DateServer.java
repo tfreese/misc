@@ -28,17 +28,17 @@ public class DateServer extends Thread
 		/**
 		 * 
 		 */
+		private final Socket clientSocket;
+
+		/**
+		 * 
+		 */
 		private ObjectInputStream ois = null;
 
 		/**
 		 * 
 		 */
 		private ObjectOutputStream oos = null;
-
-		/**
-		 * 
-		 */
-		private final Socket clientSocket;
 
 		/**
 		 * Creates a new Connect object.
@@ -54,21 +54,19 @@ public class DateServer extends Thread
 				this.ois = new ObjectInputStream(this.clientSocket.getInputStream());
 				this.oos = new ObjectOutputStream(this.clientSocket.getOutputStream());
 			}
-			catch (Exception e1)
+			catch (Exception ex)
 			{
 				try
 				{
 					this.clientSocket.close();
 				}
-				catch (Exception e)
+				catch (Exception ex1)
 				{
-					System.out.println(e.getMessage());
+					System.out.println(ex1.getMessage());
 				}
 
 				return;
 			}
-
-			start();
 		}
 
 		/**
@@ -100,7 +98,8 @@ public class DateServer extends Thread
 	 */
 	public static void main(final String[] argv) throws Exception
 	{
-		new DateServer();
+		DateServer server = new DateServer();
+		server.start();
 	}
 
 	/**
@@ -143,12 +142,12 @@ public class DateServer extends Thread
 		}
 
 		System.out.println("Server listening on port 3000.");
-		start();
 	}
 
 	/**
 	 * @see java.lang.Thread#run()
 	 */
+	@SuppressWarnings("resource")
 	@Override
 	public void run()
 	{
@@ -161,7 +160,8 @@ public class DateServer extends Thread
 				Socket clientSocket = this.serverSocket.accept();
 				System.out.println("Accepted a connection from: " + clientSocket.getInetAddress());
 
-				new Connect(clientSocket);
+				Connect connect = new Connect(clientSocket);
+				connect.start();
 			}
 			catch (Exception ex)
 			{

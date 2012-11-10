@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.http.HttpClientCodec;
 import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 import org.jboss.netty.handler.ssl.SslHandler;
 
-import de.freese.sonstiges.server.netty.securechat.SecureChatSslContextFactory;
+import de.freese.sonstiges.ssl.bogus.BogusSSLContextFactory;
 
 /**
  * @author Thomas Freese
@@ -49,7 +49,7 @@ public class HttpSnoopClientPipelineFactory implements ChannelPipelineFactory
 		// Enable HTTPS if necessary.
 		if (this.ssl)
 		{
-			SSLEngine engine = SecureChatSslContextFactory.getClientContext().createSSLEngine();
+			SSLEngine engine = BogusSSLContextFactory.getClientContext().createSSLEngine();
 			engine.setUseClientMode(true);
 
 			pipeline.addLast("ssl", new SslHandler(engine));

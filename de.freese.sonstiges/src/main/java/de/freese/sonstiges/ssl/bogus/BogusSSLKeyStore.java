@@ -7,7 +7,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.freese.sonstiges.server.netty.securechat;
+package de.freese.sonstiges.ssl.bogus;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -17,13 +17,16 @@ import java.io.InputStream;
  * connection. To generate a bogus key store:
  * 
  * <pre>
- * keytool  -genkey -alias securechat -keysize 2048 -validity 36500
- *          -keyalg RSA -dname "CN=securechat"
+ * keytool  -genkey -alias bogus -keysize 2048 -validity 36500
+ *          -keyalg RSA -dname "CN=bogus"
  *          -keypass secret -storepass secret
  *          -keystore cert.jks
  * </pre>
+ * 
+ * @author Norman Maurer <norman@apache.org>
+ * @author Thomas Freese
  */
-public final class SecureChatKeyStore
+public final class BogusSSLKeyStore
 {
 	/**
 	 * 
@@ -289,6 +292,7 @@ public final class SecureChatKeyStore
         0xe6, 0x9d, 0xd9, 0x1a, 0x62, 0x1b, 0xb8, 0xd3,
         0xd6, 0x9a, 0x6d, 0xb9, 0x8e, 0x15, 0x51 };
     //@formatter:on
+
 	/**
 	 * @return {@link InputStream}
 	 */
@@ -321,9 +325,9 @@ public final class SecureChatKeyStore
 	}
 
 	/**
-	 * Erstellt ein neues {@link SecureChatKeyStore} Object.
+	 * Erstellt ein neues {@link BogusSSLKeyStore} Object.
 	 */
-	private SecureChatKeyStore()
+	private BogusSSLKeyStore()
 	{
 		super();
 	}

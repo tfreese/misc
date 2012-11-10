@@ -4,7 +4,6 @@
 package de.freese.sonstiges.ssl;
 
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Date;
 
@@ -45,29 +44,31 @@ public class DateClient
 				socketFactory = SocketFactory.getDefault();
 			}
 
-			Socket socket = socketFactory.createSocket("localhost", 3000);
-
-			if (socket instanceof SSLSocket)
+			try (Socket socket = socketFactory.createSocket("localhost", 3000))
 			{
-				SSLSocket sslSocket = (SSLSocket) socket;
+				if (socket instanceof SSLSocket)
+				{
+					SSLSocket sslSocket = (SSLSocket) socket;
 
-				sslSocket.startHandshake();
+					sslSocket.startHandshake();
 
-				SSLSession session = sslSocket.getSession();
-				System.out.println("Cipher suite in use is " + session.getCipherSuite());
-				System.out.println("Protocol is " + session.getProtocol());
+					SSLSession session = sslSocket.getSession();
+					System.out.println("Cipher suite in use is " + session.getCipherSuite());
+					System.out.println("Protocol is " + session.getProtocol());
+				}
+
+				// get the input and output streams from the SSL connection
+				try (ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()))
+				{
+					Date date = (Date) ois.readObject();
+					System.out.print("The date is: " + date);
+				}
+
+				// try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream()))
+				// {
+				// // TODO
+				// }
 			}
-
-			// get the input and output streams from the SSL connection
-			ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-			ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-
-			Date date = (Date) ois.readObject();
-			System.out.print("The date is: " + date);
-			oos.close();
-			ois.close();
-
-			socket.close();
 		}
 		catch (Exception e)
 		{

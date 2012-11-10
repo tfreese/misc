@@ -7,7 +7,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.freese.sonstiges.server.netty.securechat;
+package de.freese.sonstiges.ssl.bogus;
 
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -21,10 +21,11 @@ import javax.net.ssl.TrustManager;
 
 import org.jboss.netty.handler.ssl.SslHandler;
 
+
 /**
  * Creates a bogus {@link SSLContext}. A client-side context created by this factory accepts any
  * certificate even if it is invalid. A server-side context created by this factory sends a bogus
- * certificate defined in {@link SecureChatKeyStore}.
+ * certificate defined in {@link BogusSSLKeyStore}.
  * <p>
  * You will have to create your context differently in a real world application.
  * <h3>Client Certificate Authentication</h3> To enable client certificate authentication:
@@ -39,8 +40,11 @@ import org.jboss.netty.handler.ssl.SslHandler;
  * {@link SSLContext#init(KeyManager[], TrustManager[], SecureRandom)} to validate the client
  * certificate.</li>
  * </ul>
+ * 
+ * @author Norman Maurer <norman@apache.org>
+ * @author Thomas Freese
  */
-public final class SecureChatSslContextFactory
+public final class BogusSSLContextFactory
 {
 	/**
      * 
@@ -72,11 +76,11 @@ public final class SecureChatSslContextFactory
 		try
 		{
 			KeyStore ks = KeyStore.getInstance("JKS");
-			ks.load(SecureChatKeyStore.asInputStream(), SecureChatKeyStore.getKeyStorePassword());
+			ks.load(BogusSSLKeyStore.asInputStream(), BogusSSLKeyStore.getKeyStorePassword());
 
 			// Set up key manager factory to use our key store
 			KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-			kmf.init(ks, SecureChatKeyStore.getCertificatePassword());
+			kmf.init(ks, BogusSSLKeyStore.getCertificatePassword());
 
 			// Initialize the SSLContext to work with our key managers.
 			serverContext = SSLContext.getInstance(PROTOCOL);
@@ -87,17 +91,18 @@ public final class SecureChatSslContextFactory
 			throw new Error("Failed to initialize the server-side SSLContext", ex);
 		}
 
+		SERVER_CONTEXT = serverContext;
+
 		try
 		{
 			clientContext = SSLContext.getInstance(PROTOCOL);
-			clientContext.init(null, SecureChatTrustManagerFactory.getTrustManagers(), null);
+			clientContext.init(null, BogusSSLTrustManagerFactory.getTrustManagers(), null);
 		}
 		catch (Exception ex)
 		{
 			throw new Error("Failed to initialize the client-side SSLContext", ex);
 		}
 
-		SERVER_CONTEXT = serverContext;
 		CLIENT_CONTEXT = clientContext;
 	}
 
@@ -118,9 +123,9 @@ public final class SecureChatSslContextFactory
 	}
 
 	/**
-	 * Erstellt ein neues {@link SecureChatSslContextFactory} Object.
+	 * Erstellt ein neues {@link BogusSSLContextFactory} Object.
 	 */
-	private SecureChatSslContextFactory()
+	private BogusSSLContextFactory()
 	{
 		super();
 	}
