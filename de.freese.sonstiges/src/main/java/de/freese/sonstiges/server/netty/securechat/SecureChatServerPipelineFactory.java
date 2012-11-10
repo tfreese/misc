@@ -15,7 +15,7 @@ import org.jboss.netty.handler.codec.string.StringDecoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 
-import de.freese.sonstiges.ssl.bogus.BogusSSLContextFactory;
+import de.freese.base.net.ssl.bogus.BogusSSLContextFactory;
 
 /**
  * Creates a newly configured {@link ChannelPipeline} for a new channel.

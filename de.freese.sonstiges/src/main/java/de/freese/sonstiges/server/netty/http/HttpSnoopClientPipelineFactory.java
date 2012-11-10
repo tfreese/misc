@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.http.HttpClientCodec;
 import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 import org.jboss.netty.handler.ssl.SslHandler;
 
-import de.freese.sonstiges.ssl.bogus.BogusSSLContextFactory;
+import de.freese.base.net.ssl.bogus.BogusSSLContextFactory;
 
 /**
  * @author Thomas Freese
