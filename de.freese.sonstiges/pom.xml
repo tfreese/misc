@@ -175,10 +175,10 @@
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-container-default</artifactId>
 		</dependency>
-	    <!--dependency>
+	    <dependency>
 	      <groupId>org.eclipse.jetty.npn</groupId>
 	      <artifactId>npn-api</artifactId>
-	    </dependency-->			
+	    </dependency>			
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
