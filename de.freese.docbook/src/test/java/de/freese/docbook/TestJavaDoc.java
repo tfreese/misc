@@ -44,23 +44,25 @@ public class TestJavaDoc
 	@Test
 	public void testJavaDoc() throws Exception
 	{
-		URL helpURL = new File("mydocu.jar").toURL();
+		URL helpURL = new File("mydocu.jar").toURI().toURL();
 		System.out.println(helpURL);
 
-		ClassLoader classLoader = new URLClassLoader(new URL[]
+		try (URLClassLoader classLoader = new URLClassLoader(new URL[]
 		{
 			helpURL
-		});
-		URL helpSetURL = new URL("jar:" + helpURL.toExternalForm() + "!/jhelpset.hs");
+		}))
+		{
+			URL helpSetURL = new URL("jar:" + helpURL.toExternalForm() + "!/jhelpset.hs");
 
-		JHelp helpViewer = new JHelp(new HelpSet(classLoader, helpSetURL));
+			JHelp helpViewer = new JHelp(new HelpSet(classLoader, helpSetURL));
 
-		JFrame frame = new JFrame();
-		frame.setTitle("IPPS Help");
-		frame.getContentPane().add(helpViewer);
-		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		frame.setSize(1024, 800);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+			JFrame frame = new JFrame();
+			frame.setTitle("IPPS Help");
+			frame.getContentPane().add(helpViewer);
+			frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+			frame.setSize(1024, 800);
+			frame.setLocationRelativeTo(null);
+			frame.setVisible(true);
+		}
 	}
 }
