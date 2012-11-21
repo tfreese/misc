@@ -34,8 +34,9 @@ import com.jgoodies.binding.PresentationModel;
 import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.beans.Model;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -56,134 +57,6 @@ import com.jgoodies.forms.layout.FormLayout;
 public final class CommitStylesExample
 {
 
-	/**
-	 * Holds a TextBean and vends ValueModels that adapt TextBean properties. As an alternative to
-	 * this PresentationModel we could use 3 ValueModels, for example 3 ValueHolders, or any other
-	 * ValueModel implementation.
-	 */
-	private final PresentationModel<TextBean> presentationModel;
-
-	private JTextComponent onKeyTypedField;
-
-	private JTextComponent onFocusLostField;
-
-	private JTextComponent onApplyField;
-
-	private JLabel onKeyTypedLabel;
-
-	private JLabel onFocusLostLabel;
-
-	private JLabel onApplyLabel;
-
-	private JButton applyButton;
-
-	// Launching **************************************************************
-
-	public static void main(final String[] args)
-	{
-		try
-		{
-			UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
-		}
-		catch (Exception e)
-		{
-			// Likely PlasticXP is not in the class path; ignore.
-		}
-		JFrame frame = new JFrame();
-		frame.setTitle("Binding Tutorial :: Commit Styles");
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		CommitStylesExample example = new CommitStylesExample();
-		JComponent panel = example.buildPanel();
-		frame.getContentPane().add(panel);
-		frame.pack();
-		TutorialUtils.locateOnOpticalScreenCenter(frame);
-		frame.setVisible(true);
-	}
-
-	// Instance Creation ******************************************************
-
-	/**
-	 * Constructs the example with a PresentationModel on the a TextBean.
-	 */
-	public CommitStylesExample()
-	{
-		this.presentationModel = new PresentationModel<TextBean>(new TextBean());
-	}
-
-	// Component Creation and Initialization **********************************
-
-	/**
-	 * Creates,binds and configures the UI components.
-	 * <p>
-	 */
-	private void initComponents()
-	{
-		this.onKeyTypedField =
-				BasicComponentFactory.createTextField(
-						this.presentationModel.getModel(TextBean.PROPERTYNAME_TEXT1), false);
-		this.onKeyTypedLabel =
-				BasicComponentFactory.createLabel(this.presentationModel
-						.getModel(TextBean.PROPERTYNAME_TEXT1));
-
-		this.onFocusLostField =
-				BasicComponentFactory.createTextField(this.presentationModel
-						.getModel(TextBean.PROPERTYNAME_TEXT2));
-		this.onFocusLostLabel =
-				BasicComponentFactory.createLabel(this.presentationModel
-						.getModel(TextBean.PROPERTYNAME_TEXT2));
-
-		this.onApplyField =
-				BasicComponentFactory.createTextField(this.presentationModel
-						.getBufferedModel(TextBean.PROPERTYNAME_TEXT3));
-		this.onApplyLabel =
-				BasicComponentFactory.createLabel(this.presentationModel
-						.getModel(TextBean.PROPERTYNAME_TEXT3));
-
-		this.applyButton = new JButton(new ApplyAction());
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns the panel.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu, 9dlu, 50dlu",
-						"p, 6dlu, p, 3dlu, p, 3dlu, p, 17dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-
-		builder.addTitle("Commit Style", cc.xy(1, 1));
-		builder.addTitle("Value", cc.xy(5, 1));
-		builder.addLabel("Key Typed", cc.xy(1, 3));
-		builder.add(this.onKeyTypedField, cc.xy(3, 3));
-		builder.add(this.onKeyTypedLabel, cc.xy(5, 3));
-		builder.addLabel("Focus Lost", cc.xy(1, 5));
-		builder.add(this.onFocusLostField, cc.xy(3, 5));
-		builder.add(this.onFocusLostLabel, cc.xy(5, 5));
-		builder.addLabel("Apply Pressed", cc.xy(1, 7));
-		builder.add(this.onApplyField, cc.xy(3, 7));
-		builder.add(this.onApplyLabel, cc.xy(5, 7));
-		builder.add(buildButtonBar(), cc.xyw(1, 9, 5));
-
-		return builder.getPanel();
-	}
-
-	private JComponent buildButtonBar()
-	{
-		return ButtonBarFactory.buildRightAlignedBar(this.applyButton);
-	}
-
-	// Actions ****************************************************************
-
 	private final class ApplyAction extends AbstractAction
 	{
 
@@ -195,13 +68,12 @@ public final class CommitStylesExample
 		/**
 		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 		 */
+		@Override
 		public void actionPerformed(final ActionEvent e)
 		{
 			CommitStylesExample.this.presentationModel.triggerCommit();
 		}
 	}
-
-	// Helper Class ***********************************************************
 
 	/**
 	 * A simple bean that just provides three bound read-write text properties.
@@ -239,16 +111,21 @@ public final class CommitStylesExample
 			return this.text1;
 		}
 
+		public String getText2()
+		{
+			return this.text2;
+		}
+
+		public String getText3()
+		{
+			return this.text3;
+		}
+
 		public void setText1(final String newText1)
 		{
 			String oldText1 = getText1();
 			this.text1 = newText1;
 			firePropertyChange(PROPERTYNAME_TEXT1, oldText1, newText1);
-		}
-
-		public String getText2()
-		{
-			return this.text2;
 		}
 
 		public void setText2(final String newText2)
@@ -258,11 +135,6 @@ public final class CommitStylesExample
 			firePropertyChange(PROPERTYNAME_TEXT2, oldText2, newText2);
 		}
 
-		public String getText3()
-		{
-			return this.text3;
-		}
-
 		public void setText3(final String newText3)
 		{
 			String oldText3 = getText3();
@@ -270,6 +142,136 @@ public final class CommitStylesExample
 			firePropertyChange(PROPERTYNAME_TEXT3, oldText3, newText3);
 		}
 
+	}
+
+	public static void main(final String[] args)
+	{
+		try
+		{
+			UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			// Likely PlasticXP is not in the class path; ignore.
+		}
+		JFrame frame = new JFrame();
+		frame.setTitle("Binding Tutorial :: Commit Styles");
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		CommitStylesExample example = new CommitStylesExample();
+		JComponent panel = example.buildPanel();
+		frame.getContentPane().add(panel);
+		frame.pack();
+		TutorialUtils.locateOnOpticalScreenCenter(frame);
+		frame.setVisible(true);
+	}
+
+	private JButton applyButton;
+
+	private JTextComponent onApplyField;
+
+	private JLabel onApplyLabel;
+
+	private JTextComponent onFocusLostField;
+
+	private JLabel onFocusLostLabel;
+
+	// Launching **************************************************************
+
+	private JTextComponent onKeyTypedField;
+
+	// Instance Creation ******************************************************
+
+	private JLabel onKeyTypedLabel;
+
+	// Component Creation and Initialization **********************************
+
+	/**
+	 * Holds a TextBean and vends ValueModels that adapt TextBean properties. As an alternative to
+	 * this PresentationModel we could use 3 ValueModels, for example 3 ValueHolders, or any other
+	 * ValueModel implementation.
+	 */
+	private final PresentationModel<TextBean> presentationModel;
+
+	// Building ***************************************************************
+
+	/**
+	 * Constructs the example with a PresentationModel on the a TextBean.
+	 */
+	public CommitStylesExample()
+	{
+		this.presentationModel = new PresentationModel<TextBean>(new TextBean());
+	}
+
+	private JComponent buildButtonBar()
+	{
+		return new ButtonBarBuilder().addButton(this.applyButton).build();
+	}
+
+	// Actions ****************************************************************
+
+	/**
+	 * Builds and returns the panel.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu, 9dlu, 50dlu",
+						"p, 6dlu, p, 3dlu, p, 3dlu, p, 17dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+
+		builder.addTitle("Commit Style", cc.xy(1, 1));
+		builder.addTitle("Value", cc.xy(5, 1));
+		builder.addLabel("Key Typed", cc.xy(1, 3));
+		builder.add(this.onKeyTypedField, cc.xy(3, 3));
+		builder.add(this.onKeyTypedLabel, cc.xy(5, 3));
+		builder.addLabel("Focus Lost", cc.xy(1, 5));
+		builder.add(this.onFocusLostField, cc.xy(3, 5));
+		builder.add(this.onFocusLostLabel, cc.xy(5, 5));
+		builder.addLabel("Apply Pressed", cc.xy(1, 7));
+		builder.add(this.onApplyField, cc.xy(3, 7));
+		builder.add(this.onApplyLabel, cc.xy(5, 7));
+		builder.add(buildButtonBar(), cc.xyw(1, 9, 5));
+
+		return builder.getPanel();
+	}
+
+	// Helper Class ***********************************************************
+
+	/**
+	 * Creates,binds and configures the UI components.
+	 * <p>
+	 */
+	private void initComponents()
+	{
+		this.onKeyTypedField =
+				BasicComponentFactory.createTextField(
+						this.presentationModel.getModel(TextBean.PROPERTYNAME_TEXT1), false);
+		this.onKeyTypedLabel =
+				BasicComponentFactory.createLabel(this.presentationModel
+						.getModel(TextBean.PROPERTYNAME_TEXT1));
+
+		this.onFocusLostField =
+				BasicComponentFactory.createTextField(this.presentationModel
+						.getModel(TextBean.PROPERTYNAME_TEXT2));
+		this.onFocusLostLabel =
+				BasicComponentFactory.createLabel(this.presentationModel
+						.getModel(TextBean.PROPERTYNAME_TEXT2));
+
+		this.onApplyField =
+				BasicComponentFactory.createTextField(this.presentationModel
+						.getBufferedModel(TextBean.PROPERTYNAME_TEXT3));
+		this.onApplyLabel =
+				BasicComponentFactory.createLabel(this.presentationModel
+						.getModel(TextBean.PROPERTYNAME_TEXT3));
+
+		this.applyButton = new JButton(new ApplyAction());
 	}
 
 }

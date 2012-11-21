@@ -35,8 +35,9 @@ import javax.swing.text.JTextComponent;
 
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -146,30 +147,30 @@ public final class EditorCopyingExample
 		frame.setVisible(true);
 	}
 
+	private JTextComponent artistField;
+
+	private JButton cancelButton;
+
+	private JCheckBox classicalBox;
+
+	// Launching **************************************************************
+
+	private JTextComponent composerField;
+
+	// Instance Creation ******************************************************
+
 	/**
 	 * Refers to the Album that is to be edited by this example editor.
 	 */
 	private final Album editedAlbum;
 
-	private JTextComponent titleField;
-
-	private JTextComponent artistField;
-
-	// Launching **************************************************************
-
-	private JCheckBox classicalBox;
-
-	// Instance Creation ******************************************************
-
-	private JTextComponent composerField;
-
 	private JButton okButton;
 
 	// Initialization *********************************************************
 
-	private JButton cancelButton;
-
 	private JButton resetButton;
+
+	private JTextComponent titleField;
 
 	// Copying Data Back and Forth ********************************************
 
@@ -195,8 +196,8 @@ public final class EditorCopyingExample
 
 	private JComponent buildButtonBar()
 	{
-		return ButtonBarFactory.buildRightAlignedBar(this.okButton, this.cancelButton,
-				this.resetButton);
+		return new ButtonBarBuilder().addButton(this.okButton, this.cancelButton, this.resetButton)
+				.build();
 	}
 
 	/**
@@ -214,7 +215,7 @@ public final class EditorCopyingExample
 						"p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
 
 		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
+		builder.border(Borders.DIALOG);
 		CellConstraints cc = new CellConstraints();
 
 		builder.addLabel("Artist", cc.xy(1, 1));

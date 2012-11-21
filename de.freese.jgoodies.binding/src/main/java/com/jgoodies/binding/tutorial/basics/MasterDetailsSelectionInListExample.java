@@ -36,8 +36,9 @@ import com.jgoodies.binding.list.SelectionInList;
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
 import com.jgoodies.binding.value.ConverterFactory;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -71,30 +72,6 @@ import com.jgoodies.forms.layout.FormLayout;
 public final class MasterDetailsSelectionInListExample
 {
 
-	/**
-	 * Holds the list of Albums plus a single selection.
-	 */
-	private final SelectionInList<Album> albumSelection;
-
-	/**
-	 * Holds the edited Album and vends ValueModels that adapt Album properties.
-	 */
-	private final PresentationModel<Album> detailsModel;
-
-	private JList albumsList;
-
-	private JTextComponent titleField;
-
-	private JTextComponent artistField;
-
-	private JTextComponent classicalField;
-
-	private JTextComponent composerField;
-
-	private JButton closeButton;
-
-	// Launching **************************************************************
-
 	public static void main(final String[] args)
 	{
 		try
@@ -114,6 +91,30 @@ public final class MasterDetailsSelectionInListExample
 		TutorialUtils.locateOnOpticalScreenCenter(frame);
 		frame.setVisible(true);
 	}
+
+	/**
+	 * Holds the list of Albums plus a single selection.
+	 */
+	private final SelectionInList<Album> albumSelection;
+
+	private JList albumsList;
+
+	private JTextComponent artistField;
+
+	private JTextComponent classicalField;
+
+	private JButton closeButton;
+
+	private JTextComponent composerField;
+
+	/**
+	 * Holds the edited Album and vends ValueModels that adapt Album properties.
+	 */
+	private final PresentationModel<Album> detailsModel;
+
+	// Launching **************************************************************
+
+	private JTextComponent titleField;
 
 	// Instance Creation ******************************************************
 
@@ -148,6 +149,47 @@ public final class MasterDetailsSelectionInListExample
 
 	// Component Creation and Initialization **********************************
 
+	private JComponent buildButtonBar()
+	{
+		return new ButtonBarBuilder().addButton(this.closeButton).build();
+	}
+
+	// Building ***************************************************************
+
+	/**
+	 * Builds and returns a panel that consists of a master list and a details form.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+
+		FormLayout layout =
+				new FormLayout("right:pref, 3dlu, 150dlu:grow",
+						"p, 1dlu, p, 9dlu, p, 1dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+
+		builder.addSeparator("Albums", cc.xyw(1, 1, 3));
+		builder.add(new JScrollPane(this.albumsList), cc.xy(3, 3));
+
+		builder.addSeparator("Details", cc.xyw(1, 5, 3));
+		builder.addLabel("Artist", cc.xy(1, 7));
+		builder.add(this.artistField, cc.xy(3, 7));
+		builder.addLabel("Title", cc.xy(1, 9));
+		builder.add(this.titleField, cc.xy(3, 9));
+		builder.addLabel("Classical", cc.xy(1, 11));
+		builder.add(this.classicalField, cc.xy(3, 11));
+		builder.addLabel("Composer", cc.xy(1, 13));
+		builder.add(this.composerField, cc.xy(3, 13));
+		builder.add(buildButtonBar(), cc.xyw(1, 15, 3));
+
+		return builder.getPanel();
+	}
+
 	/**
 	 * Creates and intializes the UI components.
 	 */
@@ -176,47 +218,6 @@ public final class MasterDetailsSelectionInListExample
 						.getModel(Album.PROPERTYNAME_COMPOSER));
 		this.composerField.setEditable(false);
 		this.closeButton = new JButton(TutorialUtils.getCloseAction());
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns a panel that consists of a master list and a details form.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-
-		FormLayout layout =
-				new FormLayout("right:pref, 3dlu, 150dlu:grow",
-						"p, 1dlu, p, 9dlu, p, 1dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-
-		builder.addSeparator("Albums", cc.xyw(1, 1, 3));
-		builder.add(new JScrollPane(this.albumsList), cc.xy(3, 3));
-
-		builder.addSeparator("Details", cc.xyw(1, 5, 3));
-		builder.addLabel("Artist", cc.xy(1, 7));
-		builder.add(this.artistField, cc.xy(3, 7));
-		builder.addLabel("Title", cc.xy(1, 9));
-		builder.add(this.titleField, cc.xy(3, 9));
-		builder.addLabel("Classical", cc.xy(1, 11));
-		builder.add(this.classicalField, cc.xy(3, 11));
-		builder.addLabel("Composer", cc.xy(1, 13));
-		builder.add(this.composerField, cc.xy(3, 13));
-		builder.add(buildButtonBar(), cc.xyw(1, 15, 3));
-
-		return builder.getPanel();
-	}
-
-	private JComponent buildButtonBar()
-	{
-		return ButtonBarFactory.buildRightAlignedBar(this.closeButton);
 	}
 
 }

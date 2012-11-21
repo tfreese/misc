@@ -36,8 +36,9 @@ import javax.swing.text.JTextComponent;
 
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -61,28 +62,28 @@ public final class MasterDetailsCopyingExample
 {
 
 	/**
-	 * The Albums displayed in the overview list.
+	 * Upates the view using the selected album.
 	 */
-	private final List<Album> albums;
+	private final class AlbumSelectionHandler implements ListSelectionListener
+	{
 
-	/**
-	 * Holds the list selection, which is the currently edited Album.
-	 */
-	private Album editedAlbum;
-
-	private JList albumsList;
-
-	private JTextComponent titleField;
-
-	private JTextComponent artistField;
-
-	private JTextComponent classicalField;
-
-	private JTextComponent composerField;
-
-	private JButton closeButton;
-
-	// Launching **************************************************************
+		/**
+		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+		 */
+		@Override
+		public void valueChanged(final ListSelectionEvent e)
+		{
+			if (e.getValueIsAdjusting())
+			{
+				return;
+			}
+			// Now set the current selection as edited album.
+			MasterDetailsCopyingExample.this.editedAlbum =
+					(Album) MasterDetailsCopyingExample.this.albumsList.getSelectedValue();
+			// Then copy the album data to the component values.
+			updateView(MasterDetailsCopyingExample.this.editedAlbum);
+		}
+	}
 
 	public static void main(final String[] args)
 	{
@@ -104,7 +105,31 @@ public final class MasterDetailsCopyingExample
 		frame.setVisible(true);
 	}
 
+	/**
+	 * The Albums displayed in the overview list.
+	 */
+	private final List<Album> albums;
+
+	private JList albumsList;
+
+	private JTextComponent artistField;
+
+	private JTextComponent classicalField;
+
+	private JButton closeButton;
+
+	private JTextComponent composerField;
+
+	// Launching **************************************************************
+
+	/**
+	 * Holds the list selection, which is the currently edited Album.
+	 */
+	private Album editedAlbum;
+
 	// Instance Creation ******************************************************
+
+	private JTextComponent titleField;
 
 	/**
 	 * Constructs a list editor using a example Album list.
@@ -113,6 +138,8 @@ public final class MasterDetailsCopyingExample
 	{
 		this(Album.ALBUMS);
 	}
+
+	// Component Creation and Initialization **********************************
 
 	/**
 	 * Constructs a list editor for editing the given list of Albums.
@@ -124,7 +151,49 @@ public final class MasterDetailsCopyingExample
 		this.albums = albums;
 	}
 
-	// Component Creation and Initialization **********************************
+	private JComponent buildButtonBar()
+	{
+		return new ButtonBarBuilder().addButton(this.closeButton).build();
+	}
+
+	// Copying Data Back and Forth ********************************************
+
+	/**
+	 * Builds and returns a panel that consists of a master list and a details form.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+		initEventHandling();
+
+		FormLayout layout =
+				new FormLayout("right:pref, 3dlu, 150dlu:grow",
+						"p, 1dlu, p, 9dlu, p, 1dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+
+		builder.addSeparator("Albums", cc.xyw(1, 1, 3));
+		builder.add(new JScrollPane(this.albumsList), cc.xy(3, 3));
+
+		builder.addSeparator("Details", cc.xyw(1, 5, 3));
+		builder.addLabel("Artist", cc.xy(1, 7));
+		builder.add(this.artistField, cc.xy(3, 7));
+		builder.addLabel("Title", cc.xy(1, 9));
+		builder.add(this.titleField, cc.xy(3, 9));
+		builder.addLabel("Classical", cc.xy(1, 11));
+		builder.add(this.classicalField, cc.xy(3, 11));
+		builder.addLabel("Composer", cc.xy(1, 13));
+		builder.add(this.composerField, cc.xy(3, 13));
+		builder.add(buildButtonBar(), cc.xyw(1, 15, 3));
+
+		return builder.getPanel();
+	}
+
+	// Building ***************************************************************
 
 	/**
 	 * Creates and intializes the UI components. All components in the details view are read-only.
@@ -151,7 +220,7 @@ public final class MasterDetailsCopyingExample
 		this.albumsList.addListSelectionListener(new AlbumSelectionHandler());
 	}
 
-	// Copying Data Back and Forth ********************************************
+	// Event Handling *********************************************************
 
 	/**
 	 * Reads the property values from the edited Album and sets them in this editor's components.
@@ -164,73 +233,6 @@ public final class MasterDetailsCopyingExample
 		this.artistField.setText(album.getArtist());
 		this.classicalField.setText(album.isClassical() ? "Yes" : "No");
 		this.composerField.setText(album.getComposer());
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns a panel that consists of a master list and a details form.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-		initEventHandling();
-
-		FormLayout layout =
-				new FormLayout("right:pref, 3dlu, 150dlu:grow",
-						"p, 1dlu, p, 9dlu, p, 1dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-
-		builder.addSeparator("Albums", cc.xyw(1, 1, 3));
-		builder.add(new JScrollPane(this.albumsList), cc.xy(3, 3));
-
-		builder.addSeparator("Details", cc.xyw(1, 5, 3));
-		builder.addLabel("Artist", cc.xy(1, 7));
-		builder.add(this.artistField, cc.xy(3, 7));
-		builder.addLabel("Title", cc.xy(1, 9));
-		builder.add(this.titleField, cc.xy(3, 9));
-		builder.addLabel("Classical", cc.xy(1, 11));
-		builder.add(this.classicalField, cc.xy(3, 11));
-		builder.addLabel("Composer", cc.xy(1, 13));
-		builder.add(this.composerField, cc.xy(3, 13));
-		builder.add(buildButtonBar(), cc.xyw(1, 15, 3));
-
-		return builder.getPanel();
-	}
-
-	private JComponent buildButtonBar()
-	{
-		return ButtonBarFactory.buildRightAlignedBar(this.closeButton);
-	}
-
-	// Event Handling *********************************************************
-
-	/**
-	 * Upates the view using the selected album.
-	 */
-	private final class AlbumSelectionHandler implements ListSelectionListener
-	{
-
-		/**
-		 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-		 */
-		public void valueChanged(final ListSelectionEvent e)
-		{
-			if (e.getValueIsAdjusting())
-			{
-				return;
-			}
-			// Now set the current selection as edited album.
-			MasterDetailsCopyingExample.this.editedAlbum =
-					(Album) MasterDetailsCopyingExample.this.albumsList.getSelectedValue();
-			// Then copy the album data to the component values.
-			updateView(MasterDetailsCopyingExample.this.editedAlbum);
-		}
 	}
 
 }

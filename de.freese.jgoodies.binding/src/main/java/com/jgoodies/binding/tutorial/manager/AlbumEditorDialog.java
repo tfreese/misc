@@ -31,9 +31,9 @@ import javax.swing.border.EmptyBorder;
 
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.factories.Borders;
-import com.jgoodies.forms.factories.ButtonBarFactory;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -133,9 +133,9 @@ public final class AlbumEditorDialog extends JDialog
 	private JComponent buildButtonBar()
 	{
 		JPanel bar =
-				ButtonBarFactory.buildOKCancelBar(new JButton(new OKAction()), new JButton(
-						new CancelAction()));
-		bar.setBorder(Borders.BUTTON_BAR_GAP_BORDER);
+				new ButtonBarBuilder().addButton(new JButton(new OKAction()),
+						new JButton(new CancelAction())).build();
+		bar.setBorder(Borders.BUTTON_BAR_PAD);
 		return bar;
 	}
 

@@ -37,8 +37,9 @@ import com.jgoodies.binding.adapter.BasicComponentFactory;
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
 import com.jgoodies.binding.value.ValueModel;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -58,32 +59,65 @@ public final class EditorBufferedExample
 {
 
 	/**
-	 * Holds the edited Album and vends ValueModels that adapt Album properties. In this example we
-	 * will request BufferedValueModels for the editor.
+	 * Commits the Trigger used to buffer the editor contents.
 	 */
-	private final PresentationModel<Album> presentationModel;
+	private final class ApplyAction extends AbstractAction
+	{
 
-	private JTextComponent titleField;
+		private ApplyAction()
+		{
+			super("Apply");
+		}
 
-	private JTextComponent artistField;
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			EditorBufferedExample.this.presentationModel.triggerCommit();
+		}
+	}
 
-	private JCheckBox classicalBox;
+	/**
+	 * Updates the composer field's enablement and the buffered composer name.
+	 */
+	private final class BufferedClassicalChangeHandler implements PropertyChangeListener
+	{
 
-	private JTextComponent composerField;
+		/**
+		 * The buffered (Boolean) classical property has changed. Updates the enablement and
+		 * contents of the composer field.
+		 * 
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(final PropertyChangeEvent evt)
+		{
+			updateComposerField();
+		}
+	}
 
-	private JTextComponent unbufferedTitleField;
+	/**
+	 * Flushed the Trigger used to buffer the editor contents.
+	 */
+	private final class ResetAction extends AbstractAction
+	{
 
-	private JTextComponent unbufferedArtistField;
+		private ResetAction()
+		{
+			super("Reset");
+		}
 
-	private JCheckBox unbufferedClassicalBox;
-
-	private JTextComponent unbufferedComposerField;
-
-	private JButton applyButton;
-
-	private JButton resetButton;
-
-	// Launching **************************************************************
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			EditorBufferedExample.this.presentationModel.triggerFlush();
+		}
+	}
 
 	public static void main(final String[] args)
 	{
@@ -106,7 +140,37 @@ public final class EditorBufferedExample
 		frame.setVisible(true);
 	}
 
+	private JButton applyButton;
+
+	private JTextComponent artistField;
+
+	private JCheckBox classicalBox;
+
+	private JTextComponent composerField;
+
+	/**
+	 * Holds the edited Album and vends ValueModels that adapt Album properties. In this example we
+	 * will request BufferedValueModels for the editor.
+	 */
+	private final PresentationModel<Album> presentationModel;
+
+	private JButton resetButton;
+
+	private JTextComponent titleField;
+
+	// Launching **************************************************************
+
+	private JTextComponent unbufferedArtistField;
+
 	// Instance Creation ******************************************************
+
+	private JCheckBox unbufferedClassicalBox;
+
+	private JTextComponent unbufferedComposerField;
+
+	// Initialization *********************************************************
+
+	private JTextComponent unbufferedTitleField;
 
 	/**
 	 * Constructs a buffered editor on an example Album.
@@ -115,6 +179,8 @@ public final class EditorBufferedExample
 	{
 		this(Album.ALBUM1);
 	}
+
+	// Building ***************************************************************
 
 	/**
 	 * Constructs a buffered editor for an Album to be edited.
@@ -126,7 +192,54 @@ public final class EditorBufferedExample
 		this.presentationModel = new PresentationModel<Album>(album);
 	}
 
-	// Initialization *********************************************************
+	private JComponent buildButtonBar()
+	{
+		return new ButtonBarBuilder().addButton(this.applyButton, this.resetButton).build();
+	}
+
+	// Event Handling *********************************************************
+
+	/**
+	 * Builds and returns a panel that consists of the editor and display.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+		initEventHandling();
+
+		FormLayout layout =
+				new FormLayout("right:pref, 3dlu, 150dlu:grow",
+						"p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 17dlu, "
+								+ "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 17dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+
+		builder.addSeparator("Buffered", cc.xyw(1, 1, 3));
+		builder.addLabel("Artist", cc.xy(1, 3));
+		builder.add(this.artistField, cc.xy(3, 3));
+		builder.addLabel("Title", cc.xy(1, 5));
+		builder.add(this.titleField, cc.xy(3, 5));
+		builder.add(this.classicalBox, cc.xy(3, 7));
+		builder.addLabel("Composer", cc.xy(1, 9));
+		builder.add(this.composerField, cc.xy(3, 9));
+
+		builder.addSeparator("Unbuffered", cc.xyw(1, 11, 3));
+		builder.addLabel("Artist", cc.xy(1, 13));
+		builder.add(this.unbufferedArtistField, cc.xy(3, 13));
+		builder.addLabel("Title", cc.xy(1, 15));
+		builder.add(this.unbufferedTitleField, cc.xy(3, 15));
+		builder.add(this.unbufferedClassicalBox, cc.xy(3, 17));
+		builder.addLabel("Composer", cc.xy(1, 19));
+		builder.add(this.unbufferedComposerField, cc.xy(3, 19));
+
+		builder.add(buildButtonBar(), cc.xyw(1, 21, 3));
+
+		return builder.getPanel();
+	}
 
 	/**
 	 * Creates, binds and configures the UI components. Changes are committed to the value models on
@@ -171,6 +284,8 @@ public final class EditorBufferedExample
 		updateComposerField();
 	}
 
+	// Actions ****************************************************************
+
 	/**
 	 * Observes the buffered <em>classical</em> property to update the composer field's enablement
 	 * and contents.
@@ -187,57 +302,6 @@ public final class EditorBufferedExample
 		bufferedClassicalModel.addValueChangeListener(new BufferedClassicalChangeHandler());
 	}
 
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns a panel that consists of the editor and display.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-		initEventHandling();
-
-		FormLayout layout =
-				new FormLayout("right:pref, 3dlu, 150dlu:grow",
-						"p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 17dlu, "
-								+ "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 17dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-
-		builder.addSeparator("Buffered", cc.xyw(1, 1, 3));
-		builder.addLabel("Artist", cc.xy(1, 3));
-		builder.add(this.artistField, cc.xy(3, 3));
-		builder.addLabel("Title", cc.xy(1, 5));
-		builder.add(this.titleField, cc.xy(3, 5));
-		builder.add(this.classicalBox, cc.xy(3, 7));
-		builder.addLabel("Composer", cc.xy(1, 9));
-		builder.add(this.composerField, cc.xy(3, 9));
-
-		builder.addSeparator("Unbuffered", cc.xyw(1, 11, 3));
-		builder.addLabel("Artist", cc.xy(1, 13));
-		builder.add(this.unbufferedArtistField, cc.xy(3, 13));
-		builder.addLabel("Title", cc.xy(1, 15));
-		builder.add(this.unbufferedTitleField, cc.xy(3, 15));
-		builder.add(this.unbufferedClassicalBox, cc.xy(3, 17));
-		builder.addLabel("Composer", cc.xy(1, 19));
-		builder.add(this.unbufferedComposerField, cc.xy(3, 19));
-
-		builder.add(buildButtonBar(), cc.xyw(1, 21, 3));
-
-		return builder.getPanel();
-	}
-
-	private JComponent buildButtonBar()
-	{
-		return ButtonBarFactory.buildRightAlignedBar(this.applyButton, this.resetButton);
-	}
-
-	// Event Handling *********************************************************
-
 	/**
 	 * Updates the composer field's enablement and contents. Sets the enablement according to the
 	 * boolean state of the buffered classical property. If the composer is not enabled, we copy the
@@ -252,66 +316,6 @@ public final class EditorBufferedExample
 		if (!composerEnabled)
 		{
 			this.presentationModel.setBufferedValue(Album.PROPERTYNAME_COMPOSER, null);
-		}
-	}
-
-	/**
-	 * Updates the composer field's enablement and the buffered composer name.
-	 */
-	private final class BufferedClassicalChangeHandler implements PropertyChangeListener
-	{
-
-		/**
-		 * The buffered (Boolean) classical property has changed. Updates the enablement and
-		 * contents of the composer field.
-		 * 
-		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-		 */
-		public void propertyChange(final PropertyChangeEvent evt)
-		{
-			updateComposerField();
-		}
-	}
-
-	// Actions ****************************************************************
-
-	/**
-	 * Commits the Trigger used to buffer the editor contents.
-	 */
-	private final class ApplyAction extends AbstractAction
-	{
-
-		private ApplyAction()
-		{
-			super("Apply");
-		}
-
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		public void actionPerformed(final ActionEvent e)
-		{
-			EditorBufferedExample.this.presentationModel.triggerCommit();
-		}
-	}
-
-	/**
-	 * Flushed the Trigger used to buffer the editor contents.
-	 */
-	private final class ResetAction extends AbstractAction
-	{
-
-		private ResetAction()
-		{
-			super("Reset");
-		}
-
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		public void actionPerformed(final ActionEvent e)
-		{
-			EditorBufferedExample.this.presentationModel.triggerFlush();
 		}
 	}
 }

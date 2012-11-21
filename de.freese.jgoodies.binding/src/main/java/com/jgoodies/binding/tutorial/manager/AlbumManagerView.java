@@ -26,8 +26,9 @@ import javax.swing.JTable;
 
 import com.jgoodies.binding.adapter.SingleListSelectionAdapter;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -52,11 +53,11 @@ public final class AlbumManagerView
 
 	private JTable albumTable;
 
-	private JButton newButton;
+	private JButton deleteButton;
 
 	private JButton editButton;
 
-	private JButton deleteButton;
+	private JButton newButton;
 
 	// Instance Creation ******************************************************
 
@@ -71,6 +72,37 @@ public final class AlbumManagerView
 	}
 
 	// Component Creation and Initialization **********************************
+
+	private JComponent buildButtonBar()
+	{
+		return new ButtonBarBuilder().addButton(this.newButton, this.editButton, this.deleteButton)
+				.build();
+	}
+
+	/**
+	 * Builds and returns the panel for the Album Manager View.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+		initEventHandling();
+
+		FormLayout layout = new FormLayout("fill:250dlu:grow", "p, 1dlu, fill:200dlu, 6dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+
+		builder.addTitle("Albums", cc.xy(1, 1));
+		builder.add(new JScrollPane(this.albumTable), cc.xy(1, 3));
+		builder.add(buildButtonBar(), cc.xy(1, 5));
+
+		return builder.getPanel();
+	}
+
+	// Building ***************************************************************
 
 	/**
 	 * Creates and intializes the UI components.
@@ -91,37 +123,6 @@ public final class AlbumManagerView
 	private void initEventHandling()
 	{
 		this.albumTable.addMouseListener(this.albumManagerModel.getDoubleClickHandler());
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns the panel for the Album Manager View.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-		initEventHandling();
-
-		FormLayout layout = new FormLayout("fill:250dlu:grow", "p, 1dlu, fill:200dlu, 6dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-
-		builder.addTitle("Albums", cc.xy(1, 1));
-		builder.add(new JScrollPane(this.albumTable), cc.xy(1, 3));
-		builder.add(buildButtonBar(), cc.xy(1, 5));
-
-		return builder.getPanel();
-	}
-
-	private JComponent buildButtonBar()
-	{
-		return ButtonBarFactory.buildLeftAlignedBar(this.newButton, this.editButton,
-				this.deleteButton);
 	}
 
 }

@@ -35,8 +35,9 @@ import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.AlbumPresentationModel;
 import com.jgoodies.binding.tutorial.TutorialUtils;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -95,24 +96,24 @@ public final class EditorBoundExample
 		frame.setVisible(true);
 	}
 
+	private JTextComponent artistField;
+
+	private JCheckBox classicalBox;
+
+	private JButton closeButton;
+
+	private JTextComponent composerField;
+
+	// Launching **************************************************************
+
 	/**
 	 * Holds the edited Album and vends ValueModels that adapt Album properties.
 	 */
 	private final AlbumPresentationModel presentationModel;
 
-	private JTextComponent titleField;
-
-	private JTextComponent artistField;
-
-	private JCheckBox classicalBox;
-
-	// Launching **************************************************************
-
-	private JTextComponent composerField;
-
 	// Instance Creation ******************************************************
 
-	private JButton closeButton;
+	private JTextComponent titleField;
 
 	/**
 	 * Constructs an editor on an Album example instance.
@@ -136,7 +137,7 @@ public final class EditorBoundExample
 
 	private JComponent buildButtonBar()
 	{
-		return ButtonBarFactory.buildRightAlignedBar(this.closeButton);
+		return new ButtonBarBuilder().addButton(this.closeButton).build();
 	}
 
 	// Building ***************************************************************
@@ -156,7 +157,7 @@ public final class EditorBoundExample
 						"p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
 
 		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
+		builder.border(Borders.DIALOG);
 		CellConstraints cc = new CellConstraints();
 
 		builder.addLabel("Artist", cc.xy(1, 1));

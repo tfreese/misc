@@ -78,6 +78,7 @@ import com.jgoodies.binding.value.ValueModel;
 import com.jgoodies.common.collect.ArrayListModel;
 import com.jgoodies.common.collect.ObservableList;
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
@@ -94,61 +95,356 @@ import com.jgoodies.forms.layout.FormLayout;
 public final class ComponentsExample
 {
 
-	// Holds an ExampleBean and vends ValueModels that adapt its properties.
-	private final ExamplePresentationModel presentationModel;
+	private static final class ChooseColorAction extends AbstractAction
+	{
 
-	// Text Components
-	private JTextField textField;
+		private static final class Closer extends WindowAdapter implements Serializable
+		{
+			@Override
+			public void windowClosing(final WindowEvent e)
+			{
+				Window w = e.getWindow();
+				w.setVisible(false);
+			}
+		}
 
-	private JTextArea textArea;
+		private static final class DisposeOnClose extends ComponentAdapter implements Serializable
+		{
+			@Override
+			public void componentHidden(final ComponentEvent e)
+			{
+				Window w = (Window) e.getComponent();
+				w.dispose();
+			}
+		}
 
-	private JPasswordField passwordField;
+		private static final class OKHandler implements ActionListener
+		{
+			private final Trigger trigger;
 
-	private JLabel textLabel;
+			private OKHandler(final Trigger trigger)
+			{
+				this.trigger = trigger;
+			}
 
-	// Formatted Input
-	private JFormattedTextField dateField;
+			/**
+			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+			 */
+			@Override
+			public void actionPerformed(final ActionEvent e)
+			{
+				this.trigger.triggerCommit();
+			}
+		}
 
-	private JFormattedTextField integerField;
+		private final ValueModel bufferedColorModel;
 
-	private JFormattedTextField longField;
+		private final Component parent;
 
-	// Lists
-	private JComboBox comboBox;
+		private final Trigger trigger;
 
-	private JList list;
+		private ChooseColorAction(final Component parent, final ValueModel colorModel)
+		{
+			super("\u2026");
+			this.parent = parent;
+			this.trigger = new Trigger();
+			this.bufferedColorModel = new BufferedValueModel(colorModel, this.trigger);
+		}
 
-	private JTable table;
+		/**
+		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+		 */
+		@Override
+		public void actionPerformed(final ActionEvent e)
+		{
+			JColorChooser colorChooser =
+					BasicComponentFactory.createColorChooser(this.bufferedColorModel);
+			ActionListener okHandler = new OKHandler(this.trigger);
+			JDialog dialog =
+					JColorChooser.createDialog(this.parent, "Choose Color", true, colorChooser,
+							okHandler, null);
+			dialog.addWindowListener(new Closer());
+			dialog.addComponentListener(new DisposeOnClose());
 
-	// Choice
-	private JRadioButton leftIntRadio;
+			dialog.setVisible(true); // blocks until user brings dialog down...
+		}
 
-	private JRadioButton centerIntRadio;
+	}
 
-	private JRadioButton rightIntRadio;
+	private final class ColorUpdateHandler implements PropertyChangeListener
+	{
+		/**
+		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+		 */
+		@Override
+		public void propertyChange(final PropertyChangeEvent evt)
+		{
+			updatePreviewPanel();
+		}
+	}
 
-	private JComboBox alignmentIntCombo;
+	public static final class ExampleBean extends Model
+	{
 
-	private JRadioButton leftObjectRadio;
+		// Names of the Bound Bean Properties *************************************
 
-	private JRadioButton centerObjectRadio;
+		public static final Object CENTER = ColumnSpec.CENTER;
 
-	private JRadioButton rightObjectRadio;
+		static final Integer[] INTEGER_CHOICES =
+		{
+				new Integer(0), new Integer(1), new Integer(2)
+		};
 
-	private JComboBox alignmentObjectCombo;
+		// An object based enumeration (using an enum from the JGoodies Forms)
+		public static final Object LEFT = ColumnSpec.LEFT;
 
-	// Misc
-	private JCheckBox checkBox;
+		private static final int NO_DATE = -1;
 
-	private JPanel colorPreview;
+		static final Object[] OBJECT_CHOICES =
+		{
+				LEFT, CENTER, ColumnSpec.RIGHT
+		};
 
-	private JSlider slider;
+		public static final String PROPERTYNAME_BOOLEAN_VALUE = "booleanValue";
 
-	private JLabel floatLabel;
+		public static final String PROPERTYNAME_COLOR = "color";
 
-	private JSpinner spinner;
+		public static final String PROPERTYNAME_DATE = "date";
 
-	// Launching **************************************************************
+		public static final String PROPERTYNAME_FLOAT_VALUE = "floatValue";
+
+		public static final String PROPERTYNAME_INT_CHOICE = "intChoice";
+
+		// Constants **************************************************************
+
+		public static final String PROPERTYNAME_INT_LIMITED = "intLimited";
+
+		public static final String PROPERTYNAME_INT_VALUE = "intValue";
+
+		public static final String PROPERTYNAME_LIST_SELECTION = "listSelection";
+
+		public static final String PROPERTYNAME_LONG_VALUE = "longValue";
+
+		public static final String PROPERTYNAME_OBJECT_CHOICE = "objectChoice";
+
+		public static final String PROPERTYNAME_TEXT = "text";
+
+		public static final Object RIGHT = ColumnSpec.RIGHT;
+
+		// Fields *****************************************************************
+
+		private boolean booleanValue;
+
+		private Color color;
+
+		private long date;
+
+		private float floatValue;
+
+		private int intChoice;
+
+		private int intLimited; // for a spinner
+
+		private int intValue;
+
+		private ObservableList<Album> listModel;
+
+		private Object listSelection;
+
+		private long longValue;
+
+		private Object objectChoice;
+
+		private String text;
+
+		// Instance Creation ******************************************************
+
+		public ExampleBean()
+		{
+			this.booleanValue = true;
+			this.color = Color.WHITE;
+			this.date = new GregorianCalendar(1967, 11, 5).getTime().getTime();
+			this.floatValue = 0.5f;
+			this.intChoice = INTEGER_CHOICES[0].intValue();
+			this.intLimited = 15;
+			this.intValue = 42;
+			this.longValue = 42L;
+			this.objectChoice = LEFT;
+			this.text = "Text";
+			this.listModel = new ArrayListModel<Album>();
+			this.listModel.addAll(Album.ALBUMS);
+			this.listSelection = this.listModel.get(0);
+		}
+
+		// Accessors **************************************************************
+
+		public boolean getBooleanValue()
+		{
+			return this.booleanValue;
+		}
+
+		public Color getColor()
+		{
+			return this.color;
+		}
+
+		public Date getDate()
+		{
+			return this.date == NO_DATE ? null : new Date(this.date);
+		}
+
+		public float getFloatValue()
+		{
+			return this.floatValue;
+		}
+
+		public int getIntChoice()
+		{
+			return this.intChoice;
+		}
+
+		public int getIntLimited()
+		{
+			return this.intLimited;
+		}
+
+		public int getIntValue()
+		{
+			return this.intValue;
+		}
+
+		public ListModel getListModel()
+		{
+			return this.listModel;
+		}
+
+		public Object getListSelection()
+		{
+			return this.listSelection;
+		}
+
+		public long getLongValue()
+		{
+			return this.longValue;
+		}
+
+		public Object getObjectChoice()
+		{
+			return this.objectChoice;
+		}
+
+		public String getText()
+		{
+			return this.text;
+		}
+
+		public void setBooleanValue(final boolean newBooleanValue)
+		{
+			boolean oldBooleanValue = getBooleanValue();
+			this.booleanValue = newBooleanValue;
+			firePropertyChange(PROPERTYNAME_BOOLEAN_VALUE, oldBooleanValue, newBooleanValue);
+		}
+
+		public void setColor(final Color newColor)
+		{
+			Color oldColor = getColor();
+			this.color = newColor;
+			firePropertyChange(PROPERTYNAME_COLOR, oldColor, newColor);
+		}
+
+		public void setDate(final Date newDate)
+		{
+			Date oldDate = getDate();
+			this.date = newDate == null ? NO_DATE : newDate.getTime();
+			firePropertyChange(PROPERTYNAME_DATE, oldDate, newDate);
+		}
+
+		public void setFloatValue(final float newFloatValue)
+		{
+			float oldFloatValue = getFloatValue();
+			this.floatValue = newFloatValue;
+			firePropertyChange(PROPERTYNAME_FLOAT_VALUE, oldFloatValue, newFloatValue);
+		}
+
+		public void setIntChoice(final int newIntChoice)
+		{
+			int oldIntChoice = getIntChoice();
+			this.intChoice = newIntChoice;
+			firePropertyChange(PROPERTYNAME_INT_CHOICE, oldIntChoice, newIntChoice);
+		}
+
+		public void setIntLimited(final int newIntLimited)
+		{
+			int oldIntLimited = getIntLimited();
+			this.intLimited = newIntLimited;
+			firePropertyChange(PROPERTYNAME_INT_LIMITED, oldIntLimited, newIntLimited);
+		}
+
+		public void setIntValue(final int newIntValue)
+		{
+			int oldIntValue = getIntValue();
+			this.intValue = newIntValue;
+			firePropertyChange(PROPERTYNAME_INT_VALUE, oldIntValue, newIntValue);
+		}
+
+		public void setListSelection(final Object newListSelection)
+		{
+			Object oldListSelection = getListSelection();
+			this.listSelection = newListSelection;
+			firePropertyChange(PROPERTYNAME_LIST_SELECTION, oldListSelection, newListSelection);
+		}
+
+		public void setLongValue(final long newLongValue)
+		{
+			long oldLongValue = getLongValue();
+			this.longValue = newLongValue;
+			firePropertyChange(PROPERTYNAME_LONG_VALUE, oldLongValue, newLongValue);
+		}
+
+		public void setObjectChoice(final Object newObjectChoice)
+		{
+			Object oldObjectChoice = getObjectChoice();
+			this.objectChoice = newObjectChoice;
+			firePropertyChange(PROPERTYNAME_OBJECT_CHOICE, oldObjectChoice, newObjectChoice);
+		}
+
+		public void setText(final String newText)
+		{
+			String oldText = getText();
+			this.text = newText;
+			firePropertyChange(PROPERTYNAME_TEXT, oldText, newText);
+		}
+
+	}
+
+	// A custom PresentationModel that provides a SelectionInList
+	// for the bean's ListModel and the bean's list selection.
+	private static final class ExamplePresentationModel extends PresentationModel<ExampleBean>
+	{
+
+		/**
+		 * Holds the bean's list model plus a selection.
+		 */
+		private final SelectionInList<ExampleBean> selectionInList;
+
+		// Instance Creation -----------------------------------------
+
+		private ExamplePresentationModel(final ExampleBean exampleBean)
+		{
+			super(exampleBean);
+			this.selectionInList =
+					new SelectionInList<ExampleBean>(exampleBean.getListModel(),
+							getModel(ExampleBean.PROPERTYNAME_LIST_SELECTION));
+		}
+
+		// Custom Models ---------------------------------------------
+
+		public SelectionInList<ExampleBean> getSelectionInList()
+		{
+			return this.selectionInList;
+		}
+
+	}
 
 	public static void main(final String[] args)
 	{
@@ -171,7 +467,67 @@ public final class ComponentsExample
 		frame.setVisible(true);
 	}
 
+	private JComboBox alignmentIntCombo;
+
+	private JComboBox alignmentObjectCombo;
+
+	private JRadioButton centerIntRadio;
+
+	private JRadioButton centerObjectRadio;
+
+	// Misc
+	private JCheckBox checkBox;
+
+	private JPanel colorPreview;
+
+	// Lists
+	private JComboBox comboBox;
+
+	// Formatted Input
+	private JFormattedTextField dateField;
+
+	private JLabel floatLabel;
+
+	private JFormattedTextField integerField;
+
+	// Choice
+	private JRadioButton leftIntRadio;
+
+	private JRadioButton leftObjectRadio;
+
+	private JList list;
+
+	private JFormattedTextField longField;
+
+	private JPasswordField passwordField;
+
+	// Holds an ExampleBean and vends ValueModels that adapt its properties.
+	private final ExamplePresentationModel presentationModel;
+
+	private JRadioButton rightIntRadio;
+
+	private JRadioButton rightObjectRadio;
+
+	private JSlider slider;
+
+	// Launching **************************************************************
+
+	private JSpinner spinner;
+
 	// Instance Creation ******************************************************
+
+	private JTable table;
+
+	// Component Creation and Initialization **********************************
+
+	private JTextArea textArea;
+
+	// Text Components
+	private JTextField textField;
+
+	private JLabel textLabel;
+
+	// Building ***************************************************************
 
 	/**
 	 * Constructs the 'Components' example on an instance of ExampleBean.
@@ -181,7 +537,149 @@ public final class ComponentsExample
 		this.presentationModel = new ExamplePresentationModel(new ExampleBean());
 	}
 
-	// Component Creation and Initialization **********************************
+	private JPanel buildChoicesPanel()
+	{
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, p, 6dlu, p, 6dlu, p, 0:grow",
+						"p, 3dlu, p, 3dlu, p, 9dlu, p, 3dlu, p, 3dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+		builder.addSeparator("Integer Choice", cc.xyw(1, 1, 8));
+		builder.addLabel("JRadioButton", cc.xy(1, 3));
+		builder.add(this.leftIntRadio, cc.xy(3, 3));
+		builder.add(this.centerIntRadio, cc.xy(5, 3));
+		builder.add(this.rightIntRadio, cc.xy(7, 3));
+		builder.addLabel("JComboBox", cc.xy(1, 5));
+		builder.add(this.alignmentIntCombo, cc.xyw(3, 5, 3));
+
+		builder.addSeparator("Object Choice", cc.xyw(1, 7, 8));
+		builder.addLabel("JRadioButton", cc.xy(1, 9));
+		builder.add(this.leftObjectRadio, cc.xy(3, 9));
+		builder.add(this.centerObjectRadio, cc.xy(5, 9));
+		builder.add(this.rightObjectRadio, cc.xy(7, 9));
+		builder.addLabel("JComboBox", cc.xy(1, 11));
+		builder.add(this.alignmentObjectCombo, cc.xyw(3, 11, 3));
+		return builder.getPanel();
+	}
+
+	private JPanel buildFormattedPanel()
+	{
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu", "p, 3dlu, p, 3dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+		builder.addLabel("Date", cc.xy(1, 1));
+		builder.add(this.dateField, cc.xy(3, 1));
+		builder.addLabel("Integer", cc.xy(1, 3));
+		builder.add(this.integerField, cc.xy(3, 3));
+		builder.addLabel("Long", cc.xy(1, 5));
+		builder.add(this.longField, cc.xy(3, 5));
+		return builder.getPanel();
+	}
+
+	private JPanel buildListPanel()
+	{
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, 150dlu",
+						"fill:60dlu, 6dlu, fill:60dlu, 6dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+		builder.addLabel("JList", cc.xy(1, 1, "right, top"));
+		builder.add(new JScrollPane(this.list), cc.xy(3, 1));
+		builder.addLabel("JTable", cc.xy(1, 3, "right, top"));
+		builder.add(new JScrollPane(this.table), cc.xy(3, 3));
+		builder.addLabel("JComboBox", cc.xy(1, 5));
+		builder.add(this.comboBox, cc.xy(3, 5));
+		return builder.getPanel();
+	}
+
+	private JPanel buildMiscPanel()
+	{
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu, 3dlu, 50dlu",
+						"p, 3dlu, p, 3dlu, p, 3dlu, p");
+		layout.setRowGroups(new int[][]
+		{
+			{
+					1, 3, 5
+			}
+		});
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+
+		Action chooseAction =
+				new ChooseColorAction(builder.getPanel(),
+						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_COLOR));
+
+		CellConstraints cc = new CellConstraints();
+		builder.addLabel("JCheckBox", cc.xy(1, 1));
+		builder.add(this.checkBox, cc.xy(3, 1));
+		builder.addLabel("JSlider", cc.xy(1, 3));
+		builder.add(this.slider, cc.xy(3, 3));
+		builder.add(this.floatLabel, cc.xy(5, 3));
+		builder.addLabel("JSpinner", cc.xy(1, 5));
+		builder.add(this.spinner, cc.xy(3, 5));
+		builder.addLabel("JColorChooser", cc.xy(1, 7));
+		builder.add(this.colorPreview, cc.xy(3, 7, "fill, fill"));
+		builder.add(new JButton(chooseAction), cc.xy(5, 7, "left, center"));
+		return builder.getPanel();
+	}
+
+	/**
+	 * Builds and returns the panel.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+		initEventHandling();
+
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
+
+		tabbedPane.addTab("Text", buildTextPanel());
+		tabbedPane.addTab("Formatted", buildFormattedPanel());
+		tabbedPane.addTab("Choices", buildChoicesPanel());
+		tabbedPane.addTab("List", buildListPanel());
+		tabbedPane.addTab("Misc", buildMiscPanel());
+		return tabbedPane;
+	}
+
+	// Helper Code ************************************************************
+
+	private JPanel buildTextPanel()
+	{
+		FormLayout layout =
+				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu",
+						"p, 3dlu, p, 3dlu, p, 14dlu, 3dlu, p");
+		layout.setRowGroups(new int[][]
+		{
+			{
+					1, 3, 5
+			}
+		});
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+		builder.addLabel("JTextField", cc.xy(1, 1));
+		builder.add(this.textField, cc.xy(3, 1));
+		builder.addLabel("JPasswordField", cc.xy(1, 3));
+		builder.add(this.passwordField, cc.xy(3, 3));
+		builder.addLabel("JTextArea", cc.xy(1, 5));
+		builder.add(new JScrollPane(this.textArea), cc.xywh(3, 5, 1, 2));
+		builder.addLabel("JLabel", cc.xy(1, 8));
+		builder.add(this.textLabel, cc.xy(3, 8));
+		return builder.getPanel();
+	}
 
 	/**
 	 * Creates, binds and configures the UI components.
@@ -220,14 +718,14 @@ public final class ComponentsExample
 		ValueModel intChoiceModel =
 				this.presentationModel.getModel(ExampleBean.PROPERTYNAME_INT_CHOICE);
 		this.leftIntRadio =
-				BasicComponentFactory.createRadioButton(intChoiceModel, ExampleBean.LEFT_INTEGER,
-						"Left");
+				BasicComponentFactory.createRadioButton(intChoiceModel,
+						ExampleBean.INTEGER_CHOICES[0], "Left");
 		this.centerIntRadio =
-				BasicComponentFactory.createRadioButton(intChoiceModel, ExampleBean.CENTER_INTEGER,
-						"Center");
+				BasicComponentFactory.createRadioButton(intChoiceModel,
+						ExampleBean.INTEGER_CHOICES[1], "Center");
 		this.rightIntRadio =
-				BasicComponentFactory.createRadioButton(intChoiceModel, ExampleBean.RIGHT_INTEGER,
-						"Right");
+				BasicComponentFactory.createRadioButton(intChoiceModel,
+						ExampleBean.INTEGER_CHOICES[2], "Right");
 		this.alignmentIntCombo =
 				BasicComponentFactory.createComboBox(new SelectionInList<Integer>(
 						ExampleBean.INTEGER_CHOICES, intChoiceModel));
@@ -296,510 +794,6 @@ public final class ComponentsExample
 	private void updatePreviewPanel()
 	{
 		this.colorPreview.setBackground((this.presentationModel.getBean()).getColor());
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns the panel.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-		initEventHandling();
-
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
-
-		tabbedPane.addTab("Text", buildTextPanel());
-		tabbedPane.addTab("Formatted", buildFormattedPanel());
-		tabbedPane.addTab("Choices", buildChoicesPanel());
-		tabbedPane.addTab("List", buildListPanel());
-		tabbedPane.addTab("Misc", buildMiscPanel());
-		return tabbedPane;
-	}
-
-	private JPanel buildTextPanel()
-	{
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu",
-						"p, 3dlu, p, 3dlu, p, 14dlu, 3dlu, p");
-		layout.setRowGroups(new int[][]
-		{
-			{
-					1, 3, 5
-			}
-		});
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		builder.addLabel("JTextField", cc.xy(1, 1));
-		builder.add(this.textField, cc.xy(3, 1));
-		builder.addLabel("JPasswordField", cc.xy(1, 3));
-		builder.add(this.passwordField, cc.xy(3, 3));
-		builder.addLabel("JTextArea", cc.xy(1, 5));
-		builder.add(new JScrollPane(this.textArea), cc.xywh(3, 5, 1, 2));
-		builder.addLabel("JLabel", cc.xy(1, 8));
-		builder.add(this.textLabel, cc.xy(3, 8));
-		return builder.getPanel();
-	}
-
-	private JPanel buildFormattedPanel()
-	{
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu", "p, 3dlu, p, 3dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		builder.addLabel("Date", cc.xy(1, 1));
-		builder.add(this.dateField, cc.xy(3, 1));
-		builder.addLabel("Integer", cc.xy(1, 3));
-		builder.add(this.integerField, cc.xy(3, 3));
-		builder.addLabel("Long", cc.xy(1, 5));
-		builder.add(this.longField, cc.xy(3, 5));
-		return builder.getPanel();
-	}
-
-	private JPanel buildChoicesPanel()
-	{
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, p, 6dlu, p, 6dlu, p, 0:grow",
-						"p, 3dlu, p, 3dlu, p, 9dlu, p, 3dlu, p, 3dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		builder.addSeparator("Integer Choice", cc.xyw(1, 1, 8));
-		builder.addLabel("JRadioButton", cc.xy(1, 3));
-		builder.add(this.leftIntRadio, cc.xy(3, 3));
-		builder.add(this.centerIntRadio, cc.xy(5, 3));
-		builder.add(this.rightIntRadio, cc.xy(7, 3));
-		builder.addLabel("JComboBox", cc.xy(1, 5));
-		builder.add(this.alignmentIntCombo, cc.xyw(3, 5, 3));
-
-		builder.addSeparator("Object Choice", cc.xyw(1, 7, 8));
-		builder.addLabel("JRadioButton", cc.xy(1, 9));
-		builder.add(this.leftObjectRadio, cc.xy(3, 9));
-		builder.add(this.centerObjectRadio, cc.xy(5, 9));
-		builder.add(this.rightObjectRadio, cc.xy(7, 9));
-		builder.addLabel("JComboBox", cc.xy(1, 11));
-		builder.add(this.alignmentObjectCombo, cc.xyw(3, 11, 3));
-		return builder.getPanel();
-	}
-
-	private JPanel buildListPanel()
-	{
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, 150dlu",
-						"fill:60dlu, 6dlu, fill:60dlu, 6dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		builder.addLabel("JList", cc.xy(1, 1, "right, top"));
-		builder.add(new JScrollPane(this.list), cc.xy(3, 1));
-		builder.addLabel("JTable", cc.xy(1, 3, "right, top"));
-		builder.add(new JScrollPane(this.table), cc.xy(3, 3));
-		builder.addLabel("JComboBox", cc.xy(1, 5));
-		builder.add(this.comboBox, cc.xy(3, 5));
-		return builder.getPanel();
-	}
-
-	private JPanel buildMiscPanel()
-	{
-		FormLayout layout =
-				new FormLayout("right:max(50dlu;pref), 3dlu, 50dlu, 3dlu, 50dlu",
-						"p, 3dlu, p, 3dlu, p, 3dlu, p");
-		layout.setRowGroups(new int[][]
-		{
-			{
-					1, 3, 5
-			}
-		});
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-
-		Action chooseAction =
-				new ChooseColorAction(builder.getPanel(),
-						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_COLOR));
-
-		CellConstraints cc = new CellConstraints();
-		builder.addLabel("JCheckBox", cc.xy(1, 1));
-		builder.add(this.checkBox, cc.xy(3, 1));
-		builder.addLabel("JSlider", cc.xy(1, 3));
-		builder.add(this.slider, cc.xy(3, 3));
-		builder.add(this.floatLabel, cc.xy(5, 3));
-		builder.addLabel("JSpinner", cc.xy(1, 5));
-		builder.add(this.spinner, cc.xy(3, 5));
-		builder.addLabel("JColorChooser", cc.xy(1, 7));
-		builder.add(this.colorPreview, cc.xy(3, 7, "fill, fill"));
-		builder.add(new JButton(chooseAction), cc.xy(5, 7, "left, center"));
-		return builder.getPanel();
-	}
-
-	// Helper Code ************************************************************
-
-	public static final class ExampleBean extends Model
-	{
-
-		// Names of the Bound Bean Properties *************************************
-
-		public static final String PROPERTYNAME_BOOLEAN_VALUE = "booleanValue";
-
-		public static final String PROPERTYNAME_COLOR = "color";
-
-		public static final String PROPERTYNAME_DATE = "date";
-
-		public static final String PROPERTYNAME_FLOAT_VALUE = "floatValue";
-
-		public static final String PROPERTYNAME_INT_CHOICE = "intChoice";
-
-		public static final String PROPERTYNAME_INT_LIMITED = "intLimited";
-
-		public static final String PROPERTYNAME_INT_VALUE = "intValue";
-
-		public static final String PROPERTYNAME_LIST_SELECTION = "listSelection";
-
-		public static final String PROPERTYNAME_LONG_VALUE = "longValue";
-
-		public static final String PROPERTYNAME_OBJECT_CHOICE = "objectChoice";
-
-		public static final String PROPERTYNAME_TEXT = "text";
-
-		// Constants **************************************************************
-
-		// An int based enumeration.
-		public static final Integer LEFT_INTEGER = new Integer(0);
-
-		public static final Integer CENTER_INTEGER = new Integer(1);
-
-		public static final Integer RIGHT_INTEGER = new Integer(2);
-
-		static final Integer[] INTEGER_CHOICES =
-		{
-				LEFT_INTEGER, CENTER_INTEGER, RIGHT_INTEGER
-		};
-
-		// An object based enumeration (using an enum from the JGoodies Forms)
-		public static final Object LEFT = ColumnSpec.LEFT;
-
-		public static final Object CENTER = ColumnSpec.CENTER;
-
-		public static final Object RIGHT = ColumnSpec.RIGHT;
-
-		static final Object[] OBJECT_CHOICES =
-		{
-				LEFT, CENTER, RIGHT
-		};
-
-		private static final int NO_DATE = -1;
-
-		// Fields *****************************************************************
-
-		private boolean booleanValue;
-
-		private Color color;
-
-		private long date;
-
-		private float floatValue;
-
-		private int intChoice;
-
-		private int intLimited; // for a spinner
-
-		private int intValue;
-
-		private long longValue;
-
-		private Object objectChoice;
-
-		private String text;
-
-		private ObservableList<Album> listModel;
-
-		private Object listSelection;
-
-		// Instance Creation ******************************************************
-
-		public ExampleBean()
-		{
-			this.booleanValue = true;
-			this.color = Color.WHITE;
-			this.date = new GregorianCalendar(1967, 11, 5).getTime().getTime();
-			this.floatValue = 0.5f;
-			this.intChoice = LEFT_INTEGER.intValue();
-			this.intLimited = 15;
-			this.intValue = 42;
-			this.longValue = 42L;
-			this.objectChoice = LEFT;
-			this.text = "Text";
-			this.listModel = new ArrayListModel<Album>();
-			this.listModel.addAll(Album.ALBUMS);
-			this.listSelection = this.listModel.get(0);
-		}
-
-		// Accessors **************************************************************
-
-		public boolean getBooleanValue()
-		{
-			return this.booleanValue;
-		}
-
-		public void setBooleanValue(final boolean newBooleanValue)
-		{
-			boolean oldBooleanValue = getBooleanValue();
-			this.booleanValue = newBooleanValue;
-			firePropertyChange(PROPERTYNAME_BOOLEAN_VALUE, oldBooleanValue, newBooleanValue);
-		}
-
-		public Color getColor()
-		{
-			return this.color;
-		}
-
-		public void setColor(final Color newColor)
-		{
-			Color oldColor = getColor();
-			this.color = newColor;
-			firePropertyChange(PROPERTYNAME_COLOR, oldColor, newColor);
-		}
-
-		public Date getDate()
-		{
-			return this.date == NO_DATE ? null : new Date(this.date);
-		}
-
-		public void setDate(final Date newDate)
-		{
-			Date oldDate = getDate();
-			this.date = newDate == null ? NO_DATE : newDate.getTime();
-			firePropertyChange(PROPERTYNAME_DATE, oldDate, newDate);
-		}
-
-		public float getFloatValue()
-		{
-			return this.floatValue;
-		}
-
-		public void setFloatValue(final float newFloatValue)
-		{
-			float oldFloatValue = getFloatValue();
-			this.floatValue = newFloatValue;
-			firePropertyChange(PROPERTYNAME_FLOAT_VALUE, oldFloatValue, newFloatValue);
-		}
-
-		public int getIntChoice()
-		{
-			return this.intChoice;
-		}
-
-		public void setIntChoice(final int newIntChoice)
-		{
-			int oldIntChoice = getIntChoice();
-			this.intChoice = newIntChoice;
-			firePropertyChange(PROPERTYNAME_INT_CHOICE, oldIntChoice, newIntChoice);
-		}
-
-		public int getIntLimited()
-		{
-			return this.intLimited;
-		}
-
-		public void setIntLimited(final int newIntLimited)
-		{
-			int oldIntLimited = getIntLimited();
-			this.intLimited = newIntLimited;
-			firePropertyChange(PROPERTYNAME_INT_LIMITED, oldIntLimited, newIntLimited);
-		}
-
-		public int getIntValue()
-		{
-			return this.intValue;
-		}
-
-		public void setIntValue(final int newIntValue)
-		{
-			int oldIntValue = getIntValue();
-			this.intValue = newIntValue;
-			firePropertyChange(PROPERTYNAME_INT_VALUE, oldIntValue, newIntValue);
-		}
-
-		public long getLongValue()
-		{
-			return this.longValue;
-		}
-
-		public void setLongValue(final long newLongValue)
-		{
-			long oldLongValue = getLongValue();
-			this.longValue = newLongValue;
-			firePropertyChange(PROPERTYNAME_LONG_VALUE, oldLongValue, newLongValue);
-		}
-
-		public Object getObjectChoice()
-		{
-			return this.objectChoice;
-		}
-
-		public void setObjectChoice(final Object newObjectChoice)
-		{
-			Object oldObjectChoice = getObjectChoice();
-			this.objectChoice = newObjectChoice;
-			firePropertyChange(PROPERTYNAME_OBJECT_CHOICE, oldObjectChoice, newObjectChoice);
-		}
-
-		public String getText()
-		{
-			return this.text;
-		}
-
-		public void setText(final String newText)
-		{
-			String oldText = getText();
-			this.text = newText;
-			firePropertyChange(PROPERTYNAME_TEXT, oldText, newText);
-		}
-
-		public ListModel getListModel()
-		{
-			return this.listModel;
-		}
-
-		public Object getListSelection()
-		{
-			return this.listSelection;
-		}
-
-		public void setListSelection(final Object newListSelection)
-		{
-			Object oldListSelection = getListSelection();
-			this.listSelection = newListSelection;
-			firePropertyChange(PROPERTYNAME_LIST_SELECTION, oldListSelection, newListSelection);
-		}
-
-	}
-
-	// A custom PresentationModel that provides a SelectionInList
-	// for the bean's ListModel and the bean's list selection.
-	private static final class ExamplePresentationModel extends PresentationModel<ExampleBean>
-	{
-
-		/**
-		 * Holds the bean's list model plus a selection.
-		 */
-		private final SelectionInList<ExampleBean> selectionInList;
-
-		// Instance Creation -----------------------------------------
-
-		private ExamplePresentationModel(final ExampleBean exampleBean)
-		{
-			super(exampleBean);
-			this.selectionInList =
-					new SelectionInList<ExampleBean>(exampleBean.getListModel(),
-							getModel(ExampleBean.PROPERTYNAME_LIST_SELECTION));
-		}
-
-		// Custom Models ---------------------------------------------
-
-		public SelectionInList<ExampleBean> getSelectionInList()
-		{
-			return this.selectionInList;
-		}
-
-	}
-
-	private final class ColorUpdateHandler implements PropertyChangeListener
-	{
-		/**
-		 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
-		 */
-		@Override
-		public void propertyChange(final PropertyChangeEvent evt)
-		{
-			updatePreviewPanel();
-		}
-	}
-
-	private static final class ChooseColorAction extends AbstractAction
-	{
-
-		private final Component parent;
-
-		private final ValueModel bufferedColorModel;
-
-		private final Trigger trigger;
-
-		private ChooseColorAction(final Component parent, final ValueModel colorModel)
-		{
-			super("\u2026");
-			this.parent = parent;
-			this.trigger = new Trigger();
-			this.bufferedColorModel = new BufferedValueModel(colorModel, this.trigger);
-		}
-
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-		 */
-		@Override
-		public void actionPerformed(final ActionEvent e)
-		{
-			JColorChooser colorChooser =
-					BasicComponentFactory.createColorChooser(this.bufferedColorModel);
-			ActionListener okHandler = new OKHandler(this.trigger);
-			JDialog dialog =
-					JColorChooser.createDialog(this.parent, "Choose Color", true, colorChooser,
-							okHandler, null);
-			dialog.addWindowListener(new Closer());
-			dialog.addComponentListener(new DisposeOnClose());
-
-			dialog.setVisible(true); // blocks until user brings dialog down...
-		}
-
-		private static final class Closer extends WindowAdapter implements Serializable
-		{
-			@Override
-			public void windowClosing(final WindowEvent e)
-			{
-				Window w = e.getWindow();
-				w.setVisible(false);
-			}
-		}
-
-		private static final class DisposeOnClose extends ComponentAdapter implements Serializable
-		{
-			@Override
-			public void componentHidden(final ComponentEvent e)
-			{
-				Window w = (Window) e.getComponent();
-				w.dispose();
-			}
-		}
-
-		private static final class OKHandler implements ActionListener
-		{
-			private final Trigger trigger;
-
-			private OKHandler(final Trigger trigger)
-			{
-				this.trigger = trigger;
-			}
-
-			/**
-			 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-			 */
-			@Override
-			public void actionPerformed(final ActionEvent e)
-			{
-				this.trigger.triggerCommit();
-			}
-		}
-
 	}
 
 }

@@ -39,8 +39,9 @@ import com.jgoodies.binding.tutorial.Album;
 import com.jgoodies.binding.tutorial.TutorialUtils;
 import com.jgoodies.binding.value.ConverterFactory;
 import com.jgoodies.binding.value.ValueHolder;
+import com.jgoodies.forms.builder.ButtonBarBuilder;
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.factories.ButtonBarFactory;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -118,26 +119,26 @@ public final class MasterDetailsBoundExample
 	 */
 	private final List<Album> albums;
 
-	/**
-	 * Holds the edited Album and vends ValueModels that adapt Album properties.
-	 */
-	private final PresentationModel<Album> detailsModel;
-
 	private JList albumsList;
-
-	private JTextComponent titleField;
 
 	private JTextComponent artistField;
 
 	private JTextComponent classicalField;
 
-	// Launching **************************************************************
+	private JButton closeButton;
 
 	private JTextComponent composerField;
 
+	// Launching **************************************************************
+
+	/**
+	 * Holds the edited Album and vends ValueModels that adapt Album properties.
+	 */
+	private final PresentationModel<Album> detailsModel;
+
 	// Instance Creation ******************************************************
 
-	private JButton closeButton;
+	private JTextComponent titleField;
 
 	/**
 	 * Constructs a list editor using a example Album list.
@@ -162,7 +163,7 @@ public final class MasterDetailsBoundExample
 
 	private JComponent buildButtonBar()
 	{
-		return ButtonBarFactory.buildRightAlignedBar(this.closeButton);
+		return new ButtonBarBuilder().addButton(this.closeButton).build();
 	}
 
 	// Building ***************************************************************
@@ -182,7 +183,7 @@ public final class MasterDetailsBoundExample
 						"p, 1dlu, p, 9dlu, p, 1dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 9dlu, p");
 
 		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
+		builder.border(Borders.DIALOG);
 		CellConstraints cc = new CellConstraints();
 
 		builder.addSeparator("Albums", cc.xyw(1, 1, 3));

@@ -310,7 +310,7 @@ public final class AlbumManagerModel
 	 */
 	private void initEventHandling()
 	{
-		this.albumSelection.addPropertyChangeListener(SelectionInList.PROPERTYNAME_SELECTION_EMPTY,
+		this.albumSelection.addPropertyChangeListener(SelectionInList.PROPERTY_SELECTION_EMPTY,
 				new SelectionEmptyHandler());
 	}
 

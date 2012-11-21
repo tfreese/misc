@@ -36,6 +36,7 @@ import com.jgoodies.binding.beans.PropertyConnector;
 import com.jgoodies.binding.tutorial.TutorialUtils;
 import com.jgoodies.binding.value.ComponentModel;
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -56,129 +57,14 @@ import com.jgoodies.forms.layout.FormLayout;
 public final class ComponentValueModelExample
 {
 
-	// Holds an ExampleBean and vends ValueModels that adapt its properties.
-	private final ExamplePresentationModel presentationModel;
-
-	private JTextField text1Field;
-
-	private JCheckBox enabledBox;
-
-	private JTextField text2Field;
-
-	private JCheckBox editableBox;
-
-	private JTextField text3Field;
-
-	private JCheckBox visibleBox;
-
-	// Launching **************************************************************
-
-	public static void main(final String[] args)
-	{
-		try
-		{
-			UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
-		}
-		catch (Exception e)
-		{
-			// Likely PlasticXP is not in the class path; ignore.
-		}
-		JFrame frame = new JFrame();
-		frame.setTitle("Binding Tutorial :: ComponentValueModel");
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		ComponentValueModelExample example = new ComponentValueModelExample();
-		JComponent panel = example.buildPanel();
-		frame.getContentPane().add(panel);
-		frame.pack();
-		TutorialUtils.locateOnOpticalScreenCenter(frame);
-		frame.setVisible(true);
-	}
-
-	// Instance Creation ******************************************************
-
-	/**
-	 * Constructs the 'Components' example on an instance of ExampleBean.
-	 */
-	public ComponentValueModelExample()
-	{
-		this.presentationModel = new ExamplePresentationModel(new ExampleBean());
-	}
-
-	// Component Creation and Initialization **********************************
-
-	/**
-	 * Creates, binds and configures the UI components.
-	 * <p>
-	 * If possible, the components are created using the BasicComponentFactory, or the Bindings
-	 * class.
-	 */
-	private void initComponents()
-	{
-		this.text1Field =
-				BasicComponentFactory.createTextField(this.presentationModel
-						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT1));
-		this.text2Field =
-				BasicComponentFactory.createTextField(this.presentationModel
-						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT2));
-		this.text3Field =
-				BasicComponentFactory.createTextField(this.presentationModel
-						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT3));
-
-		this.enabledBox =
-				BasicComponentFactory.createCheckBox(
-						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_ENABLED),
-						"enabled");
-		this.editableBox =
-				BasicComponentFactory.createCheckBox(
-						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_EDITABLE),
-						"editable");
-		this.visibleBox =
-				BasicComponentFactory.createCheckBox(
-						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_VISIBLE),
-						"visible");
-	}
-
-	// Building ***************************************************************
-
-	/**
-	 * Builds and returns the panel.
-	 * 
-	 * @return the built panel
-	 */
-	public JComponent buildPanel()
-	{
-		initComponents();
-
-		FormLayout layout =
-				new FormLayout("right:pref, 3dlu, 50dlu, 3dlu, pref", "p, 3dlu, p, 3dlu, p");
-
-		PanelBuilder builder = new PanelBuilder(layout);
-		builder.setDefaultDialogBorder();
-		CellConstraints cc = new CellConstraints();
-		builder.addLabel("Text1", cc.xy(1, 1));
-		builder.add(this.text1Field, cc.xy(3, 1));
-		builder.add(this.enabledBox, cc.xy(5, 1));
-		builder.addLabel("Text2", cc.xy(1, 3));
-		builder.add(this.text2Field, cc.xy(3, 3));
-		builder.add(this.editableBox, cc.xy(5, 3));
-		builder.addLabel("Text3", cc.xy(1, 5));
-		builder.add(this.text3Field, cc.xy(3, 5));
-		builder.add(this.visibleBox, cc.xy(5, 5));
-		return builder.getPanel();
-	}
-
-	// Helper Code ************************************************************
-
 	public static final class ExampleBean extends Model
 	{
 
 		// Names of the Bound Bean Properties *************************************
 
-		public static final String PROPERTYNAME_ENABLED = "enabled";
-
 		public static final String PROPERTYNAME_EDITABLE = "editable";
 
-		public static final String PROPERTYNAME_VISIBLE = "visible";
+		public static final String PROPERTYNAME_ENABLED = "enabled";
 
 		public static final String PROPERTYNAME_TEXT1 = "text1";
 
@@ -186,19 +72,21 @@ public final class ComponentValueModelExample
 
 		public static final String PROPERTYNAME_TEXT3 = "text3";
 
-		// Fields *****************************************************************
+		public static final String PROPERTYNAME_VISIBLE = "visible";
 
-		private boolean enabled;
+		// Fields *****************************************************************
 
 		private boolean editable;
 
-		private boolean visible;
+		private boolean enabled;
 
 		private String text1;
 
 		private String text2;
 
 		private String text3;
+
+		private boolean visible;
 
 		// Instance Creation ******************************************************
 
@@ -214,21 +102,34 @@ public final class ComponentValueModelExample
 
 		// Accessors **************************************************************
 
-		public boolean isEnabled()
+		public String getText1()
 		{
-			return this.enabled;
+			return this.text1;
 		}
 
-		public void setEnabled(final boolean newEnabled)
+		public String getText2()
 		{
-			boolean oldEnabled = isEnabled();
-			this.enabled = newEnabled;
-			firePropertyChange(PROPERTYNAME_ENABLED, oldEnabled, newEnabled);
+			return this.text2;
+		}
+
+		public String getText3()
+		{
+			return this.text3;
 		}
 
 		public boolean isEditable()
 		{
 			return this.editable;
+		}
+
+		public boolean isEnabled()
+		{
+			return this.enabled;
+		}
+
+		public boolean isVisible()
+		{
+			return this.visible;
 		}
 
 		public void setEditable(final boolean newEditable)
@@ -238,21 +139,11 @@ public final class ComponentValueModelExample
 			firePropertyChange(PROPERTYNAME_EDITABLE, oldEditable, newEditable);
 		}
 
-		public boolean isVisible()
+		public void setEnabled(final boolean newEnabled)
 		{
-			return this.visible;
-		}
-
-		public void setVisible(final boolean newVisible)
-		{
-			boolean oldVisible = isVisible();
-			this.visible = newVisible;
-			firePropertyChange(PROPERTYNAME_VISIBLE, oldVisible, newVisible);
-		}
-
-		public String getText1()
-		{
-			return this.text1;
+			boolean oldEnabled = isEnabled();
+			this.enabled = newEnabled;
+			firePropertyChange(PROPERTYNAME_ENABLED, oldEnabled, newEnabled);
 		}
 
 		public void setText1(final String newText)
@@ -262,11 +153,6 @@ public final class ComponentValueModelExample
 			firePropertyChange(PROPERTYNAME_TEXT1, oldText, newText);
 		}
 
-		public String getText2()
-		{
-			return this.text2;
-		}
-
 		public void setText2(final String newText)
 		{
 			String oldText = getText2();
@@ -274,16 +160,18 @@ public final class ComponentValueModelExample
 			firePropertyChange(PROPERTYNAME_TEXT2, oldText, newText);
 		}
 
-		public String getText3()
-		{
-			return this.text3;
-		}
-
 		public void setText3(final String newText)
 		{
 			String oldText = getText3();
 			this.text3 = newText;
 			firePropertyChange(PROPERTYNAME_TEXT3, oldText, newText);
+		}
+
+		public void setVisible(final boolean newVisible)
+		{
+			boolean oldVisible = isVisible();
+			this.visible = newVisible;
+			firePropertyChange(PROPERTYNAME_VISIBLE, oldVisible, newVisible);
 		}
 
 	}
@@ -363,6 +251,119 @@ public final class ComponentValueModelExample
 			getComponentModel(ExampleBean.PROPERTYNAME_TEXT1).setEnabled(enabled);
 		}
 
+	}
+
+	public static void main(final String[] args)
+	{
+		try
+		{
+			UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			// Likely PlasticXP is not in the class path; ignore.
+		}
+		JFrame frame = new JFrame();
+		frame.setTitle("Binding Tutorial :: ComponentValueModel");
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		ComponentValueModelExample example = new ComponentValueModelExample();
+		JComponent panel = example.buildPanel();
+		frame.getContentPane().add(panel);
+		frame.pack();
+		TutorialUtils.locateOnOpticalScreenCenter(frame);
+		frame.setVisible(true);
+	}
+
+	private JCheckBox editableBox;
+
+	private JCheckBox enabledBox;
+
+	// Holds an ExampleBean and vends ValueModels that adapt its properties.
+	private final ExamplePresentationModel presentationModel;
+
+	private JTextField text1Field;
+
+	// Launching **************************************************************
+
+	private JTextField text2Field;
+
+	// Instance Creation ******************************************************
+
+	private JTextField text3Field;
+
+	// Component Creation and Initialization **********************************
+
+	private JCheckBox visibleBox;
+
+	// Building ***************************************************************
+
+	/**
+	 * Constructs the 'Components' example on an instance of ExampleBean.
+	 */
+	public ComponentValueModelExample()
+	{
+		this.presentationModel = new ExamplePresentationModel(new ExampleBean());
+	}
+
+	// Helper Code ************************************************************
+
+	/**
+	 * Builds and returns the panel.
+	 * 
+	 * @return the built panel
+	 */
+	public JComponent buildPanel()
+	{
+		initComponents();
+
+		FormLayout layout =
+				new FormLayout("right:pref, 3dlu, 50dlu, 3dlu, pref", "p, 3dlu, p, 3dlu, p");
+
+		PanelBuilder builder = new PanelBuilder(layout);
+		builder.border(Borders.DIALOG);
+		CellConstraints cc = new CellConstraints();
+		builder.addLabel("Text1", cc.xy(1, 1));
+		builder.add(this.text1Field, cc.xy(3, 1));
+		builder.add(this.enabledBox, cc.xy(5, 1));
+		builder.addLabel("Text2", cc.xy(1, 3));
+		builder.add(this.text2Field, cc.xy(3, 3));
+		builder.add(this.editableBox, cc.xy(5, 3));
+		builder.addLabel("Text3", cc.xy(1, 5));
+		builder.add(this.text3Field, cc.xy(3, 5));
+		builder.add(this.visibleBox, cc.xy(5, 5));
+		return builder.getPanel();
+	}
+
+	/**
+	 * Creates, binds and configures the UI components.
+	 * <p>
+	 * If possible, the components are created using the BasicComponentFactory, or the Bindings
+	 * class.
+	 */
+	private void initComponents()
+	{
+		this.text1Field =
+				BasicComponentFactory.createTextField(this.presentationModel
+						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT1));
+		this.text2Field =
+				BasicComponentFactory.createTextField(this.presentationModel
+						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT2));
+		this.text3Field =
+				BasicComponentFactory.createTextField(this.presentationModel
+						.getComponentModel(ExampleBean.PROPERTYNAME_TEXT3));
+
+		this.enabledBox =
+				BasicComponentFactory.createCheckBox(
+						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_ENABLED),
+						"enabled");
+		this.editableBox =
+				BasicComponentFactory.createCheckBox(
+						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_EDITABLE),
+						"editable");
+		this.visibleBox =
+				BasicComponentFactory.createCheckBox(
+						this.presentationModel.getModel(ExampleBean.PROPERTYNAME_VISIBLE),
+						"visible");
 	}
 
 }
