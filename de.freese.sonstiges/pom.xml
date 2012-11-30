@@ -227,17 +227,14 @@
 		<dependency>
 			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-core</artifactId>
-			<version>4.3.0-stable</version>
-		</dependency>
-		<dependency>
-			<groupId>pentaho-kettle</groupId>
-			<artifactId>kettle-engine</artifactId>
-			<version>4.3.0-stable</version>
 		</dependency>
 		<dependency>
 			<groupId>pentaho-kettle</groupId>
 			<artifactId>kettle-db</artifactId>
-			<version>4.3.0-stable</version>
+		</dependency>		
+		<dependency>
+			<groupId>pentaho-kettle</groupId>
+			<artifactId>kettle-engine</artifactId>
 		</dependency>
 
 		<dependency>
