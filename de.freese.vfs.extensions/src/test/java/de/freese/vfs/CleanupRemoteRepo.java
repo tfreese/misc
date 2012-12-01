@@ -4,6 +4,7 @@
 
 package de.freese.vfs;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -38,11 +39,29 @@ public class CleanupRemoteRepo
 	 */
 	public static void main(final String[] args)
 	{
+		String username = null;
+		char[] passwd = null;
+
+		Console console = System.console();
+
+		if (console != null)
+		{
+			username = console.readLine("Enter username: ");
+			passwd = console.readPassword("[%s]", "Password: ");
+		}
+
+		if (console == null)
+		{
+			System.err.println("no console");
+			username = args[0];
+			passwd = args[1].toCharArray();
+		}
+
 		CleanupRemoteRepo cleanup = new CleanupRemoteRepo();
 
 		try
 		{
-			cleanup.init("https://sd2dav.1und1.de", "", "");
+			cleanup.init("https://sd2dav.1und1.de", username, String.valueOf(passwd));
 			cleanup.cleanUp("/maven/repository-snapshots");
 			cleanup.close();
 		}
