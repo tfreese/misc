@@ -5,7 +5,6 @@
 package de.freese.sonstiges.vcard;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
 import net.sourceforge.cardme.engine.VCardEngine;
@@ -16,10 +15,10 @@ import net.sourceforge.cardme.io.VCardWriter;
 import net.sourceforge.cardme.util.StringUtil;
 import net.sourceforge.cardme.vcard.VCard;
 import net.sourceforge.cardme.vcard.VCardImpl;
-import net.sourceforge.cardme.vcard.VCardVersion;
+import net.sourceforge.cardme.vcard.arch.VCardVersion;
 import net.sourceforge.cardme.vcard.errors.VCardError;
-import net.sourceforge.cardme.vcard.features.AddressFeature;
-import net.sourceforge.cardme.vcard.features.TelephoneFeature;
+import net.sourceforge.cardme.vcard.types.AdrType;
+import net.sourceforge.cardme.vcard.types.TelType;
 
 /**
  * @author Thomas Freese
@@ -39,18 +38,18 @@ public class TestVCard
 
 		VCard vcard = engine.parse(file);
 
-		Iterator<AddressFeature> addresses = vcard.getAddresses();
+		List<AdrType> addresses = vcard.getAdrs();
 
-		while (addresses.hasNext())
+		for (AdrType address : addresses)
 		{
-			System.out.println(addresses.next());
+			System.out.println(address);
 		}
 
-		Iterator<TelephoneFeature> telephones = vcard.getTelephoneNumbers();
+		List<TelType> telephones = vcard.getTels();
 
-		while (telephones.hasNext())
+		for (TelType telephone : telephones)
 		{
-			System.out.println(telephones.next());
+			System.out.println(telephone);
 		}
 
 		System.out.println();
