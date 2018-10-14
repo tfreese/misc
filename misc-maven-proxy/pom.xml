@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>de.freese.misc</groupId>
+		<artifactId>misc</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>misc-maven-proxy</artifactId>
+	<packaging>jar</packaging>
+
+	<name>${project.groupId} - ${project.artifactId}</name>
+	<description>Einfache Implementierung eines virtuellen Repositories.</description>
+
+	<dependencies>
+		<!-- compile scope -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${version:io.netty:netty}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.mina</groupId>
+			<artifactId>mina-core</artifactId>
+			<version>${version:org.apache.mina:mina}</version>
+		</dependency>
+
+		<!-- runtime scope -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${version:org.slf4j:slf4j}</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- provided scope -->
+		<!-- test scope -->
+	</dependencies>
+
+</project>

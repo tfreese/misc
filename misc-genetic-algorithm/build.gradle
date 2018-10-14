@@ -1,0 +1,7 @@
+apply from: System.properties['user.home']+'/.gradle/java.gradle'
+
+dependencies {
+}
+
+// Keine Compiler-Warnungen
+[compileJava, compileTestJava]*.options*.compilerArgs = []

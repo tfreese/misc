@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.freese.misc</groupId>
+        <artifactId>misc</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>misc-cache</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.groupId} - ${project.artifactId}</name>
+    <description>Demos für Caching.</description>
+
+    <dependencies>
+        <!-- compile scope -->
+        <!-- EhCache3 steht in Konflikt mit EhCache2 -->
+        <!--dependency>
+        <groupId>org.ehcache</groupId>
+        <artifactId>ehcache</artifactId>
+        <version>${version:org.ehcache:ehcache}</version>
+        </dependency -->
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-all</artifactId>
+            <version>${version:com.hazelcast:hazelcast}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>${version:net.sf.ehcache:ehcache}</version>
+        </dependency>
+
+        <!-- runtime scope -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${version:org.slf4j:slf4j}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- provided scope -->
+        <!-- test scope -->
+    </dependencies>
+
+</project>

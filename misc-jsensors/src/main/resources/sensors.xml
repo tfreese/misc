@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task  http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!--context:annotation-config/ -->
+
+	<!-- Zugriff auf ApplicationContext -->
+	<!--bean class="de.freese.jsensors.spring.SpringContext" / -->
+
+	<!-- Backends konfigurieren -->
+	<bean id="loggingBackend" class="de.freese.jsensors.backend.LoggingBackend">
+	</bean>
+
+	<bean id="csvBackend" class="de.freese.jsensors.backend.CSVBackend">
+		<property name="executor" ref="executorServiceCsv" />
+		<property name="basePath" value="${jsensors.home}/backend/csv" />
+	</bean>
+	<!--bean id="rrdBackend" class="de.freese.jsensors.backend.RRDToolBackend">
+		<property name="executor" ref="executorServiceRrd"/>
+		<property name="basePath" value="${jsensors.home}/backend/rrd"/>
+		</bean -->
+
+	<!-- ;shutdown=true -->
+	<!--bean id="datasource" class="org.hsqldb.jdbc.JDBCDataSource">
+		<property name="url" value="jdbc:hsqldb:file:${user.home}/.jsensors/backend/jdbc/hsqldb;shutdown=true"/>
+		<property name="user" value="sa"/>
+		<property name="password" value=""/>
+		</bean -->
+	<bean id="jdbcBackend" class="de.freese.jsensors.backend.JDBCBackend">
+		<property name="executor" ref="executorServiceJdbc" />
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- Sensoren konfigurieren -->
+	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
+	<!--constructor-arg index="0" value="test4" / -->
+	<bean id="diskFreeC" class="de.freese.jsensors.sensor.disk.DiskFreeSpace">
+		<property name="disk" value="C:\" />
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="diskUsageC" class="de.freese.jsensors.sensor.disk.DiskUsage">
+		<property name="disk" value="C:\" />
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="diskFreeRoot" class="de.freese.jsensors.sensor.disk.DiskFreeSpace">
+		<property name="disk" value="/" />
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage">
+		<property name="disk" value="/" />
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage">
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage">
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage">
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+			</list>
+		</property>
+	</bean>
+	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage">
+		<property name="backends">
+			<list>
+				<ref bean="loggingBackend" />
+				<ref bean="csvBackend" />
+				<ref bean="jdbcBackend" />
+				<!--ref bean="rrdBackend"/ -->
+			</list>
+		</property>
+	</bean>
+	<!--ref bean="csvBackend"/>
+		<ref bean="rrdBackend"/ -->
+
+	<!-- Sensormessung planen -->
+	<task:scheduled-tasks scheduler="taskScheduler">
+		<!-- Alle 10 Sekunden ausführen -->
+		<!--task:scheduled ref="testSensor" method="measure" cron="*/10 * * * * MON-FRI"/ -->
+
+		<task:scheduled ref="diskFreeC" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="diskUsageC" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<!--task:scheduled ref="diskFreeRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
+			<task:scheduled ref="diskUsageRoot" method="scan" initial-delay="1000" fixed-delay="5000" / -->
+		<task:scheduled ref="cpuUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="memoryUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="swapUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="netUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
+	</task:scheduled-tasks>
+
+</beans>
