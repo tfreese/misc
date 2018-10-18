@@ -192,7 +192,7 @@ public class HTTPServerMultiThread
         @Override
         public void run()
         {
-            while (true)
+            while (!Thread.interrupted())
             {
                 try
                 {

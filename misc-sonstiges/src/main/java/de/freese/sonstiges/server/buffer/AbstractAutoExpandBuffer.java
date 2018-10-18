@@ -1,5 +1,5 @@
 // Created: 03.11.2016
-package de.freese.sonstiges.server;
+package de.freese.sonstiges.server.buffer;
 
 import java.nio.Buffer;
 import java.util.Objects;
@@ -121,6 +121,7 @@ public abstract class AbstractAutoExpandBuffer<B extends Buffer>
      */
     protected void autoExpand(final int pos, final int expectedRemaining)
     {
+        // TODO Optimierung
         int end = pos + expectedRemaining;
         int newCapacity = normalizeCapacity(end);
 
@@ -306,7 +307,6 @@ public abstract class AbstractAutoExpandBuffer<B extends Buffer>
      */
     protected void setBuffer(final B buffer)
     {
-
         this.buffer = Objects.requireNonNull(buffer, "buffer required");
     }
 

@@ -1,5 +1,5 @@
 // Created: 03.11.2016
-package de.freese.sonstiges.server;
+package de.freese.sonstiges.server.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ public final class AutoExpandByteBuffer extends AbstractAutoExpandBuffer<ByteBuf
         }
 
         /**
-         * @see de.freese.sonstiges.server.AbstractAutoExpandBuffer.AbstractBuilder#createAutoExpandBuffer(int)
+         * @see de.freese.sonstiges.server.buffer.AbstractAutoExpandBuffer.AbstractBuilder#createAutoExpandBuffer(int)
          */
         @Override
         protected AutoExpandByteBuffer createAutoExpandBuffer(final int capacity)
@@ -215,7 +215,7 @@ public final class AutoExpandByteBuffer extends AbstractAutoExpandBuffer<ByteBuf
     }
 
     /**
-     * @see de.freese.sonstiges.server.AbstractAutoExpandBuffer#createNewBuffer(java.nio.Buffer, int, int)
+     * @see de.freese.sonstiges.server.buffer.AbstractAutoExpandBuffer#createNewBuffer(java.nio.Buffer, int, int)
      */
     @Override
     protected ByteBuffer createNewBuffer(final ByteBuffer buffer, final int newCapacity, final int mark)

@@ -30,11 +30,16 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${version:javax.xml.bind:jaxb-api}</version>
-		</dependency>        
+		</dependency>     
 
         <!-- runtime scope -->
         <!-- provided scope -->
         <!-- test scope -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${version:org.apache.commons:commons-lang}</version>
+        </dependency>        
     </dependencies>
 
 </project>

@@ -1,5 +1,5 @@
 // Created: 03.11.2016
-package de.freese.sonstiges.server;
+package de.freese.sonstiges.server.buffer;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -30,7 +30,7 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
         }
 
         /**
-         * @see de.freese.sonstiges.server.AbstractAutoExpandBuffer.AbstractBuilder#createAutoExpandBuffer(int)
+         * @see de.freese.sonstiges.server.buffer.AbstractAutoExpandBuffer.AbstractBuilder#createAutoExpandBuffer(int)
          */
         @Override
         protected AutoExpandCharBuffer createAutoExpandBuffer(final int capacity)
@@ -99,7 +99,7 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
     }
 
     /**
-     * @see de.freese.sonstiges.server.AbstractAutoExpandBuffer#createNewBuffer(java.nio.Buffer, int, int)
+     * @see de.freese.sonstiges.server.buffer.AbstractAutoExpandBuffer#createNewBuffer(java.nio.Buffer, int, int)
      */
     @Override
     protected CharBuffer createNewBuffer(final CharBuffer buffer, final int newCapacity, final int mark)
