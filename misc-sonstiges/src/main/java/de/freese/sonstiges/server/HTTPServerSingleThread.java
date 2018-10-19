@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Der Server kümmert sich um alle Verbindungen in einem einzelnen Thread.
@@ -33,7 +35,22 @@ public class HTTPServerSingleThread
     /**
      *
      */
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    private static final Charset CHARSET = StandardCharsets.US_ASCII;
+
+    /**
+     *
+     */
+    private static final CharsetDecoder CHARSET_DECODER = CHARSET.newDecoder();
+
+    /**
+     *
+     */
+    private static final CharsetEncoder CHARSET_ENCODER = CHARSET.newEncoder();
+
+    /**
+     *
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerSingleThread.class);
 
     /**
      * @param args String[]
@@ -92,7 +109,7 @@ public class HTTPServerSingleThread
      */
     public void listen()
     {
-        log("server listening on port: %d", this.serverSocketChannel.socket().getLocalPort());
+        LOGGER.info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
 
         try
         {
@@ -112,12 +129,12 @@ public class HTTPServerSingleThread
 
                         if (!selectionKey.isValid())
                         {
-                            log("SelectionKey not valid: %s", selectionKey);
+                            LOGGER.info("SelectionKey not valid: {}", selectionKey);
                         }
 
                         if (selectionKey.isAcceptable())
                         {
-                            log("Connection Accepted");
+                            LOGGER.info("Connection Accepted");
 
                             // Verbindung mit Client herstellen.
                             @SuppressWarnings("resource")
@@ -133,11 +150,11 @@ public class HTTPServerSingleThread
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            log("Client Connected");
+                            LOGGER.info("Client Connected");
                         }
                         else if (selectionKey.isReadable())
                         {
-                            log("Read Request");
+                            LOGGER.info("Read Request");
 
                             // Request lesen.
                             readRequest(selectionKey);
@@ -145,7 +162,7 @@ public class HTTPServerSingleThread
                         }
                         else if (selectionKey.isWritable())
                         {
-                            log("Write Response");
+                            LOGGER.info("Write Response");
 
                             // Response schreiben.
                             writeResponse(selectionKey);
@@ -174,22 +191,6 @@ public class HTTPServerSingleThread
     }
 
     /**
-     * Erweitert die Log-Ausgabe um den Thread-Namen.
-     *
-     * @param format String
-     * @param args Object[]
-     */
-    private void log(final String format, final Object...args)
-    {
-        Object[] newArgs = new Object[args.length + 1];
-
-        System.arraycopy(args, 0, newArgs, 1, args.length);
-        newArgs[0] = Thread.currentThread().getName();
-
-        System.out.printf("[%s]: " + format + "%n", newArgs);
-    }
-
-    /**
      * Lesen des Requests.
      *
      * @param selectionKey {@link SelectionKey}
@@ -201,14 +202,22 @@ public class HTTPServerSingleThread
         ReadableByteChannel channel = (ReadableByteChannel) selectionKey.channel();
 
         ByteBuffer inputBuffer = ByteBuffer.allocateDirect(1024);
-        channel.read(inputBuffer);
 
-        inputBuffer.flip();
+        int bytesRead = channel.read(inputBuffer);
 
-        CharsetDecoder decoder = CHARSET.newDecoder();
-        CharBuffer charBuffer = decoder.decode(inputBuffer);
+        while (bytesRead > 0)
+        {
+            inputBuffer.flip();
 
-        log(charBuffer.toString());
+            CharBuffer charBuffer = CHARSET_DECODER.reset().decode(inputBuffer);
+
+            LOGGER.info(charBuffer.toString());
+
+            // inputBuffer.compact();
+            inputBuffer.clear();
+
+            bytesRead = channel.read(inputBuffer);
+        }
     }
 
     /**
@@ -249,8 +258,6 @@ public class HTTPServerSingleThread
      */
     private void writeResponse(final SelectionKey selectionKey) throws IOException
     {
-        CharsetEncoder encoder = CHARSET.newEncoder();
-
         // CharBuffer charBuffer = CharBuffer.allocate(1024);
         // charBuffer.put("HTTP/1.1 200 OK").put("\r\n");
         // charBuffer.put("Server: MEINER !").put("\r\n");
@@ -266,7 +273,7 @@ public class HTTPServerSingleThread
         //
         // charBuffer.flip();
         //
-        // ByteBuffer outputBuffer = encoder.encode(charBuffer);
+        // ByteBuffer outputBuffer = CHARSET_ENCODER.encode(charBuffer);
         //
         // @SuppressWarnings("resource")
         // WritableByteChannel channel = (WritableByteChannel) selectionKey.channel();
@@ -293,8 +300,8 @@ public class HTTPServerSingleThread
         charBufferBody.flip();
         charBufferHeader.flip();
 
-        ByteBuffer outputBufferHeader = encoder.reset().encode(charBufferHeader);
-        ByteBuffer outputBufferBody = encoder.reset().encode(charBufferBody);
+        ByteBuffer outputBufferHeader = CHARSET_ENCODER.reset().encode(charBufferHeader);
+        ByteBuffer outputBufferBody = CHARSET_ENCODER.reset().encode(charBufferBody);
 
         @SuppressWarnings("resource")
         GatheringByteChannel channel = (GatheringByteChannel) selectionKey.channel();

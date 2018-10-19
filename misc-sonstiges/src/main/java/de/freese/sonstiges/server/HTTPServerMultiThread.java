@@ -109,9 +109,9 @@ public class HTTPServerMultiThread
             }
             catch (SecurityException sex)
             {
-                if (LOGGER.isWarnEnabled())
+                if (LOGGER_ACCEPTOR.isWarnEnabled())
                 {
-                    LOGGER.warn("Failed to set the thread name.", sex);
+                    LOGGER_ACCEPTOR.warn("Failed to set the thread name.", sex);
                 }
             }
         }
@@ -122,6 +122,11 @@ public class HTTPServerMultiThread
      */
     private class Processor implements Runnable
     {
+        /**
+        *
+        */
+        private final Logger logger = LoggerFactory.getLogger(Processor.class);
+
         /**
          * Queue für die neuen {@link SocketChannel}s.
          */
@@ -157,6 +162,14 @@ public class HTTPServerMultiThread
             this.newSessions.add(socketChannel);
 
             this.selector.wakeup();
+        }
+
+        /**
+         * @return {@link Logger}
+         */
+        private Logger getLogger()
+        {
+            return this.logger;
         }
 
         /**
@@ -210,20 +223,20 @@ public class HTTPServerMultiThread
 
                             if (!selectionKey.isValid())
                             {
-                                log("SelectionKey not valid: %s", selectionKey);
+                                getLogger().info("SelectionKey not valid: {}", selectionKey);
                             }
 
                             if (selectionKey.isReadable())
                             {
-                                log("Read Request");
+                                getLogger().info("Read Request");
 
                                 // Request lesen.
-                                readRequest(selectionKey);
+                                readRequest(selectionKey, getLogger());
                                 selectionKey.interestOps(SelectionKey.OP_WRITE);
                             }
                             else if (selectionKey.isWritable())
                             {
-                                log("Write Response");
+                                getLogger().info("Write Response");
 
                                 // Response schreiben.
                                 writeResponse(selectionKey);
@@ -258,7 +271,25 @@ public class HTTPServerMultiThread
     /**
     *
     */
-    private final static Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
+    public static final ThreadLocal<CharsetDecoder> CHARSET_DECODER = ThreadLocal.withInitial(() -> {
+        CharsetDecoder decoder = CHARSET.newDecoder();
+
+        return decoder;
+    });
+
+    /**
+    *
+    */
+    public static final ThreadLocal<CharsetEncoder> CHARSET_ENCODER = ThreadLocal.withInitial(() -> {
+        CharsetEncoder encoder = CHARSET.newEncoder();
+
+        return encoder;
+    });
+
+    /**
+    *
+    */
+    private final static Logger LOGGER_ACCEPTOR = LoggerFactory.getLogger(HTTPServerMultiThread.class);
 
     /**
      *
@@ -342,7 +373,7 @@ public class HTTPServerMultiThread
      */
     public void listen()
     {
-        log("server listening on port: %d", this.serverSocketChannel.socket().getLocalPort());
+        LOGGER_ACCEPTOR.info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
 
         try
         {
@@ -362,12 +393,12 @@ public class HTTPServerMultiThread
 
                         if (!selectionKey.isValid())
                         {
-                            log("SelectionKey not valid: %s", selectionKey);
+                            LOGGER_ACCEPTOR.info("SelectionKey not valid: {}", selectionKey);
                         }
 
                         if (selectionKey.isAcceptable())
                         {
-                            log("Connection Accepted");
+                            LOGGER_ACCEPTOR.info("Connection Accepted");
 
                             // Verbindung mit Client herstellen.
                             @SuppressWarnings("resource")
@@ -378,7 +409,7 @@ public class HTTPServerMultiThread
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            log("Client Connected");
+                            LOGGER_ACCEPTOR.info("Client Connected");
                         }
                     }
 
@@ -398,22 +429,6 @@ public class HTTPServerMultiThread
     }
 
     /**
-     * Erweitert die Log-Ausgabe um den Thread-Namen.
-     *
-     * @param format String
-     * @param args Object[]
-     */
-    private void log(final String format, final Object...args)
-    {
-        Object[] newArgs = new Object[args.length + 1];
-
-        System.arraycopy(args, 0, newArgs, 1, args.length);
-        newArgs[0] = Thread.currentThread().getName();
-
-        System.out.printf("[%s]: " + format + "%n", newArgs);
-    }
-
-    /**
      * Liefert den nächsten {@link Processor} im RoundRobin-Verfahren.<br>
      *
      * @return {@link Processor}
@@ -421,8 +436,6 @@ public class HTTPServerMultiThread
      */
     private synchronized Processor nextProcessor() throws IOException
     {
-        // return this.processor;
-
         Processor processor = null;
 
         if (this.processors.size() < NUM_OF_PROCESSORS)
@@ -431,7 +444,6 @@ public class HTTPServerMultiThread
             processor = new Processor();
 
             this.processors.add(processor);
-            // this.executor.execute(processor);
             this.executor.execute(new NamePreservingRunnable(processor, "Processor-" + this.processors.size()));
         }
 
@@ -448,22 +460,31 @@ public class HTTPServerMultiThread
      * Lesen des Requests.
      *
      * @param selectionKey {@link SelectionKey}
+     * @param logger {@link Logger}
      * @throws IOException Falls was schief geht.
      */
-    private void readRequest(final SelectionKey selectionKey) throws IOException
+    private void readRequest(final SelectionKey selectionKey, final Logger logger) throws IOException
     {
         @SuppressWarnings("resource")
         ReadableByteChannel channel = (ReadableByteChannel) selectionKey.channel();
 
         ByteBuffer inputBuffer = ByteBuffer.allocateDirect(1024);
-        channel.read(inputBuffer);
 
-        inputBuffer.flip();
+        int bytesRead = channel.read(inputBuffer);
 
-        CharsetDecoder decoder = CHARSET.newDecoder();
-        CharBuffer charBuffer = decoder.decode(inputBuffer);
+        while (bytesRead > 0)
+        {
+            inputBuffer.flip();
 
-        log(charBuffer.toString());
+            CharBuffer charBuffer = CHARSET_DECODER.get().reset().decode(inputBuffer);
+
+            logger.info(charBuffer.toString());
+
+            // inputBuffer.compact();
+            inputBuffer.clear();
+
+            bytesRead = channel.read(inputBuffer);
+        }
     }
 
     /**
@@ -504,8 +525,6 @@ public class HTTPServerMultiThread
      */
     private void writeResponse(final SelectionKey selectionKey) throws IOException
     {
-        CharsetEncoder encoder = CHARSET.newEncoder();
-
         // CharBuffer charBuffer = CharBuffer.allocate(1024);
         // charBuffer.put("HTTP/1.1 200 OK").put("\r\n");
         // charBuffer.put("Server: MEINER !").put("\r\n");
@@ -548,8 +567,8 @@ public class HTTPServerMultiThread
         charBufferBody.flip();
         charBufferHeader.flip();
 
-        ByteBuffer outputBufferHeader = encoder.reset().encode(charBufferHeader);
-        ByteBuffer outputBufferBody = encoder.reset().encode(charBufferBody);
+        ByteBuffer outputBufferHeader = CHARSET_ENCODER.get().reset().encode(charBufferHeader);
+        ByteBuffer outputBufferBody = CHARSET_ENCODER.get().reset().encode(charBufferBody);
 
         @SuppressWarnings("resource")
         GatheringByteChannel channel = (GatheringByteChannel) selectionKey.channel();
