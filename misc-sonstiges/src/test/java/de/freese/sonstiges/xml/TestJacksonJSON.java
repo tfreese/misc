@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -27,7 +26,7 @@ import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
  *
  * @author Thomas Freese
  */
-//@Ignore
+// @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestJacksonJSON
 {

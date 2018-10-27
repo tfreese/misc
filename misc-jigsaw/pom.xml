@@ -14,24 +14,29 @@
 
 	<description>Jigsaw Demo</description>
 
+	<build>
+		<plugins>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<!-- compile scope -->
 		<!--dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${version:javax.xml.bind:jaxb-api}</version>
-		</dependency-->
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-            <version>${version:javax.xml.bind:jaxb-api}</version>
-        </dependency>	
-		
+			</dependency -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>${version:javax.xml.bind:jaxb-api}</version>
+		</dependency>
+
 		<!-- runtime scope -->
 		<!-- provided scope -->
 
 		<!-- test scope -->
-		<!-- Implementierung von javax.xml.bind:jaxb-api -->		
+		<!-- Implementierung von javax.xml.bind:jaxb-api -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

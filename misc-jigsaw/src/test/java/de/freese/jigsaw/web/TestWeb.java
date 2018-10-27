@@ -9,7 +9,6 @@ import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
-import de.freese.jigsaw.web.HttpQuery;
 
 /**
  * @author Thomas Freese
@@ -34,6 +33,8 @@ public class TestWeb
         Supplier<String> supplier = new HttpQuery();
 
         String result = supplier.get();
+
+        System.out.println(result);
 
         Assert.assertNotNull(result);
         Assert.assertTrue(!result.isEmpty());

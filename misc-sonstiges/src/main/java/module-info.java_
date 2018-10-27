@@ -11,6 +11,7 @@ module freese.sonstiges
 
     opens de.freese.sonstiges.xml.jaxb.model to java.xml.bind, com.fasterxml.jackson.databind;
 
+    requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.module.jaxb;
     requires commons.math3;

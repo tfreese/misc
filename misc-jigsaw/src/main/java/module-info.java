@@ -3,7 +3,7 @@
  *
  * @author Thomas Freese
  */
-// open module my.jigsaw
+// open module freese.jigsaw
 module freese.jigsaw
 {
     // exports de.freese.jigsaw.jaxb;
