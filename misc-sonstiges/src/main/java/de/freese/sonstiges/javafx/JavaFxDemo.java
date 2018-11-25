@@ -16,8 +16,14 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Geht momentan nicht aus der IDE, sondern nur per Console: mvn compile exec:java
- * 
+ * Geht momentan nicht aus der IDE, sondern nur per Console: mvn compile exec:java<br>
+ * <br>
+ * In Eclipse:<br>
+ * <ol>
+ * <li>VM-Parameter: --add-modules javafx.controls
+ * <li>Module-Classpath: OpenJFX die jeweils 2 Jars für javafx-base, javafx-controls und javafx-graphics hinzufügen
+ * </ol>
+ *
  * @author Thomas Freese
  */
 public class JavaFxDemo extends Application

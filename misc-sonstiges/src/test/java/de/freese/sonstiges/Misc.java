@@ -267,6 +267,49 @@ public class Misc
     }
 
     /**
+     *
+     */
+    static void javaVersion()
+    {
+        // String javaVersion = SystemUtils.JAVA_VERSION;
+        String javaVersion = System.getProperty("java.version");
+        String javaVersionDate = System.getProperty("java.version.date");
+        String vmVersion = System.getProperty("java.vm.version");
+        String[] splits = javaVersion.toLowerCase().split("[._]");
+
+        // Major
+        String versionString = String.format("%03d", Integer.parseInt(splits[0]));
+
+        // Minor
+        versionString += "." + String.format("%03d", Integer.parseInt(splits[1]));
+
+        if (splits.length > 2)
+        {
+            // Micro
+            versionString += "." + String.format("%03d", Integer.parseInt(splits[2]));
+        }
+
+        if ((splits.length > 3) && !splits[3].startsWith("ea"))
+        {
+            // Update
+            try
+            {
+                versionString += "." + String.format("%03d", Integer.parseInt(splits[3]));
+            }
+            catch (Exception ex)
+            {
+                System.err.println(ex.getMessage());
+            }
+        }
+
+        int version = Integer.parseInt(versionString.replace(".", ""));
+
+        System.out.printf("javaVersionDate = %s%n", javaVersionDate);
+        System.out.printf("vmVersion = %s%n", vmVersion);
+        System.out.printf("JavaVersion = %s = %s = %d%n", javaVersion, versionString, version);
+    }
+
+    /**
      * @throws Exception Falls was schief geht.
      */
     static void listDirectories() throws Exception
@@ -329,7 +372,9 @@ public class Misc
         // ***********************************************************************************
         // systemMXBean();
 
-        securityProviders();
+        // securityProviders();
+
+        javaVersion();
     }
 
     /**
