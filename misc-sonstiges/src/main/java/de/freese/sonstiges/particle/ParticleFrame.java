@@ -27,6 +27,7 @@ public class ParticleFrame extends JFrame
         int numOfParticles = 10;
 
         ParticleFrame frame = new ParticleFrame();
+        frame.initAndShowGUI();
 
         frame.addWindowListener(new WindowAdapter()
         {
@@ -61,6 +62,14 @@ public class ParticleFrame extends JFrame
 
         this.canvas = new ParticleCanvas(800);
 
+        setTitle("Particles");
+    }
+
+    /**
+     *
+     */
+    public void initAndShowGUI()
+    {
         add(this.canvas);
         pack();
         setLocationRelativeTo(null);
