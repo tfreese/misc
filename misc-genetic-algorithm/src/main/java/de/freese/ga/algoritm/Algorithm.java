@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.chromonome.DefaultChromosome;
 import de.freese.ga.gene.Gene;
@@ -56,8 +55,7 @@ public interface Algorithm<G extends Gene<?>>
 
     /**
      * Zufällige Rekombination ausgewählter Individuen (Chromosomen).<br>
-     * Beim Crossover werden aus der Population/Genotype paarweise Chromosomen ausgewählt, die dann mit einer Wahrscheinlichkeit W zu
-     * kreuzen sind.
+     * Beim Crossover werden aus der Population/Genotype paarweise Chromosomen ausgewählt, die dann mit einer Wahrscheinlichkeit W zu kreuzen sind.
      *
      * @param parent1 {@link Chromosome}
      * @param parent2 {@link Chromosome}
@@ -145,6 +143,12 @@ public interface Algorithm<G extends Gene<?>>
                 // Select parents
                 Chromosome<G> parent1 = tournamentSelection(genotype);
                 Chromosome<G> parent2 = tournamentSelection(genotype);
+
+                // Kann bei einigen Beispielen zur Endlos-Schleife führen.
+//                while(parent1.calcFitnessValue() == parent2.calcFitnessValue())
+//                {
+//                    parent2 = tournamentSelection(genotype);
+//                }
 
                 // Crossover parents
                 Chromosome<G> child = crossover(parent1, parent2);

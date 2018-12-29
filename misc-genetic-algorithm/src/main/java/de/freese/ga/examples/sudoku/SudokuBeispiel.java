@@ -4,7 +4,6 @@ package de.freese.ga.examples.sudoku;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.genotype.Genotype;
 
@@ -29,11 +28,13 @@ public class SudokuBeispiel
 
         // algorithm.setElitism(true);
         // algorithm.setMutationRate(0.05D);
-        // algorithm.setCrossoverRate(0.5D);
+        // algorithm.setCrossoverRate(0.75D);
         algorithm.setTournamentSize(9);
-        algorithm.setSizeGenotype(200); // Anzahl Chromosomen/Lösungen
+        algorithm.setSizeGenotype(100); // Anzahl Chromosomen/Lösungen
         // algorithm.setSizeChromosome(...); // Anzahl Zahlen im Rätzel
         algorithm.setPuzzle(puzzle);
+
+        double maxFitness = algorithm.getMaxFitness();
 
         // Create an initial population
         Genotype<SudokuGene> population = algorithm.createInitialGenotype();
@@ -44,14 +45,20 @@ public class SudokuBeispiel
         {
             fittest = population.getFittest();
 
-            System.out.printf("Generation: %2d; Fittest: %3.0f; %s%n", i, fittest.calcFitnessValue(), fittest);
+            System.out.printf("Generation: %2d; Fittest: %3.0f / %3.0f; %s%n", i, fittest.calcFitnessValue(), maxFitness, fittest);
             population = algorithm.evolvePopulation(population);
+
+            // if (i == algorithm.getSizeGenotype() - 1)
+            // {
+            // // Neustart
+            // i = 0;
+            // population = algorithm.createInitialGenotype();
+            // fittest = population.getFittest();
+            // }
         }
 
-        // 243 = 3*81: In allen Rows, Spalten und Blöcken sind 9 unterschiedliche Zahlen.
-        // 1215 = 3*405: In allen Rows, Spalten und Blöcken ist die Summe 45.
-        // max. Fitness: 1458
-        System.out.println("Solution found!");
-        System.out.printf("Genes: Fittest: %3.0f%s%n", fittest.calcFitnessValue(), fittest);
+        // 1215 = 3 * 405: In allen Zeilen, Spalten und Blöcken ist die Summe 45.
+        System.out.println(maxFitness != fittest.calcFitnessValue() ? "Wrong Solution !!!" : "Solution found!");
+        System.out.printf("Genes: Fittest: %3.0f / %3.0f%s%n", fittest.calcFitnessValue(), maxFitness, fittest);
     }
 }

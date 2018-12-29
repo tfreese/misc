@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.chromonome.DefaultChromosome;
@@ -111,6 +110,7 @@ public class TspAlgorithm extends AbstractAlgorithm<Gene<City>>
             City fromCity = chromosome.getGene(cityIndex).getValue();
             // City we're travelling to
             City destinationCity;
+
             // Check we're not on our tour's last city, if we are set our
             // tour's final destination city to our starting city
             if ((cityIndex + 1) < chromosome.size())
