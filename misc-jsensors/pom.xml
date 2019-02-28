@@ -55,7 +55,6 @@
 				</jvmArguments-->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${version:org.springframework.boot:spring-boot}</version>
 				<configuration>
 					<mainClass>de.freese.jsensors.SensorApplication</mainClass>
 					<layout>ZIP</layout>
@@ -77,24 +76,20 @@
 		<dependency>
 			<groupId>com.danielflower.apprunner</groupId>
 			<artifactId>javasysmon</artifactId>
-			<version>0.3.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>${version:org.hsqldb:hsqldb}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jdbc</artifactId>
-			<version>${version:org.springframework.boot:spring-boot}</version>
 		</dependency>
 
 		<!-- runtime scope -->
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>${version:org.mariadb.jdbc:mariadb}</version>
 			<scope>runtime</scope>
 		</dependency>
 
@@ -103,17 +98,6 @@
 		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jfreechart</artifactId>
-			<version>${version:org.jfree:jfreechart}</version>
-			<!--exclusions>
-				<exclusion>
-					<groupId>com.lowagie</groupId>
-					<artifactId>itext</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions-->
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

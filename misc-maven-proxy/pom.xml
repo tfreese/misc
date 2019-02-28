@@ -21,19 +21,16 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
-			<version>${version:io.netty:netty}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.mina</groupId>
 			<artifactId>mina-core</artifactId>
-			<version>${version:org.apache.mina:mina}</version>
 		</dependency>
 
 		<!-- runtime scope -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>${version:org.slf4j:slf4j}</version>
 			<scope>runtime</scope>
 		</dependency>
 

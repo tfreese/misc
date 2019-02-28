@@ -22,26 +22,23 @@
         <!--dependency>
         <groupId>org.ehcache</groupId>
         <artifactId>ehcache</artifactId>
-        <version>${version:org.ehcache:ehcache}</version>
         </dependency -->
         <dependency>
             <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-all</artifactId>
-            <version>${version:com.hazelcast:hazelcast}</version>
+            <artifactId>hazelcast</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>
             <artifactId>ehcache</artifactId>
-            <version>${version:net.sf.ehcache:ehcache}</version>
         </dependency>
 
         <!-- runtime scope -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>${version:org.slf4j:slf4j}</version>
             <scope>runtime</scope>
         </dependency>
+        
         <!-- provided scope -->
         <!-- test scope -->
     </dependencies>
