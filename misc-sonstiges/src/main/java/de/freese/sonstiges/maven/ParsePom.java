@@ -6,6 +6,11 @@ package de.freese.sonstiges.maven;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Map;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.building.DefaultModelBuilderFactory;
+import org.apache.maven.model.building.ModelBuilder;
+import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
@@ -24,7 +29,7 @@ import org.sonatype.plexus.components.sec.dispatcher.SecDispatcher;
 /**
  * @author Thomas Freese
  */
-public class ShowMavenSettings
+public class ParsePom
 {
     /**
      * @param args String[]
@@ -32,16 +37,42 @@ public class ShowMavenSettings
      */
     public static void main(final String[] args) throws Exception
     {
+        mavenModel();
+        mavenSettings();
+    }
+
+    /**
+    *
+    */
+    private static void mavenModel()
+    {
+        File pomFile = new File("pom.xml");
+
+        DefaultModelBuilderFactory modelBuilderFactory = new DefaultModelBuilderFactory();
+        ModelBuilder modelBuilder = modelBuilderFactory.newInstance();
+        // Result<Model> result = null;
+        Model model = modelBuilder.buildRawModel(pomFile, 0, false).get();
+
+        model.getDependencies().forEach(System.out::println);
+        model.getProperties().forEach((key, value) -> System.out.printf("[%s - %s]%n", key, value));
+        model.getRepositories().forEach(repo -> System.out.println(repo.getUrl()));
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    private static void mavenSettings() throws Exception
+    {
         DefaultSettingsBuilderFactory settingsBuilderFactory = new DefaultSettingsBuilderFactory();
         SettingsBuilder settingsBuilder = settingsBuilderFactory.newInstance();
 
         // @formatter:off
-		DefaultSettingsBuildingRequest settingsBuildingRequest = new DefaultSettingsBuildingRequest()
-		        .setSystemProperties(System.getProperties())
-				.setUserProperties(null)
-				.setGlobalSettingsFile(new File(System.getenv("M2_HOME") + "/conf/settings.xml"))
-				.setUserSettingsFile(new File(System.getProperty("user.home") + "/.m2/settings.xml"));
-		// @formatter:on
+        DefaultSettingsBuildingRequest settingsBuildingRequest = new DefaultSettingsBuildingRequest()
+                .setSystemProperties(System.getProperties())
+                .setUserProperties(null)
+                .setGlobalSettingsFile(new File(System.getenv("M2_HOME") + "/conf/settings.xml"))
+                .setUserSettingsFile(new File(System.getProperty("user.home") + "/.m2/settings.xml"));
+        // @formatter:on
 
         SettingsBuildingResult settingsBuildingResult = settingsBuilder.build(settingsBuildingRequest);
 
@@ -51,6 +82,11 @@ public class ShowMavenSettings
         {
             System.out.println("Server = " + server.getId() + " " + server.getUsername() + "/" + server.getPassword());
         }
+
+        settings.getMirrors().forEach(System.out::println);
+
+        Map<String, Profile> map = settings.getProfilesAsMap();
+        settings.getActiveProfiles().stream().map(map::get).flatMap(p -> p.getRepositories().stream()).forEach(p -> System.out.println(p.getUrl()));
 
         System.out.println();
 
