@@ -8,6 +8,7 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.FilterEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.freese.maven.proxy.model.MavenRequest;
@@ -41,6 +42,18 @@ public class MinaMavenRequestHandler implements IoHandler
         super();
 
         this.repository = Objects.requireNonNull(repository, "repository required");
+    }
+
+    /**
+     * @see org.apache.mina.core.service.IoHandler#event(org.apache.mina.core.session.IoSession, org.apache.mina.filter.FilterEvent)
+     */
+    @Override
+    public void event(final IoSession session, final FilterEvent event) throws Exception
+    {
+        if (getLogger().isDebugEnabled())
+        {
+            getLogger().debug(session.toString());
+        }
     }
 
     /**
