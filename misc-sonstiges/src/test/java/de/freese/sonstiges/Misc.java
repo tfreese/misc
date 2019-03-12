@@ -1,5 +1,8 @@
 package de.freese.sonstiges;
 
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -48,6 +51,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import de.freese.sonstiges.xml.jaxb.model.DJ;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -267,6 +271,17 @@ public class Misc
     }
 
     /**
+     * @throws IntrospectionException Falls was schief geht.
+     */
+    static void introspector() throws IntrospectionException
+    {
+        for (PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(DJ.class).getPropertyDescriptors())
+        {
+            System.out.printf("%s: %s, %s%n", propertyDescriptor.getName(), propertyDescriptor.getReadMethod(), propertyDescriptor.getWriteMethod());
+        }
+    }
+
+    /**
      *
      */
     static void javaVersion()
@@ -374,7 +389,8 @@ public class Misc
 
         // securityProviders();
 
-        javaVersion();
+        // javaVersion();
+        introspector();
     }
 
     /**
