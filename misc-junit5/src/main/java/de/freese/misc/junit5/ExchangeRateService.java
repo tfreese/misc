@@ -1,0 +1,19 @@
+package de.freese.misc.junit5;
+
+/**
+ * The interface Exchange rate service.
+ *
+ * @author Thomas Freese
+ */
+public interface ExchangeRateService
+{
+    /**
+     * Gets rate.
+     *
+     * @param sourceCurrency String
+     * @param targetCurrency String
+     *
+     * @return double rate
+     */
+    public double getRate(String sourceCurrency, String targetCurrency);
+}
