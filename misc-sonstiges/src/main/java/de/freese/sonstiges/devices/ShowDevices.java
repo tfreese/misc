@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.filechooser.FileSystemView;
 
@@ -96,7 +95,7 @@ public class ShowDevices
         List<File> roots = new ArrayList<>();
 
         // roots.addAll(Arrays.asList(fsv.getRoots())); // Liefert nur lokale Partitionen.
-        roots.addAll(Arrays.asList(File.listRoots())); // Liefert auch Netzlaufwerke.
+        roots.addAll(List.of(File.listRoots())); // Liefert auch Netzlaufwerke.
 
         for (File path : roots)
         {

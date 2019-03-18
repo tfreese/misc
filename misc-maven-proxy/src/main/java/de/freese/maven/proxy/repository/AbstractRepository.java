@@ -4,14 +4,14 @@
 
 package de.freese.maven.proxy.repository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Basisimplementierung eines Repositories.
@@ -23,27 +23,23 @@ public abstract class AbstractRepository implements Repository
     /**
      *
      */
-    private boolean active = true;
-
-    /**
-     *
-     */
-    private CharsetDecoder charsetDecoder = null;
-
-    /**
-     *
-     */
-    private CharsetEncoder charsetEncoder = null;
-
-    /**
-     *
-     */
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
     /**
      *
      */
     private final URI uri;
+    /**
+     *
+     */
+    private boolean active = true;
+    /**
+     *
+     */
+    private CharsetDecoder charsetDecoder = null;
+    /**
+     *
+     */
+    private CharsetEncoder charsetEncoder = null;
 
     /**
      * Erstellt ein neues {@link AbstractRepository} Object.<br>
@@ -59,14 +55,14 @@ public abstract class AbstractRepository implements Repository
     /**
      * Erstellt ein neues {@link AbstractRepository} Object.
      *
-     * @param uri {@link URI}; Ressourenquelle des Repositories
+     * @param uri     {@link URI}; Ressourenquelle des Repositories
      * @param charset {@link Charset}; Kodierung
      */
     public AbstractRepository(final URI uri, final Charset charset)
     {
         super();
 
-        this.uri = Objects.requireNonNull(uri, "uri required");
+        this.uri = Objects.requireNonNull(uri, "repository required");
 
         Objects.requireNonNull(charset, "charset required");
         this.charsetEncoder = charset.newEncoder();

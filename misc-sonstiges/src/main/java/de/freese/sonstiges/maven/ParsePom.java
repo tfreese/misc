@@ -63,9 +63,6 @@ public class ParsePom
      */
     private static void mavenSettings() throws Exception
     {
-        DefaultSettingsBuilderFactory settingsBuilderFactory = new DefaultSettingsBuilderFactory();
-        SettingsBuilder settingsBuilder = settingsBuilderFactory.newInstance();
-
         // @formatter:off
         DefaultSettingsBuildingRequest settingsBuildingRequest = new DefaultSettingsBuildingRequest()
                 .setSystemProperties(System.getProperties())
@@ -74,6 +71,8 @@ public class ParsePom
                 .setUserSettingsFile(new File(System.getProperty("user.home") + "/.m2/settings.xml"));
         // @formatter:on
 
+        DefaultSettingsBuilderFactory settingsBuilderFactory = new DefaultSettingsBuilderFactory();
+        SettingsBuilder settingsBuilder = settingsBuilderFactory.newInstance();
         SettingsBuildingResult settingsBuildingResult = settingsBuilder.build(settingsBuildingRequest);
 
         Settings settings = settingsBuildingResult.getEffectiveSettings();
