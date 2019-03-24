@@ -18,7 +18,6 @@
 	<description>Demos für JUnit5.</description>
 
 	<properties>
-		<!--version_junit5>5.4.0</version_junit5 -->
 	</properties>
 
 	<dependencyManagement>
