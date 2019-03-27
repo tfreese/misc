@@ -1,6 +1,12 @@
 package de.freese.misc.junit5;
 
-
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import java.awt.Point;
+import java.util.Random;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
@@ -22,15 +28,6 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.awt.Point;
-import java.util.Random;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 /**
  * The type Test misc.
@@ -81,26 +78,11 @@ public class TestDemo
         /**
          *
          */
-        static final MyObject[] MY_OBJECTS = {new MyObject(0, 0), new MyObject(0, 1), new MyObject(1, 0), new MyObject(1, 1)};
-
-        /**
-         *
-         */
         static final Random RANDOM = new Random();
 
         /**
-         * @see org.junit.jupiter.api.extension.ParameterResolver#supportsParameter(org.junit.jupiter.api.extension.ParameterContext,
-         * org.junit.jupiter.api.extension.ExtensionContext)
-         */
-        @Override
-        public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) throws ParameterResolutionException
-        {
-            return parameterContext.getParameter().getType() == MyObject.class;
-        }
-
-        /**
          * @see org.junit.jupiter.api.extension.ParameterResolver#resolveParameter(org.junit.jupiter.api.extension.ParameterContext,
-         * org.junit.jupiter.api.extension.ExtensionContext)
+         *      org.junit.jupiter.api.extension.ExtensionContext)
          */
         @Override
         public Object resolveParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) throws ParameterResolutionException
@@ -112,7 +94,25 @@ public class TestDemo
 
             return null;
         }
+
+        /**
+         * @see org.junit.jupiter.api.extension.ParameterResolver#supportsParameter(org.junit.jupiter.api.extension.ParameterContext,
+         *      org.junit.jupiter.api.extension.ExtensionContext)
+         */
+        @Override
+        public boolean supportsParameter(final ParameterContext parameterContext, final ExtensionContext extensionContext) throws ParameterResolutionException
+        {
+            return parameterContext.getParameter().getType() == MyObject.class;
+        }
     }
+
+    /**
+    *
+    */
+    static final MyObject[] MY_OBJECTS =
+    {
+            new MyObject(0, 0), new MyObject(0, 1), new MyObject(1, 0), new MyObject(1, 1)
+    };
 
     /**
      * Create objects stream.
@@ -121,7 +121,7 @@ public class TestDemo
      */
     static Stream<MyObject> createObjects()
     {
-        return Stream.of(MyParameterResolver.MY_OBJECTS);
+        return Stream.of(MY_OBJECTS);
     }
 
     /**
@@ -139,7 +139,7 @@ public class TestDemo
     public Stream<DynamicTest> testDynamic()
     {
         // @formatter:off
-        return Stream.of(MyParameterResolver.MY_OBJECTS)
+        return Stream.of(MY_OBJECTS)
                 .map(obj -> dynamicTest("Test for: " + obj, () -> assertNotNull(obj))
                 )
                 ;
@@ -153,7 +153,7 @@ public class TestDemo
     public Stream<DynamicTest> testDynamic2()
     {
         // @formatter:off
-        return Stream.of(MyParameterResolver.MY_OBJECTS)
+        return Stream.of(MY_OBJECTS)
                 .flatMap(obj -> Stream.of(
                         dynamicTest("NotNull-Test for: " + obj, () -> assertNotNull(obj)),
                         dynamicTest("X-Test", () -> assertTrue(obj.getX() < 2)),
@@ -171,7 +171,7 @@ public class TestDemo
     public Stream<DynamicNode> testDynamic3()
     {
         // @formatter:off
-        return Stream.of(MyParameterResolver.MY_OBJECTS)
+        return Stream.of(MY_OBJECTS)
                 .map(obj -> dynamicContainer(obj.toString(),
                         Stream.of(dynamicTest("NotNull-Test", () -> assertNotNull(obj)),
                                 dynamicContainer("Coords.",
@@ -196,9 +196,9 @@ public class TestDemo
     @DisplayName("Test @MethodSource")
     @Tag("myTest")
     @EnabledOnOs(
-            {
-                    OS.WINDOWS, OS.LINUX
-            })
+    {
+            OS.WINDOWS, OS.LINUX
+    })
     @EnabledOnJre(JRE.JAVA_11)
     @DisabledOnJre(JRE.JAVA_8)
     // @EnabledIfSystemProperty(named = "os.arch", matches = ".*64.*")
