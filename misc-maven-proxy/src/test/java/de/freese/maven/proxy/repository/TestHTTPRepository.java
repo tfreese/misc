@@ -4,9 +4,8 @@
 
 package de.freese.maven.proxy.repository;
 
-import org.junit.Test;
-
 import java.net.URI;
+import org.junit.jupiter.api.Test;
 
 /**
  * Testklasse für das {@link HTTPRepository}.
@@ -16,14 +15,6 @@ import java.net.URI;
 public class TestHTTPRepository
 {
     /**
-     * Erstellt ein neues {@link TestHTTPRepository} Object.
-     */
-    public TestHTTPRepository()
-    {
-        super();
-    }
-
-    /**
      * @param args String[]
      */
     public static void main(final String[] args)
@@ -32,9 +23,16 @@ public class TestHTTPRepository
     }
 
     /**
-     * @param uri  {@link URI}
+     * Erstellt ein neues {@link TestHTTPRepository} Object.
+     */
+    public TestHTTPRepository()
+    {
+        super();
+    }
+
+    /**
+     * @param uri {@link URI}
      * @param path String
-     *
      * @throws Exception Falls was schief geht.
      */
     private void test(final URI uri, final String path) throws Exception

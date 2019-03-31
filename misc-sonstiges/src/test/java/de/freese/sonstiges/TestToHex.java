@@ -3,15 +3,15 @@ package de.freese.sonstiges;
 
 import java.util.Random;
 import javax.xml.bind.DatatypeConverter;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 /**
  * @author Thomas Freese
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestToHex
 {
     /**
@@ -27,8 +27,8 @@ public class TestToHex
     /**
      *
      */
-    @BeforeClass
-    public static void beforeClass()
+    @BeforeAll
+    public static void beforeAll()
     {
         Random random = new Random(System.currentTimeMillis());
 

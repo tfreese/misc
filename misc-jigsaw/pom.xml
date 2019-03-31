@@ -26,6 +26,7 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             </dependency -->
+        <!-- Implementierung von javax.xml.bind:jaxb-api -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
@@ -35,10 +36,9 @@
         <!-- provided scope -->
 
         <!-- test scope -->
-        <!-- Implementierung von javax.xml.bind:jaxb-api -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

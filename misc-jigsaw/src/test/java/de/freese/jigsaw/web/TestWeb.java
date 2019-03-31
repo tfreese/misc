@@ -4,16 +4,17 @@
 
 package de.freese.jigsaw.web;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.function.Supplier;
-import org.junit.Assert;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 /**
  * @author Thomas Freese
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestWeb
 {
     /**
@@ -36,7 +37,7 @@ public class TestWeb
 
         System.out.println(result);
 
-        Assert.assertNotNull(result);
-        Assert.assertTrue(!result.isEmpty());
+        assertNotNull(result);
+        assertTrue(!result.isEmpty());
     }
 }

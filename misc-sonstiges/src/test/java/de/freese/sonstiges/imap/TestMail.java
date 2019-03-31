@@ -3,6 +3,7 @@
  */
 package de.freese.sonstiges.imap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,13 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jsoup.Jsoup;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import de.freese.sonstiges.imap.analyze.FunctionStemmer;
 import de.freese.sonstiges.imap.analyze.FunctionStripNotLetter;
 import de.freese.sonstiges.imap.analyze.FunctionStripStopWords;
@@ -31,7 +31,7 @@ import de.freese.sonstiges.imap.analyze.FunctionStripStopWords;
 /**
  * @author Thomas Freese
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestMail
 {
     /**
@@ -90,8 +90,8 @@ public class TestMail
     /**
      * @throws Exception Falls was schief geht.
      */
-    @BeforeClass
-    public static void beforeClass() throws Exception
+    @BeforeAll
+    public static void beforeAll() throws Exception
     {
         if (!Boolean.parseBoolean(System.getProperty("run_in_ide", "false")))
         {
@@ -127,16 +127,16 @@ public class TestMail
     /**
      *
      */
-    @After
-    public void afterMethod()
+    @AfterEach
+    public void afterEach()
     {
     }
 
     /**
      *
      */
-    @Before
-    public void beforeMethod()
+    @BeforeEach
+    public void beforeEach()
     {
     }
 
@@ -176,19 +176,19 @@ public class TestMail
     public void test0100TFunctionStripNotLetter() throws Exception
     {
         String text = "abcdefghijklmnopqrstuvwxyz";
-        Assert.assertEquals(text, FunctionStripNotLetter.INSTANCE.apply(text));
+        assertEquals(text, FunctionStripNotLetter.INSTANCE.apply(text));
 
         text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        Assert.assertEquals(text, FunctionStripNotLetter.INSTANCE.apply(text));
+        assertEquals(text, FunctionStripNotLetter.INSTANCE.apply(text));
 
         text = " aBc ";
-        Assert.assertEquals(" aBc ", FunctionStripNotLetter.INSTANCE.apply(text));
+        assertEquals(" aBc ", FunctionStripNotLetter.INSTANCE.apply(text));
 
         text = ",.-#+´aBc!\"§$%&/()=";
-        Assert.assertEquals("      aBc          ", FunctionStripNotLetter.INSTANCE.apply(text));
+        assertEquals("      aBc          ", FunctionStripNotLetter.INSTANCE.apply(text));
 
         text = "0123aBc6789";
-        Assert.assertEquals("    aBc    ", FunctionStripNotLetter.INSTANCE.apply(text));
+        assertEquals("    aBc    ", FunctionStripNotLetter.INSTANCE.apply(text));
     }
 
     /**
@@ -198,12 +198,12 @@ public class TestMail
     public void test0200TFunctionStemmer() throws Exception
     {
         String ref = "wald";
-        Assert.assertEquals(ref, FunctionStemmer.DE.apply(ref));
-        Assert.assertEquals(ref, FunctionStemmer.DE.apply("wälder"));
+        assertEquals(ref, FunctionStemmer.DE.apply(ref));
+        assertEquals(ref, FunctionStemmer.DE.apply("wälder"));
 
         ref = "trademark";
-        Assert.assertEquals(ref, FunctionStemmer.EN.apply(ref));
-        Assert.assertEquals(ref, FunctionStemmer.EN.apply("trademarks"));
+        assertEquals(ref, FunctionStemmer.EN.apply(ref));
+        assertEquals(ref, FunctionStemmer.EN.apply("trademarks"));
     }
 
     /**

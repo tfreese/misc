@@ -1,5 +1,6 @@
 package de.freese.sonstiges.xml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -8,11 +9,10 @@ import java.nio.charset.StandardCharsets;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import de.freese.sonstiges.xml.jaxb.model.Club;
 import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
 import de.freese.sonstiges.xml.jaxb.model.DJ;
@@ -20,7 +20,7 @@ import de.freese.sonstiges.xml.jaxb.model.DJ;
 /**
  * @author Thomas Freese
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestJAXB
 {
     /**
@@ -36,8 +36,8 @@ public class TestJAXB
     /**
      * @throws Exception Falls was schief geht.
      */
-    @BeforeClass
-    public static void beforeClass() throws Exception
+    @BeforeAll
+    public static void beforeAll() throws Exception
     {
         TestJAXB.jaxbContext = JAXBContext.newInstance(Club.class, DJ.class);
 
@@ -76,7 +76,7 @@ public class TestJAXB
         }
 
         TestJAXB.bytes = baos.toByteArray();
-        Assert.assertNotNull(TestJAXB.bytes);
+        assertNotNull(TestJAXB.bytes);
 
         System.out.println(new String(TestJAXB.bytes, StandardCharsets.UTF_8));
     }
@@ -94,7 +94,7 @@ public class TestJAXB
         try (InputStream fis = new ByteArrayInputStream(TestJAXB.bytes))
         {
             Club club = (Club) unmarshaller.unmarshal(fis);
-            Assert.assertNotNull(club);
+            assertNotNull(club);
             // ClubFactory.toString(club);
         }
     }

@@ -1,15 +1,15 @@
 package de.freese.sonstiges.xml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,7 +27,7 @@ import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
  * @author Thomas Freese
  */
 // @Ignore
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestJacksonJSON
 {
     /**
@@ -43,8 +43,8 @@ public class TestJacksonJSON
     /**
      * @throws Exception Falls was schief geht.
      */
-    @BeforeClass
-    public static void beforeClass() throws Exception
+    @BeforeAll
+    public static void beforeAll() throws Exception
     {
         jsonMapper = new ObjectMapper();
 
@@ -103,7 +103,7 @@ public class TestJacksonJSON
         }
 
         TestJacksonJSON.bytes = baos.toByteArray();
-        Assert.assertNotNull(TestJacksonJSON.bytes);
+        assertNotNull(TestJacksonJSON.bytes);
 
         System.out.println(new String(TestJacksonJSON.bytes, StandardCharsets.UTF_8));
     }
@@ -119,7 +119,7 @@ public class TestJacksonJSON
         try (InputStream is = new ByteArrayInputStream(TestJacksonJSON.bytes))
         {
             Club club = jsonMapper.readValue(is, Club.class);
-            Assert.assertNotNull(club);
+            assertNotNull(club);
             // ClubFactory.toString(club);
         }
     }
@@ -142,7 +142,7 @@ public class TestJacksonJSON
         }
 
         TestJacksonJSON.bytes = baos.toByteArray();
-        Assert.assertNotNull(TestJacksonJSON.bytes);
+        assertNotNull(TestJacksonJSON.bytes);
 
         System.out.println(new String(TestJacksonJSON.bytes, StandardCharsets.UTF_8));
     }
@@ -158,7 +158,7 @@ public class TestJacksonJSON
         try (InputStream is = new ByteArrayInputStream(TestJacksonJSON.bytes))
         {
             Club club = jsonMapper.readValue(is, Club.class);
-            Assert.assertNotNull(club);
+            assertNotNull(club);
             // ClubFactory.toString(club);
         }
     }
