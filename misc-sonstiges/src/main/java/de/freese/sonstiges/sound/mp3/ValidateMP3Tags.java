@@ -15,7 +15,6 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.LogManager;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -84,7 +83,7 @@ public class ValidateMP3Tags
                     // Ignore
                 }
 
-                if (StringUtils.isBlank(value))
+                if ((value == null) || value.isBlank())
                 {
                     continue;
                 }
@@ -185,7 +184,7 @@ public class ValidateMP3Tags
         Tag tag = audioFile.getTag();
         List<Artwork> artworks = tag.getArtworkList();
 
-        if (CollectionUtils.isEmpty(artworks))
+        if ((artworks == null) || artworks.isEmpty())
         {
             return;
         }
@@ -336,7 +335,7 @@ public class ValidateMP3Tags
                 TagTextField textField = (TagTextField) field;
                 String value = textField.getContent();
 
-                if (StringUtils.isBlank(value))
+                if ((value == null) || value.isBlank())
                 {
                     continue;
                 }
@@ -365,7 +364,7 @@ public class ValidateMP3Tags
 
                 for (String split : splits)
                 {
-                    if (StringUtils.isBlank(split))
+                    if ((split == null) || split.isBlank())
                     {
                         continue;
                     }

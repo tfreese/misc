@@ -51,10 +51,10 @@ final class Report implements Comparable<Report>
     {
         int comp = this.file.compareTo(o.file);
 
-        //if (comp == 0)
-        //{
-        //    comp = this.messages.toString().compareTo(o.messages.toString());
-        //}
+        // if (comp == 0)
+        // {
+        // comp = this.messages.toString().compareTo(o.messages.toString());
+        // }
         return comp;
     }
 
@@ -116,6 +116,7 @@ final class Report implements Comparable<Report>
     {
         final int prime = 31;
         int result = 1;
+
         result = (prime * result) + ((this.file == null) ? 0 : this.file.hashCode());
         result = (prime * result) + ((this.messages == null) ? 0 : this.messages.hashCode());
 
@@ -138,7 +139,6 @@ final class Report implements Comparable<Report>
 
     /**
      * @param rootDirectory {@link Path}
-     *
      * @return String
      */
     public String toString(final Path rootDirectory)
