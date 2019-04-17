@@ -58,8 +58,7 @@
         <max-idle-seconds>0</max-idle-seconds>
         <eviction-policy>LRU</eviction-policy>
         <max-size policy="PER_NODE">3</max-size>
-        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy
-        </merge-policy>
+        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy</merge-policy>
         <cache-deserialized-values>INDEX-ONLY</cache-deserialized-values>
     </map>
 
