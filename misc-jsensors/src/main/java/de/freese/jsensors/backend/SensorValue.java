@@ -3,22 +3,29 @@ package de.freese.jsensors.backend;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
  * @author Thomas Freese
  */
-class SensorValue
+public class SensorValue
 {
     /**
     *
     */
-    private final LocalDateTime localDateTime;
+    private Date date = null;
+
+    /**
+    *
+    */
+    private LocalDateTime localDateTime = null;
 
     /**
      *
      */
-    private final String sensor;
+    private final String name;
 
     /**
      *
@@ -33,19 +40,67 @@ class SensorValue
     /**
      * Erzeugt eine neue Instanz von {@link SensorValue}.
      *
+     * @param name String
      * @param value String
      * @param timestamp long
-     * @param sensor String
      */
-    public SensorValue(final String value, final long timestamp, final String sensor)
+    public SensorValue(final String name, final String value, final long timestamp)
     {
         super();
 
-        this.value = value;
-        this.sensor = sensor;
+        this.name = Objects.requireNonNull(name, "name rrequired");
+        this.value = Objects.requireNonNull(value, "value rrequired");
         this.timestamp = timestamp <= 0 ? System.currentTimeMillis() : timestamp;
+    }
 
-        this.localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this.timestamp), TimeZone.getDefault().toZoneId());
+    /**
+     * @return {@link Date}
+     */
+    public Date getDate()
+    {
+        if (this.date == null)
+        {
+            this.date = new Date(getTimestamp());
+        }
+
+        return this.date;
+    }
+
+    /**
+     * @return {@link LocalDateTime}
+     */
+    public LocalDateTime getLocalDateTime()
+    {
+        if (this.localDateTime == null)
+        {
+            this.localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this.timestamp), TimeZone.getDefault().toZoneId());
+        }
+
+        return this.localDateTime;
+    }
+
+    /**
+     * @return String
+     */
+    public String getName()
+    {
+        return this.name;
+    }
+
+    /**
+     * @return long
+     */
+    public long getTimestamp()
+    {
+        return this.timestamp;
+    }
+
+    /**
+     * @return String
+     */
+    public String getValue()
+    {
+        return this.value;
     }
 
     /**
@@ -56,43 +111,11 @@ class SensorValue
     {
         StringBuilder builder = new StringBuilder();
         builder.append("SensorValue [");
-        builder.append("sensor=").append(this.sensor);
+        builder.append("name=").append(this.name);
         builder.append(", value=").append(this.value);
-        builder.append(", timestamp=").append(this.localDateTime);
+        builder.append(", timestamp=").append(getLocalDateTime());
         builder.append("]");
 
         return builder.toString();
-    }
-
-    /**
-     * @return {@link LocalDateTime}
-     */
-    protected LocalDateTime getLocalDateTime()
-    {
-        return this.localDateTime;
-    }
-
-    /**
-     * @return String
-     */
-    protected String getSensor()
-    {
-        return this.sensor;
-    }
-
-    /**
-     * @return long
-     */
-    protected long getTimestamp()
-    {
-        return this.timestamp;
-    }
-
-    /**
-     * @return String
-     */
-    protected String getValue()
-    {
-        return this.value;
     }
 }

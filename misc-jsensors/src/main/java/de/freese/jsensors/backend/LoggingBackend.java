@@ -1,13 +1,21 @@
 // Created: 12.05.2017
 package de.freese.jsensors.backend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * {@link Backend} für die Ausgabe der Sensorwerte auf der Logger-Console.
  *
  * @author Thomas Freese
  */
-public class LoggingBackend extends AbstractBackend
+public class LoggingBackend implements Backend
 {
+    /**
+    *
+    */
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
      * Erzeugt eine neue Instanz von {@link LoggingBackend}.
      */
@@ -17,31 +25,27 @@ public class LoggingBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#save(java.lang.String, long, java.lang.String)
+     * @return {@link Logger}
      */
-    @Override
-    public void save(final String value, final long timestamp, final String sensor)
+    public Logger getLogger()
     {
-        SensorValue sensorValue = new SensorValue(value, timestamp, sensor);
-
-        save(sensorValue);
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#initialize()
-     */
-    @Override
-    protected void initialize() throws Exception
-    {
-        // Keine Initialisierung notwendig.
+        return this.logger;
     }
 
     /**
      * @see de.freese.jsensors.backend.AbstractBackend#save(de.freese.jsensors.backend.SensorValue)
      */
     @Override
-    protected void save(final SensorValue sensorValue)
+    public void save(final SensorValue sensorValue)
     {
         getLogger().info("{}", sensorValue);
+    }
+
+    /**
+     * @param logger {@link Logger}
+     */
+    public void setLogger(final Logger logger)
+    {
+        this.logger = logger;
     }
 }

@@ -11,9 +11,7 @@ public interface Backend
     /**
      * Speichert den Sensorwert.
      *
-     * @param value String Wert der Messung
-     * @param timestamp long Timestamp der Messung
-     * @param sensor String Name des Sensors
+     * @param sensorValue {@link SensorValue}
      */
-    public void save(String value, long timestamp, String sensor);
+    public void save(SensorValue sensorValue);
 }

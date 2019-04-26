@@ -73,7 +73,7 @@ public class ApplicationConfig
         bean.setThreadPriority(Thread.NORM_PRIORITY);
         bean.setThreadNamePrefix(threadNamePrefix);
         bean.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-        bean.setAllowCoreThreadTimeOut(false);
+        bean.setAllowCoreThreadTimeOut(true);
         bean.setExposeUnconfigurableExecutor(true);
 
         return bean;

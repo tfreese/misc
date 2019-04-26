@@ -3,13 +3,12 @@ package de.freese.jsensors.sensor;
 
 import java.util.List;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
-
 import de.freese.jsensors.backend.Backend;
+import de.freese.jsensors.backend.SensorValue;
 
 /**
  * Basis-implementierung eines Sensors.
@@ -48,54 +47,6 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
     public final void afterPropertiesSet() throws Exception
     {
         initialize();
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#scan()
-     */
-    @Override
-    public final void scan()
-    {
-        try
-        {
-            scanValue();
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#setBackends(java.util.List)
-     */
-    @Override
-    public void setBackends(final List<Backend> backends)
-    {
-        this.backends = Objects.requireNonNull(backends, "backends required");
-    }
-
-    /**
-     * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
-     */
-    @Override
-    public final void setBeanName(final String name)
-    {
-        // Defaultname = Beanname
-        setName(name);
-    }
-
-    /**
-     * Setzt den Namen des Sensors.
-     *
-     * @param name String; optional; Default = BeanID
-     */
-    @Override
-    public void setName(final String name)
-    {
-        Objects.requireNonNull(name, "name required");
-
-        this.name = name;
     }
 
     /**
@@ -153,9 +104,27 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
      */
     protected void save(final String value, final long timestamp, final String sensor)
     {
+        final SensorValue sensorValue = new SensorValue(sensor, value, timestamp);
+
         for (Backend backend : getBackends())
         {
-            backend.save(value, timestamp, sensor);
+            backend.save(sensorValue);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.Sensor#scan()
+     */
+    @Override
+    public final void scan()
+    {
+        try
+        {
+            scanValue();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
         }
     }
 
@@ -165,4 +134,36 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
      * @throws Exception Falls was schief geht.
      */
     protected abstract void scanValue() throws Exception;
+
+    /**
+     * @see de.freese.jsensors.sensor.Sensor#setBackends(java.util.List)
+     */
+    @Override
+    public void setBackends(final List<Backend> backends)
+    {
+        this.backends = Objects.requireNonNull(backends, "backends required");
+    }
+
+    /**
+     * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+     */
+    @Override
+    public final void setBeanName(final String name)
+    {
+        // Defaultname = Beanname
+        setName(name);
+    }
+
+    /**
+     * Setzt den Namen des Sensors.
+     *
+     * @param name String; optional; Default = BeanID
+     */
+    @Override
+    public void setName(final String name)
+    {
+        Objects.requireNonNull(name, "name required");
+
+        this.name = name;
+    }
 }

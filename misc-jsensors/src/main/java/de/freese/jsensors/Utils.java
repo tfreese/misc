@@ -34,7 +34,7 @@ public class Utils
      * @return {@link List}
      * @throws Exception Falls was schief geht.
      */
-    public static List<String> executeCommand(final String... command) throws Exception
+    public static List<String> executeCommand(final String...command) throws Exception
     {
         // @formatter:off
         Process process = new ProcessBuilder()
@@ -93,26 +93,6 @@ public class Utils
     }
 
     /**
-     * Formatiert den Sensornamen als SQL-Tabellenname.<br>
-     * Format:<br>
-     * <ul>
-     * <li>Großbuchstaben
-     * <li>' ', '-' werden durch '_' ersetzt
-     * </ul>
-     *
-     * @param sensorName String
-     * @return String
-     */
-    public static String formatSensorTableName(final String sensorName)
-    {
-        String tableName = sensorName.toUpperCase();
-        tableName = tableName.replace("-", "_");
-        tableName = tableName.replace(" ", "_");
-
-        return tableName;
-    }
-
-    /**
      * @return boolean
      */
     public static boolean isLinux()
@@ -134,6 +114,26 @@ public class Utils
     public static boolean isWindows()
     {
         return OS.startsWith("win");
+    }
+
+    /**
+     * Formatiert den Sensornamen als SQL-Tabellenname.<br>
+     * Format:<br>
+     * <ul>
+     * <li>Großbuchstaben
+     * <li>' ', '-' werden durch '_' ersetzt
+     * </ul>
+     *
+     * @param sensorName String
+     * @return String
+     */
+    public static String sensorNameToTableName(final String sensorName)
+    {
+        String tableName = sensorName.toUpperCase();
+        tableName = tableName.replace("-", "_");
+        tableName = tableName.replace(" ", "_");
+
+        return tableName;
     }
 
     /**

@@ -11,9 +11,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-
 import javax.sql.DataSource;
-
 import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.Sensor;
 
@@ -42,26 +40,6 @@ public class JDBCBackend extends AbstractBackend
     public JDBCBackend()
     {
         super();
-    }
-
-    /**
-     * Liefert die {@link DataSource}.
-     *
-     * @return {@link DataSource}
-     */
-    public DataSource getDataSource()
-    {
-        return this.dataSource;
-    }
-
-    /**
-     * Setzt die {@link DataSource}.
-     *
-     * @param dataSource {@link DataSource}
-     */
-    public void setDataSource(final DataSource dataSource)
-    {
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
     }
 
     /**
@@ -110,6 +88,16 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
+     * Liefert die {@link DataSource}.
+     *
+     * @return {@link DataSource}
+     */
+    public DataSource getDataSource()
+    {
+        return this.dataSource;
+    }
+
+    /**
      * @see de.freese.jsensors.backend.AbstractBackend#initialize()
      */
     @Override
@@ -121,12 +109,12 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#save(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.backend.SensorValue)
      */
     @Override
-    protected void save(final SensorValue sensorValue)
+    protected void saveImpl(final SensorValue sensorValue)
     {
-        String tableName = Utils.formatSensorTableName(sensorValue.getSensor());
+        String tableName = Utils.sensorNameToTableName(sensorValue.getName());
 
         try
         {
@@ -165,5 +153,15 @@ public class JDBCBackend extends AbstractBackend
         {
             getLogger().error(null, ex);
         }
+    }
+
+    /**
+     * Setzt die {@link DataSource}.
+     *
+     * @param dataSource {@link DataSource}
+     */
+    public void setDataSource(final DataSource dataSource)
+    {
+        this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
     }
 }
