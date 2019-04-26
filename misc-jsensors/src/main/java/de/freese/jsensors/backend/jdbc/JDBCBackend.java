@@ -1,5 +1,5 @@
 // Created: 02.06.2017
-package de.freese.jsensors.backend;
+package de.freese.jsensors.backend.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -12,7 +12,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.sql.DataSource;
+import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.Utils;
+import de.freese.jsensors.backend.AbstractBackend;
+import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
 
 /**
@@ -98,18 +101,7 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#initialize()
-     */
-    @Override
-    protected void initialize() throws Exception
-    {
-        super.initialize();
-
-        Objects.requireNonNull(getDataSource(), "dataSource required");
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
      */
     @Override
     protected void saveImpl(final SensorValue sensorValue)
@@ -149,9 +141,9 @@ public class JDBCBackend extends AbstractBackend
                 con.commit();
             }
         }
-        catch (Exception ex)
+        catch (SQLException sex)
         {
-            getLogger().error(null, ex);
+            getLogger().error(null, sex);
         }
     }
 
@@ -163,5 +155,16 @@ public class JDBCBackend extends AbstractBackend
     public void setDataSource(final DataSource dataSource)
     {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#start()
+     */
+    @Override
+    public void start()
+    {
+        super.start();
+
+        Objects.requireNonNull(getDataSource(), "dataSource required");
     }
 }

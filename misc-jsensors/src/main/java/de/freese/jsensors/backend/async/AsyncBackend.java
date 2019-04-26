@@ -2,22 +2,22 @@
  * Created: 26.04.2019
  */
 
-package de.freese.jsensors.backend;
+package de.freese.jsensors.backend.async;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import de.freese.jsensors.LifeCycle;
+import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.backend.AbstractBackend;
+import de.freese.jsensors.backend.Backend;
 
 /**
  * Asynchrone-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public class AsyncBackend implements Backend, LifeCycle
+public class AsyncBackend extends AbstractBackend
 {
     /**
      * @author Thomas Freese
@@ -77,8 +77,8 @@ public class AsyncBackend implements Backend, LifeCycle
          */
         void shutdown()
         {
-            interrupt();
             this.isShutdown = true;
+            interrupt();
         }
     }
 
@@ -86,11 +86,6 @@ public class AsyncBackend implements Backend, LifeCycle
      *
      */
     private Backend delegate = null;
-
-    /**
-    *
-    */
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      *
@@ -124,14 +119,6 @@ public class AsyncBackend implements Backend, LifeCycle
     }
 
     /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return this.logger;
-    }
-
-    /**
      * Liefert die Anzahl der Worker-Threads.
      *
      * @return int
@@ -150,30 +137,11 @@ public class AsyncBackend implements Backend, LifeCycle
     }
 
     /**
-     * @see de.freese.jsensors.LifeCycle#isStarted()
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
      */
     @Override
-    public boolean isStarted()
+    protected void saveImpl(final SensorValue sensorValue)
     {
-        return !this.workers.isEmpty();
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.backend.SensorValue)
-     */
-    @Override
-    public void save(final SensorValue sensorValue)
-    {
-        if (sensorValue == null)
-        {
-            return;
-        }
-
-        if (!isStarted())
-        {
-            getLogger().error("Backend stopped, SensorValue discarted");
-        }
-
         getQueue().add(sensorValue);
     }
 
@@ -211,10 +179,14 @@ public class AsyncBackend implements Backend, LifeCycle
     @Override
     public void start()
     {
+        super.start();
+
         if (getDelegate() == null)
         {
             throw new NullPointerException("delegate Backend required");
         }
+
+        getDelegate().start();
 
         for (int i = 1; i <= getNumberOfWorkers(); i++)
         {
@@ -233,6 +205,25 @@ public class AsyncBackend implements Backend, LifeCycle
     @Override
     public void stop()
     {
+        super.stop();
+
         this.workers.forEach(w -> w.shutdown());
+
+        // Save last SensorValues.
+        if (!getQueue().isEmpty())
+        {
+            getLogger().info("save last sensorvalues");
+
+            SensorValue sv = null;
+
+            while ((sv = getQueue().poll()) != null)
+            {
+                getDelegate().save(sv);
+            }
+        }
+
+        this.workers.clear();
+
+        getDelegate().stop();
     }
 }

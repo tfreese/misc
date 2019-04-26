@@ -7,8 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.backend.SensorValue;
 
 /**
  * Basis-implementierung eines Sensors.

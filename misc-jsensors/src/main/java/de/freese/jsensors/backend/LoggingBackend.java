@@ -3,13 +3,14 @@ package de.freese.jsensors.backend;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jsensors.SensorValue;
 
 /**
  * {@link Backend} für die Ausgabe der Sensorwerte auf der Logger-Console.
  *
  * @author Thomas Freese
  */
-public class LoggingBackend implements Backend
+public class LoggingBackend extends AbstractBackend
 {
     /**
     *
@@ -25,18 +26,19 @@ public class LoggingBackend implements Backend
     }
 
     /**
-     * @return {@link Logger}
+     * @see de.freese.jsensors.backend.AbstractBackend#getLogger()
      */
-    public Logger getLogger()
+    @Override
+    protected Logger getLogger()
     {
         return this.logger;
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#save(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
      */
     @Override
-    public void save(final SensorValue sensorValue)
+    protected void saveImpl(final SensorValue sensorValue)
     {
         getLogger().info("{}", sensorValue);
     }

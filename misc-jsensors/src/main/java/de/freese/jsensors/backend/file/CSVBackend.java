@@ -1,11 +1,10 @@
 // Created: 31.05.2017
-package de.freese.jsensors.backend;
+package de.freese.jsensors.backend.file;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
 
 /**
@@ -26,18 +25,16 @@ public class CSVBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
      */
+    @SuppressWarnings("resource")
     @Override
     protected void saveImpl(final SensorValue sensorValue)
     {
-        // "csv.zip"
-        Path path = getBasePath().resolve(sensorValue.getName() + ".csv");
-
-        // GZIPOutputStream
-        // ZipOutputStream
-        try (PrintStream ps = new PrintStream(Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND)))
+        try
         {
+            PrintStream ps = getPrintStream(sensorValue.getName() + ".csv", true);
+
             ps.format("%d;%s%n", sensorValue.getTimestamp(), sensorValue.getValue());
         }
         catch (IOException ioex)

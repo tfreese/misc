@@ -1,5 +1,5 @@
 // Created: 07.12.2017
-package de.freese.jsensors.backend;
+package de.freese.jsensors;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

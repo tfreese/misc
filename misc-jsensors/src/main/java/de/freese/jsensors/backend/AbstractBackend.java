@@ -1,101 +1,31 @@
 // Created: 31.05.2017
 package de.freese.jsensors.backend;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import de.freese.jsensors.SensorValue;
 
 /**
  * Basis-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractBackend implements Backend, InitializingBean
+public abstract class AbstractBackend implements Backend
 {
-    /**
-     * @author Thomas Freese
-     */
-    private class QueueWorker extends Thread
-    {
-        /**
-         *
-         */
-        private boolean isShutdown = false;
-
-        /**
-         * Erzeugt eine neue Instanz von {@link QueueWorker}.
-         */
-        private QueueWorker()
-        {
-            super();
-        }
-
-        /**
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run()
-        {
-            while (!Thread.interrupted())
-            {
-                try
-                {
-                    SensorValue sensorValue = getQueue().take();
-
-                    getLogger().debug("{}", sensorValue);
-
-                    if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
-                    {
-                        return;
-                    }
-
-                    saveImpl(sensorValue);
-                }
-                catch (Exception ex)
-                {
-                    getLogger().error(null, ex);
-                }
-
-                if (this.isShutdown)
-                {
-                    break;
-                }
-            }
-        }
-
-        /**
-         *
-         */
-        void shutdown()
-        {
-            interrupt();
-            this.isShutdown = true;
-        }
-    }
-
     /**
     *
     */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-    *
-    */
-    private final BlockingQueue<SensorValue> queue = new LinkedBlockingQueue<>();
+     *
+     */
+    private boolean started = false;
 
     /**
      *
      */
-    private final List<QueueWorker> workers = new ArrayList<>();
-
-    /**
-     * Wert für feste Anzahl von WorkerThreads.<br>
-     */
-    private final int workerThreads = 1;
+    private boolean stopped = false;
 
     /**
      * Erzeugt eine neue Instanz von {@link AbstractBackend}.
@@ -103,15 +33,6 @@ public abstract class AbstractBackend implements Backend, InitializingBean
     public AbstractBackend()
     {
         super();
-    }
-
-    /**
-     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-     */
-    @Override
-    public final void afterPropertiesSet() throws Exception
-    {
-        initialize();
     }
 
     /**
@@ -123,46 +44,48 @@ public abstract class AbstractBackend implements Backend, InitializingBean
     }
 
     /**
-     * @return {@link BlockingQueue}
+     * @see de.freese.jsensors.LifeCycle#isStarted()
      */
-    private BlockingQueue<SensorValue> getQueue()
+    @Override
+    public boolean isStarted()
     {
-        return this.queue;
+        return this.started;
     }
 
     /**
-     * Initialisierung des Backends.
-     *
-     * @throws Exception Falls was schief geht.
+     * @return boolean
      */
-    protected void initialize() throws Exception
+    protected boolean isStopped()
     {
-        if (this.workerThreads > 0)
-        {
-            for (int i = 1; i <= this.workerThreads; i++)
-            {
-                QueueWorker worker = new QueueWorker();
-                worker.setName(getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
-                worker.setDaemon(true);
-
-                this.workers.add(worker);
-                worker.start();
-            }
-        }
+        return this.stopped;
     }
 
     /**
-     * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.SensorValue)
      */
     @Override
     public void save(final SensorValue sensorValue)
     {
         if (sensorValue == null)
         {
+            getLogger().warn("sensorvalue is null");
             return;
         }
 
-        getQueue().add(sensorValue);
+        if (isStopped())
+        {
+            // throw new IllegalStateException("backend already stopped, sensorvalue discarted");
+            getLogger().error("backend already stopped, sensorvalue discarted");
+            return;
+        }
+
+        if (!isStarted())
+        {
+            getLogger().error("backend not started started, sensorvalue discarted");
+            return;
+        }
+
+        saveImpl(sensorValue);
     }
 
     /**
@@ -171,4 +94,45 @@ public abstract class AbstractBackend implements Backend, InitializingBean
      * @param sensorValue {@link SensorValue}
      */
     protected abstract void saveImpl(SensorValue sensorValue);
+
+    /**
+     * @see de.freese.jsensors.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        getLogger().info("starting backend");
+
+        if (isStarted())
+        {
+            // throw new IllegalStateException("backend already started");
+            getLogger().error("backend already started");
+            return;
+        }
+
+        if (isStopped())
+        {
+            getLogger().error("backend already stopped");
+            return;
+        }
+
+        this.started = true;
+    }
+
+    /**
+     * @see de.freese.jsensors.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        getLogger().info("stopping backend");
+
+        if (isStopped())
+        {
+            getLogger().error("backend already stopped");
+            return;
+        }
+
+        this.stopped = true;
+    }
 }

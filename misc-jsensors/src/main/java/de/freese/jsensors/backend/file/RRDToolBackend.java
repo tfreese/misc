@@ -1,5 +1,5 @@
 // Created: 31.05.2017
-package de.freese.jsensors.backend;
+package de.freese.jsensors.backend.file;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.Utils;
+import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
 
 /**
@@ -75,12 +77,12 @@ public class RRDToolBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.backend.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
      */
     @Override
     protected void saveImpl(final SensorValue sensorValue)
     {
-        Path path = getBasePath().resolve(sensorValue.getName() + ".rrd");
+        Path path = getDirectory().resolve(sensorValue.getName() + ".rrd");
         String pathString = path.toString();
 
         try
