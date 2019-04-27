@@ -25,11 +25,6 @@ public class AsyncBackend extends AbstractBackend
     private class QueueWorker extends Thread
     {
         /**
-         *
-         */
-        private boolean isShutdown = false;
-
-        /**
          * Erzeugt eine neue Instanz von {@link QueueWorker}.
          */
         private QueueWorker()
@@ -43,7 +38,8 @@ public class AsyncBackend extends AbstractBackend
         @Override
         public void run()
         {
-            while (!Thread.interrupted())
+            // while (!Thread.interrupted())
+            while (!isStopped())
             {
                 try
                 {
@@ -53,32 +49,22 @@ public class AsyncBackend extends AbstractBackend
 
                     if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
                     {
-                        return;
+                        continue;
                     }
 
                     getDelegate().save(sensorValue);
+                }
+                catch (InterruptedException iex)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {
                     getLogger().error(null, ex);
                 }
-
-                if (this.isShutdown)
-                {
-                    break;
-                }
             }
 
             getLogger().debug("terminated");
-        }
-
-        /**
-         *
-         */
-        void shutdown()
-        {
-            this.isShutdown = true;
-            interrupt();
         }
     }
 
@@ -137,10 +123,10 @@ public class AsyncBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveImpl(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue)
     {
         getQueue().add(sensorValue);
     }
@@ -191,7 +177,7 @@ public class AsyncBackend extends AbstractBackend
         for (int i = 1; i <= getNumberOfWorkers(); i++)
         {
             QueueWorker worker = new QueueWorker();
-            worker.setName(getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
+            worker.setName(getDelegate().getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
             worker.setDaemon(true);
 
             this.workers.add(worker);
@@ -207,7 +193,7 @@ public class AsyncBackend extends AbstractBackend
     {
         super.stop();
 
-        this.workers.forEach(w -> w.shutdown());
+        this.workers.forEach(w -> w.interrupt());
 
         // Save last SensorValues.
         if (!getQueue().isEmpty())

@@ -1,7 +1,7 @@
 // Created: 12.05.2017
 package de.freese.jsensors.backend;
 
-import ch.qos.logback.core.spi.LifeCycle;
+import de.freese.jsensors.LifeCycle;
 import de.freese.jsensors.SensorValue;
 
 /**

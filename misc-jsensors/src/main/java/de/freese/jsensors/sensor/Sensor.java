@@ -2,7 +2,7 @@
 package de.freese.jsensors.sensor;
 
 import java.util.List;
-
+import de.freese.jsensors.LifeCycle;
 import de.freese.jsensors.backend.Backend;
 
 /**
@@ -11,7 +11,7 @@ import de.freese.jsensors.backend.Backend;
  *
  * @author Thomas Freese
  */
-public interface Sensor
+public interface Sensor extends LifeCycle
 {
     /**
      * Messen des Wertes.

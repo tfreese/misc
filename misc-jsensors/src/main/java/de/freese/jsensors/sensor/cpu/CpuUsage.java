@@ -3,7 +3,6 @@ package de.freese.jsensors.sensor.cpu;
 
 import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
-
 import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
 
@@ -22,7 +21,7 @@ public class CpuUsage extends AbstractSensor
     /**
      *
      */
-    private JavaSysMon monitor = null;
+    private final JavaSysMon monitor;
 
     /**
      * Erzeugt eine neue Instanz von {@link CpuUsage}.
@@ -30,6 +29,10 @@ public class CpuUsage extends AbstractSensor
     public CpuUsage()
     {
         super();
+
+        this.monitor = new JavaSysMon();
+
+        this.cpuTimesPrevious = this.monitor.cpuTimes();
     }
 
     // /**
@@ -48,19 +51,6 @@ public class CpuUsage extends AbstractSensor
     //
     // return value;
     // }
-
-    /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#initialize()
-     */
-    @Override
-    protected void initialize() throws Exception
-    {
-        super.initialize();
-
-        this.monitor = new JavaSysMon();
-
-        this.cpuTimesPrevious = this.monitor.cpuTimes();
-    }
 
     /**
      * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()

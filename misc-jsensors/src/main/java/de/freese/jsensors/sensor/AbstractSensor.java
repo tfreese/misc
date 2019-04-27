@@ -6,7 +6,6 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanNameAware;
-import org.springframework.beans.factory.InitializingBean;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -15,7 +14,7 @@ import de.freese.jsensors.backend.Backend;
  *
  * @author Thomas Freese
  */
-public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNameAware
+public abstract class AbstractSensor implements Sensor, BeanNameAware
 {
     /**
      *
@@ -38,15 +37,6 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
     public AbstractSensor()
     {
         super();
-    }
-
-    /**
-     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-     */
-    @Override
-    public final void afterPropertiesSet() throws Exception
-    {
-        initialize();
     }
 
     /**
@@ -73,16 +63,6 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
     protected String getName()
     {
         return this.name;
-    }
-
-    /**
-     * Initialisierung des Sensors.
-     *
-     * @throws Exception Falls was schief geht.
-     */
-    protected void initialize() throws Exception
-    {
-        // Empty
     }
 
     /**
@@ -165,5 +145,23 @@ public abstract class AbstractSensor implements Sensor, InitializingBean, BeanNa
         Objects.requireNonNull(name, "name required");
 
         this.name = name;
+    }
+
+    /**
+     * @see de.freese.jsensors.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        // NOOP
+    }
+
+    /**
+     * @see de.freese.jsensors.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        // NOOP
     }
 }

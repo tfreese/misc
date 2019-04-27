@@ -71,7 +71,7 @@ public abstract class AbstractFileBackend extends AbstractBackend
 
             if (buffered)
             {
-                os = new BufferedOutputStream(os, 1024);
+                os = new BufferedOutputStream(os, 256);
             }
 
             this.outputStreams.put(file, os);

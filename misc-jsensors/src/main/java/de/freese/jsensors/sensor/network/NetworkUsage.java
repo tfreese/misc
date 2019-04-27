@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
 import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
 
@@ -38,17 +37,6 @@ public class NetworkUsage extends AbstractSensor
     }
 
     /**
-     * Setzt das zu beobachtende Netzwerk-Interfrace.<br>
-     * Nur für Linux relevant.
-     *
-     * @param iFace String; optional
-     */
-    public void setInterface(final String iFace)
-    {
-        this.interfaces.add(iFace);
-    }
-
-    /**
      * Ausgabe von "ifconfig".<br>
      *
      * @return String[]; Index 0=Input, 1=Output
@@ -71,8 +59,7 @@ public class NetworkUsage extends AbstractSensor
             // ArchLinux:
             // RX packets 32997 bytes 46685918 (44.5 MiB)
             // TX packets 15894 bytes 1288395 (1.2 MiB)
-            input += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("RX packets")).mapToLong(l ->
-            {
+            input += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("RX packets")).mapToLong(l -> {
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
@@ -80,8 +67,7 @@ public class NetworkUsage extends AbstractSensor
                 return value;
             }).findFirst().orElse(0L);
 
-            output += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("TX packets")).mapToLong(l ->
-            {
+            output += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("TX packets")).mapToLong(l -> {
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
@@ -125,25 +111,6 @@ public class NetworkUsage extends AbstractSensor
     }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#initialize()
-     */
-    @Override
-    protected void initialize() throws Exception
-    {
-        super.initialize();
-
-        if (Utils.isLinux() && this.interfaces.isEmpty())
-        {
-            // Kein Interface angegeben -> alle ermitteln ausser "lo".
-            // Beispiel: em1 lo wlp6so
-            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
-
-            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo"))
-                    .forEach(this.interfaces::add);
-        }
-    }
-
-    /**
      * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
      */
     @Override
@@ -171,5 +138,34 @@ public class NetworkUsage extends AbstractSensor
 
         save(bytesInput, timeStamp, getName() + "-in");
         save(bytesOutput, timeStamp, getName() + "-out");
+    }
+
+    /**
+     * Setzt das zu beobachtende Netzwerk-Interfrace.<br>
+     * Nur für Linux relevant.
+     *
+     * @param iFace String; optional
+     */
+    public void setInterface(final String iFace)
+    {
+        this.interfaces.add(iFace);
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.AbstractSensor#start()
+     */
+    @Override
+    public void start()
+    {
+        super.start();
+
+        if (Utils.isLinux() && this.interfaces.isEmpty())
+        {
+            // Kein Interface angegeben -> alle ermitteln ausser "lo".
+            // Beispiel: em1 lo wlp6so
+            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
+
+            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+        }
     }
 }

@@ -3,7 +3,6 @@ package de.freese.jsensors.sensor.memory;
 
 import com.jezhumble.javasysmon.JavaSysMon;
 import com.jezhumble.javasysmon.MemoryStats;
-
 import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
 
@@ -17,7 +16,7 @@ public class MemoryUsage extends AbstractSensor
     /**
      *
      */
-    private JavaSysMon monitor = null;
+    private final JavaSysMon monitor;
 
     /**
      * Erzeugt eine neue Instanz von {@link MemoryUsage}.
@@ -25,15 +24,6 @@ public class MemoryUsage extends AbstractSensor
     public MemoryUsage()
     {
         super();
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#initialize()
-     */
-    @Override
-    protected void initialize() throws Exception
-    {
-        super.initialize();
 
         this.monitor = new JavaSysMon();
     }

@@ -3,9 +3,7 @@ package de.freese.jsensors.sensor.disk;
 
 import java.io.File;
 import java.util.Objects;
-
 import javax.swing.filechooser.FileSystemView;
-
 import de.freese.jsensors.sensor.AbstractSensor;
 
 /**
@@ -36,15 +34,6 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     public AbstractDiskSensor()
     {
         super();
-
-    }
-
-    /**
-     * @param disk String
-     */
-    public void setDisk(final String disk)
-    {
-        this.disk = Objects.requireNonNull(disk, "disk required");
     }
 
     /**
@@ -64,12 +53,20 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#initialize()
+     * @param disk String
+     */
+    public void setDisk(final String disk)
+    {
+        this.disk = Objects.requireNonNull(disk, "disk required");
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.AbstractSensor#start()
      */
     @Override
-    protected void initialize() throws Exception
+    public void start()
     {
-        super.initialize();
+        super.start();
 
         if ((this.disk == null) || this.disk.isEmpty())
         {

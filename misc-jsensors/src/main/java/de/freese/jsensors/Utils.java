@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Util-Klasse.
@@ -24,42 +26,55 @@ public class Utils
     /**
      *
      */
+    private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
+
+    /**
+     *
+     */
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
     /**
      * Ausführen eines OS-Commands über {@link Process}.<br>
-     * Leerzeilen werden bei der Ausgabe entfernt.
+     * Leerzeilen werden bei der Ausgabe entfernt.<br>
+     * Bei Exceptions wird eine leere Liste geliefert.
      *
      * @param command String[]
      * @return {@link List}
-     * @throws Exception Falls was schief geht.
      */
-    public static List<String> executeCommand(final String...command) throws Exception
+    public static List<String> executeCommand(final String...command)
     {
-        // @formatter:off
-        Process process = new ProcessBuilder()
-                //.command("ipconfig", "/all")
-                .command(command)
-                .redirectErrorStream(true)
-                .start();
-        // @formatter:on
-
-        Charset charset = StandardCharsets.UTF_8;
         List<String> list = null;
 
-        // try (InputStreamReader isr = new InputStreamReader(process.getInputStream()))
-        // {
-        // System.out.println(isr.getEncoding());
-        // }
-        try (BufferedReader readerIn = new BufferedReader(new InputStreamReader(process.getInputStream(), charset)))
+        try
         {
-            list = readerIn.lines().filter(l -> !l.isEmpty()).collect(Collectors.toList());
+            // @formatter:off
+            Process process = new ProcessBuilder()
+                    //.command("ipconfig", "/all")
+                    .command(command)
+                    .redirectErrorStream(true)
+                    .start();
+            // @formatter:on
+
+            Charset charset = StandardCharsets.UTF_8;
+
+            // try (InputStreamReader isr = new InputStreamReader(process.getInputStream()))
+            // {
+            // System.out.println(isr.getEncoding());
+            // }
+            try (BufferedReader readerIn = new BufferedReader(new InputStreamReader(process.getInputStream(), charset)))
+            {
+                list = readerIn.lines().filter(l -> !l.isEmpty()).collect(Collectors.toList());
+            }
+
+            // list.forEach(System.out::println);
+
+            process.waitFor();
+            process.destroy();
         }
-
-        // list.forEach(System.out::println);
-
-        process.waitFor();
-        process.destroy();
+        catch (Exception ex)
+        {
+            LOGGER.error(null, ex);
+        }
 
         return list;
     }

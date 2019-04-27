@@ -14,27 +14,33 @@
 	<bean id="loggingBackend" class="de.freese.jsensors.backend.LoggingBackend" init-method="start" destroy-method="stop">
 	</bean>
 
-	<bean id="csvBackend" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
+	<bean id="csvSyncBackend" class="de.freese.jsensors.backend.file.CSVBackend">
 		<property name="directory" value="${jsensors.home}/backend/csv" />
 	</bean>
-	<!--bean id="rrdBackend" class="de.freese.jsensors.backend.file.RRDToolBackend" init-method="start" destroy-method="stop">
-		<property name="basePath" value="${jsensors.home}/backend/rrd"/>
-		</bean -->
+	<bean id="csvBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
+		<property name="delegate" ref="csvSyncBackend" />
+	</bean>		
+	<!--bean id="csvBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
+		<property name="delegate" ref="csvSyncBackend" />
+		<property name="executorService" ref="executorService" />
+	</bean-->	
 
-	<!-- ;shutdown=true -->
-	<!--bean id="datasource" class="org.hsqldb.jdbc.JDBCDataSource">
-		<property name="url" value="jdbc:hsqldb:file:${user.home}/.jsensors/backend/jdbc/hsqldb;shutdown=true"/>
-		<property name="user" value="sa"/>
-		<property name="password" value=""/>
-		</bean -->
-	<bean id="jdbcBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend" init-method="start" destroy-method="stop">
+	<bean id="jdbcSyncBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
+	<bean id="jdbcBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
+		<property name="delegate" ref="jdbcSyncBackend" />
+		<property name="numberOfWorkers" value="3" />
+	</bean>	
+	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
+		<property name="delegate" ref="jdbcSyncBackend" />
+		<property name="executorService" ref="executorService" />
+	</bean-->			
 
 	<!-- Sensoren konfigurieren -->
 	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
 	<!--constructor-arg index="0" value="test4" / -->
-	<bean id="diskFreeC" class="de.freese.jsensors.sensor.disk.DiskFreeSpace">
+	<bean id="diskFreeC" class="de.freese.jsensors.sensor.disk.DiskFreeSpace" init-method="start" destroy-method="stop">
 		<property name="disk" value="C:\" />
 		<property name="backends">
 			<list>
@@ -44,7 +50,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="diskUsageC" class="de.freese.jsensors.sensor.disk.DiskUsage">
+	<bean id="diskUsageC" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
 		<property name="disk" value="C:\" />
 		<property name="backends">
 			<list>
@@ -54,7 +60,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="diskFreeRoot" class="de.freese.jsensors.sensor.disk.DiskFreeSpace">
+	<bean id="diskFreeRoot" class="de.freese.jsensors.sensor.disk.DiskFreeSpace" init-method="start" destroy-method="stop">
 		<property name="disk" value="/" />
 		<property name="backends">
 			<list>
@@ -64,7 +70,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage">
+	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
 		<property name="disk" value="/" />
 		<property name="backends">
 			<list>
@@ -74,7 +80,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage">
+	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
 				<ref bean="loggingBackend" />
@@ -83,7 +89,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage">
+	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
 				<ref bean="loggingBackend" />
@@ -92,7 +98,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage">
+	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
 				<ref bean="loggingBackend" />
@@ -101,7 +107,7 @@
 			</list>
 		</property>
 	</bean>
-	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage">
+	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
 				<ref bean="loggingBackend" />

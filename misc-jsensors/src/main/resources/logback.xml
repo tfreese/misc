@@ -48,7 +48,7 @@
         <file>${log.dir}/jsensors.log</file>
         <append>true</append>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.dir}/%d{yyyy-MM,aux}/jsensors.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>${log.dir}/%d{yyyy-MM, aux}/jsensors.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>

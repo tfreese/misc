@@ -65,9 +65,7 @@ public class HsqldbServerAutoConfiguration
 
     /**
      * @param hsqldbServerProperties {@link HsqldbServerProperties}
-     *
      * @return {@link Server}
-     *
      * @throws Exception Falls was schief geht.
      */
     @Bean(initMethod = "start", destroyMethod = "shutdown")
@@ -81,7 +79,7 @@ public class HsqldbServerAutoConfiguration
         List<HsqldbServerProperties.DB> dbs = hsqldbServerProperties.getDb();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Create HsqldbServer with:");
+        sb.append("Create Embedded-HsqldbServer with:");
         sb.append(" port={}");
         sb.append(", noSystemExit={}");
         sb.append(", silent={}");
@@ -98,10 +96,11 @@ public class HsqldbServerAutoConfiguration
             @Override
             public void shutdown()
             {
+                LOGGER.info("Shutdown Embedded-HsqldbServer");
+
                 // "SHUTDOWN COMPACT"
                 super.shutdownWithCatalogs(Database.CLOSEMODE_COMPACT);
             }
-
         };
         server.setLogWriter(null); // can use custom writer
         server.setErrWriter(null); // can use custom writer

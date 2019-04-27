@@ -42,15 +42,26 @@ public class SensorValue
      *
      * @param name String
      * @param value String
+     */
+    public SensorValue(final String name, final String value)
+    {
+        this(name, value, System.currentTimeMillis());
+    }
+
+    /**
+     * Erzeugt eine neue Instanz von {@link SensorValue}.
+     *
+     * @param name String
+     * @param value String
      * @param timestamp long
      */
     public SensorValue(final String name, final String value, final long timestamp)
     {
         super();
 
-        this.name = Objects.requireNonNull(name, "name rrequired");
-        this.value = Objects.requireNonNull(value, "value rrequired");
-        this.timestamp = timestamp <= 0 ? System.currentTimeMillis() : timestamp;
+        this.name = Objects.requireNonNull(name, "name required");
+        this.value = Objects.requireNonNull(value, "value required");
+        this.timestamp = timestamp;
     }
 
     /**

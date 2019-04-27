@@ -25,11 +25,11 @@ public class CSVBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @SuppressWarnings("resource")
     @Override
-    protected void saveImpl(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue)
     {
         try
         {

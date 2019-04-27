@@ -4,6 +4,8 @@ package de.freese.jsensors.spring;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -28,56 +30,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 @ImportResource("classpath:sensors.xml")
 public class ApplicationConfig
 {
-    // /**
-    // * Liefert den {@link ExecutorService} des Backends.
-    // *
-    // * @param backend String
-    // * @return {@link ExecutorService}
-    // */
-    // public static ExecutorService getExecutorServiceForBackend(final String backend)
-    // {
-    // ExecutorService es = null;
-    // // es = SpringContext.getExecutorService();
-    //
-    // String beanID = backend + "_executorService";
-    //
-    // if (!SpringContext.containsBean(beanID))
-    // {
-    // ThreadPoolExecutorFactoryBean bean = createDefaultExecutorService(backend + "-");
-    // bean.setBeanName(beanID);
-    //
-    // bean.afterPropertiesSet();
-    // SpringContext.registerSingleton(beanID, bean);
-    // }
-    //
-    // es = SpringContext.getBean(beanID, ExecutorService.class);
-    //
-    // return es;
-    // }
-
     /**
-     * @param threadNamePrefix String
-     * @return {@link ThreadPoolExecutorFactoryBean}
-     */
-    private static ThreadPoolExecutorFactoryBean createDefaultExecutorService(final String threadNamePrefix)
-    {
-        int coreSize = Runtime.getRuntime().availableProcessors();
-        int maxSize = coreSize * 2;
-        int queueSize = maxSize;
-
-        ThreadPoolExecutorFactoryBean bean = new ThreadPoolExecutorFactoryBean();
-        bean.setCorePoolSize(coreSize);
-        bean.setMaxPoolSize(maxSize);
-        bean.setKeepAliveSeconds(60);
-        bean.setQueueCapacity(queueSize);
-        bean.setThreadPriority(Thread.NORM_PRIORITY);
-        bean.setThreadNamePrefix(threadNamePrefix);
-        bean.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-        bean.setAllowCoreThreadTimeOut(true);
-        bean.setExposeUnconfigurableExecutor(true);
-
-        return bean;
-    }
+    *
+    */
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfig.class);
 
     /**
      * Erzeugt eine neue Instanz von {@link ApplicationConfig}
@@ -92,50 +48,25 @@ public class ApplicationConfig
      */
     @Bean
     @Primary
+    @ConditionalOnMissingBean(ExecutorService.class)
     public ThreadPoolExecutorFactoryBean executorService()
     {
-        ThreadPoolExecutorFactoryBean bean = createDefaultExecutorService("thread-");
+        LOGGER.info("no ExecutorService exist, create a ExecutorService");
 
-        return bean;
-    }
+        int coreSize = Runtime.getRuntime().availableProcessors();
+        int maxSize = coreSize * 2;
+        int queueSize = maxSize;
 
-    /**
-     * @return {@link ThreadPoolExecutorFactoryBean}
-     */
-    @Bean
-    public ThreadPoolExecutorFactoryBean executorServiceCsv()
-    {
-        ThreadPoolExecutorFactoryBean bean = createDefaultExecutorService("thread-csv-");
-        bean.setCorePoolSize(1);
-        bean.setMaxPoolSize(2);
-        bean.setKeepAliveSeconds(600);
-        bean.setQueueCapacity(100);
-
-        return bean;
-    }
-
-    /**
-     * @return {@link ThreadPoolExecutorFactoryBean}
-     */
-    @Bean
-    public ThreadPoolExecutorFactoryBean executorServiceJdbc()
-    {
-        ThreadPoolExecutorFactoryBean bean = createDefaultExecutorService("thread-jdbc-");
-
-        return bean;
-    }
-
-    /**
-     * @return {@link ThreadPoolExecutorFactoryBean}
-     */
-    @Bean
-    public ThreadPoolExecutorFactoryBean executorServiceRrd()
-    {
-        ThreadPoolExecutorFactoryBean bean = createDefaultExecutorService("thread-rrd-");
-        bean.setCorePoolSize(1);
-        bean.setMaxPoolSize(2);
-        bean.setKeepAliveSeconds(600);
-        bean.setQueueCapacity(100);
+        ThreadPoolExecutorFactoryBean bean = new ThreadPoolExecutorFactoryBean();
+        bean.setCorePoolSize(coreSize);
+        bean.setMaxPoolSize(maxSize);
+        bean.setKeepAliveSeconds(60);
+        bean.setQueueCapacity(queueSize);
+        bean.setThreadPriority(Thread.NORM_PRIORITY);
+        bean.setThreadNamePrefix("task-");
+        bean.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+        bean.setAllowCoreThreadTimeOut(true);
+        bean.setExposeUnconfigurableExecutor(true);
 
         return bean;
     }
@@ -144,9 +75,11 @@ public class ApplicationConfig
      * @return {@link ScheduledExecutorFactoryBean}
      */
     @Bean
-    // @Primary
+    @ConditionalOnMissingBean(ScheduledExecutorService.class)
     public ScheduledExecutorFactoryBean scheduledExecutorService()
     {
+        LOGGER.info("no ScheduledExecutorService exist, create a ScheduledExecutorService");
+
         int poolSize = Runtime.getRuntime().availableProcessors();
 
         ScheduledExecutorFactoryBean bean = new ScheduledExecutorFactoryBean();
@@ -165,13 +98,12 @@ public class ApplicationConfig
      * @param executorService {@link ExecutorService}
      * @return {@link AsyncTaskExecutor}
      */
-    @Bean(
-    {
-            "taskExecutor", "asyncTaskExecutor"
-    })
+    @Bean("taskExecutor")
     @ConditionalOnMissingBean(AsyncTaskExecutor.class)
     public AsyncTaskExecutor springTaskExecutor(@Qualifier("executorService") final ExecutorService executorService)
     {
+        LOGGER.info("no TaskExecutor exist, create a ConcurrentTaskExecutor");
+
         AsyncTaskExecutor bean = new ConcurrentTaskExecutor(executorService);
 
         return bean;
@@ -189,6 +121,8 @@ public class ApplicationConfig
     public TaskScheduler springTaskScheduler(@Qualifier("executorService") final ExecutorService executorService,
                                              final ScheduledExecutorService scheduledExecutorService)
     {
+        LOGGER.info("no TaskScheduler exist, create a ConcurrentTaskScheduler");
+
         TaskScheduler bean = new ConcurrentTaskScheduler(executorService, scheduledExecutorService);
 
         return bean;

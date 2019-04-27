@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.context.event.ApplicationContextEvent;
 import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 
@@ -20,7 +22,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @Profile("HsqldbEmbeddedServer")
 @PropertySources(@PropertySource("classpath:hikari-pool.properties"))
-public class HsqldbEmbeddedServerConfig implements ApplicationListener<ContextClosedEvent> // , DisposableBean
+public class HsqldbEmbeddedServerConfig implements ApplicationListener<ApplicationContextEvent>
 {
     /**
      *
@@ -50,9 +52,20 @@ public class HsqldbEmbeddedServerConfig implements ApplicationListener<ContextCl
      * @see org.springframework.context.ApplicationListener#onApplicationEvent(org.springframework.context.ApplicationEvent)
      */
     @Override
-    public void onApplicationEvent(final ContextClosedEvent event)
+    public void onApplicationEvent(final ApplicationContextEvent event)
     {
-        LOGGER.info("ContextClosedEvent");
+        if (event instanceof ContextStartedEvent)
+        {
+            LOGGER.info("ContextStartedEvent");
+        }
+        else if (event instanceof ContextClosedEvent)
+        {
+            LOGGER.info("ContextClosedEvent");
+        }
+        else
+        {
+            LOGGER.info(event.getClass().getSimpleName());
+        }
 
         // Spring schickt dieses Event am Anfang des Shutdowns, das wäre zu früh für den HSQLDB Server.
         // Beans werden in umgekehrter Reihenfolge ihrere Erzeugung zerstört.

@@ -44,10 +44,9 @@ public abstract class AbstractBackend implements Backend
     }
 
     /**
-     * @see de.freese.jsensors.LifeCycle#isStarted()
+     * @return boolean
      */
-    @Override
-    public boolean isStarted()
+    protected boolean isStarted()
     {
         return this.started;
     }
@@ -85,7 +84,7 @@ public abstract class AbstractBackend implements Backend
             return;
         }
 
-        saveImpl(sensorValue);
+        saveValue(sensorValue);
     }
 
     /**
@@ -93,7 +92,7 @@ public abstract class AbstractBackend implements Backend
      *
      * @param sensorValue {@link SensorValue}
      */
-    protected abstract void saveImpl(SensorValue sensorValue);
+    protected abstract void saveValue(SensorValue sensorValue);
 
     /**
      * @see de.freese.jsensors.LifeCycle#start()

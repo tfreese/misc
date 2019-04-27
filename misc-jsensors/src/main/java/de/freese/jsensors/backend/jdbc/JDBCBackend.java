@@ -101,10 +101,10 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveImpl(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveImpl(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue)
     {
         String tableName = Utils.sensorNameToTableName(sensorValue.getName());
 
