@@ -23,6 +23,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class HTTPServerMultiThread
         @Override
         public void run()
         {
-            Thread currentThread = Thread.currentThread();
+            final Thread currentThread = Thread.currentThread();
             String oldName = currentThread.getName();
 
             setName(currentThread, this.runnableName);
@@ -439,7 +440,19 @@ public class HTTPServerMultiThread
             // Wait a while for existing tasks to terminate.
             if (!executorService.awaitTermination(10, TimeUnit.SECONDS))
             {
-                executorService.shutdownNow(); // Cancel currently executing tasks
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Timed out while waiting for executorService");
+                }
+
+                // Cancel currently executing tasks.
+                for (Runnable remainingTask : executorService.shutdownNow())
+                {
+                    if (remainingTask instanceof Future)
+                    {
+                        ((Future<?>) remainingTask).cancel(true);
+                    }
+                }
 
                 // Wait a while for tasks to respond to being cancelled
                 if (!executorService.awaitTermination(5, TimeUnit.SECONDS))
@@ -450,10 +463,15 @@ public class HTTPServerMultiThread
         }
         catch (InterruptedException iex)
         {
-            // (Re-)Cancel if current thread also interrupted
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("Interrupted while waiting for executorService");
+            }
+
+            // (Re-)Cancel if current thread also interrupted.
             executorService.shutdownNow();
 
-            // Preserve interrupt status
+            // Preserve interrupt status.
             Thread.currentThread().interrupt();
         }
     }

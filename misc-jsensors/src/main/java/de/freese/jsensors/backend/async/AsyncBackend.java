@@ -45,8 +45,6 @@ public class AsyncBackend extends AbstractBackend
                 {
                     SensorValue sensorValue = getQueue().take();
 
-                    getLogger().debug("{}", sensorValue);
-
                     if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
                     {
                         continue;

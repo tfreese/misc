@@ -84,6 +84,11 @@ public abstract class AbstractBackend implements Backend
             return;
         }
 
+        if (getLogger().isDebugEnabled())
+        {
+            getLogger().debug("{}", sensorValue);
+        }
+
         saveValue(sensorValue);
     }
 

@@ -312,28 +312,34 @@ public class HTTPServerAsynchronous
             // Wait a while for existing tasks to terminate.
             if (!channelGroup.awaitTermination(10, TimeUnit.SECONDS))
             {
-                channelGroup.shutdownNow(); // Cancel currently executing tasks
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Timed out while waiting for AsynchronousChannelGroup");
+                }
 
-                // Wait a while for tasks to respond to being cancelled
+                // Cancel currently executing tasks
+                channelGroup.shutdownNow();
+
+                // Wait a while for tasks to respond to being cancelled.
                 if (!channelGroup.awaitTermination(5, TimeUnit.SECONDS))
                 {
-                    logger.error("Pool did not terminate");
+                    logger.error("AsynchronousChannelGroup did not terminate");
                 }
             }
         }
         catch (InterruptedException | IOException ex)
         {
-            // (Re-)Cancel if current thread also interrupted
+            // (Re-)Cancel if current thread also interrupted.
             try
             {
                 channelGroup.shutdownNow();
             }
             catch (IOException ex2)
             {
-                logger.error("Pool did not terminate");
+                logger.error("AsynchronousChannelGroup did not terminate");
             }
 
-            // Preserve interrupt status
+            // Preserve interrupt status.
             Thread.currentThread().interrupt();
         }
     }

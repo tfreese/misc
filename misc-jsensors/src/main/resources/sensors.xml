@@ -11,31 +11,28 @@
 	<!--bean class="de.freese.jsensors.spring.SpringContext" / -->
 
 	<!-- Backends konfigurieren -->
-	<bean id="loggingBackend" class="de.freese.jsensors.backend.LoggingBackend" init-method="start" destroy-method="stop">
-	</bean>
-
 	<bean id="csvSyncBackend" class="de.freese.jsensors.backend.file.CSVBackend">
 		<property name="directory" value="${jsensors.home}/backend/csv" />
 	</bean>
-	<bean id="csvBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
+	<!--bean id="csvBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="csvSyncBackend" />
-	</bean>		
-	<!--bean id="csvBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
+	</bean-->		
+	<bean id="csvBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="csvSyncBackend" />
 		<property name="executorService" ref="executorService" />
-	</bean-->	
+	</bean>	
 
 	<bean id="jdbcSyncBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
-	<bean id="jdbcBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
+	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="jdbcSyncBackend" />
 		<property name="numberOfWorkers" value="3" />
-	</bean>	
-	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
+	</bean-->	
+	<bean id="jdbcBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="jdbcSyncBackend" />
 		<property name="executorService" ref="executorService" />
-	</bean-->			
+	</bean>			
 
 	<!-- Sensoren konfigurieren -->
 	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
@@ -44,7 +41,6 @@
 		<property name="disk" value="C:\" />
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -54,7 +50,6 @@
 		<property name="disk" value="C:\" />
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -64,7 +59,6 @@
 		<property name="disk" value="/" />
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -74,7 +68,6 @@
 		<property name="disk" value="/" />
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -83,7 +76,6 @@
 	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -92,7 +84,6 @@
 	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -101,7 +92,6 @@
 	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 			</list>
@@ -110,7 +100,6 @@
 	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage" init-method="start" destroy-method="stop">
 		<property name="backends">
 			<list>
-				<ref bean="loggingBackend" />
 				<ref bean="csvBackend" />
 				<ref bean="jdbcBackend" />
 				<!--ref bean="rrdBackend"/ -->

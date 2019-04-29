@@ -58,14 +58,23 @@ public class ExecutorBackend extends AbstractBackend
     protected void saveValue(final SensorValue sensorValue)
     {
         getExecutorService().execute(() -> {
-            getLogger().debug("{}", sensorValue);
-
             if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
             {
                 return;
             }
 
-            getDelegate().save(sensorValue);
+            final Thread currentThread = Thread.currentThread();
+            String oldName = currentThread.getName();
+            currentThread.setName("task-" + sensorValue.getName());
+
+            try
+            {
+                getDelegate().save(sensorValue);
+            }
+            finally
+            {
+                currentThread.setName(oldName);
+            }
         });
     }
 
