@@ -47,6 +47,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -507,10 +508,9 @@ public class Misc
         Thread.sleep(200);
         System.out.println();
 
-        // Scheduler scheduler = Schedulers.fromExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
-        Scheduler scheduler = Schedulers.elastic();
-        // Scheduler scheduler = Schedulers.parallel();
+        Scheduler scheduler = Schedulers.fromExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
         // subscribeOn(Scheduler scheduler)
+
         Flux.just("Test1", "Test2", "Test3", "Test4").parallel().runOn(scheduler).map(s -> s + s).subscribe(v -> {
             System.out.println(Thread.currentThread().getName() + ": " + v);
         });
