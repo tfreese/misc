@@ -10,9 +10,12 @@ import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -38,6 +41,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -95,6 +99,56 @@ public class Misc
             .forEach(System.out::println);
             //@formatter:on
         }
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    static void byteBuffer() throws Exception
+    {
+        CharsetEncoder encoder = StandardCharsets.UTF_8.newEncoder();
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+
+        String text = "Hello World !";
+        System.out.printf("Original: '%s'%n", text);
+
+        // To Base64
+        CharBuffer charBuffer = CharBuffer.allocate(128);
+        charBuffer.put(text);
+        charBuffer.flip();
+
+        // CharBuffer in UTF8 kodieren.
+        ByteBuffer byteBuffer = encoder.encode(charBuffer);
+
+        // Zwischen-Ausgabe -> flip() nicht vergessen zum Rücksetzen des ByteBuffers.
+        System.out.printf("ByteBuffer after encode: '%s'%n", StandardCharsets.UTF_8.decode(byteBuffer).toString());
+        byteBuffer.flip();
+
+        // ByteBuffer in Base64 umwandeln.
+        byteBuffer = Base64.getEncoder().encode(byteBuffer);
+
+        // ByteBuffer mit UTF8 in CharBuffer umwandeln.
+        String base64String = decoder.decode(byteBuffer).toString();
+        System.out.printf("as Base64: '%s'%n", base64String);
+
+        // From Base64
+        charBuffer.clear();
+        charBuffer.put(base64String);
+        charBuffer.flip();
+
+        // CharBuffer in UTF8 kodieren.
+        byteBuffer = encoder.encode(charBuffer);
+
+        // Zwischen-Ausgabe -> flip() nicht vergessen zum Rücksetzen des ByteBuffers
+        System.out.printf("ByteBuffer after encode: '%s'%n", StandardCharsets.UTF_8.decode(byteBuffer).toString());
+        byteBuffer.flip();
+
+        // ByteBuffer in Base64 umwandeln.
+        byteBuffer = Base64.getDecoder().decode(byteBuffer);
+
+        // ByteBuffer mit UTF8 in CharBuffer umwandeln.
+        String originalString = decoder.decode(byteBuffer).toString();
+        System.out.printf("Original: '%s'%n", originalString);
     }
 
     /**
@@ -391,7 +445,8 @@ public class Misc
         // securityProviders();
 
         // javaVersion();
-        introspector();
+        // introspector();
+        byteBuffer();
     }
 
     /**
