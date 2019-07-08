@@ -36,6 +36,8 @@
         <module>misc-jigsaw</module>
         <module>misc-jsensors</module>
         <module>misc-junit5</module>
+        <module>misc-kotlin-mixed</module>
+        <module>misc-kotlin-pure</module>
         <module>misc-littlemina</module>
         <module>misc-maven-proxy</module>
         <module>misc-openstreetmap</module>
