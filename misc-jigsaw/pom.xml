@@ -15,10 +15,9 @@
     <name>${project.groupId} - ${project.artifactId}</name>
     <description>Jigsaw Demo</description>
 
-    <build>
-        <plugins>
-        </plugins>
-    </build>
+    <properties>
+    	<version.java>11</version.java>
+    </properties>
 
     <dependencies>
         <!-- compile scope -->
