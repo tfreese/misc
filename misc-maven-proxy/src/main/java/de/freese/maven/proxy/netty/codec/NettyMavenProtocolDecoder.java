@@ -6,10 +6,8 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import de.freese.maven.proxy.model.MavenRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -45,16 +43,7 @@ public class NettyMavenProtocolDecoder extends ByteToMessageDecoder
     }
 
     /**
-     * @return {@link Logger}
-     */
-    private Logger getLogger()
-    {
-        return this.logger;
-    }
-
-    /**
-     * @see io.netty.handler.codec.ByteToMessageDecoder#decode(io.netty.channel.ChannelHandlerContext, io.netty.buffer.ByteBuf,
-     *      java.util.List)
+     * @see io.netty.handler.codec.ByteToMessageDecoder#decode(io.netty.channel.ChannelHandlerContext, io.netty.buffer.ByteBuf, java.util.List)
      */
     @Override
     protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws Exception
@@ -64,16 +53,22 @@ public class NettyMavenProtocolDecoder extends ByteToMessageDecoder
             getLogger().debug(in.toString());
         }
 
-        StringReader stringReader = new StringReader(in.toString(this.charset));
-
         MavenRequest mavenRequest = null;
 
-        try (BufferedReader reader = new BufferedReader(stringReader))
+        try (BufferedReader reader = new BufferedReader(new StringReader(in.toString(this.charset))))
         {
             mavenRequest = MavenRequest.create(reader);
         }
 
         // ctx.write(mavenRequest);
         out.add(mavenRequest);
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    private Logger getLogger()
+    {
+        return this.logger;
     }
 }

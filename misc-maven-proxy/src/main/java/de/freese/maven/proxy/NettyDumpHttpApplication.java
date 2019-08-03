@@ -69,7 +69,6 @@ public class NettyDumpHttpApplication
                              p.addLast(new HttpResponseEncoder());
                              p.addLast(new ChannelInboundHandlerAdapter()
                                      {
-
                                         /**
                                          * @see io.netty.channel.ChannelInboundHandlerAdapter#channelRead(io.netty.channel.ChannelHandlerContext, java.lang.Object)
                                          */
