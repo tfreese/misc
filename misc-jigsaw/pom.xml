@@ -1,44 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.freese.misc</groupId>
-        <artifactId>misc</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>de.freese.misc</groupId>
+		<artifactId>misc</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>misc-jigsaw</artifactId>
-    <packaging>jar</packaging>
+	<artifactId>misc-jigsaw</artifactId>
+	<packaging>jar</packaging>
 
-    <name>${project.groupId} - ${project.artifactId}</name>
-    <description>Jigsaw Demo</description>
+	<name>${project.groupId} - ${project.artifactId}</name>
+	<description>Jigsaw Demo</description>
 
-    <properties>
-    	<version.java>11</version.java>
-    </properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<dependencies>
+					<!-- Für JDK Jigsaw -->
+					<dependency>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+						<version>${version_org.ow2.asm_asm}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
 
-    <dependencies>
-        <!-- compile scope -->
-        <!--dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            </dependency -->
-        <!-- Implementierung von javax.xml.bind:jaxb-api -->
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-        </dependency>
+	<dependencies>
+		<!-- compile scope -->
+		<!--dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			</dependency -->
+		<!-- Implementierung von javax.xml.bind:jaxb-api -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
 
-        <!-- runtime scope -->
-        <!-- provided scope -->
+		<!-- runtime scope -->
+		<!-- provided scope -->
 
-        <!-- test scope -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+		<!-- test scope -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
