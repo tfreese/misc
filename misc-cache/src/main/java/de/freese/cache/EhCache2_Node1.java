@@ -39,9 +39,9 @@ public class EhCache2_Node1
                 Element element = cache.get("key");
 
                 Object value = element != null ? element.getObjectValue() : null;
-                System.out.println("value = " + value);
+                System.out.printf("%s: cache value = %s%n", Thread.currentThread().getName(), value);
 
-                if (value == null && atomicInteger.get() < 8)
+                if ((value == null) && (atomicInteger.get() < 8))
                 {
                     cache.put(new Element("key", "value" + atomicInteger.getAndIncrement()));
                 }

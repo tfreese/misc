@@ -1,45 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	xmlns:jsr107='http://www.ehcache.org/v3/jsr107'
+	http://www.ehcache.org/v3/jsr107 http://www.ehcache.org/schema/ehcache-107-ext.xsd
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>de.freese.misc</groupId>
-        <artifactId>misc</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>de.freese.misc</groupId>
+		<artifactId>misc</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>misc-cache</artifactId>
-    <packaging>jar</packaging>
+	<artifactId>misc-cache</artifactId>
+	<packaging>jar</packaging>
 
-    <name>${project.groupId} - ${project.artifactId}</name>
-    <description>Demos für Caching.</description>
+	<name>${project.groupId} - ${project.artifactId}</name>
+	<description>Demos für Caching.</description>
 
-    <dependencies>
-        <!-- compile scope -->
-        <!-- EhCache3 steht in Konflikt mit EhCache2 -->
-        <!--dependency>
-        <groupId>org.ehcache</groupId>
-        <artifactId>ehcache</artifactId>
-        </dependency -->
-        <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-        </dependency>
+	<dependencies>
+		<!-- compile scope -->
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+		</dependency>
+		<!--dependency>
+			<groupId>org.ehcache</groupId>
+			<artifactId>ehcache-transactions</artifactId>
+		</dependency-->
 
-        <!-- runtime scope -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        
-        <!-- provided scope -->
-        <!-- test scope -->
-    </dependencies>
+		<!-- runtime scope -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!-- provided scope -->
+		<!-- test scope -->
+	</dependencies>
 
 </project>

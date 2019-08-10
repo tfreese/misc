@@ -36,7 +36,7 @@ public class Hazelcast_Node2
             while (true)
             {
                 String value = map.get("key");
-                System.out.println("value = " + value);
+                System.out.printf("%s: cache value = %s%n", Thread.currentThread().getName(), value);
 
                 try
                 {

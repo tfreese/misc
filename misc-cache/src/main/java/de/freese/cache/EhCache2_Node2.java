@@ -36,7 +36,7 @@ public class EhCache2_Node2
                 Element element = cache.get("key");
 
                 Object value = element != null ? element.getObjectValue() : null;
-                System.out.println("value = " + value);
+                System.out.printf("%s: cache value = %s%n", Thread.currentThread().getName(), value);
 
                 try
                 {
