@@ -26,7 +26,6 @@ import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
  *
  * @author Thomas Freese
  */
-// @Ignore
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class TestJacksonJSON
 {
