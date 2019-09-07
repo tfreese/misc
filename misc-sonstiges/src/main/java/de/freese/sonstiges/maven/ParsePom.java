@@ -97,10 +97,10 @@ public class ParsePom
         cipherField.set(securityDispatcher, new DefaultPlexusCipher());
         ((DefaultSecDispatcher) securityDispatcher).setConfigurationFile(System.getProperty("user.home") + "/.m2/settings-security.xml");
 
-        SettingsDecrypter settingsDecrypter = new DefaultSettingsDecrypter();
-        Field dispatcherField = settingsDecrypter.getClass().getDeclaredField("securityDispatcher");
-        dispatcherField.setAccessible(true);
-        dispatcherField.set(settingsDecrypter, securityDispatcher);
+        SettingsDecrypter settingsDecrypter = new DefaultSettingsDecrypter(securityDispatcher);
+        // Field dispatcherField = settingsDecrypter.getClass().getDeclaredField("securityDispatcher");
+        // dispatcherField.setAccessible(true);
+        // dispatcherField.set(settingsDecrypter, securityDispatcher);
 
         SettingsDecryptionRequest decryptionRequest = new DefaultSettingsDecryptionRequest(settings);
         SettingsDecryptionResult decryptionResult = settingsDecrypter.decrypt(decryptionRequest);
