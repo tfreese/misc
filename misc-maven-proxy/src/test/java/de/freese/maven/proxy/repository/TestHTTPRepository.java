@@ -5,6 +5,7 @@
 package de.freese.maven.proxy.repository;
 
 import java.net.URI;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author Thomas Freese
  */
+@Disabled
 public class TestHTTPRepository
 {
     /**
