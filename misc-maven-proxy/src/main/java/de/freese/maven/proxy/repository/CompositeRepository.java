@@ -8,7 +8,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
 import de.freese.maven.proxy.model.AbstractMavenHttpObject;
 import de.freese.maven.proxy.model.MavenRequest;
 import de.freese.maven.proxy.model.MavenResponse;
@@ -91,11 +90,6 @@ public class CompositeRepository extends AbstractRepository
             // Suchen
             for (Repository repository : this.repositories.values())
             {
-                if (!repository.isActive())
-                {
-                    continue;
-                }
-
                 try
                 {
                     mavenResponse = repository.exist(mavenRequest);
@@ -149,22 +143,16 @@ public class CompositeRepository extends AbstractRepository
             // Suchen
             for (Repository repository : this.repositories.values())
             {
-                if (!repository.isActive())
-                {
-                    continue;
-                }
-
                 try
                 {
                     mavenResponse = repository.getResource(mavenRequest);
                 }
                 catch (Exception ex)
                 {
-                    // Ignore
+                    getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
                 }
 
-                if ((mavenResponse != null) && mavenResponse.hasResource()
-                        && (mavenResponse.getHttpCode() == AbstractMavenHttpObject.HTTP_OK))
+                if ((mavenResponse != null) && mavenResponse.hasResource() && (mavenResponse.getHttpCode() == AbstractMavenHttpObject.HTTP_OK))
                 {
                     repo = repository;
                     this.index.put(context, repository);
@@ -182,23 +170,5 @@ public class CompositeRepository extends AbstractRepository
         }
 
         return mavenResponse == null ? mavenResponseLast : mavenResponse;
-    }
-
-    /**
-     * @see de.freese.maven.proxy.repository.AbstractRepository#isActive()
-     */
-    @Override
-    public boolean isActive()
-    {
-        return true;
-    }
-
-    /**
-     * @see de.freese.maven.proxy.repository.AbstractRepository#setActive(boolean)
-     */
-    @Override
-    public void setActive(final boolean value)
-    {
-        getLogger().warn("not supported");
     }
 }

@@ -1,11 +1,13 @@
 // Created: 27.03.2018
 package de.freese.maven.proxy.netty;
 
+import java.net.URI;
 import java.util.concurrent.Executor;
 import de.freese.maven.proxy.AbstractMavenProxy;
 import de.freese.maven.proxy.MavenProxy;
 import de.freese.maven.proxy.netty.initializer.NettyMavenInitializer;
 import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.repository.file.FileRepository;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -81,7 +83,7 @@ public class NettyMavenProxy extends AbstractMavenProxy
             bootstrap.group(this.acceptorGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new NettyMavenInitializer(getRepository(), getCharset()));
+                .childHandler(new NettyMavenInitializer(getRepository(), getCharset(), new FileRepository(URI.create("file:///tmp/mavenProxy"))));
             //  @formatter:off
 
             ChannelFuture ch = bootstrap.bind(getPort());

@@ -60,6 +60,9 @@ public class NettyMavenProtocolDecoder extends ByteToMessageDecoder
             mavenRequest = MavenRequest.create(reader);
         }
 
+        // Sonst kommt die Exception "did not read anything but decoded a message".
+        in.resetWriterIndex();
+
         // ctx.write(mavenRequest);
         out.add(mavenRequest);
     }

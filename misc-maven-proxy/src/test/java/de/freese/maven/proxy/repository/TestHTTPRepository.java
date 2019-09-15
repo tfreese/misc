@@ -7,15 +7,21 @@ package de.freese.maven.proxy.repository;
 import java.net.URI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import de.freese.maven.proxy.repository.http.HttpNioRepository;
 
 /**
- * Testklasse für das {@link HTTPRepository}.
+ * Testklasse für das {@link HttpNioRepository}.
  *
  * @author Thomas Freese
  */
 @Disabled
 public class TestHTTPRepository
 {
+    /**
+     *
+     */
+    private static final String PATH = "/javax/servlet/servlet-api/2.5/maven-metadata.xml";
+
     /**
      * @param args String[]
      */
@@ -67,8 +73,8 @@ public class TestHTTPRepository
     @Test
     public void testArtifactory() throws Exception
     {
-        URI uri = new URI("http://localhost:8089/artifactory/remote-repos");
-        String path = "/javax/servlet/servlet-api/2.5/maven-metadata.xml";
+        URI uri = new URI("http://localhost:6081/artifactory/remote-repos");
+        String path = PATH;
 
         test(uri, path);
     }
@@ -80,7 +86,7 @@ public class TestHTTPRepository
     public void testCentral() throws Exception
     {
         URI uri = new URI("http://repo1.maven.org/maven2");
-        String path = "/javax/servlet/servlet-api/2.5/maven-metadata.xml";
+        String path = PATH;
 
         test(uri, path);
     }
@@ -111,10 +117,10 @@ public class TestHTTPRepository
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void testFreeseWeb() throws Exception
+    public void testNexus() throws Exception
     {
-        URI uri = new URI("http://freese-home.de/maven/repository-thirdparty");
-        String path = "/com/jgoodies/binding/maven-metadata.xml";
+        URI uri = new URI("http://localhost:5081/nexus/repository/maven-public");
+        String path = PATH;
 
         test(uri, path);
     }

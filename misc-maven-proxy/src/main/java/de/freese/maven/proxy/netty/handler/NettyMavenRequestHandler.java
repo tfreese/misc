@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import de.freese.maven.proxy.model.MavenRequest;
 import de.freese.maven.proxy.model.MavenResponse;
 import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.repository.file.FileRepository;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -17,6 +18,11 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public class NettyMavenRequestHandler extends ChannelInboundHandlerAdapter
 {
+    /**
+     *
+     */
+    private final FileRepository fileRepository;
+
     /**
     *
     */
@@ -31,12 +37,14 @@ public class NettyMavenRequestHandler extends ChannelInboundHandlerAdapter
      * Erzeugt eine neue Instanz von {@link NettyMavenRequestHandler}.
      *
      * @param repository {@link Repository}
+     * @param fileRepository {@link FileRepository}
      */
-    public NettyMavenRequestHandler(final Repository repository)
+    public NettyMavenRequestHandler(final Repository repository, final FileRepository fileRepository)
     {
         super();
 
         this.repository = Objects.requireNonNull(repository, "repository required");
+        this.fileRepository = Objects.requireNonNull(fileRepository, "fileRepository required");
     }
 
     /**
@@ -54,11 +62,22 @@ public class NettyMavenRequestHandler extends ChannelInboundHandlerAdapter
 
         if (mavenRequest.getHttpMethod().equals("HEAD"))
         {
-            mavenResponse = this.repository.exist(mavenRequest);
+            mavenResponse = this.fileRepository.exist(mavenRequest);
+
+            if (mavenResponse == null)
+            {
+                mavenResponse = this.repository.exist(mavenRequest);
+            }
         }
         else
         {
-            mavenResponse = this.repository.getResource(mavenRequest);
+            mavenResponse = this.fileRepository.getResource(mavenRequest);
+
+            if (mavenResponse == null)
+            {
+                mavenResponse = this.repository.getResource(mavenRequest);
+                this.fileRepository.writeFile(mavenResponse);
+            }
         }
 
         if (mavenResponse != null)

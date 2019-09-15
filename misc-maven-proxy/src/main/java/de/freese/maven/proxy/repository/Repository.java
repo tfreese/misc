@@ -4,6 +4,7 @@
 
 package de.freese.maven.proxy.repository;
 
+import java.net.URI;
 import de.freese.maven.proxy.model.MavenRequest;
 import de.freese.maven.proxy.model.MavenResponse;
 
@@ -21,7 +22,6 @@ public interface Repository
 
     /**
      * Prüft, ob die Datei vorhanden ist.<br>
-     * Diese Methode muss Threadsicher sein !
      *
      * @param mavenRequest {@link MavenRequest}
      * @return {@link MavenResponse}
@@ -34,11 +34,13 @@ public interface Repository
      *
      * @return String
      */
-    public String getName();
+    public default String getName()
+    {
+        return getUri().toString();
+    }
 
     /**
      * Laden der betreffenden Datei.<br>
-     * Diese Methode muss Threadsicher sein !
      *
      * @param mavenRequest {@link MavenRequest}
      * @return {@link MavenResponse}
@@ -47,12 +49,9 @@ public interface Repository
     public MavenResponse getResource(MavenRequest mavenRequest) throws Exception;
 
     /**
-     * @return boolean
+     * Liefert den Ort des Repositories.
+     *
+     * @return {@link URI}
      */
-    public boolean isActive();
-
-    /**
-     * @param value boolean
-     */
-    public void setActive(boolean value);
+    public URI getUri();
 }

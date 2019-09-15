@@ -3,12 +3,12 @@ package de.freese.maven.proxy.netty.initializer;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
-
 import de.freese.maven.proxy.MavenProxy;
 import de.freese.maven.proxy.netty.codec.NettyMavenProtocolDecoder;
 import de.freese.maven.proxy.netty.codec.NettyMavenProtocolEncoder;
 import de.freese.maven.proxy.netty.handler.NettyMavenRequestHandler;
 import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.repository.file.FileRepository;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -28,6 +28,11 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
     /**
     *
     */
+    private final FileRepository fileRepository;
+
+    /**
+    *
+    */
     private final Repository repository;
 
     /**
@@ -35,13 +40,15 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
      *
      * @param repository {@link Repository}
      * @param charset {@link Charset}
+     * @param fileRepository {@link FileRepository}
      */
-    public NettyMavenInitializer(final Repository repository, final Charset charset)
+    public NettyMavenInitializer(final Repository repository, final Charset charset, final FileRepository fileRepository)
     {
         super();
 
         this.repository = Objects.requireNonNull(repository, "repository required");
         this.charset = Objects.requireNonNull(charset, "charset required");
+        this.fileRepository = Objects.requireNonNull(fileRepository, "fileRepository required");
     }
 
     /**
@@ -63,6 +70,6 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
 
         // Remove the following line if you don't want automatic content compression.
         // p.addLast(new HttpContentCompressor());
-        p.addLast(new NettyMavenRequestHandler(this.repository));
+        p.addLast(new NettyMavenRequestHandler(this.repository, this.fileRepository));
     }
 }

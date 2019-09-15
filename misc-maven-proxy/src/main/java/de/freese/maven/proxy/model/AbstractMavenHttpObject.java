@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +53,6 @@ public abstract class AbstractMavenHttpObject
     /**
     *
     */
-    public final static int HTTP_OK = 200;
-
-    /**
-    *
-    */
     protected static final String HEADER_CONNECTION = "Connection";
 
     /**
@@ -84,6 +79,11 @@ public abstract class AbstractMavenHttpObject
     *
     */
     protected final static int HTTP_NOT_FOUND = 404;
+
+    /**
+    *
+    */
+    public final static int HTTP_OK = 200;
 
     /**
     *
@@ -140,6 +140,14 @@ public abstract class AbstractMavenHttpObject
     }
 
     /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return this.logger;
+    }
+
+    /**
      * Liest die Header bis zur ersten leeren Zeile des Readers.<br>
      * Dieser wird nicht geschlossen.
      *
@@ -148,12 +156,13 @@ public abstract class AbstractMavenHttpObject
      */
     public void readHeader(final BufferedReader reader) throws IOException
     {
-        String line = null;
-
-        while (((line = reader.readLine()) != null) && !line.isEmpty())
-        {
-            setHeader(line);
-        }
+        // String line = null;
+        //
+        // while (((line = reader.readLine()) != null) && !line.isEmpty())
+        // {
+        // setHeader(line);
+        // }
+        reader.lines().forEach(this::setHeader);
     }
 
     /**
@@ -163,6 +172,11 @@ public abstract class AbstractMavenHttpObject
      */
     public void setHeader(final String headerLine)
     {
+        if ((headerLine == null) || headerLine.isBlank())
+        {
+            return;
+        }
+
         String[] tokens = headerLine.split(": ");
 
         setHeader(tokens[0], tokens[1]);
@@ -174,10 +188,8 @@ public abstract class AbstractMavenHttpObject
      */
     public void setHeader(final String headerName, final String headerValue)
     {
-        if ((headerName == null) || headerName.isEmpty())
-        {
-            throw new IllegalArgumentException("header is null or empty");
-        }
+        Objects.requireNonNull(headerName, "headerName required");
+        Objects.requireNonNull(headerValue, "headerValue required");
 
         if (getLogger().isDebugEnabled())
         {
@@ -185,22 +197,6 @@ public abstract class AbstractMavenHttpObject
         }
 
         this.headers.put(headerName, headerValue);
-    }
-
-    /**
-     * @param value String
-     */
-    public void setServerValue(final String value)
-    {
-        setHeader(HEADER_SERVER, value);
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return this.logger;
     }
 
     /**
@@ -219,5 +215,13 @@ public abstract class AbstractMavenHttpObject
     protected void setHttpUri(final String httpUri)
     {
         this.httpUri = httpUri;
+    }
+
+    /**
+     * @param value String
+     */
+    public void setServerValue(final String value)
+    {
+        setHeader(HEADER_SERVER, value);
     }
 }

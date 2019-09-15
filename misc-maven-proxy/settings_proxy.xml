@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<localRepository>${user.home}/.m2/repository</localRepository>
+
+	<interactiveMode>true</interactiveMode>
+	<offline>false</offline>
+
+	<mirrors>
+		<mirror>
+			<id>central</id>
+			<name>local-maven-proxy</name>
+			<url>http://localhost:8085/</url>
+			<mirrorOf>*</mirrorOf>
+		</mirror>
+	</mirrors>
+
+	<!--
+		# Erzwingen der Neu-Auflösung: mvn clean install -U
+		# Alle Dependencies laden: mvn dependency:resolve
+		# Alle Sources laden: mvn dependency:sources
+		# Updates: mvn versions:display-dependency-updates -DprocessDependencyManagement=false -DallowSnapshots=false
+		# Leichen entfernen: mvn dependency:purge-local-repository -DreResolve=false -DresolutionFuzziness=artifactId -Dverbose=true
+		# Aktive Profile: mvn help:active-profiles
+
+		updatePolicy: always, daily, "interval:XXX" (in minutes), never
+	-->
+
+</settings>

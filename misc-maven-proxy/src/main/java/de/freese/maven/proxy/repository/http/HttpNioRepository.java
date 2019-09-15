@@ -1,17 +1,13 @@
 /**
  * Created: 28.12.2011
  */
-package de.freese.maven.proxy.repository;
+package de.freese.maven.proxy.repository.http;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.BufferUnderflowException;
@@ -21,7 +17,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-import java.util.Optional;
 import de.freese.maven.proxy.model.MavenRequest;
 import de.freese.maven.proxy.model.MavenResponse;
 
@@ -30,85 +25,46 @@ import de.freese.maven.proxy.model.MavenResponse;
  *
  * @author Thomas Freese
  */
-public class HTTPRepository extends AbstractRepository
+public class HttpNioRepository extends AbstractHttpRepository
 {
     /**
-     * (0x0D, 0x0A), (13,10), (\r\n)
-     */
-    private static final String CRLF = "\r\n";
-
-    /**
-     * Erstellt ein neues {@link HTTPRepository} Object.
+     * Erstellt ein neues {@link HttpNioRepository} Object.
      *
-     * @param uri String; Ressourenquelle des Repositories
+     * @param uri String; Quelle des Repositories
      * @throws URISyntaxException Falls was schief geht.
      */
-    public HTTPRepository(final String uri) throws URISyntaxException
+    public HttpNioRepository(final String uri) throws URISyntaxException
     {
-        this(new URI(uri));
+        super(new URI(uri));
     }
 
     /**
-     * Erstellt ein neues {@link HTTPRepository} Object.
+     * Erstellt ein neues {@link HttpNioRepository} Object.
      *
-     * @param uri String; Ressourenquelle des Repositories
-     * @param charset {@link Charset}; Kodierung
-     * @throws URISyntaxException Falls was schief geht.
+     * @param uri {@link URI}; Quelle des Repositories
      */
-    public HTTPRepository(final String uri, final Charset charset) throws URISyntaxException
+    public HttpNioRepository(final URI uri)
     {
-        this(new URI(uri), charset);
+        super(uri);
     }
 
     /**
-     * Erstellt ein neues {@link HTTPRepository} Object.
+     * Erstellt ein neues {@link HttpNioRepository} Object.
      *
-     * @param uri {@link URI}; Ressourenquelle des Repositories
-     */
-    public HTTPRepository(final URI uri)
-    {
-        this(uri, Charset.forName("ISO-8859-1"));
-    }
-
-    /**
-     * Erstellt ein neues {@link HTTPRepository} Object.
-     *
-     * @param uri {@link URI}; Ressourenquelle des Repositories
+     * @param uri {@link URI}; Quelle des Repositories
      * @param charset {@link Charset}; Kodierung
      */
-    public HTTPRepository(final URI uri, final Charset charset)
+    public HttpNioRepository(final URI uri, final Charset charset)
     {
         super(uri, charset);
-
-        String scheme = uri.getScheme();
-
-        if ((scheme == null) || (!scheme.equals("http") && !scheme.equals("https")))
-        {
-            getLogger().error("Must use HTTP/S protocol, repository disabled");
-            setActive(false);
-            return;
-        }
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#dispose()
+     * @see de.freese.maven.proxy.repository.http.AbstractHttpRepository#existImpl(de.freese.maven.proxy.model.MavenRequest)
      */
     @Override
-    public void dispose()
+    protected MavenResponse existImpl(final MavenRequest mavenRequest) throws Exception
     {
-        // Empty
-    }
-
-    /**
-     * @see de.freese.maven.proxy.repository.Repository#exist(de.freese.maven.proxy.model.MavenRequest)
-     */
-    @Override
-    public MavenResponse exist(final MavenRequest mavenRequest) throws Exception
-    {
-        // HTTP Request bauen.
-        // mavenRequest.setConnectionValue("close");
-        mavenRequest.setHostValue(getUri().getHost());
-
         String statusLine =
                 String.format("%s %s%s %s", mavenRequest.getHttpMethod(), getUri().getPath(), mavenRequest.getHttpUri(), mavenRequest.getHttpProtocol());
 
@@ -121,74 +77,14 @@ public class HTTPRepository extends AbstractRepository
 
         request.append(CRLF); // Headerabschluss
 
-        MavenResponse mavenResponse = existNIO(request);
-        // MavenResponse mavenResponse = existIO(mavenRequest);
-
-        if (mavenResponse != null)
+        // request.append("Cache-control: no-cache").append("\r\n");
+        // request.append("Cache-store: no-store").append("\r\n");
+        // request.append("Pragma: no-cache").append("\r\n");
+        if (getLogger().isDebugEnabled())
         {
-            mavenResponse.setHttpUri(mavenRequest.getHttpUri());
+            getLogger().debug("{}\n {}", toString(), request.toString());
         }
 
-        return mavenResponse;
-    }
-
-    /**
-     * @param mavenRequest {@link MavenRequest}
-     * @return {@link MavenResponse}
-     * @throws Exception Falls was schief geht.
-     */
-    MavenResponse existIO(final MavenRequest mavenRequest) throws Exception
-    {
-        MavenResponse mavenResponse = null;
-
-        StringBuilder url = new StringBuilder(getUri().getScheme());
-        url.append("://");
-        url.append(getUri().getHost());
-
-        if (getUri().getPort() > 0)
-        {
-            url.append(":").append(getUri().getPort());
-        }
-
-        url.append(getUri().getPath());
-        // url.append(mavenRequest.getHttpUri());
-
-        URI uri = new URI(url.toString());
-        Proxy proxy = ProxySelector.getDefault().select(uri).get(0);
-
-        HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection(proxy);
-
-        // Header kopieren.
-        mavenRequest.getHeaders().forEach((headerName, headerValue) -> {
-            String actualHeaderValue = Optional.ofNullable(headerValue).orElse("");
-            connection.addRequestProperty(headerName, actualHeaderValue);
-        });
-
-        connection.setRequestMethod("HEAD");
-        connection.setDoInput(true);
-        connection.setInstanceFollowRedirects(true);
-        connection.connect();
-
-        // Response lesen.
-        mavenResponse = MavenResponse.create(connection);
-        // try (InputStream response = connection.getInputStream();
-        // BufferedReader reader = new BufferedReader(new InputStreamReader(response)))
-        // {
-        // mavenResponse = MavenResponse.create(reader);
-        // }
-
-        connection.disconnect();
-
-        return mavenResponse;
-    }
-
-    /**
-     * @param request {@link CharSequence}
-     * @return {@link MavenResponse}
-     * @throws Exception Falls was schief geht.
-     */
-    MavenResponse existNIO(final CharSequence request) throws Exception
-    {
         MavenResponse mavenResponse = null;
 
         // Abschicken
@@ -231,20 +127,20 @@ public class HTTPRepository extends AbstractRepository
             // new BufferedReader(new StringReader(new String(baos.toByteArray(),
             // getCharsetDecoder().charset())));
         }
+        finally
+        {
+            getCharsetDecoder().reset();
+        }
 
         return mavenResponse;
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#getResource(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.repository.http.AbstractHttpRepository#getResourceImpl(de.freese.maven.proxy.model.MavenRequest)
      */
     @Override
-    public MavenResponse getResource(final MavenRequest mavenRequest) throws Exception
+    protected MavenResponse getResourceImpl(final MavenRequest mavenRequest) throws Exception
     {
-        // HTTP Request bauen.
-        mavenRequest.setConnectionValue("close");
-        mavenRequest.setHostValue(getUri().getHost());
-
         String firstLine =
                 String.format("%s %s%s %s", mavenRequest.getHttpMethod(), getUri().getPath(), mavenRequest.getHttpUri(), mavenRequest.getHttpProtocol());
 
@@ -265,92 +161,6 @@ public class HTTPRepository extends AbstractRepository
             getLogger().debug("{}\n {}", toString(), request.toString());
         }
 
-        MavenResponse mavenResponse = getResourceNIO(request);
-        // MavenResponse mavenResponse = getResourceIO(mavenRequest);
-
-        if (mavenResponse != null)
-        {
-            mavenResponse.setHttpUri(mavenRequest.getHttpUri());
-        }
-
-        return mavenResponse;
-    }
-
-    /**
-     * @param mavenRequest {@link MavenRequest}
-     * @return {@link MavenResponse}
-     * @throws Exception Falls was schief geht.
-     */
-    MavenResponse getResourceIO(final MavenRequest mavenRequest) throws Exception
-    {
-        MavenResponse mavenResponse = null;
-
-        StringBuilder url = new StringBuilder(getUri().getScheme());
-        url.append("://");
-        url.append(getUri().getHost());
-
-        if (getUri().getPort() > 0)
-        {
-            url.append(":").append(getUri().getPort());
-        }
-
-        url.append(getUri().getPath());
-        url.append(mavenRequest.getHttpUri());
-
-        URI uri = new URI(url.toString());
-        Proxy proxy = ProxySelector.getDefault().select(uri).get(0);
-
-        HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection(proxy);
-
-        // Header kopieren.
-        mavenRequest.getHeaders().forEach((headerName, headerValue) -> {
-            String actualHeaderValue = Optional.ofNullable(headerValue).orElse("");
-            connection.addRequestProperty(headerName, actualHeaderValue);
-        });
-
-        connection.setRequestMethod("GET");
-        connection.setDoInput(true);
-        connection.setInstanceFollowRedirects(true);
-        connection.connect();
-
-        mavenResponse = MavenResponse.create(connection);
-
-        // Response lesen.
-        try (InputStream response = connection.getInputStream())// ;
-        // BufferedReader reader = new BufferedReader(new InputStreamReader(response)))
-        {
-            // mavenResponse = MavenResponse.create(reader);
-
-            int contentLength = mavenResponse.getContentLength();
-
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream(contentLength >= 0 ? (int) contentLength : 16 * 1024))
-            {
-                byte[] buffer = new byte[8 * 1024];
-                int bytesRead = -1;
-
-                while ((bytesRead = response.read(buffer)) != -1)
-                {
-                    baos.write(buffer, 0, bytesRead);
-                }
-
-                baos.flush();
-
-                mavenResponse.setResource(baos.toByteArray());
-            }
-        }
-
-        connection.disconnect();
-
-        return mavenResponse;
-    }
-
-    /**
-     * @param request {@link CharSequence}
-     * @return {@link MavenResponse}
-     * @throws Exception Falls was schief geht.
-     */
-    MavenResponse getResourceNIO(final CharSequence request) throws Exception
-    {
         MavenResponse mavenResponse = null;
 
         /**
@@ -484,6 +294,10 @@ public class HTTPRepository extends AbstractRepository
             }
 
             mavenResponse.setResource(resource);
+        }
+        finally
+        {
+            getCharsetEncoder().reset();
         }
 
         return mavenResponse;

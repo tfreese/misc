@@ -484,11 +484,6 @@ public class HTTPServerMultiThread
     /**
     *
     */
-    private final boolean externalExecutor;
-
-    /**
-    *
-    */
     private IoHandler ioHandler = null;
 
     /**
@@ -532,17 +527,6 @@ public class HTTPServerMultiThread
      * Erstellt ein neues {@link HTTPServerMultiThread} Object.
      *
      * @param port int
-     * @throws IOException Falls was schief geht.
-     */
-    public HTTPServerMultiThread(final int port) throws IOException
-    {
-        this(port, null);
-    }
-
-    /**
-     * Erstellt ein neues {@link HTTPServerMultiThread} Object.
-     *
-     * @param port int
      * @param executorService {@link ExecutorService}; optional
      * @throws IOException Falls was schief geht.
      */
@@ -552,19 +536,7 @@ public class HTTPServerMultiThread
 
         this.port = port;
 
-        // this.executorService = Objects.requireNonNull(executorService, "executorService required");
-
-        if (executorService == null)
-        {
-            int poolSize = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-            this.executorService = Executors.newFixedThreadPool(poolSize);
-            this.externalExecutor = false;
-        }
-        else
-        {
-            this.executorService = executorService;
-            this.externalExecutor = true;
-        }
+        this.executorService = Objects.requireNonNull(executorService, "executorService required");
     }
 
     /**
@@ -771,11 +743,6 @@ public class HTTPServerMultiThread
         finally
         {
             this.stopLock.release();
-        }
-
-        if (!this.externalExecutor)
-        {
-            shutdown(getExecutorService(), getLogger());
         }
     }
 }

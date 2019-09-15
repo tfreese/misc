@@ -109,7 +109,7 @@ public class MavenResponse extends AbstractMavenHttpObject
      * @param httpCode int
      * @param httpMessage String
      */
-    private MavenResponse(final String httpProtocol, final int httpCode, final String httpMessage)
+    public MavenResponse(final String httpProtocol, final int httpCode, final String httpMessage)
     {
         super();
 
@@ -242,8 +242,7 @@ public class MavenResponse extends AbstractMavenHttpObject
         sb.append(System.lineSeparator());
 
         // Headers
-        getHeaders().forEach((header, value) ->
-        {
+        getHeaders().forEach((header, value) -> {
             sb.append(header).append(": ").append(value);
             sb.append(System.lineSeparator());
         });

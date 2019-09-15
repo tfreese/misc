@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -19,7 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import de.freese.maven.proxy.netty.NettyMavenProxy;
 import de.freese.maven.proxy.repository.CompositeRepository;
-import de.freese.maven.proxy.repository.HTTPRepository;
+import de.freese.maven.proxy.repository.http.HttpNioRepository;
 
 /**
  * Startet den Maven Proxy.<br>
@@ -134,9 +135,9 @@ public class MavenProxyApplication
         Charset charset = Charset.forName("ISO-8859-1");
 
         CompositeRepository repository = new CompositeRepository();
-        repository.addRepository(new HTTPRepository("http://repo1.maven.org/maven2", charset));
-        repository.addRepository(new HTTPRepository("http://repository.jboss.org/nexus/content/groups/public-jboss", charset));
-        repository.addRepository(new HTTPRepository("https://repository.jboss.org/nexus/content/repositories/releases", charset));
+        repository.addRepository(new HttpNioRepository(new URI("http://repo1.maven.org/maven2"), charset));
+        repository.addRepository(new HttpNioRepository(new URI("http://repository.jboss.org/nexus/content/groups/public-jboss"), charset));
+        repository.addRepository(new HttpNioRepository(new URI("https://repository.jboss.org/nexus/content/repositories/releases"), charset));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 

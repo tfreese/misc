@@ -38,7 +38,7 @@ public class NettyDumpHttpApplication
      */
     public static void main(final String[] args) throws Exception
     {
-        int port = 8080;
+        int port = 8085;
 
         // Charset charset = Charset.forName("ISO-8859-1");
 
