@@ -7,6 +7,7 @@ package de.freese.maven.proxy.model;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.http.HttpResponse;
 import java.util.Objects;
 
 /**
@@ -20,8 +21,8 @@ public class MavenResponse extends AbstractMavenHttpObject
      * Liest die erste Zeile aus dem Reader und erzeugt den Response inklusive Header.<br>
      * Der Reader wird nicht geschlossen.
      *
-     * @param reader {@link MavenResponse}
-     * @return {@link MavenRequest}
+     * @param reader {@link BufferedReader}
+     * @return {@link MavenResponse}
      * @throws IOException Falls was schief geht.
      */
     public static MavenResponse create(final BufferedReader reader) throws IOException
@@ -46,11 +47,29 @@ public class MavenResponse extends AbstractMavenHttpObject
     }
 
     /**
+     * @param response {@link HttpResponse}
+     * @return {@link MavenRequest}
+     * @throws IOException Falls was schief geht.
+     */
+    public static MavenResponse create(final HttpResponse<?> response) throws IOException
+    {
+        String httpProtocol = response.request().version().toString();
+        int httpCode = response.statusCode();
+        String httpMessage = response.toString();
+
+        MavenResponse mavenResponse = new MavenResponse(httpProtocol, httpCode, httpMessage);
+
+        response.headers().map().forEach((headerName, headerValue) -> mavenResponse.setHeader(headerName, headerValue.get(0)));
+
+        return mavenResponse;
+    }
+
+    /**
      * Erzeugt den Response direkt aus der HttpURLConnection.<br>
      * Bei HEAD-Requests ist der InputStream leer.
      *
      * @param connection {@link HttpURLConnection}
-     * @return {@link MavenRequest}
+     * @return {@link MavenResponse}
      * @throws IOException Falls was schief geht.
      */
     public static MavenResponse create(final HttpURLConnection connection) throws IOException

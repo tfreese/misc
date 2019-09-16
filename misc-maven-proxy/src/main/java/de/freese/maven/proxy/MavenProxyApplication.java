@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import de.freese.maven.proxy.netty.NettyMavenProxy;
 import de.freese.maven.proxy.repository.CompositeRepository;
-import de.freese.maven.proxy.repository.http.HttpNioRepository;
+import de.freese.maven.proxy.repository.http.JreHttpClientRepository;
 
 /**
  * Startet den Maven Proxy.<br>
@@ -135,9 +135,9 @@ public class MavenProxyApplication
         Charset charset = Charset.forName("ISO-8859-1");
 
         CompositeRepository repository = new CompositeRepository();
-        repository.addRepository(new HttpNioRepository(new URI("http://repo1.maven.org/maven2"), charset));
-        repository.addRepository(new HttpNioRepository(new URI("http://repository.jboss.org/nexus/content/groups/public-jboss"), charset));
-        repository.addRepository(new HttpNioRepository(new URI("https://repository.jboss.org/nexus/content/repositories/releases"), charset));
+        repository.addRepository(new JreHttpClientRepository(new URI("http://repo1.maven.org/maven2"), charset));
+        // repository.addRepository(new JreHttpClientRepository(new URI("http://repository.jboss.org/nexus/content/groups/public-jboss"), charset));
+        // repository.addRepository(new JreHttpClientRepository(new URI("https://repository.jboss.org/nexus/content/repositories/releases"), charset));
 
         final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 

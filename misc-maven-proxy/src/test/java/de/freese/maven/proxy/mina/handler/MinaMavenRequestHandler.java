@@ -102,9 +102,17 @@ public class MinaMavenRequestHandler implements IoHandler
         {
             mavenResponse = this.repository.exist(mavenRequest);
         }
-        else
+        else if (mavenRequest.getHttpMethod().equals("GET"))
         {
             mavenResponse = this.repository.getResource(mavenRequest);
+        }
+        else if (mavenRequest.getHttpMethod().equals("PUT"))
+        {
+            throw new UnsupportedOperationException(mavenRequest.getHttpMethod());
+        }
+        else
+        {
+            throw new UnsupportedOperationException(mavenRequest.getHttpMethod());
         }
 
         if (mavenResponse != null)

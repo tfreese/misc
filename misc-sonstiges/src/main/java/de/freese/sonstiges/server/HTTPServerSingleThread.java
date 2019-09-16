@@ -5,6 +5,8 @@
 package de.freese.sonstiges.server;
 
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
@@ -13,6 +15,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Objects;
@@ -41,9 +44,12 @@ public class HTTPServerSingleThread
      * @param args String[]
      * @throws Exception Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     public static void main(final String[] args) throws Exception
     {
-        HTTPServerSingleThread server = new HTTPServerSingleThread(8001);
+        final SelectorProvider selectorProvider = SelectorProvider.provider();
+
+        HTTPServerSingleThread server = new HTTPServerSingleThread(8001, selectorProvider);
         server.setIoHandler(new HttpIoHandler());
         server.start();
 
@@ -55,6 +61,11 @@ public class HTTPServerSingleThread
         System.out.println();
         System.out.println();
 
+        // Console für programmatische Eingabe simulieren.
+        PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(pos);
+        // System.setIn(pis);
+
         // Client Task starten
         ForkJoinPool.commonPool().submit((Callable<Void>) () -> {
 
@@ -63,8 +74,9 @@ public class HTTPServerSingleThread
             InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
             Charset charset = IoHandler.DEFAULT_CHARSET;
 
-            try (SocketChannel client = SocketChannel.open(serverAddress))
+            try (SocketChannel client = selectorProvider.openSocketChannel())
             {
+                client.connect(serverAddress);
                 client.configureBlocking(true);
 
                 // Request
@@ -103,6 +115,9 @@ public class HTTPServerSingleThread
                 }
             }
 
+            // Console simulieren.
+            // pos.write(0);
+
             return null;
         });
 
@@ -140,6 +155,11 @@ public class HTTPServerSingleThread
     private Selector selector = null;
 
     /**
+     *
+     */
+    private final SelectorProvider selectorProvider;
+
+    /**
     *
     */
     private ServerSocketChannel serverSocketChannel = null;
@@ -157,9 +177,22 @@ public class HTTPServerSingleThread
      */
     public HTTPServerSingleThread(final int port) throws IOException
     {
+        this(port, SelectorProvider.provider());
+    }
+
+    /**
+     * Erstellt ein neues {@link HTTPServerSingleThread} Object.
+     *
+     * @param port int
+     * @param selectorProvider {@link SelectorProvider}
+     * @throws IOException Falls was schief geht.
+     */
+    public HTTPServerSingleThread(final int port, final SelectorProvider selectorProvider) throws IOException
+    {
         super();
 
         this.port = port;
+        this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
     }
 
     /**
@@ -176,6 +209,14 @@ public class HTTPServerSingleThread
     protected Logger getLogger()
     {
         return LOGGER;
+    }
+
+    /**
+     * @return {@link SelectorProvider}
+     */
+    protected SelectorProvider getSelectorProvider()
+    {
+        return this.selectorProvider;
     }
 
     /**
@@ -282,9 +323,9 @@ public class HTTPServerSingleThread
 
         Objects.requireNonNull(this.ioHandler, "ioHandler requried");
 
-        this.selector = Selector.open();
+        this.selector = getSelectorProvider().openSelector();
 
-        this.serverSocketChannel = ServerSocketChannel.open();
+        this.serverSocketChannel = getSelectorProvider().openServerSocketChannel();
         this.serverSocketChannel.configureBlocking(false);
 
         @SuppressWarnings("resource")

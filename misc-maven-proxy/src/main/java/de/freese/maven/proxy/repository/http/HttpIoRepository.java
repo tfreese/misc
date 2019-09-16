@@ -60,8 +60,6 @@ public class HttpIoRepository extends AbstractHttpRepository
     @Override
     protected MavenResponse existImpl(final MavenRequest mavenRequest) throws Exception
     {
-        MavenResponse mavenResponse = null;
-
         StringBuilder url = new StringBuilder(getUri().getScheme());
         url.append("://");
         url.append(getUri().getHost());
@@ -72,7 +70,7 @@ public class HttpIoRepository extends AbstractHttpRepository
         }
 
         url.append(getUri().getPath());
-        // url.append(mavenRequest.getHttpUri());
+        url.append(mavenRequest.getHttpUri());
 
         URI uri = new URI(url.toString());
         Proxy proxy = ProxySelector.getDefault().select(uri).get(0);
@@ -91,7 +89,7 @@ public class HttpIoRepository extends AbstractHttpRepository
         connection.connect();
 
         // Response lesen.
-        mavenResponse = MavenResponse.create(connection);
+        MavenResponse mavenResponse = MavenResponse.create(connection);
         // try (InputStream response = connection.getInputStream();
         // BufferedReader reader = new BufferedReader(new InputStreamReader(response)))
         // {
@@ -109,8 +107,6 @@ public class HttpIoRepository extends AbstractHttpRepository
     @Override
     protected MavenResponse getResourceImpl(final MavenRequest mavenRequest) throws Exception
     {
-        MavenResponse mavenResponse = null;
-
         StringBuilder url = new StringBuilder(getUri().getScheme());
         url.append("://");
         url.append(getUri().getHost());
@@ -139,7 +135,7 @@ public class HttpIoRepository extends AbstractHttpRepository
         connection.setInstanceFollowRedirects(true);
         connection.connect();
 
-        mavenResponse = MavenResponse.create(connection);
+        MavenResponse mavenResponse = MavenResponse.create(connection);
 
         // Response lesen.
         try (InputStream response = connection.getInputStream())// ;

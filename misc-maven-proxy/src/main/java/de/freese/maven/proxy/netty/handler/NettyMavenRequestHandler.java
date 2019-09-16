@@ -69,7 +69,7 @@ public class NettyMavenRequestHandler extends ChannelInboundHandlerAdapter
                 mavenResponse = this.repository.exist(mavenRequest);
             }
         }
-        else
+        else if (mavenRequest.getHttpMethod().equals("GET"))
         {
             mavenResponse = this.fileRepository.getResource(mavenRequest);
 
@@ -78,6 +78,14 @@ public class NettyMavenRequestHandler extends ChannelInboundHandlerAdapter
                 mavenResponse = this.repository.getResource(mavenRequest);
                 this.fileRepository.writeFile(mavenResponse);
             }
+        }
+        else if (mavenRequest.getHttpMethod().equals("PUT"))
+        {
+            throw new UnsupportedOperationException(mavenRequest.getHttpMethod());
+        }
+        else
+        {
+            throw new UnsupportedOperationException(mavenRequest.getHttpMethod());
         }
 
         if (mavenResponse != null)
