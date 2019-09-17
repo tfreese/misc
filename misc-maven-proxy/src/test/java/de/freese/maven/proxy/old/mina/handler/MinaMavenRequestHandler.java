@@ -1,7 +1,7 @@
 /**
  * Created: 28.12.2011
  */
-package de.freese.maven.proxy.mina.handler;
+package de.freese.maven.proxy.old.mina.handler;
 
 import java.util.Objects;
 import org.apache.mina.core.future.IoFutureListener;
@@ -11,9 +11,9 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.FilterEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.maven.proxy.model.MavenRequest;
-import de.freese.maven.proxy.model.MavenResponse;
-import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.old.model.MavenRequest;
+import de.freese.maven.proxy.old.model.MavenResponse;
+import de.freese.maven.proxy.old.repository.Repository;
 
 /**
  * Handler für Requests an den Maven Proxy.

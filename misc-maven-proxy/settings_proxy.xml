@@ -17,10 +17,11 @@
 	</mirrors>
 
 	<!--
+		# mvn -s settings_proxy.xml -f pom_proxy.xml -U ...
 		# Erzwingen der Neu-Auflösung: mvn clean install -U
-		# Alle Dependencies laden: mvn dependency:resolve
-		# Alle Sources laden: mvn dependency:sources
-		# Updates: mvn versions:display-dependency-updates -DprocessDependencyManagement=false -DallowSnapshots=false
+		# Alle Dependencies laden, GET: mvn dependency:resolve
+		# Alle Sources laden, GET: mvn dependency:sources
+		# Updates, GET: mvn versions:display-dependency-updates -DprocessDependencyManagement=false -DallowSnapshots=false
 		# Leichen entfernen: mvn dependency:purge-local-repository -DreResolve=false -DresolutionFuzziness=artifactId -Dverbose=true
 		# Aktive Profile: mvn help:active-profiles
 

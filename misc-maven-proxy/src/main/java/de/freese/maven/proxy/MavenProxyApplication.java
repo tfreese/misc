@@ -13,13 +13,16 @@ import java.net.ProxySelector;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
+import java.net.http.HttpClient;
+import java.net.http.HttpClient.Redirect;
+import java.net.http.HttpClient.Version;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import de.freese.maven.proxy.netty.NettyMavenProxy;
-import de.freese.maven.proxy.repository.CompositeRepository;
+import de.freese.maven.proxy.repository.file.FileRepository;
 import de.freese.maven.proxy.repository.http.JreHttpClientRepository;
 
 /**
@@ -131,20 +134,32 @@ public class MavenProxyApplication
     public static void main(final String[] args) throws Exception
     {
         // enableProxy();
+        // Charset charset = Charset.forName("ISO-8859-1");
+        // Charset charset = StandardCharsets.ISO_8859_1;
 
-        Charset charset = Charset.forName("ISO-8859-1");
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.max(5, Runtime.getRuntime().availableProcessors() * 2));
 
-        CompositeRepository repository = new CompositeRepository();
-        repository.addRepository(new JreHttpClientRepository(new URI("http://repo1.maven.org/maven2"), charset));
-        // repository.addRepository(new JreHttpClientRepository(new URI("http://repository.jboss.org/nexus/content/groups/public-jboss"), charset));
-        // repository.addRepository(new JreHttpClientRepository(new URI("https://repository.jboss.org/nexus/content/repositories/releases"), charset));
+        // @formatter:off
+        HttpClient.Builder builder = HttpClient.newBuilder()
+                .version(Version.HTTP_2)
+                .followRedirects(Redirect.NEVER)
+                .proxy(ProxySelector.getDefault())
+                .connectTimeout(Duration.ofSeconds(5))
+                .executor(executorService)
+                ;
+        // @formatter:on
+        // .authenticator(Authenticator.getDefault())
+        // .cookieHandler(CookieHandler.getDefault())
+        // .sslContext(SSLContext.getDefault())
+        // .sslParameters(new SSLParameters())
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        HttpClient httpClient = builder.build();
 
-        // final MavenProxy proxy = new MinaMavenProxy(repository, executorService);
-        final MavenProxy proxy = new NettyMavenProxy(repository, executorService);
+        final MavenProxy proxy = new NettyMavenProxy(executorService, new FileRepository(URI.create("file:///tmp/mavenProxy")),
+                List.of(new JreHttpClientRepository(URI.create("http://repo1.maven.org/maven2"), httpClient),
+                        new JreHttpClientRepository(URI.create("http://repository.jboss.org/nexus/content/groups/public-jboss"), httpClient),
+                        new JreHttpClientRepository(URI.create("https://repository.jboss.org/nexus/content/repositories/releases"), httpClient)));
         proxy.setPort(8085);
-        proxy.setCharset(charset);
 
         proxy.start();
 

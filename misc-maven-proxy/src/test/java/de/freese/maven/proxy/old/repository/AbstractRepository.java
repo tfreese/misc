@@ -2,7 +2,7 @@
  * Created: 28.12.2011
  */
 
-package de.freese.maven.proxy.repository;
+package de.freese.maven.proxy.old.repository;
 
 import java.net.URI;
 import java.util.Objects;
@@ -61,6 +61,6 @@ public abstract class AbstractRepository implements Repository
     @Override
     public String toString()
     {
-        return getUri().toString();
+        return getName();
     }
 }

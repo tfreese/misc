@@ -1,8 +1,6 @@
 // Created: 27.03.2018
 package de.freese.maven.proxy;
 
-import java.nio.charset.Charset;
-
 /**
  * Interface eines MavenProxies.
  *
@@ -10,14 +8,6 @@ import java.nio.charset.Charset;
  */
 public interface MavenProxy
 {
-    /**
-     * Zeichensatz für die Codierung.<br>
-     * Default: ISO-8859-1
-     *
-     * @param charset {@link Charset}
-     */
-    public void setCharset(final Charset charset);
-
     /**
      * Setzt den Port.<br>
      * Default: 8080

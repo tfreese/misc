@@ -2,11 +2,11 @@
  * Created: 28.12.2011
  */
 
-package de.freese.maven.proxy.mina;
+package de.freese.maven.proxy.old.mina;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executor;
-
 import org.apache.mina.core.service.IoConnector;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.executor.ExecutorFilter;
@@ -14,12 +14,11 @@ import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioProcessor;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
-
-import de.freese.maven.proxy.AbstractMavenProxy;
 import de.freese.maven.proxy.MavenProxy;
-import de.freese.maven.proxy.mina.codec.MinaMavenProtocolCodecFactory;
-import de.freese.maven.proxy.mina.handler.MinaMavenRequestHandler;
-import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.old.AbstractMavenProxy;
+import de.freese.maven.proxy.old.mina.codec.MinaMavenProtocolCodecFactory;
+import de.freese.maven.proxy.old.mina.handler.MinaMavenRequestHandler;
+import de.freese.maven.proxy.old.repository.Repository;
 
 /**
  * {@link MavenProxy} mit dem mina-Framework.<br>
@@ -44,6 +43,11 @@ public class MinaMavenProxy extends AbstractMavenProxy
     private NioSocketAcceptor acceptor = null;
 
     /**
+     *
+     */
+    private NioProcessor processor = null;
+
+    /**
      * Erstellt ein neues {@link MinaMavenProxy} Object.
      *
      * @param repository {@link Repository}
@@ -60,12 +64,17 @@ public class MinaMavenProxy extends AbstractMavenProxy
     @Override
     public void shutdown()
     {
-        getLogger().info(null);
+        getLogger().info("shutdown");
 
         if (this.acceptor != null)
         {
             this.acceptor.dispose();
             this.acceptor.unbind();
+        }
+
+        if (this.processor != null)
+        {
+            this.processor.dispose();
         }
     }
 
@@ -75,11 +84,12 @@ public class MinaMavenProxy extends AbstractMavenProxy
     @Override
     public void start()
     {
+        getLogger().info("start");
+
         try
         {
-            NioProcessor processor = new NioProcessor(getExecutor());
-
-            this.acceptor = new NioSocketAcceptor(getExecutor(), processor);
+            this.processor = new NioProcessor(getExecutor());
+            this.acceptor = new NioSocketAcceptor(getExecutor(), this.processor);
 
             if (getLogger().isDebugEnabled())
             {
@@ -87,7 +97,7 @@ public class MinaMavenProxy extends AbstractMavenProxy
             }
 
             this.acceptor.getFilterChain().addLast("executor", new ExecutorFilter(getExecutor()));
-            this.acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaMavenProtocolCodecFactory(getCharset())));
+            this.acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new MinaMavenProtocolCodecFactory(StandardCharsets.UTF_8)));
 
             this.acceptor.getSessionConfig().setReadBufferSize(2048);
             // acceptor.getSessionConfig().setIdleTime(IdleStatus.BOTH_IDLE, 10);

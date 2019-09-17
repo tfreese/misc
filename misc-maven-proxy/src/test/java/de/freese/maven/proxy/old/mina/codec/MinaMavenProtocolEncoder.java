@@ -2,20 +2,18 @@
  * Created: 29.12.2011
  */
 
-package de.freese.maven.proxy.mina.codec;
+package de.freese.maven.proxy.old.mina.codec;
 
 import java.nio.charset.CharsetEncoder;
 import java.util.Map.Entry;
 import java.util.Objects;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.freese.maven.proxy.model.MavenResponse;
+import de.freese.maven.proxy.old.model.MavenResponse;
 
 /**
  * {@link ProtocolEncoder} für Maven HTTP Response.
@@ -81,8 +79,7 @@ public class MinaMavenProtocolEncoder implements ProtocolEncoder
 
             if (getLogger().isDebugEnabled())
             {
-                getLogger().debug("ContentLength: Resource={}, Header={}", Integer.valueOf(contentLengthResource),
-                        Integer.valueOf(contentLengthHeader));
+                getLogger().debug("ContentLength: Resource={}, Header={}", Integer.valueOf(contentLengthResource), Integer.valueOf(contentLengthHeader));
             }
         }
 
@@ -90,8 +87,7 @@ public class MinaMavenProtocolEncoder implements ProtocolEncoder
         response.setAutoExpand(true);
 
         // HTTP/1.1 200 OK
-        response.putString(mavenResponse.getHttpProtocol() + " " + mavenResponse.getHttpCode() + " " + mavenResponse.getHttpMessage(),
-                this.charsetEncoder);
+        response.putString(mavenResponse.getHttpProtocol() + " " + mavenResponse.getHttpCode() + " " + mavenResponse.getHttpMessage(), this.charsetEncoder);
         response.put(CRLF);
 
         for (Entry<String, String> entry : mavenResponse.getHeaders().entrySet())

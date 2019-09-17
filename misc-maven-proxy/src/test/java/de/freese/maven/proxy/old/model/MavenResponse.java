@@ -2,7 +2,7 @@
  * Created: 29.12.2011
  */
 
-package de.freese.maven.proxy.model;
+package de.freese.maven.proxy.old.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -232,7 +232,7 @@ public class MavenResponse extends AbstractMavenHttpObject
     }
 
     /**
-     * @see de.freese.maven.proxy.model.AbstractMavenHttpObject#setHttpUri(java.lang.String)
+     * @see de.freese.maven.proxy.old.model.AbstractMavenHttpObject#setHttpUri(java.lang.String)
      */
     @Override
     public void setHttpUri(final String httpUri)

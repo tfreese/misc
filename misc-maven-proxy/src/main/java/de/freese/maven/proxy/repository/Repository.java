@@ -4,9 +4,8 @@
 
 package de.freese.maven.proxy.repository;
 
+import java.io.InputStream;
 import java.net.URI;
-import de.freese.maven.proxy.model.MavenRequest;
-import de.freese.maven.proxy.model.MavenResponse;
 
 /**
  * Interface eines Repositories.
@@ -21,32 +20,23 @@ public interface Repository
     public void dispose();
 
     /**
-     * Prüft, ob die Datei vorhanden ist.<br>
+     * Prüft, ob die Resource vorhanden ist.<br>
      *
-     * @param mavenRequest {@link MavenRequest}
-     * @return {@link MavenResponse}
+     * @param resource String
+     * @return boolean
      * @throws Exception Falls was schief geht.
      */
-    public MavenResponse exist(MavenRequest mavenRequest) throws Exception;
+    public boolean exist(String resource) throws Exception;
 
     /**
-     * Liefert den eindeitigen Namen des Repositories (URL, Path).
+     * Laden der betreffenden Resource.<br>
+     * Der Stream ist null, wenn die Resource nicht existiert.
      *
-     * @return String
-     */
-    public default String getName()
-    {
-        return getUri().toString();
-    }
-
-    /**
-     * Laden der betreffenden Datei.<br>
-     *
-     * @param mavenRequest {@link MavenRequest}
-     * @return {@link MavenResponse}
+     * @param resource String
+     * @return {@link InputStream}
      * @throws Exception Falls was schief geht.
      */
-    public MavenResponse getResource(MavenRequest mavenRequest) throws Exception;
+    public InputStream getInputStream(String resource) throws Exception;
 
     /**
      * Liefert den Ort des Repositories.

@@ -2,7 +2,7 @@
  * Created: 29.12.2011
  */
 
-package de.freese.maven.proxy.mina.codec;
+package de.freese.maven.proxy.old.mina.codec;
 
 import java.nio.charset.Charset;
 

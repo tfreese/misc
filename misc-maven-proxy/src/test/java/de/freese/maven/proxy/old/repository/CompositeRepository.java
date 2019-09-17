@@ -2,15 +2,15 @@
  * Created: 01.01.2012
  */
 
-package de.freese.maven.proxy.repository;
+package de.freese.maven.proxy.old.repository;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import de.freese.maven.proxy.model.AbstractMavenHttpObject;
-import de.freese.maven.proxy.model.MavenRequest;
-import de.freese.maven.proxy.model.MavenResponse;
+import de.freese.maven.proxy.old.model.AbstractMavenHttpObject;
+import de.freese.maven.proxy.old.model.MavenRequest;
+import de.freese.maven.proxy.old.model.MavenResponse;
 
 /**
  * Virtuelles Repository, welches die {@link Repository} zusammenfasst.
@@ -70,7 +70,7 @@ public class CompositeRepository extends AbstractRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#exist(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.old.repository.Repository#exist(de.freese.maven.proxy.old.model.MavenRequest)
      */
     @Override
     public MavenResponse exist(final MavenRequest mavenRequest) throws Exception
@@ -114,7 +114,7 @@ public class CompositeRepository extends AbstractRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#getName()
+     * @see de.freese.maven.proxy.old.repository.Repository#getName()
      */
     @Override
     public String getName()
@@ -123,7 +123,7 @@ public class CompositeRepository extends AbstractRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#getResource(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.old.repository.Repository#getResource(de.freese.maven.proxy.old.model.MavenRequest)
      */
     @Override
     public MavenResponse getResource(final MavenRequest mavenRequest) throws Exception

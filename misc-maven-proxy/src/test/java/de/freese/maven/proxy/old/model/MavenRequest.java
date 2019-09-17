@@ -2,7 +2,7 @@
  * Created: 29.12.2011
  */
 
-package de.freese.maven.proxy.model;
+package de.freese.maven.proxy.old.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,5 +1,5 @@
 // Created: 27.03.2018
-package de.freese.maven.proxy.netty.codec;
+package de.freese.maven.proxy.old.netty.codec;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.maven.proxy.model.MavenRequest;
+import de.freese.maven.proxy.old.model.MavenRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

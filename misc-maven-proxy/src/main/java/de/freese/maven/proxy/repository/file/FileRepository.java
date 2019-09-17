@@ -5,13 +5,12 @@
 package de.freese.maven.proxy.repository.file;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import de.freese.maven.proxy.model.AbstractMavenHttpObject;
-import de.freese.maven.proxy.model.MavenRequest;
-import de.freese.maven.proxy.model.MavenResponse;
 import de.freese.maven.proxy.repository.AbstractRepository;
 
 /**
@@ -62,6 +61,44 @@ public class FileRepository extends AbstractRepository
         }
     }
 
+    /**
+     * Liefert das absoluten Verzeichnis der Resource.
+     *
+     * @param repository {@link Path}
+     * @param resource String
+     * @return {@link Path}
+     */
+    protected Path createResourcePath(final Path repository, final String resource)
+    {
+        Path path = null;
+
+        if (resource.startsWith("/"))
+        {
+            path = repository.resolve(resource.substring(1));
+        }
+        else
+        {
+            path = repository.resolve(resource);
+        }
+
+        return path;
+    }
+
+    /**
+     * Liefert das absoluten Verzeichnis der Resource.
+     *
+     * @param resource String
+     * @return {@link Path}
+     * @throws Exception Falls was schief geht.
+     */
+    public Path createResourcePath(final String resource) throws Exception
+    {
+        return createResourcePath(getPathRepository(), resource);
+    }
+
+    /**
+     * @see de.freese.maven.proxy.repository.Repository#dispose()
+     */
     @Override
     public void dispose()
     {
@@ -69,45 +106,55 @@ public class FileRepository extends AbstractRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#exist(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.repository.Repository#exist(java.lang.String)
      */
     @Override
-    public MavenResponse exist(final MavenRequest mavenRequest) throws Exception
+    public boolean exist(final String resource) throws Exception
     {
-        Path pathFile = getFilePath(getPathRepository(), mavenRequest.getHttpUri());
+        Path pathFile = createResourcePath(getPathRepository(), resource);
+
+        return Files.isReadable(pathFile);
+    }
+
+    /**
+     * @see de.freese.maven.proxy.repository.Repository#getInputStream(java.lang.String)
+     */
+    @Override
+    public InputStream getInputStream(final String resource) throws Exception
+    {
+        Path pathFile = createResourcePath(getPathRepository(), resource);
 
         if (!Files.isReadable(pathFile))
         {
             return null;
         }
 
-        MavenResponse mavenResponse = new MavenResponse(mavenRequest.getHttpProtocol(), AbstractMavenHttpObject.HTTP_OK, "OK");
-        mavenResponse.setHttpUri(mavenRequest.getHttpUri());
+        return Files.newInputStream(pathFile);
 
-        return mavenResponse;
+        // // BasicFileAttributes basicFileAttributes = Files.readAttributes(pathFile, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        // // long size = basicFileAttributes.size();
+        // long size = Files.size(pathFile);
+        //
+        // mavenResponse.setContentLengthValue(Long.toString(size));
+        // mavenResponse.setResource(Files.readAllBytes(pathFile));
+        //
+        // // Content-Type: application/xml
     }
 
     /**
-     * Liefert das absoluten Verzeichnis der Datei.
+     * Schreibt die Resource in den {@link OutputStream}.
      *
-     * @param repository {@link Path}
-     * @param file String
-     * @return {@link Path}
+     * @param resource String
+     * @return {@link OutputStream}
+     * @throws IOException Falls was schief geht.
      */
-    protected Path getFilePath(final Path repository, final String file)
+    public OutputStream getOutputStream(final String resource) throws IOException
     {
-        Path path = null;
+        Path pathFile = createResourcePath(getPathRepository(), resource);
 
-        if (file.startsWith("/"))
-        {
-            path = repository.resolve(file.substring(1));
-        }
-        else
-        {
-            path = repository.resolve(file);
-        }
+        Files.createDirectories(pathFile.getParent());
 
-        return path;
+        return Files.newOutputStream(pathFile);
     }
 
     /**
@@ -116,51 +163,5 @@ public class FileRepository extends AbstractRepository
     protected Path getPathRepository()
     {
         return this.pathRepository;
-    }
-
-    /**
-     * @see de.freese.maven.proxy.repository.Repository#getResource(de.freese.maven.proxy.model.MavenRequest)
-     */
-    @Override
-    public MavenResponse getResource(final MavenRequest mavenRequest) throws Exception
-    {
-        Path pathFile = getFilePath(getPathRepository(), mavenRequest.getHttpUri());
-
-        if (!Files.isReadable(pathFile))
-        {
-            return null;
-        }
-
-        MavenResponse mavenResponse = new MavenResponse(mavenRequest.getHttpProtocol(), AbstractMavenHttpObject.HTTP_OK, "OK");
-        mavenResponse.setHttpUri(mavenRequest.getHttpUri());
-
-        // BasicFileAttributes basicFileAttributes = Files.readAttributes(pathFile, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-        // long size = basicFileAttributes.size();
-        long size = Files.size(pathFile);
-
-        mavenResponse.setContentLengthValue(Long.toString(size));
-        mavenResponse.setResource(Files.readAllBytes(pathFile));
-
-        // Content-Type: application/xml
-
-        return mavenResponse;
-    }
-
-    /**
-     * @param mavenResponse {@link MavenResponse}
-     * @throws IOException Falls was schief geht.
-     */
-    public void writeFile(final MavenResponse mavenResponse) throws IOException
-    {
-        if (!mavenResponse.hasResource())
-        {
-            return;
-        }
-
-        Path pathFile = getFilePath(getPathRepository(), mavenResponse.getHttpUri());
-
-        Files.createDirectories(pathFile.getParent());
-
-        Files.write(pathFile, mavenResponse.getResource());
     }
 }

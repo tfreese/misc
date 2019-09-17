@@ -1,7 +1,7 @@
 /**
  * Created: 28.12.2011
  */
-package de.freese.maven.proxy.repository.http;
+package de.freese.maven.proxy.old.repository.http;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -17,8 +17,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-import de.freese.maven.proxy.model.MavenRequest;
-import de.freese.maven.proxy.model.MavenResponse;
+import de.freese.maven.proxy.old.model.MavenRequest;
+import de.freese.maven.proxy.old.model.MavenResponse;
 
 /**
  * HTTP-Implementierung eines Repositories.
@@ -60,7 +60,7 @@ public class HttpNioRepository extends AbstractHttpRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.http.AbstractHttpRepository#existImpl(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.old.repository.http.AbstractHttpRepository#existImpl(de.freese.maven.proxy.old.model.MavenRequest)
      */
     @Override
     protected MavenResponse existImpl(final MavenRequest mavenRequest) throws Exception
@@ -136,7 +136,7 @@ public class HttpNioRepository extends AbstractHttpRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.http.AbstractHttpRepository#getResourceImpl(de.freese.maven.proxy.model.MavenRequest)
+     * @see de.freese.maven.proxy.old.repository.http.AbstractHttpRepository#getResourceImpl(de.freese.maven.proxy.old.model.MavenRequest)
      */
     @Override
     protected MavenResponse getResourceImpl(final MavenRequest mavenRequest) throws Exception

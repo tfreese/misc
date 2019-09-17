@@ -1,13 +1,12 @@
 // Created: 27.03.2018
-package de.freese.maven.proxy;
+package de.freese.maven.proxy.old;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.maven.proxy.repository.file.FileRepository;
-import de.freese.maven.proxy.repository.http.HttpRepository;
+import de.freese.maven.proxy.MavenProxy;
+import de.freese.maven.proxy.old.repository.Repository;
 
 /**
  * Basisklasse eines MavenProxies.<br>
@@ -34,16 +33,6 @@ public abstract class AbstractMavenProxy implements MavenProxy
     /**
     *
     */
-    private final FileRepository fileRepository;
-
-    /**
-    *
-    */
-    private final List<HttpRepository> httpRepositories;
-
-    /**
-    *
-    */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
@@ -52,19 +41,22 @@ public abstract class AbstractMavenProxy implements MavenProxy
     private int port = 8080;
 
     /**
+    *
+    */
+    private final Repository repository;
+
+    /**
      * Erzeugt eine neue Instanz von {@link AbstractMavenProxy}.
      *
+     * @param repository {@link Repository}
      * @param executor {@link Executor}
-     * @param fileRepository {@link FileRepository}
-     * @param httpRepositories {@link List}
      */
-    public AbstractMavenProxy(final Executor executor, final FileRepository fileRepository, final List<HttpRepository> httpRepositories)
+    public AbstractMavenProxy(final Repository repository, final Executor executor)
     {
         super();
 
+        this.repository = Objects.requireNonNull(repository, "repository required");
         this.executor = Objects.requireNonNull(executor, "executor required");
-        this.fileRepository = Objects.requireNonNull(fileRepository, "fileRepository required");
-        this.httpRepositories = Objects.requireNonNull(httpRepositories, "httpRepositories required");
     }
 
     /**
@@ -73,22 +65,6 @@ public abstract class AbstractMavenProxy implements MavenProxy
     protected Executor getExecutor()
     {
         return this.executor;
-    }
-
-    /**
-     * @return {@link FileRepository}
-     */
-    protected FileRepository getFileRepository()
-    {
-        return this.fileRepository;
-    }
-
-    /**
-     * @return {@link List}<HttpRepository>
-     */
-    protected List<HttpRepository> getHttpRepositories()
-    {
-        return this.httpRepositories;
     }
 
     /**
@@ -105,6 +81,14 @@ public abstract class AbstractMavenProxy implements MavenProxy
     protected int getPort()
     {
         return this.port;
+    }
+
+    /**
+     * @return {@link Repository}
+     */
+    protected Repository getRepository()
+    {
+        return this.repository;
     }
 
     /**

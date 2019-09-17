@@ -2,21 +2,19 @@
  * Created: 29.12.2011
  */
 
-package de.freese.maven.proxy.mina.codec;
+package de.freese.maven.proxy.old.mina.codec;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.nio.charset.CharsetDecoder;
 import java.util.Objects;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import de.freese.maven.proxy.model.MavenRequest;
+import de.freese.maven.proxy.old.model.MavenRequest;
 
 /**
  * {@link ProtocolDecoder} für Maven HTTP Requests.
@@ -48,8 +46,8 @@ public class MinaMavenProtocolDecoder implements ProtocolDecoder
     }
 
     /**
-     * @see org.apache.mina.filter.codec.ProtocolDecoder#decode(org.apache.mina.core.session.IoSession,
-     *      org.apache.mina.core.buffer.IoBuffer, org.apache.mina.filter.codec.ProtocolDecoderOutput)
+     * @see org.apache.mina.filter.codec.ProtocolDecoder#decode(org.apache.mina.core.session.IoSession, org.apache.mina.core.buffer.IoBuffer,
+     *      org.apache.mina.filter.codec.ProtocolDecoderOutput)
      */
     @Override
     public void decode(final IoSession session, final IoBuffer in, final ProtocolDecoderOutput out) throws Exception

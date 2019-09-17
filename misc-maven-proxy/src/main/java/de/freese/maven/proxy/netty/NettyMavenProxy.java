@@ -1,13 +1,13 @@
 // Created: 27.03.2018
 package de.freese.maven.proxy.netty;
 
-import java.net.URI;
+import java.util.List;
 import java.util.concurrent.Executor;
 import de.freese.maven.proxy.AbstractMavenProxy;
 import de.freese.maven.proxy.MavenProxy;
 import de.freese.maven.proxy.netty.initializer.NettyMavenInitializer;
-import de.freese.maven.proxy.repository.Repository;
 import de.freese.maven.proxy.repository.file.FileRepository;
+import de.freese.maven.proxy.repository.http.HttpRepository;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -36,25 +36,23 @@ public class NettyMavenProxy extends AbstractMavenProxy
     /**
      *
      */
-    private final EventLoopGroup acceptorGroup;
+    private EventLoopGroup acceptorGroup = null;
 
     /**
      *
      */
-    private final EventLoopGroup workerGroup;
+    private EventLoopGroup workerGroup = null;
 
     /**
      * Erzeugt eine neue Instanz von {@link NettyMavenProxy}.
      *
-     * @param repository {@link Repository}
      * @param executor {@link Executor}
+     * @param fileRepository {@link FileRepository}
+     * @param httpRepositories {@link List}
      */
-    public NettyMavenProxy(final Repository repository, final Executor executor)
+    public NettyMavenProxy(final Executor executor, final FileRepository fileRepository, final List<HttpRepository> httpRepositories)
     {
-        super(repository, executor);
-
-        this.acceptorGroup = new NioEventLoopGroup(2, executor);
-        this.workerGroup = new NioEventLoopGroup(2, executor);
+        super(executor, fileRepository, httpRepositories);
     }
 
     /**
@@ -63,10 +61,17 @@ public class NettyMavenProxy extends AbstractMavenProxy
     @Override
     public void shutdown()
     {
-        getLogger().info(null);
+        getLogger().info("shutdown");
 
-        this.acceptorGroup.shutdownGracefully();
-        this.workerGroup.shutdownGracefully();
+        if (this.acceptorGroup != null)
+        {
+            this.acceptorGroup.shutdownGracefully();
+        }
+
+        if (this.workerGroup != null)
+        {
+            this.workerGroup.shutdownGracefully();
+        }
     }
 
     /**
@@ -75,15 +80,20 @@ public class NettyMavenProxy extends AbstractMavenProxy
     @Override
     public void start()
     {
+        getLogger().info("start");
+
         try
         {
             ServerBootstrap bootstrap = new ServerBootstrap();
 
+            this.acceptorGroup = new NioEventLoopGroup(8, getExecutor());
+            this.workerGroup = new NioEventLoopGroup(8, getExecutor());
+
             // @formatter:off
             bootstrap.group(this.acceptorGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.INFO))
-                .childHandler(new NettyMavenInitializer(getRepository(), getCharset(), new FileRepository(URI.create("file:///tmp/mavenProxy"))));
+                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .childHandler(new NettyMavenInitializer(getFileRepository(), getHttpRepositories()));
             //  @formatter:off
 
             ChannelFuture ch = bootstrap.bind(getPort());
@@ -101,8 +111,7 @@ public class NettyMavenProxy extends AbstractMavenProxy
         }
         // finally
         // {
-        // this.bossGroup.shutdownGracefully();
-        // this.workerGroup.shutdownGracefully();
+        // shutdown()
         // }
     }
 }
