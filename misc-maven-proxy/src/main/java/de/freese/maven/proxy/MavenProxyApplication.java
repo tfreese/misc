@@ -3,27 +3,33 @@
  */
 package de.freese.maven.proxy;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpClient.Version;
+import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import de.freese.maven.proxy.netty.NettyMavenProxy;
-import de.freese.maven.proxy.repository.file.FileRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import de.freese.maven.proxy.blobstore.BlobStore;
+import de.freese.maven.proxy.blobstore.file.FileBlobStore;
+import de.freese.maven.proxy.netty.initializer.NettyMavenInitializer;
+import de.freese.maven.proxy.repository.RemoteRepositories;
+import de.freese.maven.proxy.repository.RemoteRepository;
 import de.freese.maven.proxy.repository.http.JreHttpClientRepository;
+import de.freese.maven.proxy.util.ProxyUtils;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
  * Startet den Maven Proxy.<br>
@@ -33,7 +39,7 @@ import de.freese.maven.proxy.repository.http.JreHttpClientRepository;
  * &lt;mirror&gt;
  *   &lt;id&gt;myProxy&lt;/id>&gt;
  *   &lt;name&gt;myProxy&lt;/name&gt;
- *   &lt;url&gt;http://localhost:8080&lt;/url&gt;
+ *   &lt;url&gt;http://localhost:8085&lt;/url&gt;
  *   &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;
  * &lt;/mirror&gt;
  * </pre>
@@ -43,89 +49,9 @@ import de.freese.maven.proxy.repository.http.JreHttpClientRepository;
 public class MavenProxyApplication
 {
     /**
-     *
-     */
-    static void enableProxy()
-    {
-        String proxyHost = "194.114.63.23";
-        String proxyPort = "8080";
-        String nonProxyHosts = "localhost|127.0.0.1";
-        String userID = "USER";
-        String password = "...";
-        // String domain = "DOMAIN";
-
-        System.setProperty("java.net.useSystemProxies", "true");
-
-        System.setProperty("http.proxyHost", proxyHost);
-        System.setProperty("http.proxyPort", proxyPort);
-        // System.setProperty("http.proxyUser", userID);
-        // System.setProperty("http.proxyPassword", password);
-        // System.setProperty("http.auth.ntlm.domain", domain);
-        System.setProperty("http.nonProxyHosts", nonProxyHosts);
-
-        System.setProperty("https.proxyHost", proxyHost);
-        System.setProperty("https.proxyPort", proxyPort);
-        // System.setProperty("https.proxyUser", userID);
-        // System.setProperty("https.proxyPassword", password);
-        // System.setProperty("https.auth.ntlm.domain", domain);
-        System.setProperty("https.nonProxyHosts", nonProxyHosts);
-
-        // Bei Fehler: java.net.ProtocolException: Server redirected too many times (20)
-        // System.setProperty("http.maxRedirects", "99");
-        // Default cookie manager.
-        // CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-        // String encoded = new String(Base64.encodeBase64((getHTTPUsername() + ":" + getHTTPPassword()).getBytes()));
-        // con.setRequestProperty("Proxy-Authorization", "Basic " + encoded);
-        java.net.Authenticator.setDefault(new java.net.Authenticator()
-        {
-            /**
-             * @see java.net.Authenticator#getPasswordAuthentication()
-             */
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication()
-            {
-                return new PasswordAuthentication(userID, password.toCharArray());
-            }
-        });
-
-        // Test
-        if (Boolean.getBoolean("java.net.useSystemProxies"))
-        {
-            try
-            {
-                URL url = new URL("http://www.google.de");
-                // URL url = new URL("https://search.maven.org");
-
-                // Ausgabe verfügbarer Proxies für eine URL.
-                List<Proxy> proxies = ProxySelector.getDefault().select(url.toURI());
-                proxies.forEach(System.out::println);
-
-                // SocketAddress proxyAddress = new InetSocketAddress("194.114.63.23", 8080);
-                // Proxy proxy = new Proxy(Proxy.Type.HTTP, proxyAddress);
-                Proxy proxy = proxies.get(0);
-
-                URLConnection connection = url.openConnection(proxy);
-                // URLConnection connection = url.openConnection();
-
-                try (InputStream response = connection.getInputStream();
-                     BufferedReader in = new BufferedReader(new InputStreamReader(response)))
-                {
-                    String line = null;
-
-                    while ((line = in.readLine()) != null)
-                    {
-                        System.out.println(line);
-                    }
-                }
-
-                ((HttpURLConnection) connection).disconnect();
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-    }
+    *
+    */
+    private static final Logger LOGGER = LoggerFactory.getLogger(MavenProxyApplication.class);
 
     /**
      * @param args String[]
@@ -137,7 +63,7 @@ public class MavenProxyApplication
         // Charset charset = Charset.forName("ISO-8859-1");
         // Charset charset = StandardCharsets.ISO_8859_1;
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.max(5, Runtime.getRuntime().availableProcessors() * 2));
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.max(9, Runtime.getRuntime().availableProcessors() * 2));
 
         // @formatter:off
         HttpClient.Builder builder = HttpClient.newBuilder()
@@ -155,32 +81,158 @@ public class MavenProxyApplication
 
         HttpClient httpClient = builder.build();
 
-        final MavenProxy proxy = new NettyMavenProxy(executorService, new FileRepository(URI.create("file:///tmp/mavenProxy")),
-                List.of(new JreHttpClientRepository(URI.create("http://repo1.maven.org/maven2"), httpClient),
-                        new JreHttpClientRepository(URI.create("http://repository.jboss.org/nexus/content/groups/public-jboss"), httpClient),
-                        new JreHttpClientRepository(URI.create("https://repository.jboss.org/nexus/content/repositories/releases"), httpClient)));
+        RemoteRepositories remoteRepositories = new RemoteRepositories();
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo1.maven.org/maven2"), httpClient));
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/snapshot"), httpClient));
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/milestone"), httpClient));
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/libs-milestone"), httpClient));
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repository.primefaces.org"), httpClient));
+        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://oss.sonatype.org/content/repositories/releases"), httpClient));
+
+        // remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("http://repository.jboss.org/nexus/content/groups/public-jboss"),
+        // httpClient));
+        // remoteRepositories
+        // .addRepository(new JreHttpClientRepository(URI.create("https://repository.jboss.org/nexus/content/repositories/releases"), httpClient));
+
+        final MavenProxyApplication proxy =
+                new MavenProxyApplication(executorService, new FileBlobStore(Paths.get("/mnt/sonstiges/maven-proxy")), remoteRepositories);
         proxy.setPort(8085);
 
-        proxy.start();
+        new Thread(proxy::start, "Maven-Proxy").start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             proxy.shutdown();
 
-            executorService.shutdown();
+            ProxyUtils.shutdown(executorService, LOGGER);
+        }, "Shutdown"));
 
-            while (!executorService.isTerminated())
+        // Nur in Eclipse nutzen, Enter = Shutdown.
+        try
+        {
+            System.in.read();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        System.exit(0);
+    }
+
+    /**
+    *
+    */
+    private EventLoopGroup acceptorGroup = null;
+
+    /**
+    *
+    */
+    private final BlobStore blobStore;
+
+    /**
+    *
+    */
+    private final Executor executor;
+
+    /**
+    *
+    */
+    private int port = 8080;
+
+    /**
+    *
+    */
+    private final RemoteRepository remoteRepository;
+
+    /**
+    *
+    */
+    private EventLoopGroup workerGroup = null;
+
+    /**
+     * Erstellt ein neues {@link MavenProxyApplication} Object.
+     *
+     * @param executor {@link Executor}
+     * @param blobStore {@link BlobStore}
+     * @param remoteRepository {@link RemoteRepository}
+     */
+    public MavenProxyApplication(final Executor executor, final BlobStore blobStore, final RemoteRepository remoteRepository)
+    {
+        super();
+
+        this.executor = Objects.requireNonNull(executor, "executor required");
+        this.blobStore = Objects.requireNonNull(blobStore, "blobStore required");
+        this.remoteRepository = Objects.requireNonNull(remoteRepository, "repository required");
+    }
+
+    /**
+     * @param port int
+     */
+    public void setPort(final int port)
+    {
+        if (port <= 0)
+        {
+            throw new IllegalArgumentException("port <= 0");
+        }
+
+        this.port = port;
+    }
+
+    /**
+     *
+     */
+    public void shutdown()
+    {
+        LOGGER.info("shutdown");
+
+        if (this.acceptorGroup != null)
+        {
+            this.acceptorGroup.shutdownGracefully();
+        }
+
+        if (this.workerGroup != null)
+        {
+            this.workerGroup.shutdownGracefully();
+        }
+    }
+
+    /**
+     *
+     */
+    public void start()
+    {
+        LOGGER.info("start");
+
+        try
+        {
+            ServerBootstrap bootstrap = new ServerBootstrap();
+
+            this.acceptorGroup = new NioEventLoopGroup(2, this.executor);
+            this.workerGroup = new NioEventLoopGroup(6, this.executor);
+
+            // @formatter:off
+            bootstrap.group(this.acceptorGroup, this.workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .childHandler(new NettyMavenInitializer(this.blobStore, this.remoteRepository));
+            // @formatter:on
+
+            ChannelFuture ch = bootstrap.bind(this.port);
+
+            ch.channel().closeFuture().sync();
+        }
+        catch (Exception ex)
+        {
+            if (ex instanceof RuntimeException)
             {
-                try
-                {
-                    executorService.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-                }
-                catch (InterruptedException ex)
-                {
-                    // Ignore
-                }
+                throw (RuntimeException) ex;
             }
 
-            System.exit(0);
-        }));
+            throw new RuntimeException(ex);
+        }
+        // finally
+        // {
+        // shutdown()
+        // }
     }
 }

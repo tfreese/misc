@@ -5,14 +5,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 import javax.activation.MimetypesFileTypeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.maven.proxy.repository.file.FileRepository;
+import de.freese.maven.proxy.blobstore.Blob;
+import de.freese.maven.proxy.blobstore.BlobId;
+import de.freese.maven.proxy.blobstore.BlobStore;
+import de.freese.maven.proxy.repository.RemoteRepository;
 import de.freese.maven.proxy.repository.http.HttpRepository;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -50,12 +51,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     /**
     *
     */
-    private final FileRepository fileRepository;
-
-    /**
-        *
-        */
-    private final List<HttpRepository> httpRepositories;
+    private final BlobStore blobStore;
 
     /**
     *
@@ -63,17 +59,22 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
+        *
+        */
+    private final RemoteRepository remoteRepository;
+
+    /**
      * Erzeugt eine neue Instanz von {@link NettyMavenRequestHandler}.
      *
-     * @param fileRepository {@link FileRepository}
-     * @param httpRepositories {@link List}
+     * @param blobStore {@link BlobStore}
+     * @param remoteRepository {@link RemoteRepository}
      */
-    public NettyMavenRequestHandler(final FileRepository fileRepository, final List<HttpRepository> httpRepositories)
+    public NettyMavenRequestHandler(final BlobStore blobStore, final RemoteRepository remoteRepository)
     {
         super();
 
-        this.fileRepository = Objects.requireNonNull(fileRepository, "fileRepository required");
-        this.httpRepositories = Objects.requireNonNull(httpRepositories, "httpRepositories required");
+        this.blobStore = Objects.requireNonNull(blobStore, "blobStore required");
+        this.remoteRepository = Objects.requireNonNull(remoteRepository, "repository required");
     }
 
     /**
@@ -138,41 +139,38 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     protected void handleGet(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception
     {
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
-        final String resource = request.uri();
+        String resource = request.uri();
 
-        Path path = this.fileRepository.createResourcePath(resource);
+        BlobId id = new BlobId(resource);
+        Blob blob = null;
 
         // Erst im FileRepository suchen.
-        if (!this.fileRepository.exist(resource))
+        if (!this.blobStore.exists(id))
         {
-            // Dann in den HttpRepositories suchen.
-            for (HttpRepository httpRepository : this.httpRepositories)
+            // Dann in den RemoteRepositories suchen.
+            InputStream inputStream = this.remoteRepository.getInputStream(id.asUniqueString());
+
+            if (inputStream != null)
             {
-                InputStream inputStream = null;
-
-                try
-                {
-                    inputStream = httpRepository.getInputStream(resource);
-                }
-                catch (Exception ex)
-                {
-                    getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-                }
-
-                if (inputStream == null)
-                {
-                    continue;
-                }
-
-                getLogger().info("Download {}{}", httpRepository.getUri(), resource);
-                Files.createDirectories(path.getParent());
-                Files.copy(inputStream, path);
+                getLogger().info("Download {}", id.asUniqueString());
+                blob = this.blobStore.create(id, inputStream);
+                getLogger().info("Download complete for " + id.asUniqueString());
                 inputStream.close();
-
-                break;
             }
         }
+        else
+        {
+            blob = this.blobStore.get(id);
+        }
 
+        if (blob == null)
+        {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND, "File not found: " + id.asUniqueString(), request);
+
+            return;
+        }
+
+        Path path = blob.createTempFile();
         File file = path.toFile();
         RandomAccessFile raf = null;
 
@@ -238,7 +236,14 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             @Override
             public void operationComplete(final ChannelProgressiveFuture future)
             {
-                getLogger().debug(future.channel() + " Transfer complete for " + request.uri());
+                if (getLogger().isDebugEnabled())
+                {
+                    getLogger().debug(future.channel() + " Transfer complete: " + request.uri());
+                }
+                else
+                {
+                    getLogger().info("Transfer complete: " + request.uri());
+                }
             }
 
             /**
@@ -250,11 +255,11 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
                 if (total < 0)
                 {
                     // total unknown
-                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " for " + request.uri());
+                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " : " + request.uri());
                 }
                 else
                 {
-                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " / " + total + " for " + request.uri());
+                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " / " + total + " : " + request.uri());
                 }
             }
         });
@@ -286,28 +291,21 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     protected void handleHead(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception
     {
         String resource = request.uri();
+        BlobId id = new BlobId(resource);
 
         // Erst im FileRepository suchen.
-        boolean exist = this.fileRepository.exist(resource);
+        boolean exist = this.blobStore.exists(id);
 
         if (!exist)
         {
-            // Dann in den HttpRepositories suchen.
-            for (HttpRepository httpRepository : this.httpRepositories)
+            // Dann in den RemoteRepositories suchen.
+            try
             {
-                try
-                {
-                    exist = httpRepository.exist(resource);
-                }
-                catch (Exception ex)
-                {
-                    getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
-                }
-
-                if (exist)
-                {
-                    break;
-                }
+                exist = this.remoteRepository.exist(resource);
+            }
+            catch (Exception ex)
+            {
+                getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
             }
         }
 
@@ -372,11 +370,11 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     protected void sendError(final ChannelHandlerContext ctx, final HttpResponseStatus status, final String message, final FullHttpRequest request)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("HTTP-Failure: ").append(status).append(HttpRepository.CRLF);
+        sb.append("HTTP-Failure: ").append(status);
 
         if ((message != null) && !message.isBlank())
         {
-            sb.append("Message: ").append(message).append(HttpRepository.CRLF);
+            sb.append(HttpRepository.CRLF).append("Message: ").append(message);
         }
 
         getLogger().error(sb.toString());

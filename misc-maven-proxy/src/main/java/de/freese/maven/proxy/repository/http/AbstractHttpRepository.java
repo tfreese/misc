@@ -5,15 +5,21 @@
 package de.freese.maven.proxy.repository.http;
 
 import java.net.URI;
-import de.freese.maven.proxy.repository.AbstractRepository;
+import java.util.Objects;
+import de.freese.maven.proxy.repository.AbstractRemoteRepository;
 
 /**
  * Basisimplementierung eines HTTP-Repositories.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractHttpRepository extends AbstractRepository implements HttpRepository
+public abstract class AbstractHttpRepository extends AbstractRemoteRepository implements HttpRepository
 {
+    /**
+    *
+    */
+    private final URI uri;
+
     /**
      * Erstellt ein neues {@link AbstractHttpRepository} Object.
      *
@@ -21,7 +27,9 @@ public abstract class AbstractHttpRepository extends AbstractRepository implemen
      */
     public AbstractHttpRepository(final URI uri)
     {
-        super(uri);
+        super();
+
+        this.uri = Objects.requireNonNull(uri, "repository required");
 
         String scheme = uri.getScheme();
 
@@ -35,11 +43,21 @@ public abstract class AbstractHttpRepository extends AbstractRepository implemen
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#dispose()
+     * Liefert den Ort des Repositories.
+     *
+     * @return {@link URI}
+     */
+    protected URI getUri()
+    {
+        return this.uri;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
      */
     @Override
-    public void dispose()
+    public String toString()
     {
-        // Empty
+        return getUri().toString();
     }
 }

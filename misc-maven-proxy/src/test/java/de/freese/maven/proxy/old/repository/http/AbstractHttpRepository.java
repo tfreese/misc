@@ -90,15 +90,6 @@ public abstract class AbstractHttpRepository extends AbstractRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#dispose()
-     */
-    @Override
-    public void dispose()
-    {
-        // Empty
-    }
-
-    /**
      * @see de.freese.maven.proxy.old.repository.Repository#exist(de.freese.maven.proxy.old.model.MavenRequest)
      */
     @Override

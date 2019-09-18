@@ -4,7 +4,7 @@
 
 package de.freese.maven.proxy.repository.http;
 
-import de.freese.maven.proxy.repository.Repository;
+import de.freese.maven.proxy.repository.RemoteRepository;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  *
  * @author Thomas Freese
  */
-public interface HttpRepository extends Repository
+public interface HttpRepository extends RemoteRepository
 {
     /**
      * (0x0D, 0x0A), (13,10), (\r\n)

@@ -47,7 +47,7 @@ public abstract class AbstractRepository implements Repository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#getUri()
+     * @see de.freese.maven.proxy.old.repository.Repository#getUri()
      */
     @Override
     public URI getUri()
@@ -61,6 +61,6 @@ public abstract class AbstractRepository implements Repository
     @Override
     public String toString()
     {
-        return getName();
+        return getUri().toString();
     }
 }

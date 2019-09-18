@@ -1,12 +1,10 @@
 // Created: 27.03.2018
 package de.freese.maven.proxy.netty.initializer;
 
-import java.util.List;
 import java.util.Objects;
-import de.freese.maven.proxy.MavenProxy;
+import de.freese.maven.proxy.blobstore.BlobStore;
 import de.freese.maven.proxy.netty.handler.NettyMavenRequestHandler;
-import de.freese.maven.proxy.repository.file.FileRepository;
-import de.freese.maven.proxy.repository.http.HttpRepository;
+import de.freese.maven.proxy.repository.RemoteRepository;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -16,7 +14,7 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
- * {@link ChannelInitializer} für den {@link MavenProxy}.
+ * {@link ChannelInitializer} für den Maven Proxy.
  *
  * @author Thomas Freese
  */
@@ -25,12 +23,12 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
     /**
     *
     */
-    private final FileRepository fileRepository;
+    private final BlobStore blobStore;
 
     /**
     *
     */
-    private final List<HttpRepository> httpRepositories;
+    private final RemoteRepository remoteRepository;
 
     /**
     *
@@ -40,15 +38,15 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
     /**
      * Erzeugt eine neue Instanz von {@link NettyMavenInitializer}.
      *
-     * @param fileRepository {@link FileRepository}
-     * @param httpRepositories {@link List}
+     * @param blobStore {@link BlobStore}
+     * @param remoteRepository {@link RemoteRepository}
      */
-    public NettyMavenInitializer(final FileRepository fileRepository, final List<HttpRepository> httpRepositories)
+    public NettyMavenInitializer(final BlobStore blobStore, final RemoteRepository remoteRepository)
     {
         super();
 
-        this.fileRepository = Objects.requireNonNull(fileRepository, "fileRepository required");
-        this.httpRepositories = Objects.requireNonNull(httpRepositories, "httpRepositories required");
+        this.blobStore = Objects.requireNonNull(blobStore, "blobStore required");
+        this.remoteRepository = Objects.requireNonNull(remoteRepository, "repository required");
         this.sslContext = null;
     }
 
@@ -68,6 +66,6 @@ public class NettyMavenInitializer extends ChannelInitializer<SocketChannel>
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(65536)); // Keine Chunks
         pipeline.addLast(new ChunkedWriteHandler());
-        pipeline.addLast(new NettyMavenRequestHandler(this.fileRepository, this.httpRepositories));
+        pipeline.addLast(new NettyMavenRequestHandler(this.blobStore, this.remoteRepository));
     }
 }

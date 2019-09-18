@@ -16,11 +16,6 @@ import de.freese.maven.proxy.old.model.MavenResponse;
 public interface Repository
 {
     /**
-     * Beenden und aufräumen.
-     */
-    public void dispose();
-
-    /**
      * Prüft, ob die Datei vorhanden ist.<br>
      *
      * @param mavenRequest {@link MavenRequest}
@@ -28,16 +23,6 @@ public interface Repository
      * @throws Exception Falls was schief geht.
      */
     public MavenResponse exist(MavenRequest mavenRequest) throws Exception;
-
-    /**
-     * Liefert den eindeitigen Namen des Repositories (URL, Path).
-     *
-     * @return String
-     */
-    public default String getName()
-    {
-        return getUri().toString();
-    }
 
     /**
      * Laden der betreffenden Datei.<br>

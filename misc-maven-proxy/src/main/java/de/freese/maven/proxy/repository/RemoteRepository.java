@@ -5,20 +5,14 @@
 package de.freese.maven.proxy.repository;
 
 import java.io.InputStream;
-import java.net.URI;
 
 /**
- * Interface eines Repositories.
+ * Interface eines Remote-Repositories.
  *
  * @author Thomas Freese
  */
-public interface Repository
+public interface RemoteRepository
 {
-    /**
-     * Beenden und aufräumen.
-     */
-    public void dispose();
-
     /**
      * Prüft, ob die Resource vorhanden ist.<br>
      *
@@ -37,11 +31,4 @@ public interface Repository
      * @throws Exception Falls was schief geht.
      */
     public InputStream getInputStream(String resource) throws Exception;
-
-    /**
-     * Liefert den Ort des Repositories.
-     *
-     * @return {@link URI}
-     */
-    public URI getUri();
 }

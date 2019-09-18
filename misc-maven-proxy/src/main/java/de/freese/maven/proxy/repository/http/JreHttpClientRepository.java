@@ -61,6 +61,20 @@ public class JreHttpClientRepository extends AbstractHttpRepository
      */
     protected URI createResourceUri(final URI baseUri, final String resource)
     {
+        // StringBuilder url = new StringBuilder(getUri().getScheme());
+        // url.append("://");
+        // url.append(getUri().getHost());
+        //
+        // if (getUri().getPort() > 0)
+        // {
+        // url.append(":").append(getUri().getPort());
+        // }
+        //
+        // url.append(getUri().getPath());
+        // url.append(mavenRequest.getHttpUri());
+        //
+        // URI uri = new URI(url.toString());
+
         String path = baseUri.getPath();
 
         if (path.endsWith("/") && resource.startsWith("/"))
@@ -82,7 +96,7 @@ public class JreHttpClientRepository extends AbstractHttpRepository
     }
 
     /**
-     * @see de.freese.maven.proxy.repository.Repository#exist(java.lang.String)
+     * @see de.freese.maven.proxy.repository.RemoteRepository#exist(java.lang.String)
      */
     @Override
     public boolean exist(final String resource) throws Exception
@@ -95,39 +109,17 @@ public class JreHttpClientRepository extends AbstractHttpRepository
                 .build();
         // @formatter:on
 
-        HttpResponse<String> response = getHttpClient().send(request, BodyHandlers.ofString());
+        HttpResponse<String> response = this.httpClient.send(request, BodyHandlers.ofString());
 
         return response.statusCode() == HTTP_OK;
     }
 
     /**
-     * @return {@link HttpClient}
-     */
-    protected HttpClient getHttpClient()
-    {
-        return this.httpClient;
-    }
-
-    /**
-     * @see de.freese.maven.proxy.repository.Repository#getInputStream(java.lang.String)
+     * @see de.freese.maven.proxy.repository.RemoteRepository#getInputStream(java.lang.String)
      */
     @Override
     public InputStream getInputStream(final String resource) throws Exception
     {
-        // StringBuilder url = new StringBuilder(getUri().getScheme());
-        // url.append("://");
-        // url.append(getUri().getHost());
-        //
-        // if (getUri().getPort() > 0)
-        // {
-        // url.append(":").append(getUri().getPort());
-        // }
-        //
-        // url.append(getUri().getPath());
-        // url.append(mavenRequest.getHttpUri());
-        //
-        // URI uri = new URI(url.toString());
-
         // @formatter:off
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(createResourceUri(getUri(),resource))
@@ -136,7 +128,7 @@ public class JreHttpClientRepository extends AbstractHttpRepository
                 .build();
         // @formatter:on
 
-        HttpResponse<InputStream> response = getHttpClient().send(request, BodyHandlers.ofInputStream());
+        HttpResponse<InputStream> response = this.httpClient.send(request, BodyHandlers.ofInputStream());
 
         if (response.statusCode() != HTTP_OK)
         {
@@ -145,7 +137,7 @@ public class JreHttpClientRepository extends AbstractHttpRepository
 
         return response.body();
 
-        // int contentLength = response.headers().firstValue("content-length").map(Integer::parseInt).orElse(0);
+        // int contentLength = response.headers().firstValue(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Integer::parseInt).orElse(0);
         //
         // // Response lesen.
         // try (InputStream input = response.body())
