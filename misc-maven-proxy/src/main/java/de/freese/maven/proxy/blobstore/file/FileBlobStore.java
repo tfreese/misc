@@ -30,6 +30,11 @@ public class FileBlobStore extends AbstractBlobStore
     public class FileBlob extends AbstractBlob
     {
         /**
+         *
+         */
+        private final Path absolutePath;
+
+        /**
          * Erstellt ein neues {@link FileBlob} Object.
          *
          * @param id {@link BlobId}
@@ -37,6 +42,8 @@ public class FileBlobStore extends AbstractBlobStore
         private FileBlob(final BlobId id)
         {
             super(id);
+
+            this.absolutePath = toContentPath(id);
         }
 
         /**
@@ -46,9 +53,7 @@ public class FileBlobStore extends AbstractBlobStore
         protected Path doCreateTempFile() throws Exception
         {
             // Einfach den absoluten Pfad liefern.
-            Path path = toContentPath(getId());
-
-            return path;
+            return this.absolutePath;
         }
 
         /**
@@ -57,9 +62,27 @@ public class FileBlobStore extends AbstractBlobStore
         @Override
         protected InputStream doGetInputStream() throws Exception
         {
-            Path path = toContentPath(getId());
+            return Files.newInputStream(this.absolutePath);
+        }
 
-            return Files.newInputStream(path);
+        /**
+         * @see de.freese.maven.proxy.blobstore.AbstractBlob#doGetLength()
+         */
+        @Override
+        protected long doGetLength() throws Exception
+        {
+            long length = Files.size(this.absolutePath);
+
+            return length;
+        }
+
+        /**
+         * @see de.freese.maven.proxy.blobstore.AbstractBlob#doGetName()
+         */
+        @Override
+        protected String doGetName() throws Exception
+        {
+            return this.absolutePath.getFileName().toString();
         }
 
         /**
@@ -68,7 +91,7 @@ public class FileBlobStore extends AbstractBlobStore
         @Override
         public String toString()
         {
-            return toContentPath(getId()).toString();
+            return this.absolutePath.toString();
         }
     }
 

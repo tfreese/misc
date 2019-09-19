@@ -70,6 +70,18 @@ public abstract class AbstractBlob implements Blob
     protected abstract InputStream doGetInputStream() throws Exception;
 
     /**
+     * @return long
+     * @throws Exception Falls was schief geht.
+     */
+    protected abstract long doGetLength() throws Exception;
+
+    /**
+     * @return String
+     * @throws Exception Falls was schief geht.
+     */
+    protected abstract String doGetName() throws Exception;
+
+    /**
      * @see de.freese.maven.proxy.blobstore.Blob#getId()
      */
     @Override
@@ -97,10 +109,46 @@ public abstract class AbstractBlob implements Blob
     }
 
     /**
+     * @see de.freese.maven.proxy.blobstore.Blob#getLength()
+     */
+    @Override
+    public long getLength()
+    {
+        try
+        {
+            return doGetLength();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
+
+        return -1L;
+    }
+
+    /**
      * @return {@link Logger}
      */
     protected Logger getLogger()
     {
         return this.logger;
+    }
+
+    /**
+     * @see de.freese.maven.proxy.blobstore.Blob#getName()
+     */
+    @Override
+    public String getName()
+    {
+        try
+        {
+            return doGetName();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
+
+        return null;
     }
 }

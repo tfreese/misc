@@ -37,4 +37,18 @@ public interface Blob
      * @return {@link InputStream}
      */
     public InputStream getInputStream();
+
+    /**
+     * Liefert die Größe/Lönge des Blobs in Byte.
+     *
+     * @return long
+     */
+    public long getLength();
+
+    /**
+     * Liefert den Namen des Blobs ohne führende Pfadangaben.
+     *
+     * @return long
+     */
+    public String getName();
 }

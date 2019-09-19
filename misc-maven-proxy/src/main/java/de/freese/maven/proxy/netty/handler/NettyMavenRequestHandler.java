@@ -1,11 +1,7 @@
 // Created: 27.03.2018
 package de.freese.maven.proxy.netty.handler;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.file.Path;
 import java.util.Objects;
 import javax.activation.MimetypesFileTypeMap;
 import org.slf4j.Logger;
@@ -22,7 +18,6 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelProgressiveFuture;
 import io.netty.channel.ChannelProgressiveFutureListener;
-import io.netty.channel.DefaultFileRegion;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
@@ -38,7 +33,7 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.stream.ChunkedFile;
+import io.netty.handler.stream.ChunkedStream;
 import io.netty.util.CharsetUtil;
 
 /**
@@ -59,8 +54,13 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-        *
-        */
+     *
+     */
+    private final MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+
+    /**
+    *
+    */
     private final RemoteRepository remoteRepository;
 
     /**
@@ -170,30 +170,15 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             return;
         }
 
-        Path path = blob.createTempFile();
-        File file = path.toFile();
-        RandomAccessFile raf = null;
-
-        try
-        {
-            raf = new RandomAccessFile(file, "r");
-        }
-        catch (FileNotFoundException ex)
-        {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND, ex.getMessage(), request);
-
-            return;
-        }
-
-        long fileLength = raf.length();
+        long fileLength = blob.getLength();
 
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(HttpHeaderNames.SERVER, "Maven-Proxy");
         HttpUtil.setContentLength(response, fileLength);
 
         // setContentTypeHeader(response, file);
-        MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, mimeTypesMap.getContentType(file.getPath()));
+
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, this.mimeTypesMap.getContentType(blob.getName()));
 
         // setDateAndCacheHeaders(response, file);
 
@@ -215,14 +200,14 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
 
         if (ctx.pipeline().get(SslHandler.class) == null)
         {
-            sendFileFuture = ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
+            sendFileFuture = ctx.write(new HttpChunkedInput(new ChunkedStream(blob.getInputStream())), ctx.newProgressivePromise());
 
             // Write the end marker.
             lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
         }
         else
         {
-            sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)), ctx.newProgressivePromise());
+            sendFileFuture = ctx.writeAndFlush(new HttpChunkedInput(new ChunkedStream(blob.getInputStream())), ctx.newProgressivePromise());
 
             // HttpChunkedInput will write the end marker (LastHttpContent) for us.
             lastContentFuture = sendFileFuture;
@@ -272,17 +257,6 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
         }
     }
 
-    // /**
-    // * @see io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete(io.netty.channel.ChannelHandlerContext)
-    // */
-    // @Override
-    // public void channelReadComplete(final ChannelHandlerContext ctx) throws Exception
-    // {
-    // ctx.flush();
-    //
-    // super.channelReadComplete(ctx);
-    // }
-
     /**
      * @param ctx {@link ChannelHandlerContext}
      * @param request {@link FullHttpRequest}
@@ -313,9 +287,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
 
         // HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, responseStatus);
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, responseStatus);
-        response.headers().set(HttpHeaderNames.SERVER, "Maven-Proxy");
 
-        // ctx.writeAndFlush(response);
         sendAndCleanupConnection(ctx, response, request);
     }
 
@@ -339,6 +311,8 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     protected void sendAndCleanupConnection(final ChannelHandlerContext ctx, final FullHttpResponse response, final FullHttpRequest request)
     {
         final boolean keepAlive = request != null ? HttpUtil.isKeepAlive(request) : true;
+
+        response.headers().set(HttpHeaderNames.SERVER, "Maven-Proxy");
         HttpUtil.setContentLength(response, response.content().readableBytes());
 
         if (!keepAlive)
