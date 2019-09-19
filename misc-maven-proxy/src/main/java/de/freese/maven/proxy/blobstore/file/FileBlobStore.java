@@ -47,16 +47,6 @@ public class FileBlobStore extends AbstractBlobStore
         }
 
         /**
-         * @see de.freese.maven.proxy.blobstore.AbstractBlob#doCreateTempFile()
-         */
-        @Override
-        protected Path doCreateTempFile() throws Exception
-        {
-            // Einfach den absoluten Pfad liefern.
-            return this.absolutePath;
-        }
-
-        /**
          * @see de.freese.maven.proxy.blobstore.AbstractBlob#doGetInputStream()
          */
         @Override
@@ -77,10 +67,10 @@ public class FileBlobStore extends AbstractBlobStore
         }
 
         /**
-         * @see de.freese.maven.proxy.blobstore.AbstractBlob#doGetName()
+         * @see de.freese.maven.proxy.blobstore.AbstractBlob#doGetSimpleName()
          */
         @Override
-        protected String doGetName() throws Exception
+        protected String doGetSimpleName() throws Exception
         {
             return this.absolutePath.getFileName().toString();
         }

@@ -5,7 +5,6 @@
 package de.freese.maven.proxy.blobstore;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,30 +39,6 @@ public abstract class AbstractBlob implements Blob
     }
 
     /**
-     * @see de.freese.maven.proxy.blobstore.Blob#createTempFile()
-     */
-    @Override
-    public Path createTempFile()
-    {
-        try
-        {
-            return doCreateTempFile();
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
-
-        return null;
-    }
-
-    /**
-     * @return {@link Path}
-     * @throws Exception Falls was schief geht.
-     */
-    protected abstract Path doCreateTempFile() throws Exception;
-
-    /**
      * @return {@link InputStream}
      * @throws Exception Falls was schief geht.
      */
@@ -79,7 +54,7 @@ public abstract class AbstractBlob implements Blob
      * @return String
      * @throws Exception Falls was schief geht.
      */
-    protected abstract String doGetName() throws Exception;
+    protected abstract String doGetSimpleName() throws Exception;
 
     /**
      * @see de.freese.maven.proxy.blobstore.Blob#getId()
@@ -135,14 +110,14 @@ public abstract class AbstractBlob implements Blob
     }
 
     /**
-     * @see de.freese.maven.proxy.blobstore.Blob#getName()
+     * @see de.freese.maven.proxy.blobstore.Blob#getSimpleName()
      */
     @Override
-    public String getName()
+    public String getSimpleName()
     {
         try
         {
-            return doGetName();
+            return doGetSimpleName();
         }
         catch (Exception ex)
         {

@@ -5,7 +5,6 @@
 package de.freese.maven.proxy.blobstore;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 
 /**
  * Referenz für binäre Daten aus einem {@link BlobStore}.<br>
@@ -15,11 +14,6 @@ import java.nio.file.Path;
  */
 public interface Blob
 {
-    /**
-     * @return {@link Path}
-     */
-    public Path createTempFile();
-
     /**
      * @return {@link BlobId}
      */
@@ -50,5 +44,5 @@ public interface Blob
      *
      * @return long
      */
-    public String getName();
+    public String getSimpleName();
 }

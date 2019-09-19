@@ -178,7 +178,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
 
         // setContentTypeHeader(response, file);
 
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, this.mimeTypesMap.getContentType(blob.getName()));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, this.mimeTypesMap.getContentType(blob.getSimpleName()));
 
         // setDateAndCacheHeaders(response, file);
 
