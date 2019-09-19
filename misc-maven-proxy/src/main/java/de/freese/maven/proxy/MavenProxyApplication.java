@@ -59,6 +59,15 @@ public class MavenProxyApplication
      */
     public static void main(final String[] args) throws Exception
     {
+        String workingDirectory = System.getProperty("directory.working");
+        // workingDirectory = "/mnt/sonstiges/maven-proxy";
+
+        if ((workingDirectory == null) || workingDirectory.isBlank())
+        {
+            LOGGER.error("A WorkingDirectory must be set by '-Ddirectory.working=...'");
+            return;
+        }
+
         // enableProxy();
         // Charset charset = Charset.forName("ISO-8859-1");
         // Charset charset = StandardCharsets.ISO_8859_1;
@@ -83,19 +92,18 @@ public class MavenProxyApplication
 
         RemoteRepositories remoteRepositories = new RemoteRepositories();
         remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo1.maven.org/maven2"), httpClient));
-        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/snapshot"), httpClient));
-        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/milestone"), httpClient));
+        // remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/snapshot"), httpClient));
+        // remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/milestone"), httpClient));
         remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repo.spring.io/libs-milestone"), httpClient));
         remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://repository.primefaces.org"), httpClient));
-        remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://oss.sonatype.org/content/repositories/releases"), httpClient));
+        // remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("https://oss.sonatype.org/content/repositories/releases"), httpClient));
 
         // remoteRepositories.addRepository(new JreHttpClientRepository(URI.create("http://repository.jboss.org/nexus/content/groups/public-jboss"),
         // httpClient));
         // remoteRepositories
         // .addRepository(new JreHttpClientRepository(URI.create("https://repository.jboss.org/nexus/content/repositories/releases"), httpClient));
 
-        final MavenProxyApplication proxy =
-                new MavenProxyApplication(executorService, new FileBlobStore(Paths.get("/mnt/sonstiges/maven-proxy")), remoteRepositories);
+        final MavenProxyApplication proxy = new MavenProxyApplication(executorService, new FileBlobStore(Paths.get(workingDirectory)), remoteRepositories);
         proxy.setPort(8085);
 
         new Thread(proxy::start, "Maven-Proxy").start();
@@ -107,16 +115,16 @@ public class MavenProxyApplication
         }, "Shutdown"));
 
         // Nur in Eclipse nutzen, Enter = Shutdown.
-        try
-        {
-            System.in.read();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-
-        System.exit(0);
+        // try
+        // {
+        // System.in.read();
+        // }
+        // catch (Exception ex)
+        // {
+        // ex.printStackTrace();
+        // }
+        //
+        // System.exit(0);
     }
 
     /**

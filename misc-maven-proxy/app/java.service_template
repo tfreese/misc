@@ -1,0 +1,77 @@
+[Unit]
+Description=Spring MVC Java Service
+After=network-online.target
+
+
+[Service]
+User=spring-mvc
+# The configuration file application.properties should be here:
+WorkingDirectory=/usr/local/spring-mvc
+
+SyslogIdentifier=spring-mvc
+
+# Run ExecStartPre with root-permissions
+PermissionsStartOnly=true
+
+ExecStartPre=-/bin/mkdir -p /var/log/spring-mvc
+ExecStartPre=/bin/chown -R spring-mvc:syslog /var/log/spring-mvc
+ExecStartPre=/bin/chmod -R 775 /var/log/spring-mvc
+
+Environment="ENV=stage"
+
+#https://www.freedesktop.org/software/systemd/man/systemd.service.html#ExecStart=
+ExecStart=/usr/bin/java \
+        -Dlog4j.configurationFile=log4j2-spring.xml \
+        -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector \
+        -Dspring.profiles.active=stage \
+        -Denvironment-type=stage \
+        -XX:+UseConcMarkSweepGC \
+        -XX:CMSInitiatingOccupancyFraction=80 \
+        -XX:NewSize=756m \
+        -XX:MetaspaceSize=256m \
+        -Dsun.net.inetaddr.ttl=5 \
+        -Xloggc:/var/log/spring-mvc/gc.log \
+        -verbose:gc \
+        -verbosegc \
+        -XX:+DisableExplicitGC \
+        -XX:+PrintGCDetails \
+        -XX:+PrintGCDateStamps \
+        -XX:+PreserveFramePointer \
+        -XX:+StartAttachListener \
+        -Xms768m \
+        -Xmx768m \
+        -XX:+HeapDumpOnOutOfMemoryError \
+        -jar spring-mvc.war
+
+StandardOutput=journal
+StandardError=journal
+
+# When a JVM receives a SIGINT signal it exits with code 130
+KillSignal=SIGINT
+SuccessExitStatus=130
+
+# When a JVM receives a SIGTERM signal it exits with code 143
+#KillSignal=SIGTERM
+#SuccessExitStatus=143
+
+TimeoutStopSec=20
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+StartLimitBurst=10
+
+# Specifies the maximum file descriptor number that can be opened by this process
+LimitNOFILE=65536
+
+LimitNPROC=500000
+
+#https://www.freedesktop.org/software/systemd/man/systemd.exec.html#LimitCPU=
+#LimitCPU=, LimitFSIZE=, LimitDATA=, LimitSTACK=, LimitCORE=, LimitRSS=, LimitNOFILE=, LimitAS=, LimitNPROC=, LimitMEMLOCK=, LimitLOCKS=, LimitSIGPENDING=, LimitMSGQUEUE=, LimitNICE=, LimitRTPRIO=, LimitRTTIME=¶
+
+
+[Install]
+WantedBy=multi-user.target
+
+
+# https://www.freedesktop.org/software/systemd/man/journalctl.html
+#check logs: journalctl -u spring-mvc -f -o cat

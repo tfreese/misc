@@ -15,12 +15,58 @@
 	<name>${project.groupId} - ${project.artifactId}</name>
 	<description>Einfache Implementierung eines virtuellen Repositories.</description>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+							<artifactItems>
+								<artifactItem>
+									<groupId>de.freese.misc</groupId>
+									<artifactId>misc-maven-proxy</artifactId>
+									<version>${project.version}</version>
+									<overWrite>true</overWrite>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${basedir}/dist</outputDirectory>
+							<stripVersion>true</stripVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+							<outputDirectory>${basedir}/dist/libs</outputDirectory>
+							<includeScope>runtime</includeScope>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>false</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 	<dependencies>
 		<!-- compile scope -->
 		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>jakarta.activation</artifactId>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
