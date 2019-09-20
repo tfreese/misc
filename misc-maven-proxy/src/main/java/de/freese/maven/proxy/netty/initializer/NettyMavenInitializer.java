@@ -14,7 +14,10 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 /**
- * {@link ChannelInitializer} für den Maven Proxy.
+ * {@link ChannelInitializer} für den Maven Proxy.<br>
+ * curl -v localhost:8085/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom<br>
+ * curl -v -X GET localhost:8085/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom<br>
+ * curl -v -X PUT localhost:8085 -d "..."<br>
  *
  * @author Thomas Freese
  */

@@ -102,7 +102,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
         }
         else
         {
-            sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED, request.uri(), request);
+            sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED, request.method() + "; " + request.uri(), request);
         }
     }
 
@@ -140,6 +140,13 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     {
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
         String resource = request.uri();
+
+        if ("/".equals(resource))
+        {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND, "File not found: /", request);
+
+            return;
+        }
 
         BlobId id = new BlobId(resource);
         Blob blob = null;
@@ -343,22 +350,21 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
      */
     protected void sendError(final ChannelHandlerContext ctx, final HttpResponseStatus status, final String message, final FullHttpRequest request)
     {
+        getLogger().error("HTTP-Failure: {}; Message: {}", status, message);
+
         StringBuilder sb = new StringBuilder();
-        sb.append("HTTP-Failure: ").append(status);
+        sb.append("HTTP-Failure: ").append(status).append(HttpRepository.CRLF);
 
         if ((message != null) && !message.isBlank())
         {
-            sb.append(HttpRepository.CRLF).append("Message: ").append(message);
+            sb.append("Message: ").append(message).append(HttpRepository.CRLF);
         }
-
-        getLogger().error(sb.toString());
 
         ByteBuf byteBuf = Unpooled.copiedBuffer(sb.toString(), CharsetUtil.UTF_8);
 
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, byteBuf);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
 
-        // ctx.writeAndFlush(response);
         sendAndCleanupConnection(ctx, response, request);
     }
 }
