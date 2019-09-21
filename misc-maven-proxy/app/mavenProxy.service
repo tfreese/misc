@@ -8,28 +8,28 @@ After=network-online.target
 User=tommy
 
 # The configuration file application.properties should be here:
-WorkingDirectory=/mnt/sonstiges/maven-proxy
+WorkingDirectory=/mnt/ssd512GB/maven-proxy
 
 SyslogIdentifier=maven-proxy
 
 # Run ExecStartPre with root-permissions
 PermissionsStartOnly=true
-ExecStartPre=-/bin/mkdir -p /mnt/sonstiges/maven-proxy
-ExecStartPre=/bin/chown -R tommy:tommy /mnt/sonstiges/maven-proxy
-ExecStartPre=/bin/chmod -R 775 /mnt/sonstiges/maven-proxy
+ExecStartPre=-/bin/mkdir -p /mnt/ssd512GB/maven-proxy
+ExecStartPre=/bin/chown -R tommy:tommy /mnt/ssd512GB/maven-proxy
+ExecStartPre=/bin/chmod -R 775 /mnt/ssd512GB/maven-proxy
 
 #ExecStart=/bin/bash -c "java ..."
 
 ExecStart=/usr/bin/java \
+ -Dmavenproxy.directory=/mnt/ssd512GB/maven-proxy \
+ -Dmavenproxy.port=7999 \
  -Xms32m \
  -Xmx64m \
- -XX:TieredStopAtLevel=1 \
  -noverify \
+ -XX:TieredStopAtLevel=1 \
  -Djava.security.egd=file:/dev/./urandom \
- -Ddirectory.working=/mnt/sonstiges/maven-proxy \
- -classpath \
- /home/tommy/git/misc/misc-maven-proxy/app/misc-maven-proxy.jar:/home/tommy/git/misc/misc-maven-proxy/app/libs/* \
- de.freese.maven.proxy.MavenProxyApplication
+ -jar \
+ /home/tommy/git/misc/misc-maven-proxy/app/misc-maven-proxy-jar-with-dependencies.jar
 
 Type=simple
 StandardOutput=journal

@@ -83,9 +83,12 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception
     {
-        // Absender anonymisieren.
-        // mavenRequest.setUserAgentValue("none");
-        // final boolean keepAlive = HttpUtil.isKeepAlive(request);
+        if ("/".equals(request.uri()))
+        {
+            sendError(ctx, HttpResponseStatus.NOT_FOUND, "File not found: /", request);
+
+            return;
+        }
 
         if (HttpMethod.HEAD.equals(request.method()))
         {
@@ -141,13 +144,6 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
         final boolean keepAlive = HttpUtil.isKeepAlive(request);
         String resource = request.uri();
 
-        if ("/".equals(resource))
-        {
-            sendError(ctx, HttpResponseStatus.NOT_FOUND, "File not found: /", request);
-
-            return;
-        }
-
         BlobId id = new BlobId(resource);
         Blob blob = null;
 
@@ -161,7 +157,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             {
                 getLogger().info("Download {}", id.asUniqueString());
                 blob = this.blobStore.create(id, inputStream);
-                getLogger().info("Download complete for " + id.asUniqueString());
+                // getLogger().info("Download complete " + id.asUniqueString());
                 inputStream.close();
             }
         }
@@ -228,14 +224,8 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             @Override
             public void operationComplete(final ChannelProgressiveFuture future)
             {
-                if (getLogger().isDebugEnabled())
-                {
-                    getLogger().debug(future.channel() + " Transfer complete: " + request.uri());
-                }
-                else
-                {
-                    getLogger().info("Transfer complete: " + request.uri());
-                }
+                // getLogger().debug(future.channel() + " Transfer complete: " + request.uri());
+                getLogger().debug("Transfer complete: " + request.uri());
             }
 
             /**

@@ -53,49 +53,6 @@ public class JreHttpClientRepository extends AbstractHttpRepository
     }
 
     /**
-     * Liefert das absoluten Verzeichnis der Datei.
-     *
-     * @param baseUri {@link URI}
-     * @param resource String
-     * @return {@link URI}
-     */
-    protected URI createResourceUri(final URI baseUri, final String resource)
-    {
-        // StringBuilder url = new StringBuilder(getUri().getScheme());
-        // url.append("://");
-        // url.append(getUri().getHost());
-        //
-        // if (getUri().getPort() > 0)
-        // {
-        // url.append(":").append(getUri().getPort());
-        // }
-        //
-        // url.append(getUri().getPath());
-        // url.append(mavenRequest.getHttpUri());
-        //
-        // URI uri = new URI(url.toString());
-
-        String path = baseUri.getPath();
-
-        if (path.endsWith("/") && resource.startsWith("/"))
-        {
-            path += resource.substring(1);
-        }
-        else if (path.endsWith("/") && !resource.startsWith("/"))
-        {
-            path += resource;
-        }
-        else if (!path.endsWith("/") && resource.startsWith("/"))
-        {
-            path += resource;
-        }
-
-        URI uri = baseUri.resolve(path);
-
-        return uri;
-    }
-
-    /**
      * @see de.freese.maven.proxy.repository.RemoteRepository#exist(java.lang.String)
      */
     @Override
@@ -104,8 +61,8 @@ public class JreHttpClientRepository extends AbstractHttpRepository
         // @formatter:off
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(createResourceUri(getUri(),resource))
-                .method("HEAD", BodyPublishers.noBody())
                 .header(HttpHeaderNames.USER_AGENT.toString(), "Maven-Proxy")
+                .method("HEAD", BodyPublishers.noBody())
                 .build();
         // @formatter:on
 
@@ -123,8 +80,8 @@ public class JreHttpClientRepository extends AbstractHttpRepository
         // @formatter:off
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(createResourceUri(getUri(),resource))
-                .GET()
                 .header(HttpHeaderNames.USER_AGENT.toString(), "Maven-Proxy")
+                .GET()
                 .build();
         // @formatter:on
 
