@@ -94,6 +94,5 @@ public class MavenProxyApplication
 
             ProxyUtils.shutdown(executorService, LOGGER);
         }, "Shutdown"));
-
     }
 }
