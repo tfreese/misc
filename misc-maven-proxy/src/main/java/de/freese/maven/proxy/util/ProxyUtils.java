@@ -130,7 +130,6 @@ public final class ProxyUtils
     {
         if (executorService == null)
         {
-            logger.info("ExecutorService is null");
             return;
         }
 
