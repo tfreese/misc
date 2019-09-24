@@ -75,7 +75,8 @@ public class MavenProxyApplication
         // Charset charset = Charset.forName("ISO-8859-1");
         // Charset charset = StandardCharsets.ISO_8859_1;
 
-        int poolSize = Math.max(16, Runtime.getRuntime().availableProcessors() * 2);
+        // int poolSize = Math.max(16, Runtime.getRuntime().availableProcessors() * 2);
+        int poolSize = 16;
 
         ExecutorService executorService = Executors.newFixedThreadPool(poolSize, new MavenProxyThreadFactory());
 
