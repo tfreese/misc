@@ -103,6 +103,22 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             // deploy
             handlePut(ctx, request);
         }
+        else if (HttpMethod.CONNECT.equals(request.method()))
+        {
+            // Proxy
+            // String content = request.content().toString(CharsetUtil.UTF_8);
+
+            ByteBuf byteBuf = Unpooled.copiedBuffer("", CharsetUtil.UTF_8);
+            // FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, byteBuf);
+
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, new HttpResponseStatus(200, "Connection established"), byteBuf);
+            response.headers().set("Proxy-Agent", "Maven-Proxy");
+            response.headers().set(HttpHeaderNames.CONNECTION, "close");
+
+            ctx.writeAndFlush(response);
+
+            return;
+        }
         else
         {
             sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED, request.method() + "; " + request.uri(), request);

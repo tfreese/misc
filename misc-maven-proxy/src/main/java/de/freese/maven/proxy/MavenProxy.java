@@ -29,6 +29,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
  * @author Thomas Freese
@@ -202,7 +204,7 @@ public class MavenProxy
             // @formatter:off
             bootstrap.group(this.acceptorGroup, this.workerGroup)
                 .channel(NioServerSocketChannel.class)
-                //.handler(new LoggingHandler(LogLevel.DEBUG))
+                .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new NettyMavenInitializer(blobStore, remoteRepositories));
             // @formatter:on
 

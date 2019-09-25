@@ -27,6 +27,8 @@ import de.freese.maven.proxy.util.ProxyUtils;
  * &lt;/mirror&gt;
  * </pre>
  *
+ * https://github.com/netty/netty/tree/4.1/example<br>
+ * <br>
  * curl -v localhost:7999/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom<br>
  * curl -v -X GET localhost:7999/ch/qos/logback/logback-classic/1.2.3/logback-classic-1.2.3.pom<br>
  * curl -v -X PUT localhost:7999 -d "..."<br>

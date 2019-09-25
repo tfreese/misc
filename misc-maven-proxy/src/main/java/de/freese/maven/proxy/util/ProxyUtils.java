@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Thomas Freese
@@ -118,6 +119,21 @@ public final class ProxyUtils
                 ex.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Shutdown des {@link ExecutorService}.
+     *
+     * @param executorService {@link ExecutorService}
+     */
+    public static void shutdown(final ExecutorService executorService)
+    {
+        if (executorService == null)
+        {
+            return;
+        }
+
+        shutdown(executorService, LoggerFactory.getLogger(ProxyUtils.class));
     }
 
     /**

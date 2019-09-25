@@ -6,7 +6,7 @@ package de.freese.maven.proxy;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import de.freese.maven.proxy.util.ProxyUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
@@ -93,19 +93,7 @@ public class NettyDumpHttpApplication
             acceptorGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
 
-            executorService.shutdown();
-
-            while (!executorService.isTerminated())
-            {
-                try
-                {
-                    executorService.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-                }
-                catch (InterruptedException ex)
-                {
-                    // Ignore
-                }
-            }
+            ProxyUtils.shutdown(executorService);
 
             System.exit(0);
         }));
