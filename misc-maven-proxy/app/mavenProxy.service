@@ -36,8 +36,8 @@ StandardOutput=journal
 StandardError=journal
 
 # When a JVM receives a SIGINT signal it exits with code 130
-KillSignal=SIGINT
-SuccessExitStatus=130
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 
 [Install]

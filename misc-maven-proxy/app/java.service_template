@@ -47,12 +47,12 @@ StandardOutput=journal
 StandardError=journal
 
 # When a JVM receives a SIGINT signal it exits with code 130
-KillSignal=SIGINT
-SuccessExitStatus=130
+#KillSignal=SIGINT
+#SuccessExitStatus=130
 
 # When a JVM receives a SIGTERM signal it exits with code 143
-#KillSignal=SIGTERM
-#SuccessExitStatus=143
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 TimeoutStopSec=20
 Restart=always
