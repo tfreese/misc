@@ -3,10 +3,16 @@ package de.freese.sonstiges;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.nio.ByteBuffer;
@@ -51,7 +57,10 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -149,6 +158,121 @@ public class Misc
         // ByteBuffer mit UTF8 in CharBuffer umwandeln.
         String originalString = decoder.decode(byteBuffer).toString();
         System.out.printf("Original: '%s'%n", originalString);
+    }
+
+    /**
+     * @param source {@link InputStream}
+     * @param sink {@link OutputStream}
+     * @param bufferSize int
+     * @return long
+     * @throws IOException Falls was schief geht.
+     */
+    static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
+    {
+        long read = 0;
+        byte[] buffer = new byte[bufferSize];
+        int n = 0;
+
+        while ((n = source.read(buffer)) > 0)
+        {
+            sink.write(buffer, 0, n);
+            read += n;
+        }
+
+        return read;
+    }
+
+    /**
+     * @throws Throwable Falls was schief geht.
+     */
+    static void copyPipedStreams() throws Throwable
+    {
+        ExecutorService executorService = ForkJoinPool.commonPool();
+
+        // 1 MB
+        int chunk = 1024 * 1024;
+
+        String fileName = "archlinux-2019.07.01-x86_64.iso";
+        Path pathSource = Paths.get(System.getProperty("user.home"), "downloads", "iso", fileName);
+        Path pathTarget = Paths.get(System.getProperty("user.dir"), "target", fileName);
+
+        Files.deleteIfExists(pathTarget);
+
+        if (Files.notExists(pathSource))
+        {
+            System.out.println("File not exist: " + pathSource);
+
+            return;
+        }
+
+        try (PipedInputStream pipeIn = new PipedInputStream();
+             PipedOutputStream pipeOut = new PipedOutputStream(pipeIn))
+        {
+            AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
+
+            Runnable runnable = () -> {
+                System.out.println("Start Source copy: " + Thread.currentThread().getName());
+
+                try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
+                {
+                    copy(fileInput, pipeOut, chunk);
+
+                    pipeOut.flush();
+
+                    // Ohne dieses close würde der PipedOutputStream nicht beendet werden.
+                    pipeOut.close();
+                }
+                catch (Throwable th)
+                {
+                    referenceThrowable.set(th);
+                }
+
+                System.out.println("Source copy finished: " + Thread.currentThread().getName());
+            };
+
+            executorService.execute(runnable);
+
+            System.out.println("Start Target copy: " + Thread.currentThread().getName());
+
+            try (OutputStream fileOutput = new BufferedOutputStream(Files.newOutputStream(pathTarget), chunk))
+            {
+                copy(pipeIn, fileOutput, chunk);
+            }
+
+            System.out.println("Target copy finished: " + Thread.currentThread().getName());
+
+            Throwable th = referenceThrowable.get();
+
+            if (th != null)
+            {
+                throw th;
+            }
+
+            // Direktes kopieren auf File-Ebene, ist am schnellsten.
+            // Files.copy(pathSource, pathTarget);
+
+            // Kopieren mit Temp-Datei (java.io.tmpdir), doppelter Daten-Transfer, ist am langsamsten.
+            // Path pathTemp = Files.createTempFile("copyDocuments_" + System.nanoTime(), ".tmp");
+            //
+            // try
+            // {
+            // try (OutputStream outputStream = new BufferedOutputStream(Files.newOutputStream(pathTemp), chunk))
+            // {
+            // Files.copy(pathSource, outputStream);
+            // }
+            //
+            // try (InputStream inputStream = new BufferedInputStream(Files.newInputStream(pathTemp), chunk))
+            // {
+            // Files.copy(inputStream, pathTarget);
+            // }
+            // }
+            // finally
+            // {
+            // Files.deleteIfExists(pathTemp);
+            // }
+
+            System.out.println("copy ... finished: " + Thread.currentThread().getName());
+        }
     }
 
     /**
@@ -414,9 +538,9 @@ public class Misc
 
     /**
      * @param args String[]
-     * @throws Exception Falls was schief geht.
+     * @throws Throwable Falls was schief geht.
      */
-    public static void main(final String[] args) throws Exception
+    public static void main(final String[] args) throws Throwable
     {
         // SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
         // SimpleNamingContextBuilder builder =
@@ -446,7 +570,8 @@ public class Misc
 
         // javaVersion();
         // introspector();
-        byteBuffer();
+        // byteBuffer();
+        copyPipedStreams();
     }
 
     /**

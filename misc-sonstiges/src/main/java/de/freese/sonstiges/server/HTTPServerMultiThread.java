@@ -446,6 +446,12 @@ public class HTTPServerMultiThread
     public static void shutdown(final ExecutorService executorService, final Logger logger)
     {
         logger.info("shutdown ExecutorService");
+
+        if (executorService == null)
+        {
+            return;
+        }
+
         executorService.shutdown();
 
         try
