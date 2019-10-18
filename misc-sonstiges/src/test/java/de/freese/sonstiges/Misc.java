@@ -169,11 +169,18 @@ public class Misc
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
     {
-        long read = 0;
         byte[] buffer = new byte[bufferSize];
-        int n = 0;
+        long read = 0;
 
-        while ((n = source.read(buffer)) > 0)
+        // int n = 0;
+        //
+        // while ((n = source.read(buffer)) > 0)
+        // {
+        // sink.write(buffer, 0, n);
+        // read += n;
+        // }
+
+        for (int n = 0; n >= 0; n = source.read(buffer))
         {
             sink.write(buffer, 0, n);
             read += n;
