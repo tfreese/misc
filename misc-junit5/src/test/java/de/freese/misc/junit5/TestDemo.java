@@ -16,10 +16,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.condition.DisabledOnJre;
-import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -27,6 +24,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
@@ -125,6 +123,23 @@ public class TestDemo
     }
 
     /**
+     * Create objects stream.
+     *
+     * @return {@link Stream}
+     */
+    static Stream<Arguments> createObjectsArgumented()
+    {
+        // @formatter:off
+        return Stream.of(
+                Arguments.of("Obj. 1", MY_OBJECTS[0]),
+                Arguments.of("Obj. 2", MY_OBJECTS[1]),
+                Arguments.of("Obj. 3", MY_OBJECTS[2]),
+                Arguments.of("Obj. 4", MY_OBJECTS[3])
+                );
+        // @formatter:on
+    }
+
+    /**
      * Instantiates a new Test misc.
      */
     public TestDemo()
@@ -199,11 +214,27 @@ public class TestDemo
     {
             OS.WINDOWS, OS.LINUX
     })
-    @EnabledOnJre(JRE.JAVA_11)
-    @DisabledOnJre(JRE.JAVA_8)
+    // @EnabledOnJre(JRE.JAVA_11)
+    // @DisabledOnJre(JRE.JAVA_8)
     // @EnabledIfSystemProperty(named = "os.arch", matches = ".*64.*")
     // @EnabledIfEnvironmentVariable(named = "ENV", matches = "staging-server")
     public void testMethodSource(final MyObject obj)
+    {
+        assertNotNull(obj);
+        assertTrue(obj.getX() < 2);
+        assertTrue(obj.getY() < 2);
+    }
+
+    /**
+     * Test method source.
+     * 
+     * @param name String
+     * @param obj {@link MyObject}
+     */
+    @ParameterizedTest(name = "{index} -> {0}")
+    @MethodSource("createObjectsArgumented")
+    @DisplayName("Test @MethodSource Argumented")
+    public void testMethodSourceArgumented(final String name, final MyObject obj)
     {
         assertNotNull(obj);
         assertTrue(obj.getX() < 2);
