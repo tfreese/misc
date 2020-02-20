@@ -18,6 +18,7 @@ public class RhymingWords
      * @param args String[]
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     public static void main(final String[] args) throws IOException
     {
         File file = new File("src/main/resources/stopwords_de.txt");

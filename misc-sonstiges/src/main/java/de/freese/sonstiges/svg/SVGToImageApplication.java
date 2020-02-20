@@ -39,18 +39,15 @@ public class SVGToImageApplication extends JFrame
      * @param width width
      * @param height height
      * @return {@link BufferedImage}
+     * @throws Exception Falls was schief geht.
      */
-    private static BufferedImage loadImage(final File svgFile, final float width, final float height)
+    private static BufferedImage loadImage(final File svgFile, final float width, final float height) throws Exception
     {
         BufferedImage image = null;
 
         try (InputStream inputStream = new FileInputStream(svgFile))
         {
             image = loadImage(inputStream, width, height);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
         }
 
         return image;
@@ -61,25 +58,34 @@ public class SVGToImageApplication extends JFrame
      * @param width float
      * @param height float
      * @return {@link BufferedImage}
+     * @throws Exception Falls was schief geht.
      */
-    private static BufferedImage loadImage(final InputStream inputStream, final float width, final float height)
+    private static BufferedImage loadImage(final InputStream inputStream, final float width, final float height) throws Exception
     {
         BufferedImageTranscoder transcoder = new BufferedImageTranscoder();
 
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, width);
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, height);
 
-        try
-        {
-            TranscoderInput input = new TranscoderInput(inputStream);
-            transcoder.transcode(input, null);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
+        TranscoderInput input = new TranscoderInput(inputStream);
+        transcoder.transcode(input, null);
 
         return transcoder.getBufferedImage();
+    }
+
+    /**
+     * @param url {@link URL}
+     * @param width float
+     * @param height float
+     * @return {@link BufferedImage}
+     * @throws Exception Falls was schief geht.
+     */
+    private static BufferedImage loadImage(final URL url, final float width, final float height) throws Exception
+    {
+        try (InputStream inputStream = url.openStream())
+        {
+            return loadImage(inputStream, width, height);
+        }
     }
 
     /**
@@ -145,18 +151,24 @@ public class SVGToImageApplication extends JFrame
             {
                 File svgFile = fc.getSelectedFile();
 
-                imageIcon.setImage(loadImage(svgFile, 600, 600));
-                pack();
-                setLocationRelativeTo(null);
+                try
+                {
+                    imageIcon.setImage(loadImage(svgFile, 600, 600));
+                    pack();
+                    setLocationRelativeTo(null);
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
             }
         });
 
         SwingUtilities.invokeLater(() -> {
             try
             {
-                getClass().getClassLoader();
                 URL url = ClassLoader.getSystemResource("image.svg");
-                imageIcon.setImage(loadImage(url.openStream(), 600, 600));
+                imageIcon.setImage(loadImage(url, 600, 600));
                 pack();
                 setLocationRelativeTo(null);
             }

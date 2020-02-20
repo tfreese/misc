@@ -44,7 +44,10 @@ public class HTTPServerSingleThread
      * @param args String[]
      * @throws Exception Falls was schief geht.
      */
-    @SuppressWarnings("resource")
+    @SuppressWarnings(
+    {
+            "resource", "unused"
+    })
     public static void main(final String[] args) throws Exception
     {
         final SelectorProvider selectorProvider = SelectorProvider.provider();
@@ -222,6 +225,7 @@ public class HTTPServerSingleThread
     /**
      * Wartet auf neue Connections.
      */
+    @SuppressWarnings("resource")
     private void listen()
     {
         LOGGER.info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
@@ -257,7 +261,6 @@ public class HTTPServerSingleThread
                         if (selectionKey.isAcceptable())
                         {
                             // Verbindung mit Client herstellen.
-                            @SuppressWarnings("resource")
                             SocketChannel socketChannel = this.serverSocketChannel.accept();
                             socketChannel.configureBlocking(false);
                             socketChannel.register(this.selector, SelectionKey.OP_READ);
@@ -317,6 +320,7 @@ public class HTTPServerSingleThread
      *
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     public void start() throws IOException
     {
         getLogger().info("starting server on port: {}", this.port);
@@ -328,7 +332,6 @@ public class HTTPServerSingleThread
         this.serverSocketChannel = getSelectorProvider().openServerSocketChannel();
         this.serverSocketChannel.configureBlocking(false);
 
-        @SuppressWarnings("resource")
         ServerSocket socket = this.serverSocketChannel.socket();
         socket.setReuseAddress(true);
         socket.bind(new InetSocketAddress(this.port), 50);

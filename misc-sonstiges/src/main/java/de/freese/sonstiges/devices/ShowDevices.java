@@ -55,6 +55,7 @@ public class ShowDevices
     /**
      *
      */
+    @SuppressWarnings("resource")
     private static void showFileStores()
     {
         System.out.println();
@@ -69,6 +70,7 @@ public class ShowDevices
     /**
      * @throws Exception Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     private static void showRootDirectories() throws Exception
     {
         System.out.println();

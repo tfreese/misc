@@ -178,6 +178,7 @@ public class HTTPServerMultiThread
          * @param socketChannel {@link SocketChannel}
          * @throws IOException Falls was schief geht.
          */
+        @SuppressWarnings("resource")
         public void addSession(final SocketChannel socketChannel) throws IOException
         {
             Objects.requireNonNull(socketChannel, "socketChannel required");
@@ -200,13 +201,13 @@ public class HTTPServerMultiThread
          *
          * @throws IOException Falls was schief geht.
          */
+        @SuppressWarnings("resource")
         private void processNewSessions() throws IOException
         {
             // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
             // this.newSessions.poll())
             while (!this.newSessions.isEmpty())
             {
-                @SuppressWarnings("resource")
                 SocketChannel socketChannel = this.newSessions.poll();
 
                 if (socketChannel == null)
@@ -344,7 +345,10 @@ public class HTTPServerMultiThread
      * @param args String[]
      * @throws Exception Falls was schief geht.
      */
-    @SuppressWarnings("resource")
+    @SuppressWarnings(
+    {
+            "resource", "unused"
+    })
     public static void main(final String[] args) throws Exception
     {
         final SelectorProvider selectorProvider = SelectorProvider.provider();
@@ -620,6 +624,7 @@ public class HTTPServerMultiThread
     /**
      * Wartet auf neue Connections.
      */
+    @SuppressWarnings("resource")
     private void listen()
     {
         getLogger().info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
@@ -655,7 +660,6 @@ public class HTTPServerMultiThread
                         if (selectionKey.isAcceptable())
                         {
                             // Verbindung mit Client herstellen.
-                            @SuppressWarnings("resource")
                             SocketChannel socketChannel = this.serverSocketChannel.accept();
 
                             getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
@@ -719,6 +723,7 @@ public class HTTPServerMultiThread
      *
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     public void start() throws IOException
     {
         getLogger().info("starting server on port: {}", this.port);
@@ -730,7 +735,6 @@ public class HTTPServerMultiThread
         this.serverSocketChannel = getSelectorProvider().openServerSocketChannel();
         this.serverSocketChannel.configureBlocking(false);
 
-        @SuppressWarnings("resource")
         ServerSocket socket = this.serverSocketChannel.socket();
         socket.setReuseAddress(true);
         socket.bind(new InetSocketAddress(this.port), 50);

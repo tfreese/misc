@@ -448,6 +448,7 @@ public class HTTPServerAsynchronous
     /**
      * @param channel {@link AsynchronousSocketChannel}
      */
+    @SuppressWarnings("resource")
     private void close(final AsynchronousSocketChannel channel)
     {
         try
