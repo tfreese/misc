@@ -12,6 +12,10 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 @SuiteDisplayName("JUnit Platform Suite Demo")
 @SelectPackages("de.freese.misc.junit5")
+// @SelectClasses(
+// {
+// ... , ...
+// })
 public class TestSuite
 {
     /**
