@@ -40,6 +40,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
      *
      * @param executor {@link Executor}
      */
+    @SuppressWarnings("resource")
     public NioSocketProcessor(final Executor executor)
     {
         super(executor);
@@ -62,6 +63,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
      *
      * @return {@link Iterator} of {@link IoSession}
      */
+    @SuppressWarnings("resource")
     protected Iterator<NioSocketSession> getAllSessions()
     {
         return new IoSessionIterator(getSelector().keys());
@@ -72,6 +74,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
      *
      * @return {@link Iterator} of {@link IoSession} read for I/Os operation
      */
+    @SuppressWarnings("resource")
     protected Iterator<NioSocketSession> getSelectedSessions()
     {
         return new IoSessionIterator(getSelector().selectedKeys());
@@ -83,9 +86,9 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
      * @param session the {@link IoSession} to add to the polling
      * @throws Exception any exception thrown by the underlying system calls
      */
+    @SuppressWarnings("resource")
     protected void init(final NioSocketSession session) throws Exception
     {
-        @SuppressWarnings("resource")
         SelectableChannel channel = session.getChannel();
         channel.configureBlocking(false);
         session.setSelectionKey(channel.register(getSelector(), SelectionKey.OP_READ, session));
@@ -99,6 +102,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
     /**
      * Methode zum Verarbeiten der Verbindungen.
      */
+    @SuppressWarnings("resource")
     private void process()
     {
         while (true)
@@ -271,6 +275,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
     /**
      * @param session {@link NioSocketSession}
      */
+    @SuppressWarnings("resource")
     private void read(final NioSocketSession session)
     {
         if (getLogger().isDebugEnabled())
@@ -425,6 +430,7 @@ public class NioSocketProcessor extends AbstractIoService implements IoProcessor
     /**
      * @param session {@link NioSocketSession}
      */
+    @SuppressWarnings("resource")
     private void write(final NioSocketSession session)
     {
         if (getLogger().isDebugEnabled())

@@ -77,6 +77,7 @@ public class NioSocketAcceptor extends AbstractIoService implements IoAcceptor
      *
      * @param executor {@link Executor}
      */
+    @SuppressWarnings("resource")
     public NioSocketAcceptor(final Executor executor)
     {
         super(executor);
@@ -229,6 +230,7 @@ public class NioSocketAcceptor extends AbstractIoService implements IoAcceptor
      * @param handle the server socket
      * @throws Exception any exception thrown by the underlying systems calls
      */
+    @SuppressWarnings("resource")
     private void close(final ServerSocketChannel handle) throws Exception
     {
         SelectionKey key = handle.keyFor(getSelector());
@@ -291,6 +293,7 @@ public class NioSocketAcceptor extends AbstractIoService implements IoAcceptor
      *
      * @return {@link Iterator}
      */
+    @SuppressWarnings("resource")
     private Iterator<ServerSocketChannel> getAcceptableHandles()
     {
         return new ServerSocketChannelIterator(getSelector().selectedKeys());
@@ -323,6 +326,7 @@ public class NioSocketAcceptor extends AbstractIoService implements IoAcceptor
      * @return the opened server socket
      * @throws Exception any exception thrown by the underlying systems calls
      */
+    @SuppressWarnings("resource")
     private ServerSocketChannel open(final SocketAddress localAddress) throws Exception
     {
         // Creates the listening ServerSocket
@@ -336,7 +340,6 @@ public class NioSocketAcceptor extends AbstractIoService implements IoAcceptor
             channel.configureBlocking(false);
 
             // Configure the server socket,
-            @SuppressWarnings("resource")
             ServerSocket socket = channel.socket();
 
             // Set the reuseAddress flag accordingly with the setting

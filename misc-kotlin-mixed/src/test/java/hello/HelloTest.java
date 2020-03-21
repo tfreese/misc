@@ -1,9 +1,17 @@
-import hello.JavaHello;
+package hello;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import hello.JavaHello;
 
+/**
+ * @author Thomas Freese
+ */
 public class HelloTest
 {
+    /**
+     *
+     */
     @Test
     public void testAssert()
     {

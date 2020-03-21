@@ -176,18 +176,19 @@ public class NioSocketSession implements IoSession
     /**
      * @see java.lang.Object#toString()
      */
+    @SuppressWarnings("resource")
     @Override
     public String toString()
     {
-        StringBuilder builder = new StringBuilder();
-        builder.append(getClass().getSimpleName());
-        builder.append("@");
-        builder.append(Integer.toHexString(hashCode()));
-        builder.append(": ");
-        builder.append(getChannel().socket().getLocalSocketAddress());
-        builder.append(getChannel().socket().getRemoteSocketAddress());
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append("@");
+        sb.append(Integer.toHexString(hashCode()));
+        sb.append(": ");
+        sb.append(getChannel().socket().getLocalSocketAddress());
+        sb.append(getChannel().socket().getRemoteSocketAddress());
 
-        return builder.toString();
+        return sb.toString();
     }
 
     /**

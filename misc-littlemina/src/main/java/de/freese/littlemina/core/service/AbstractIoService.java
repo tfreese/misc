@@ -95,6 +95,7 @@ public abstract class AbstractIoService implements IoService
      *
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     protected final void closeSelector() throws IOException
     {
         if (getSelector().isOpen())
@@ -197,6 +198,7 @@ public abstract class AbstractIoService implements IoService
      * @return true boolean
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     protected final boolean isBrokenConnection() throws IOException
     {
         // A flag set to true if we find a broken session
@@ -211,7 +213,6 @@ public abstract class AbstractIoService implements IoService
             // has a closed channel
             for (SelectionKey key : keys)
             {
-                @SuppressWarnings("resource")
                 SelectableChannel channel = key.channel();
 
                 if ((((channel instanceof DatagramChannel) && ((DatagramChannel) channel).isConnected()))
@@ -333,6 +334,7 @@ public abstract class AbstractIoService implements IoService
      *
      * @throws IOException If we got an exception
      */
+    @SuppressWarnings("resource")
     protected final void registerNewSelector() throws IOException
     {
         synchronized (getSelector())
@@ -344,7 +346,6 @@ public abstract class AbstractIoService implements IoService
 
             for (SelectionKey key : keys)
             {
-                @SuppressWarnings("resource")
                 SelectableChannel channel = key.channel();
 
                 // Don't forget to attache the session, and back !
@@ -364,6 +365,7 @@ public abstract class AbstractIoService implements IoService
      * @return int; Anzahl der {@link SelectionKey}s
      * @throws Exception Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     protected final int select() throws Exception
     {
         return getSelector().select();
@@ -376,6 +378,7 @@ public abstract class AbstractIoService implements IoService
      * @return int; Anzahl der {@link SelectionKey}s
      * @throws Exception Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     protected final int select(final long timeout) throws Exception
     {
         return getSelector().select(timeout);
@@ -474,6 +477,7 @@ public abstract class AbstractIoService implements IoService
     /**
      * Unterbricht die {@link Selector#select()} Methode.
      */
+    @SuppressWarnings("resource")
     protected void wakeup()
     {
         getSelector().wakeup();

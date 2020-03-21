@@ -76,9 +76,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Increases the capacity of this buffer. If the new capacity is less than or equal to the current capacity, this method returns
-     * silently. If the new capacity is greater than the current capacity, the buffer is reallocated while retaining the position, limit,
-     * mark and the content of the buffer.
+     * Increases the capacity of this buffer. If the new capacity is less than or equal to the current capacity, this method returns silently. If the new
+     * capacity is greater than the current capacity, the buffer is reallocated while retaining the position, limit, mark and the content of the buffer.
      *
      * @param byteBuffer {@link ByteBuffer}
      * @param newCapacity int
@@ -240,8 +239,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Returns an {@link InputStream} that reads the data from this buffer. {@link InputStream#read()} returns <tt>-1</tt> if the buffer
-     * position reaches to the limit.
+     * Returns an {@link InputStream} that reads the data from this buffer. {@link InputStream#read()} returns <tt>-1</tt> if the buffer position reaches to the
+     * limit.
      *
      * @return {@link InputStream}
      */
@@ -361,9 +360,9 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Returns an {@link OutputStream} that appends the data into this buffer. Please note that the {@link OutputStream#write(int)} will
-     * throw a {@link BufferOverflowException} instead of an {@link IOException} in case of buffer overflow. Please set <tt>autoExpand</tt>
-     * property by calling {@link #setAutoExpand(boolean)} to prevent the unexpected runtime exception.
+     * Returns an {@link OutputStream} that appends the data into this buffer. Please note that the {@link OutputStream#write(int)} will throw a
+     * {@link BufferOverflowException} instead of an {@link IOException} in case of buffer overflow. Please set <tt>autoExpand</tt> property by calling
+     * {@link #setAutoExpand(boolean)} to prevent the unexpected runtime exception.
      *
      * @return {@link OutputStream}
      */
@@ -404,6 +403,49 @@ public abstract class AbstractIoBuffer
     public ShortBuffer asShortBuffer()
     {
         return getByteBuffer().asShortBuffer();
+    }
+
+    /**
+     * This method forwards the call to {@link #autoExpand(int, int)}.
+     *
+     * @param expectedRemaining int
+     * @return {@link AbstractIoBuffer}
+     */
+    protected AbstractIoBuffer autoExpand(final int expectedRemaining)
+    {
+        return autoExpand(position(), expectedRemaining);
+    }
+
+    /**
+     * Expand the Buffer only when <tt>autoExpand</tt> property is <tt>true</tt>.
+     *
+     * @param pos int
+     * @param expectedRemaining int
+     * @return {@link AbstractIoBuffer}
+     */
+    protected AbstractIoBuffer autoExpand(final int pos, final int expectedRemaining)
+    {
+        if (!isAutoExpand())
+        {
+            return this;
+        }
+
+        int end = pos + expectedRemaining;
+        int newCapacity = normalizeCapacity(end);
+
+        if (newCapacity > capacity())
+        {
+            // The buffer needs expansion.
+            setByteBuffer(createNewByteBuffer(getByteBuffer(), newCapacity, this.mark));
+        }
+
+        if (end > limit())
+        {
+            // We call limit() directly to prevent StackOverflowError
+            getByteBuffer().limit(end);
+        }
+
+        return this;
     }
 
     /**
@@ -490,6 +532,16 @@ public abstract class AbstractIoBuffer
         this.mark = -1;
 
         return this;
+    }
+
+    /**
+     * @param e {@link Enum}
+     * @param type String
+     * @return String
+     */
+    protected String enumConversionErrorMessage(final Enum<?> e, final String type)
+    {
+        return String.format("%s.%s has an ordinal value too large for a %s", e.getClass().getName(), e.name(), type);
     }
 
     /**
@@ -595,8 +647,7 @@ public abstract class AbstractIoBuffer
 
         if (i > enumConstants.length)
         {
-            throw new IndexOutOfBoundsException(
-                    String.format("%d is too large of an ordinal to convert to the enum %s", i, enumClass.getName()));
+            throw new IndexOutOfBoundsException(String.format("%d is too large of an ordinal to convert to the enum %s", i, enumClass.getName()));
         }
 
         return enumConstants[i];
@@ -681,8 +732,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Relative <i>get</i> method for reading a medium int value. Reads the next three bytes at this buffer's current position, composing
-     * them into an int value according to the current byte order, and then increments the position by three.
+     * Relative <i>get</i> method for reading a medium int value. Reads the next three bytes at this buffer's current position, composing them into an int value
+     * according to the current byte order, and then increments the position by three.
      *
      * @return The medium int value at the buffer's current position
      */
@@ -701,8 +752,28 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Absolute <i>get</i> method for reading a medium int value. Reads the next three bytes at this buffer's current position, composing
-     * them into an int value according to the current byte order.
+     * @param b1 byte
+     * @param b2 byte
+     * @param b3 byte
+     * @return int
+     */
+    protected int getMediumInt(final byte b1, final byte b2, final byte b3)
+    {
+        int ret = ((b1 << 16) & 0xff0000) | ((b2 << 8) & 0xff00) | (b3 & 0xff);
+
+        // Check to see if the medium int is negative (high bit in b1 set)
+        if ((b1 & 0x80) == 0x80)
+        {
+            // Make the the whole int negative
+            ret |= 0xff000000;
+        }
+
+        return ret;
+    }
+
+    /**
+     * Absolute <i>get</i> method for reading a medium int value. Reads the next three bytes at this buffer's current position, composing them into an int value
+     * according to the current byte order.
      *
      * @param index The index from which the medium int will be read
      * @return The medium int value at the given index
@@ -757,9 +828,9 @@ public abstract class AbstractIoBuffer
         int oldLimit = limit();
         limit(position() + length);
 
-        try
+        try (InputStream inputStream = asInputStream())
         {
-            ObjectInputStream in = new ObjectInputStream(asInputStream())
+            ObjectInputStream in = new ObjectInputStream(inputStream)
             {
                 /**
                  * @see java.io.ObjectInputStream#readClassDescriptor()
@@ -838,8 +909,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Reads a <code>NUL</code>-terminated string from this buffer using the specified <code>decoder</code> and returns it. This method
-     * reads until the limit of this buffer if no <tt>NUL</tt> is found.
+     * Reads a <code>NUL</code>-terminated string from this buffer using the specified <code>decoder</code> and returns it. This method reads until the limit of
+     * this buffer if no <tt>NUL</tt> is found.
      *
      * @param decoder {@link CharsetDecoder}
      * @return String
@@ -1020,8 +1091,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Relative <i>get</i> method for reading an unsigned medium int value. Reads the next three bytes at this buffer's current position,
-     * composing them into an int value according to the current byte order, and then increments the position by three.
+     * Relative <i>get</i> method for reading an unsigned medium int value. Reads the next three bytes at this buffer's current position, composing them into an
+     * int value according to the current byte order, and then increments the position by three.
      *
      * @return The unsigned medium int value at the buffer's current position
      */
@@ -1040,8 +1111,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Absolute <i>get</i> method for reading an unsigned medium int value. Reads the next three bytes at this buffer's current position,
-     * composing them into an int value according to the current byte order.
+     * Absolute <i>get</i> method for reading an unsigned medium int value. Reads the next three bytes at this buffer's current position, composing them into an
+     * int value according to the current byte order.
      *
      * @param index The index from which the unsigned medium int will be read
      * @return The unsigned medium int value at the given index
@@ -1242,10 +1313,9 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Returns <tt>true</tt> if this buffer contains a data which has a data length as a prefix and the buffer has remaining data as enough
-     * as specified in the data length field. This method is identical with
-     * <tt>prefixedDataAvailable( prefixLength, Integer.MAX_VALUE )</tt>. Please not that using this method can allow DoS (Denial of
-     * Service) attack in case the remote peer sends too big data length value. It is recommended to use
+     * Returns <tt>true</tt> if this buffer contains a data which has a data length as a prefix and the buffer has remaining data as enough as specified in the
+     * data length field. This method is identical with <tt>prefixedDataAvailable( prefixLength, Integer.MAX_VALUE )</tt>. Please not that using this method can
+     * allow DoS (Denial of Service) attack in case the remote peer sends too big data length value. It is recommended to use
      * {@link #prefixedDataAvailable(int, int)} instead.
      *
      * @param prefixLength the length of the prefix field (1, 2, or 4)
@@ -1259,8 +1329,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Returns <tt>true</tt> if this buffer contains a data which has a data length as a prefix and the buffer has remaining data as enough
-     * as specified in the data length field.
+     * Returns <tt>true</tt> if this buffer contains a data which has a data length as a prefix and the buffer has remaining data as enough as specified in the
+     * data length field.
      *
      * @param prefixLength the length of the prefix field (1, 2, or 4)
      * @param maxDataLength the allowed maximum of the read data length
@@ -1445,8 +1515,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Relative <i>put</i> method for writing a medium int value. Writes three bytes containing the given int value, in the current byte
-     * order, into this buffer at the current position, and then increments the position by three.
+     * Relative <i>put</i> method for writing a medium int value. Writes three bytes containing the given int value, in the current byte order, into this buffer
+     * at the current position, and then increments the position by three.
      *
      * @param value The medium int value to be written
      * @return {@link AbstractIoBuffer}
@@ -1481,9 +1551,9 @@ public abstract class AbstractIoBuffer
         int oldPos = position();
         skip(4); // Make a room for the length field.
 
-        try
+        try (OutputStream outputStream = asOutputStream())
         {
-            ObjectOutputStream out = new ObjectOutputStream(asOutputStream())
+            ObjectOutputStream out = new ObjectOutputStream(outputStream)
             {
                 /**
                  * @see java.io.ObjectOutputStream#writeClassDescriptor(java.io.ObjectStreamClass)
@@ -1535,8 +1605,8 @@ public abstract class AbstractIoBuffer
     }
 
     /**
-     * Writes the content of <code>in</code> into this buffer using the specified <code>encoder</code>. This method doesn't terminate string
-     * with <tt>NUL</tt>. You have to do it by yourself.
+     * Writes the content of <code>in</code> into this buffer using the specified <code>encoder</code>. This method doesn't terminate string with <tt>NUL</tt>.
+     * You have to do it by yourself.
      *
      * @param val {@link CharSequence}
      * @param encoder {@link CharsetEncoder}
@@ -1589,8 +1659,8 @@ public abstract class AbstractIoBuffer
                             expandedState++;
                             break;
                         default:
-                            throw new RuntimeException("Expanded by " + (int) Math.ceil(in.remaining() * encoder.maxBytesPerChar())
-                                    + " but that wasn't enough for '" + val + "'");
+                            throw new RuntimeException(
+                                    "Expanded by " + (int) Math.ceil(in.remaining() * encoder.maxBytesPerChar()) + " but that wasn't enough for '" + val + "'");
                     }
 
                     continue;
@@ -1654,6 +1724,13 @@ public abstract class AbstractIoBuffer
     }
 
     /**
+     * Sets the underlying NIO buffer instance.
+     *
+     * @param newByteBuffer {@link ByteBuffer}
+     */
+    protected abstract void setByteBuffer(ByteBuffer newByteBuffer);
+
+    /**
      * Forwards the position of this buffer as the specified <code>size</code> bytes.
      *
      * @param size int
@@ -1695,84 +1772,4 @@ public abstract class AbstractIoBuffer
 
         return buf.toString();
     }
-
-    /**
-     * This method forwards the call to {@link #autoExpand(int, int)}.
-     *
-     * @param expectedRemaining int
-     * @return {@link AbstractIoBuffer}
-     */
-    protected AbstractIoBuffer autoExpand(final int expectedRemaining)
-    {
-        return autoExpand(position(), expectedRemaining);
-    }
-
-    /**
-     * Expand the Buffer only when <tt>autoExpand</tt> property is <tt>true</tt>.
-     *
-     * @param pos int
-     * @param expectedRemaining int
-     * @return {@link AbstractIoBuffer}
-     */
-    protected AbstractIoBuffer autoExpand(final int pos, final int expectedRemaining)
-    {
-        if (!isAutoExpand())
-        {
-            return this;
-        }
-
-        int end = pos + expectedRemaining;
-        int newCapacity = normalizeCapacity(end);
-
-        if (newCapacity > capacity())
-        {
-            // The buffer needs expansion.
-            setByteBuffer(createNewByteBuffer(getByteBuffer(), newCapacity, this.mark));
-        }
-
-        if (end > limit())
-        {
-            // We call limit() directly to prevent StackOverflowError
-            getByteBuffer().limit(end);
-        }
-
-        return this;
-    }
-
-    /**
-     * @param e {@link Enum}
-     * @param type String
-     * @return String
-     */
-    protected String enumConversionErrorMessage(final Enum<?> e, final String type)
-    {
-        return String.format("%s.%s has an ordinal value too large for a %s", e.getClass().getName(), e.name(), type);
-    }
-
-    /**
-     * @param b1 byte
-     * @param b2 byte
-     * @param b3 byte
-     * @return int
-     */
-    protected int getMediumInt(final byte b1, final byte b2, final byte b3)
-    {
-        int ret = ((b1 << 16) & 0xff0000) | ((b2 << 8) & 0xff00) | (b3 & 0xff);
-
-        // Check to see if the medium int is negative (high bit in b1 set)
-        if ((b1 & 0x80) == 0x80)
-        {
-            // Make the the whole int negative
-            ret |= 0xff000000;
-        }
-
-        return ret;
-    }
-
-    /**
-     * Sets the underlying NIO buffer instance.
-     *
-     * @param newByteBuffer {@link ByteBuffer}
-     */
-    protected abstract void setByteBuffer(ByteBuffer newByteBuffer);
 }
