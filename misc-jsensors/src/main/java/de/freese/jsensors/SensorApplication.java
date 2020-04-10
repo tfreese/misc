@@ -21,6 +21,7 @@ public class SensorApplication
     /**
      * @param args String[]
      */
+    @SuppressWarnings("resource")
     public static void main(final String[] args)
     {
         if (!StringUtils.hasText(System.getProperty("spring.profiles.active")))

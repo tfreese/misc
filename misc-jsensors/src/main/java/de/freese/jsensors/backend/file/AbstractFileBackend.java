@@ -99,6 +99,7 @@ public abstract class AbstractFileBackend extends AbstractBackend
      * @return {@link PrintStream}
      * @throws IOException Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     protected PrintStream getPrintStream(final Path file, final boolean buffered) throws IOException
     {
         PrintStream ps = this.printStreams.get(file);
