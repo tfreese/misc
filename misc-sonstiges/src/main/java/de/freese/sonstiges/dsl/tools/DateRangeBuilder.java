@@ -25,17 +25,17 @@ public class DateRangeBuilder<T>
 	/**
 	 * 
 	 */
-	private final IDateRangeBuilderCallback callback;
+	private final DateRangeBuilderCallback callback;
 
 	/**
 	 * Erstellt ein neues {@link DateRangeBuilder} Object.
 	 * 
 	 * @param from {@link Date}
 	 * @param caller Object
-	 * @param callback {@link IDateRangeBuilderCallback}
+	 * @param callback {@link DateRangeBuilderCallback}
 	 */
 	public DateRangeBuilder(final Date from, final T caller,
-			final IDateRangeBuilderCallback callback)
+			final DateRangeBuilderCallback callback)
 	{
 		super();
 

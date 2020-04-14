@@ -7,7 +7,7 @@ package de.freese.sonstiges.dsl;
 import java.util.Date;
 
 import de.freese.sonstiges.dsl.tools.DateRangeBuilder;
-import de.freese.sonstiges.dsl.tools.IDateRangeBuilderCallback;
+import de.freese.sonstiges.dsl.tools.DateRangeBuilderCallback;
 
 /**
  * @author Thomas Freese
@@ -41,10 +41,10 @@ public class NewNewsSnippetBuilder extends AbstractNewsSnippetBuilder<NewNewsSni
 	public DateRangeBuilder<NewNewsSnippetBuilder> validFrom(final Date from)
 	{
 		DateRangeBuilder<NewNewsSnippetBuilder> dateRangeBuilder =
-				new DateRangeBuilder<>(from, this, new IDateRangeBuilderCallback()
+				new DateRangeBuilder<>(from, this, new DateRangeBuilderCallback()
 				{
 					/**
-					 * @see de.freese.sonstiges.dsl.tools.IDateRangeBuilderCallback#setDateRange(java.util.Date,
+					 * @see de.freese.sonstiges.dsl.tools.DateRangeBuilderCallback#setDateRange(java.util.Date,
 					 *      java.util.Date)
 					 */
 					@Override
