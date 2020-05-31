@@ -15,6 +15,8 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
@@ -49,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -457,6 +460,42 @@ public class Misc
     }
 
     /**
+     * @throws Exception Falls was schief geht.
+     */
+    static void hostName() throws Exception
+    {
+        String hostName = null;
+
+        // Cross Platform (Windows, Linux, Unix, Mac)
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Runtime.getRuntime().exec("hostname").getInputStream())))
+        {
+            hostName = br.readLine();
+        }
+
+        System.out.println(hostName);
+
+        // List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+        while (interfaces.hasMoreElements())
+        {
+            NetworkInterface nic = interfaces.nextElement();
+            Enumeration<InetAddress> addresses = nic.getInetAddresses();
+
+            while (addresses.hasMoreElements())
+            {
+                InetAddress address = addresses.nextElement();
+
+                if (!address.isLoopbackAddress())
+                {
+                    hostName = address.getHostName();
+                    System.out.println(hostName);
+                }
+            }
+        }
+    }
+
+    /**
      * @throws IntrospectionException Falls was schief geht.
      */
     static void introspector() throws IntrospectionException
@@ -579,7 +618,8 @@ public class Misc
         // introspector();
         // byteBuffer();
         // copyPipedStreams();
-        textBlocks();
+        // textBlocks();
+        hostName();
     }
 
     /**
