@@ -578,7 +578,8 @@ public class Misc
         // javaVersion();
         // introspector();
         // byteBuffer();
-        copyPipedStreams();
+        // copyPipedStreams();
+        textBlocks();
     }
 
     /**
@@ -900,13 +901,17 @@ public class Misc
         });
     }
 
-    // TODO
     /**
      * @throws Exception Falls was schief geht.
      */
     static void systemMXBean() throws Exception
     {
         System.out.println("\nOperatingSystemMXBean");
+
+        // Runtime runtime = Runtime.getRuntime();
+        // long maxMemory = runtime.maxMemory();
+        // long allocatedMemory = runtime.totalMemory();
+        // long freeMemory = runtime.freeMemory();
 
         OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
@@ -916,13 +921,13 @@ public class Misc
         System.out.println("\tVersion: " + os.getVersion());
         System.out.println("\tAvailableProcessors: " + os.getAvailableProcessors());
         System.out.println("\tCommittedVirtualMemorySize: " + os.getCommittedVirtualMemorySize());
-        System.out.println("\tFreePhysicalMemorySize(: " + os.getFreePhysicalMemorySize());
+        System.out.println("\tFreePhysicalMemorySize(: " + os.getFreeMemorySize());
         System.out.println("\tFreeSwapSpaceSize: " + os.getFreeSwapSpaceSize());
         System.out.println("\tProcessCpuLoad: " + os.getProcessCpuLoad());
         System.out.println("\tProcessCpuTime: " + os.getProcessCpuTime());
-        System.out.println("\tSystemCpuLoad: " + os.getSystemCpuLoad());
+        System.out.println("\tSystemCpuLoad: " + os.getCpuLoad());
         System.out.println("\tSystemLoadAverage: " + os.getSystemLoadAverage());
-        System.out.println("\tTotalPhysicalMemorySize: " + os.getTotalPhysicalMemorySize());
+        System.out.println("\tTotalPhysicalMemorySize: " + os.getTotalMemorySize());
         System.out.println("\tTotalSwapSpaceSize: " + os.getTotalSwapSpaceSize());
 
         long lastSystemTime = 0;
@@ -942,5 +947,29 @@ public class Misc
         processCpuTime = os.getProcessCpuTime();
         cpuUsage = ((double) (processCpuTime - lastProcessCpuTime)) / ((double) (systemTime - lastSystemTime));
         System.out.println("\tcpuUsage: " + cpuUsage);
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    static void textBlocks() throws Exception
+    {
+        // '\' Zeilenumbruch für zu lange Zeilen
+        // '\n' Manueller Zeilenumbruch mit leerer Zeile
+        // '\t' Tabulator
+        // '%s' String.format Platzhalter
+
+        String sql = """
+                select
+                *
+                from \
+                "table"
+
+                where\n
+                \t1 = 1
+                    order by %s asc;
+                """.formatted("column");
+
+        System.out.println(sql);
     }
 }

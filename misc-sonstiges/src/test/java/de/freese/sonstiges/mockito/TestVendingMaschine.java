@@ -23,7 +23,6 @@ public class TestVendingMaschine
     /**
      * @throws Exception Falls was schief geht.
      */
-    @SuppressWarnings("boxing")
     @Test
     public void testWithMockito() throws Exception
     {
