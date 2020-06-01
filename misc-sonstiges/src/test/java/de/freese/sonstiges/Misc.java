@@ -474,7 +474,7 @@ public class Misc
         }
         catch (Exception ex)
         {
-            // Bei Betriebssystemen ohne DNS-Konfiguration fuinktioniert InetAddress.getLocalHost nicht !
+            // Bei Betriebssystemen ohne DNS-Konfiguration funktioniert InetAddress.getLocalHost nicht !
             System.out.printf("InetAddress.getLocalHost: %s%n", ex.getMessage());
         }
 
