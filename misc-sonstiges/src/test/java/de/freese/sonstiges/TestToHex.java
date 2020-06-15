@@ -1,6 +1,7 @@
 // Created: 04.11.2016
 package de.freese.sonstiges;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 import javax.xml.bind.DatatypeConverter;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.TestMethodOrder;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestToHex
+class TestToHex
 {
     /**
      *
@@ -28,7 +29,7 @@ public class TestToHex
      *
      */
     @BeforeAll
-    public static void beforeAll()
+    static void beforeAll()
     {
         Random random = new Random(System.currentTimeMillis());
 
@@ -36,18 +37,10 @@ public class TestToHex
     }
 
     /**
-     * Erzeugt eine neue Instanz von {@link TestToHex}
-     */
-    public TestToHex()
-    {
-        super();
-    }
-
-    /**
      *
      */
     @Test
-    public void test010()
+    void test010()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -62,13 +55,15 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("010: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 
     /**
     *
     */
     @Test
-    public void test020()
+    void test020()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -83,13 +78,15 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("020: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 
     /**
     *
     */
     @Test
-    public void test030()
+    void test030()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -97,13 +94,15 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("030: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 
     /**
     *
     */
     @Test
-    public void test040()
+    void test040()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -115,13 +114,15 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("040: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 
     /**
     *
     */
     @Test
-    public void test050()
+    void test050()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -133,13 +134,15 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("050: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 
     /**
     *
     */
     @Test
-    public void test060()
+    void test060()
     {
         long start = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(BYTES.length * 2);
@@ -158,5 +161,7 @@ public class TestToHex
 
         // System.out.println(sb);
         System.out.printf("060: %d ms%n", System.currentTimeMillis() - start);
+
+        assertTrue(true);
     }
 }

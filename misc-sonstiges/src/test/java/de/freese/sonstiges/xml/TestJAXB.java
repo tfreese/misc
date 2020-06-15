@@ -21,7 +21,7 @@ import de.freese.sonstiges.xml.jaxb.model.DJ;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestJAXB
+class TestJAXB
 {
     /**
     *
@@ -37,7 +37,7 @@ public class TestJAXB
      * @throws Exception Falls was schief geht.
      */
     @BeforeAll
-    public static void beforeAll() throws Exception
+    static void beforeAll() throws Exception
     {
         TestJAXB.jaxbContext = JAXBContext.newInstance(Club.class, DJ.class);
 
@@ -46,22 +46,10 @@ public class TestJAXB
     }
 
     /**
-     * Erstellt ein neues {@link TestJAXB} Object.
-     */
-    public TestJAXB()
-    {
-        super();
-
-        // Links
-        // http://openbook.galileocomputing.de/javainsel8/javainsel_15_008.htm#mje87729331896b2153f4d617a13dd4666
-        // http://www.tutorials.de/forum/java/263489-jaxb-tutorial.html
-    }
-
-    /**
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test1ToXML() throws Exception
+    void test1ToXML() throws Exception
     {
         Club club = ClubFactory.createClub();
 
@@ -85,7 +73,7 @@ public class TestJAXB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test2FromXML() throws Exception
+    void test2FromXML() throws Exception
     {
         System.out.println(new String(TestJAXB.bytes, StandardCharsets.UTF_8));
 

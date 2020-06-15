@@ -14,21 +14,13 @@ import org.junit.jupiter.api.Test;
  *
  * @author Thomas Freese
  */
-public class TestJulianDay
+class TestJulianDay
 {
     /**
-     * Erstellt ein neues {@link TestJulianDay} Object.
-     */
-    public TestJulianDay()
-    {
-        super();
-    }
-
-    /**
-     * 
+     *
      */
     @Test
-    public void fristBerechnungMonat()
+    void fristBerechnungMonat()
     {
         Day d1 = new Day(2011, 19, 8); // 08.07.2012
         int jd = JulianDayConverter.calculateJD(d1);
@@ -40,10 +32,10 @@ public class TestJulianDay
     }
 
     /**
-     * 
+     *
      */
     @Test
-    public void fristBerechnungTag()
+    void fristBerechnungTag()
     {
         Day d1 = new Day(2012, 7, -2); // 28.06.2012
         int jd = JulianDayConverter.calculateJD(d1);
@@ -55,10 +47,10 @@ public class TestJulianDay
     }
 
     /**
-     * 
+     *
      */
     @Test
-    public void konvertierungJavaUtilDate()
+    void konvertierungJavaUtilDate()
     {
         Date date = new Date(1344925513600L); // Tue Aug 14 08:25:13 CEST 2012
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
@@ -73,10 +65,10 @@ public class TestJulianDay
     }
 
     /**
-     * 
+     *
      */
     @Test
-    public void readable()
+    void readable()
     {
         Day d1 = new Day(2011, 19, 8); // 08.07.2012
         int readable1 = JulianDayConverter.calculateReadable(d1);
@@ -93,10 +85,10 @@ public class TestJulianDay
     }
 
     /**
-     * 
+     *
      */
     @Test
-    public void vergleich()
+    void vergleich()
     {
         Day d1 = new Day(1990, 1, 1);
         int jd = JulianDayConverter.calculateJD(d1);
@@ -109,10 +101,10 @@ public class TestJulianDay
     }
 
     /**
-     * 
+     *
      */
     @Test
-    public void wochentagsErmittlung()
+    void wochentagsErmittlung()
     {
         Day d1 = new Day(2012, 8, 6);
         int jd = JulianDayConverter.calculateJD(d1);

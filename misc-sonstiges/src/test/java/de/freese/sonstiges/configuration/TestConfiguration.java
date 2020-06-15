@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Thomas Freese
  */
-public class TestConfiguration
+class TestConfiguration
 {
     /**
      * Erstellt ein neues {@link TestConfiguration} Objekt.
      */
-    public TestConfiguration()
+    TestConfiguration()
     {
         super();
     }
@@ -30,7 +30,7 @@ public class TestConfiguration
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void testCommonsConfigurationFactoryBean() throws Exception
+    void testCommonsConfigurationFactoryBean() throws Exception
     {
         AbstractConfiguration manualConfiguration = new BaseConfiguration();
         manualConfiguration.addProperty("foo1", "bar1");
@@ -60,7 +60,7 @@ public class TestConfiguration
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void testCompositeConfiguration() throws Exception
+    void testCompositeConfiguration() throws Exception
     {
         CompositeConfiguration config = new CompositeConfiguration();
         config.setThrowExceptionOnMissing(false);

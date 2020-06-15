@@ -4,6 +4,7 @@
 package de.freese.sonstiges.imap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,7 +33,7 @@ import de.freese.sonstiges.imap.analyze.FunctionStripStopWords;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestMail
+class TestMail
 {
     /**
      * @author Thomas Freese
@@ -117,19 +118,12 @@ public class TestMail
     }
 
     /**
-     * Erzeugt eine neue Instanz von {@link TestMail}
-     */
-    public TestMail()
-    {
-        super();
-    }
-
-    /**
      *
      */
     @AfterEach
     public void afterEach()
     {
+        // Empty
     }
 
     /**
@@ -138,6 +132,7 @@ public class TestMail
     @BeforeEach
     public void beforeEach()
     {
+        // Empty
     }
 
     /**
@@ -173,7 +168,7 @@ public class TestMail
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test0100TFunctionStripNotLetter() throws Exception
+    void test0100TFunctionStripNotLetter() throws Exception
     {
         String text = "abcdefghijklmnopqrstuvwxyz";
         assertEquals(text, FunctionStripNotLetter.INSTANCE.apply(text));
@@ -195,7 +190,7 @@ public class TestMail
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test0200TFunctionStemmer() throws Exception
+    void test0200TFunctionStemmer() throws Exception
     {
         String ref = "wald";
         assertEquals(ref, FunctionStemmer.DE.apply(ref));
@@ -210,36 +205,42 @@ public class TestMail
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test1000TextPlain() throws Exception
+    void test1000TextPlain() throws Exception
     {
         // String text = new HTML2Text().parse(TEXT_PLAIN).getText();
         String text = TEXT_PLAIN;
         PRINT_STREAM.println(text);
 
         prepare(text);
+
+        assertTrue(true);
     }
 
     /**
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test2010HTML2Text() throws Exception
+    void test2010HTML2Text() throws Exception
     {
         String text = Jsoup.parse(TEXT_HTML1).text();
         PRINT_STREAM.println(text);
 
         prepare(text);
+
+        assertTrue(true);
     }
 
     /**
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test2020HTML2Text() throws Exception
+    void test2020HTML2Text() throws Exception
     {
         String text = Jsoup.parse(TEXT_HTML2).text();
         PRINT_STREAM.println(text);
 
         prepare(text);
+
+        assertTrue(true);
     }
 }

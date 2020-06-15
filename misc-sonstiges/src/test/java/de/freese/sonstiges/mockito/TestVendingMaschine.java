@@ -10,21 +10,13 @@ import org.mockito.Mockito;
 /**
  * @author Thomas Freese
  */
-public class TestVendingMaschine
+class TestVendingMaschine
 {
-    /**
-     * Erstellt ein neues {@link TestVendingMaschine} Objekt.
-     */
-    public TestVendingMaschine()
-    {
-        super();
-    }
-
     /**
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void testWithMockito() throws Exception
+    void testWithMockito() throws Exception
     {
         ICashBox cashBox = Mockito.mock(ICashBox.class);
         Mockito.when(cashBox.getCurrentAmount()).thenReturn(42);

@@ -27,7 +27,7 @@ import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestJacksonJSON
+class TestJacksonJSON
 {
     /**
     *
@@ -43,7 +43,7 @@ public class TestJacksonJSON
      * @throws Exception Falls was schief geht.
      */
     @BeforeAll
-    public static void beforeAll() throws Exception
+    static void beforeAll() throws Exception
     {
         jsonMapper = new ObjectMapper();
 
@@ -74,7 +74,7 @@ public class TestJacksonJSON
     /**
      * Erstellt ein neues {@link TestJacksonJSON} Object.
      */
-    public TestJacksonJSON()
+    TestJacksonJSON()
     {
         super();
 
@@ -87,7 +87,7 @@ public class TestJacksonJSON
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test010ToJSON() throws Exception
+    void test010ToJSON() throws Exception
     {
         jsonMapper.setAnnotationIntrospector(new JacksonAnnotationIntrospector());
 
@@ -111,7 +111,7 @@ public class TestJacksonJSON
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test011FromJSON() throws Exception
+    void test011FromJSON() throws Exception
     {
         System.out.println(new String(TestJacksonJSON.bytes, StandardCharsets.UTF_8));
 
@@ -127,7 +127,7 @@ public class TestJacksonJSON
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test020ToXML() throws Exception
+    void test020ToXML() throws Exception
     {
         jsonMapper.setAnnotationIntrospector(new JaxbAnnotationIntrospector(TypeFactory.defaultInstance()));
 
@@ -150,7 +150,7 @@ public class TestJacksonJSON
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test021FromXML() throws Exception
+    void test021FromXML() throws Exception
     {
         System.out.println(new String(TestJacksonJSON.bytes, StandardCharsets.UTF_8));
 

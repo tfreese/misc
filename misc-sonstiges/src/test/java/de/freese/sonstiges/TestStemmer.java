@@ -22,7 +22,7 @@ import org.tartarus.snowball.ext.GermanStemmer;
  *
  * @author Thomas Freese
  */
-public class TestStemmer
+class TestStemmer
 {
     /**
      * Interface für verschiedene Stemmer Implementierungen.
@@ -36,7 +36,7 @@ public class TestStemmer
          * @param charSequence String
          * @return String
          */
-        public String stem(String charSequence);
+        String stem(String charSequence);
     }
 
     /**
@@ -91,18 +91,10 @@ public class TestStemmer
     }
 
     /**
-     * Erstellt ein neues {@link TestStemmer} Object.
-     */
-    public TestStemmer()
-    {
-        super();
-    }
-
-    /**
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testBaeume(final Stemmer stemmer) throws Exception
+    void testBaeume(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("bäume");
         assertEquals("baum", stem);
@@ -112,7 +104,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testBaum(final Stemmer stemmer) throws Exception
+    void testBaum(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("baum");
         assertEquals("baum", stem);
@@ -122,7 +114,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testBewaldet(final Stemmer stemmer) throws Exception
+    void testBewaldet(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("bewaldet");
         assertEquals("bewaldet", stem);
@@ -135,7 +127,7 @@ public class TestStemmer
      * @return {@link Stream}
      */
     @TestFactory
-    public Stream<DynamicNode> testFactory()
+    Stream<DynamicNode> testFactory()
     {
         // @formatter:off
         return STEMMER.stream()
@@ -162,7 +154,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testHuehner(final Stemmer stemmer) throws Exception
+    void testHuehner(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("hühner");
         assertEquals("huhn", stem);
@@ -172,7 +164,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testHuhn(final Stemmer stemmer) throws Exception
+    void testHuhn(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("huhn");
         assertEquals("huhn", stem);
@@ -182,7 +174,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testTaegig(final Stemmer stemmer) throws Exception
+    void testTaegig(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("tägig");
         assertEquals("tagig", stem);
@@ -192,7 +184,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testTage(final Stemmer stemmer) throws Exception
+    void testTage(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("tage");
         assertEquals("tag", stem);
@@ -202,7 +194,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testTagung(final Stemmer stemmer) throws Exception
+    void testTagung(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("tagung");
         assertEquals("tagung", stem);
@@ -212,7 +204,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testWaelder(final Stemmer stemmer) throws Exception
+    void testWaelder(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("wälder");
         assertEquals("wald", stem);
@@ -222,7 +214,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testWald(final Stemmer stemmer) throws Exception
+    void testWald(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("wald");
         assertEquals("wald", stem);
@@ -232,7 +224,7 @@ public class TestStemmer
      * @param stemmer {@link Stemmer}
      * @throws Exception Falls was schief geht.
      */
-    public void testWeiße(final Stemmer stemmer) throws Exception
+    void testWeiße(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("weisse");
         assertEquals("weiss", stem);

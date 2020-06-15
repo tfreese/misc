@@ -12,21 +12,13 @@ import de.freese.sonstiges.imap.analyze.CharToken;
 /**
  * @author Thomas Freese
  */
-public class TestCharToken
+class TestCharToken
 {
-    /**
-     * Erstellt ein neues {@link TestCharToken} Object.
-     */
-    public TestCharToken()
-    {
-        super();
-    }
-
     /**
      *
      */
     @Test
-    public void testAppendChar()
+    void testAppendChar()
     {
         CharToken charToken = new CharToken().append(' ').append('a').append(' ');
 
@@ -38,7 +30,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testAppendCharSequence()
+    void testAppendCharSequence()
     {
         CharSequence charToken = new CharToken().append(" a ");
 
@@ -50,7 +42,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testappendNull()
+    void testappendNull()
     {
         CharToken charToken = new CharToken().appendNull();
 
@@ -62,7 +54,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testCompareTo()
+    void testCompareTo()
     {
         CharToken charToken1 = new CharToken().appendNull();
         CharToken charToken2 = new CharToken().appendNull();
@@ -96,7 +88,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testForceResizeBuffer()
+    void testForceResizeBuffer()
     {
         CharToken charToken = new CharToken();
 
@@ -113,7 +105,7 @@ public class TestCharToken
     *
     */
     @Test
-    public void testResize()
+    void testResize()
     {
         CharToken charToken = new CharToken();
 
@@ -130,7 +122,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testToLowerCase()
+    void testToLowerCase()
     {
         CharToken charToken = new CharToken().append(" AbCdEf!§$% ");
 
@@ -143,7 +135,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testToUpperCase()
+    void testToUpperCase()
     {
         CharToken charToken = new CharToken().append(" AbCdEf!§$% ");
 
@@ -156,7 +148,7 @@ public class TestCharToken
      *
      */
     @Test
-    public void testTrim()
+    void testTrim()
     {
         CharToken charToken = new CharToken().append(' ').append('a').append(' ').append(" a ");
 
