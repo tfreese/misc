@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.chromonome.DefaultChromosome;
 import de.freese.ga.gene.Gene;
 import de.freese.ga.gene.IntegerGene;
 
@@ -82,13 +81,13 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
     @Override
     public Chromosome<Gene<Integer>> crossover(final Chromosome<Gene<Integer>> parent1, final Chromosome<Gene<Integer>> parent2)
     {
-        Chromosome<Gene<Integer>> population = new DefaultChromosome<>(parent1.getAlgorithm());
+        Chromosome<Gene<Integer>> population = createEmptyChromosome();
 
         for (int i = 0; i < parent1.size(); i++)
         {
             final Gene<Integer> coin;
 
-            if (Math.random() <= getCrossoverRate())
+            if (getRandom().nextDouble() <= getCrossoverRate())
             {
                 coin = parent1.getGene(i);
             }
@@ -101,7 +100,7 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
             long coinsExisting = this.coinCounter.getOrDefault(coin.getValue(), 1L);
 
             // Zählen wie viele Münzen von diesem Wert im Chromosom bereits vorhanden sind.
-            long coinsInPopulation = Stream.of(population.getGenes()).filter(Objects::nonNull).filter(g -> g.getValue() == coin.getValue()).count();
+            long coinsInPopulation = Stream.of(population.getGenes()).filter(Objects::nonNull).filter(g -> g.getValue().equals(coin.getValue())).count();
 
             // Münze eines Wertes nur zuweisen, wenn noch welche übrig sind.
             if (coinsInPopulation < coinsExisting)
@@ -143,7 +142,7 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
     {
         // Keine Lösung bekannt.
         // return Double.MAX_VALUE;
-        return 1000D;
+        return 1_000D;
     }
 
     /**
@@ -176,11 +175,11 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#pupulateChromosome(de.freese.ga.chromonome.Chromosome)
+     * @see de.freese.ga.algoritm.Algorithm#populateChromosome(de.freese.ga.chromonome.Chromosome)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void pupulateChromosome(final Chromosome<Gene<Integer>> chromosome)
+    public void populateChromosome(final Chromosome<Gene<Integer>> chromosome)
     {
         List<Gene<Integer>> t = new ArrayList<>();
 

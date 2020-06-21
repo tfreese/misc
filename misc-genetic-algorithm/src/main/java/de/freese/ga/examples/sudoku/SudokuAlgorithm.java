@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.IntStream;
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
@@ -45,11 +44,6 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     private int puzzleSize = 9;
 
     /**
-     * Gaußsche Summenformel = (n² + n) / 2
-     */
-    private int puzzleSum = 0;
-
-    /**
      * Erstellt ein neues {@link SudokuAlgorithm} Object.
      */
     public SudokuAlgorithm()
@@ -65,7 +59,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
      * @param chromosome {@link Chromosome}
      * @return double
      */
-    private double calcBlockFitness(final int block, final Chromosome<SudokuGene> chromosome)
+    double calcBlockFitness(final int block, final Chromosome<SudokuGene> chromosome)
     {
         int start = 0;
 
@@ -135,7 +129,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
      * @param chromosome {@link Chromosome}
      * @return double
      */
-    private double calcColumnFitness(final int column, final Chromosome<SudokuGene> chromosome)
+    double calcColumnFitness(final int column, final Chromosome<SudokuGene> chromosome)
     {
         int start = column;
 
@@ -159,18 +153,16 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     @Override
     public double calcFitnessValue(final Chromosome<SudokuGene> chromosome)
     {
-        final DoubleAdder doubleAdder = new DoubleAdder();
+        double fitness = 0.0D;
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(r -> doubleAdder.add(calcRowFitness(r, chromosome)));
+        fitness += IntStream.range(0, this.puzzleSize).mapToDouble(r -> calcRowFitness(r, chromosome)).sum();
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(c -> doubleAdder.add(calcColumnFitness(c, chromosome)));
+        fitness += IntStream.range(0, this.puzzleSize).mapToDouble(c -> calcColumnFitness(c, chromosome)).sum();
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(b -> doubleAdder.add(calcBlockFitness(b, chromosome)));
-
-        double fitness = doubleAdder.sum();
+        fitness += IntStream.range(0, this.puzzleSize).mapToDouble(b -> calcBlockFitness(b, chromosome)).sum();
 
         return fitness;
     }
@@ -183,7 +175,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
      * @param chromosome {@link Chromosome}
      * @return double
      */
-    private double calcRowFitness(final int row, final Chromosome<SudokuGene> chromosome)
+    double calcRowFitness(final int row, final Chromosome<SudokuGene> chromosome)
     {
         int start = row * 9;
         int end = start + 9;
@@ -208,10 +200,16 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     @Override
     public double getMaxFitness()
     {
+        /**
+         * Summe pro Zeile, Spalte und Block.<br>
+         * Gaußsche Summenformel = (n² + n) / 2
+         */
+        int puzzleSum = (int) (Math.pow(this.puzzleSize, 2) + this.puzzleSize) / 2;
+
         double fitness = 0.0D;
 
         // 405: Summe aller Zeilen = 9 * 45
-        fitness += this.puzzleSize * this.puzzleSum;
+        fitness += this.puzzleSize * puzzleSum;
 
         // // 405: Summe aller Spalten = 9 * 45
         // fitness += this.puzzleSize * this.puzzleSum;
@@ -229,7 +227,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
      * @param s String
      * @return int
      */
-    private int getNumber(final String s)
+    int getNumber(final String s)
     {
         int n = 0;
 
@@ -252,29 +250,51 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     @Override
     public void mutate(final Chromosome<SudokuGene> chromosome)
     {
-        // @formatter:off
-        IntStream.range(0, chromosome.size())
-            .parallel()
-            .forEach(i -> {
-                if (getRandom().nextDouble() < getMutationRate())
+        for (int i = 0; i < chromosome.size(); i++)
+        {
+            if (getRandom().nextDouble() < getMutationRate())
+            {
+                int j = getRandom().nextInt(chromosome.size());
+
+                SudokuGene gene1 = chromosome.getGene(i);
+                SudokuGene gene2 = chromosome.getGene(j);
+
+                // Nur veränderbare.
+                if (chromosome.getGene(i).isMutable())
                 {
-                    int j = getRandom().nextInt(chromosome.size());
-
-                    SudokuGene gene1 = chromosome.getGene(i);
-                    SudokuGene gene2 = chromosome.getGene(j);
-
-                    // Nur veränderbare.
-                    if (chromosome.getGene(i).isMutable())
-                    {
-                        chromosome.setGene(i, new SudokuGene(gene2.getValue(), true));
-                    }
-
-                    if (chromosome.getGene(j).isMutable())
-                    {
-                        chromosome.setGene(j, new SudokuGene(gene1.getValue(), true));
-                    }
+                    chromosome.setGene(i, new SudokuGene(gene2.getValue(), true));
                 }
-            });
+
+                if (chromosome.getGene(j).isMutable())
+                {
+                    chromosome.setGene(j, new SudokuGene(gene1.getValue(), true));
+                }
+            }
+        }
+
+        // @formatter:off
+//        IntStream.range(0, chromosome.size())
+//            .parallel()
+//            .forEach(i -> {
+//                if (getRandom().nextDouble() < getMutationRate())
+//                {
+//                    int j = getRandom().nextInt(chromosome.size());
+//
+//                    SudokuGene gene1 = chromosome.getGene(i);
+//                    SudokuGene gene2 = chromosome.getGene(j);
+//
+//                    // Nur veränderbare.
+//                    if (chromosome.getGene(i).isMutable())
+//                    {
+//                        chromosome.setGene(i, new SudokuGene(gene2.getValue(), true));
+//                    }
+//
+//                    if (chromosome.getGene(j).isMutable())
+//                    {
+//                        chromosome.setGene(j, new SudokuGene(gene1.getValue(), true));
+//                    }
+//                }
+//            });
         // @formatter:on
     }
 
@@ -296,8 +316,13 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
                 .map(l -> l.replace("_", "0"))
                 .map(l -> l.replace("x", "0"))
                 .map(l -> l.replace("X", "0"))
+                //.peek(System.out::println)
                 .map(l -> l.replace("  ", " "))
+                .map(l -> l.replace("  ", " "))
+                .map(String::trim)
+                //.peek(System.out::println)
                 .map(l -> l.split("[ ]"))
+                //.peek(array -> System.out.println(Arrays.toString(array)))
                 .forEach(puzzle::add);
             // @formatter:on
         }
@@ -306,10 +331,10 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#pupulateChromosome(de.freese.ga.chromonome.Chromosome)
+     * @see de.freese.ga.algoritm.Algorithm#populateChromosome(de.freese.ga.chromonome.Chromosome)
      */
     @Override
-    public void pupulateChromosome(final Chromosome<SudokuGene> chromosome)
+    public void populateChromosome(final Chromosome<SudokuGene> chromosome)
     {
         SudokuGene[] genes = new SudokuGene[chromosome.size()];
 
@@ -317,23 +342,39 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
         // Set<Integer> set= IntStream.range(0, 9).collect(TreeSet::new, TreeSet::add,TreeSet::addAll);
         // Set<Integer> set= IntStream.range(0, 9).boxed().collect(Collectors.toSet());
 
+        for (int i = 0; i < chromosome.size(); i++)
+        {
+            // Erst nach fest vorgegeben Zahlen suchen.
+            SudokuGene gene = this.fixNumbers.get(i);
+
+            if (gene == null)
+            {
+                // Dann welche generieren.
+                int n = getRandom().nextInt(9) + 1;
+
+                gene = new SudokuGene(n, true);
+            }
+
+            genes[i] = gene;
+        }
+
         // @formatter:off
-        IntStream.range(0, chromosome.size())
-            .parallel()
-            .forEach(i -> {
-              // Erst nach fest vorgegeben Zahlen suchen.
-              SudokuGene gene = this.fixNumbers.get(i);
-
-              if (gene == null)
-              {
-                  // Dann welche generieren.
-                  int n = getRandom().nextInt(9) + 1;
-
-                  gene = new SudokuGene(n, true);
-              }
-
-              genes[i] = gene;
-            });
+//        IntStream.range(0, chromosome.size())
+//            .parallel()
+//            .forEach(i -> {
+//              // Erst nach fest vorgegeben Zahlen suchen.
+//              SudokuGene gene = this.fixNumbers.get(i);
+//
+//              if (gene == null)
+//              {
+//                  // Dann welche generieren.
+//                  int n = getRandom().nextInt(9) + 1;
+//
+//                  gene = new SudokuGene(n, true);
+//              }
+//
+//              genes[i] = gene;
+//            });
         // @formatter:on
 
         chromosome.setGenes(genes);
@@ -356,7 +397,6 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
         }
 
         this.puzzleSize = puzzle.size();
-        this.puzzleSum = (int) (Math.pow(this.puzzleSize, 2) + this.puzzleSize) / 2;
         this.puzzleBlockSize = (int) Math.sqrt(puzzle.size());
 
         this.fixNumbers.clear();

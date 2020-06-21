@@ -22,12 +22,23 @@ public interface Algorithm<G extends Gene<?>>
 {
     /**
      * Berechnet die Fitness-Funktion des Chromosoms.<br>
-     * Je näher an {@link #getMaxFitness()}, desto näher am optimalen Ergebnis.
+     * Je näher an {@link #getMaxFitness()}, desto näher am optimalen Ergebnis.<br>
      *
      * @param chromosome {@link Chromosome}
      * @return double
+     * @see Chromosome#calcFitnessValue()
      */
     public double calcFitnessValue(Chromosome<G> chromosome);
+
+    /**
+     * Erzeugt eine neues leeres Chromosom / Lösung.
+     *
+     * @return {@link Chromosome}
+     */
+    public default Chromosome<G> createEmptyChromosome()
+    {
+        return new DefaultChromosome<>(this);
+    }
 
     /**
      * Erzeugt einen neuen leeren Genotype / Population.
@@ -64,40 +75,41 @@ public interface Algorithm<G extends Gene<?>>
      */
     public default Chromosome<G> crossover(final Chromosome<G> parent1, final Chromosome<G> parent2)
     {
-        Chromosome<G> population = new DefaultChromosome<>(parent1.getAlgorithm());
+        Chromosome<G> population = createEmptyChromosome();
 
-        // for (int i = 0; i < parent1.size(); i++)
-        // {
-        // G gene = null;
-        //
-        // if (Math.random() <= getCrossoverRate())
-        // {
-        // gene = parent1.getGene(i);
-        // }
-        // else
-        // {
-        // gene = parent2.getGene(i);
-        // }
-        //
-        // population.setGene(i, gene);
-        // }
+        for (int i = 0; i < parent1.size(); i++)
+        {
+            G gene = null;
+
+            if (getRandom().nextDouble() <= getCrossoverRate())
+            {
+                gene = parent1.getGene(i);
+            }
+            else
+            {
+                gene = parent2.getGene(i);
+            }
+
+            population.setGene(i, gene);
+        }
+
         // @formatter:off
-        IntStream.range(0, parent1.size())
-            .parallel()
-            .forEach(i -> {
-                G gene = null;
-
-                if (Math.random() <= getCrossoverRate())
-                {
-                    gene = parent1.getGene(i);
-                }
-                else
-                {
-                    gene = parent2.getGene(i);
-                }
-
-                population.setGene(i, gene);
-            });
+//        IntStream.range(0, parent1.size())
+//            .parallel()
+//            .forEach(i -> {
+//                G gene = null;
+//
+//                if (getRandom().nextDouble() <= getCrossoverRate())
+//                {
+//                    gene = parent1.getGene(i);
+//                }
+//                else
+//                {
+//                    gene = parent2.getGene(i);
+//                }
+//
+//                population.setGene(i, gene);
+//            });
         // @formatter:on
 
         return population;
@@ -111,7 +123,7 @@ public interface Algorithm<G extends Gene<?>>
      * @param genotype {@link Genotype}
      * @return {@link Genotype}
      */
-    public default Genotype<G> evolvePopulation(final Genotype<G> genotype) // <T extends Genotype<G>>
+    public default Genotype<G> evolvePopulation(final Genotype<G> genotype)
     {
         Genotype<G> newPopulation = createEmptyGenotype(genotype.size());
 
@@ -123,24 +135,11 @@ public interface Algorithm<G extends Gene<?>>
             elitismOffset = 1;
         }
 
-        // Loop over the population size and create new individuals with
-        // crossover
-        // for (int i = elitismOffset; i < genotype.size(); i++)
-        // {
-        // // Select parents
-        // Chromosome<G> parent1 = tournamentSelection(genotype);
-        // Chromosome<G> parent2 = tournamentSelection(genotype);
-        //
-        // // Crossover parents
-        // Chromosome<G> child = crossover(parent1, parent2);
-        //
-        // // Add child to new population
-        // newPopulation.setChromosome(i, child);
-        // }
         // @formatter:off
         IntStream.range(elitismOffset, genotype.size())
             .parallel()
-            .forEach(i -> {
+            .map(i -> {
+                // Loop over the population size and create new individuals with crossover
                 // Select parents
                 Chromosome<G> parent1 = tournamentSelection(genotype);
                 Chromosome<G> parent2 = tournamentSelection(genotype);
@@ -156,18 +155,14 @@ public interface Algorithm<G extends Gene<?>>
 
                 // Add child to new population
                 newPopulation.setChromosome(i, child);
-            });
-        // @formatter:on
 
-        // Mutate population
-        // for (int i = elitismOffset; i < newPopulation.size(); i++)
-        // {
-        // mutate(newPopulation.getChromosome(i));
-        // }
-        // @formatter:off
-        IntStream.range(elitismOffset, genotype.size())
-            .parallel()
-            .forEach(i -> mutate(newPopulation.getChromosome(i)))
+                return i;
+            })
+            .forEach(i -> {
+                // Mutate population
+                mutate(newPopulation.getChromosome(i));
+                }
+            )
             ;
         // @formatter:on
 
@@ -236,44 +231,45 @@ public interface Algorithm<G extends Gene<?>>
      */
     public default void mutate(final Chromosome<G> chromosome)
     {
-        // for (int i = 0; i < chromosome.size(); i++)
-        // {
-        // if (Math.random() < getMutationRate())
-        // {
-        // int j = (int) (chromosome.size() * Math.random());
-        //
-        // G gene1 = chromosome.getGene(i);
-        // G gene2 = chromosome.getGene(j);
-        //
-        // chromosome.setGene(j, gene1);
-        // chromosome.setGene(i, gene2);
-        // }
-        // }
+        for (int i = 0; i < chromosome.size(); i++)
+        {
+            if (getRandom().nextDouble() < getMutationRate())
+            {
+                int j = getRandom().nextInt(chromosome.size());
+
+                G gene1 = chromosome.getGene(i);
+                G gene2 = chromosome.getGene(j);
+
+                chromosome.setGene(j, gene1);
+                chromosome.setGene(i, gene2);
+            }
+        }
 
         // @formatter:off
-        IntStream.range(0, chromosome.size())
-            .parallel()
-            .forEach(i -> {
-                if (Math.random() < getMutationRate())
-                {
-                    int j = getRandom().nextInt(chromosome.size());
-
-                    G gene1 = chromosome.getGene(i);
-                    G gene2 = chromosome.getGene(j);
-
-                    chromosome.setGene(j, gene1);
-                    chromosome.setGene(i, gene2);
-                }
-            });
+//        IntStream.range(0, chromosome.size())
+//            .parallel()
+//            .forEach(i -> {
+//                if (getRandom().nextDouble() < getMutationRate())
+//                {
+//                    int j = getRandom().nextInt(chromosome.size());
+//
+//                    G gene1 = chromosome.getGene(i);
+//                    G gene2 = chromosome.getGene(j);
+//
+//                    chromosome.setGene(j, gene1);
+//                    chromosome.setGene(i, gene2);
+//                }
+//            });
         // @formatter:on
     }
 
     /**
-     * Befüllt das Chromosom mit Genen.
+     * Befüllt das Chromosom mit Genen.<br>
      *
      * @param chromosome {@link Chromosome}
+     * @see Chromosome#populateChromosome()
      */
-    public void pupulateChromosome(Chromosome<G> chromosome);
+    public void populateChromosome(Chromosome<G> chromosome);
 
     /**
      * Setzt die Rate der Vererbung eines Chromosoms.
@@ -333,32 +329,7 @@ public interface Algorithm<G extends Gene<?>>
                 .map(Optional::ofNullable)
                 .map(o -> o.map(Object::toString).orElse("null"))
                 .collect(Collectors.joining(","));
-       // @formatter:on
-
-        // StringJoiner stringJoiner = new StringJoiner(",");
-        //
-        // for (int i = 0; i < chromosome.size(); i++)
-        // {
-        // G gene = chromosome.getGene(i);
-        //
-        // if (gene.getValue() != null)
-        // {
-        // stringJoiner.add(gene.getValue().toString());
-        // }
-        //
-        // stringJoiner.add("null");
-        // }
-        //
-        // s = stringJoiner.toString();
-
-        // StringBuilder sb = new StringBuilder();
-        //
-        // for (int i = 0; i < chromosome.size(); i++)
-        // {
-        // sb.append(chromosome.getGene(i).getValue());
-        // }
-        //
-        // s = sb.toString();
+        // @formatter:on
 
         return s;
     }

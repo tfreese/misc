@@ -3,21 +3,20 @@ package de.freese.ga.examples.pattern;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.gene.ByteGene;
+import de.freese.ga.gene.BooleanGene;
 import de.freese.ga.gene.Gene;
 
 /**
  * @author Thomas Freese
  */
-public class PatternAlgorithm extends AbstractAlgorithm<Gene<Byte>>
+public class PatternAlgorithm extends AbstractAlgorithm<Gene<Boolean>>
 {
     /**
      *
      */
-    private Byte[] solution = null;
+    private boolean[] solution = null;
 
     /**
      * Erzeugt eine neue Instanz von {@link PatternAlgorithm}.
@@ -31,13 +30,13 @@ public class PatternAlgorithm extends AbstractAlgorithm<Gene<Byte>>
      * @see de.freese.ga.algoritm.Algorithm#calcFitnessValue(de.freese.ga.chromonome.Chromosome)
      */
     @Override
-    public double calcFitnessValue(final Chromosome<Gene<Byte>> chromosome)
+    public double calcFitnessValue(final Chromosome<Gene<Boolean>> chromosome)
     {
         double fitness = 0.0D;
 
         for (int i = 0; (i < chromosome.size()) && (i < this.solution.length); i++)
         {
-            if (chromosome.getGene(i).getValue() == this.solution[i])
+            if (chromosome.getGene(i).getValue().equals(this.solution[i]))
             {
                 fitness++;
             }
@@ -56,30 +55,15 @@ public class PatternAlgorithm extends AbstractAlgorithm<Gene<Byte>>
         return getSizeChromosome();
     }
 
-    // /**
-    // * @see de.freese.ga.algoritm.Algorithm#mutate(de.freese.ga.chromonome.Chromosome)
-    // */
-    // @Override
-    // public void mutate(final Chromosome<Gene<Byte>> chromosome)
-    // {
-    // for (int i = 0; i < chromosome.size(); i++)
-    // {
-    // if (Math.random() <= getMutationRate())
-    // {
-    // chromosome.setGene(i, new ByteGene((byte) Math.round(Math.random())));
-    // }
-    // }
-    // }
-
     /**
-     * @see de.freese.ga.algoritm.Algorithm#pupulateChromosome(de.freese.ga.chromonome.Chromosome)
+     * @see de.freese.ga.algoritm.Algorithm#populateChromosome(de.freese.ga.chromonome.Chromosome)
      */
     @Override
-    public void pupulateChromosome(final Chromosome<Gene<Byte>> chromosome)
+    public void populateChromosome(final Chromosome<Gene<Boolean>> chromosome)
     {
         for (int i = 0; i < getSizeChromosome(); i++)
         {
-            chromosome.setGene(i, new ByteGene((byte) Math.round(Math.random())));
+            chromosome.setGene(i, new BooleanGene(getRandom().nextBoolean()));
         }
     }
 
@@ -90,19 +74,19 @@ public class PatternAlgorithm extends AbstractAlgorithm<Gene<Byte>>
      */
     public void setSolution(final String pattern)
     {
-        this.solution = new Byte[pattern.length()];
+        this.solution = new boolean[pattern.length()];
 
         for (int i = 0; i < pattern.length(); i++)
         {
-            String character = pattern.substring(i, i + 1);
+            char character = pattern.charAt(i);
 
-            if (character.contains("0") || character.contains("1"))
+            if (character == '1')
             {
-                this.solution[i] = Byte.parseByte(character);
+                this.solution[i] = true;
             }
             else
             {
-                this.solution[i] = 0;
+                this.solution[i] = false;
             }
         }
     }
@@ -111,13 +95,14 @@ public class PatternAlgorithm extends AbstractAlgorithm<Gene<Byte>>
      * @see de.freese.ga.algoritm.Algorithm#toString(de.freese.ga.chromonome.Chromosome)
      */
     @Override
-    public String toString(final Chromosome<Gene<Byte>> chromosome)
+    public String toString(final Chromosome<Gene<Boolean>> chromosome)
     {
         String s = null;
 
         // @formatter:off
         s = Stream.of(chromosome.getGenes())
                  .map(Gene::getValue)
+                 .map(v -> Boolean.TRUE.equals(v) ? '1': '0')
                  .map(Object::toString)
                  //.map(Optional::ofNullable)
                  //.map(o -> o.map(Object::toString).orElse("null"))

@@ -15,4 +15,17 @@
     <name>${project.groupId} - ${project.artifactId}</name>
     <description>Genetic Algorythms</description>
 
+    <dependencies>
+        <!-- compile scope -->
+        <!-- runtime scope -->
+        <!-- provided scope -->
+        
+        <!-- test scope -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>        
+    </dependencies>
+    
 </project>

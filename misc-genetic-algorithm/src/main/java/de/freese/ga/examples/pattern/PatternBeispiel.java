@@ -26,16 +26,16 @@ public class PatternBeispiel
         algorithm.setSolution(pattern);
 
         // Create an initial population
-        Genotype<Gene<Byte>> population = algorithm.createInitialGenotype();
-        Chromosome<Gene<Byte>> fittest = population.getFittest();
+        Genotype<Gene<Boolean>> population = algorithm.createInitialGenotype();
+        Chromosome<Gene<Boolean>> fittest = population.getFittest();
 
         // for (int i = 0; i < algorithm.getSizeGenotype(); i++)
         for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
         {
-            fittest = population.getFittest();
-
             System.out.printf("Generation: %2d; Fittest: %2.0f; %s%n", i, fittest.calcFitnessValue(), fittest);
             population = algorithm.evolvePopulation(population);
+
+            fittest = population.getFittest();
         }
 
         System.out.println("Solution found!");

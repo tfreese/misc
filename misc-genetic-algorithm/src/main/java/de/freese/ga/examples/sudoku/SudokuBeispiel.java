@@ -34,31 +34,49 @@ public class SudokuBeispiel
         // algorithm.setSizeChromosome(...); // Anzahl Zahlen im Rätzel
         algorithm.setPuzzle(puzzle);
 
-        double maxFitness = algorithm.getMaxFitness();
+        boolean correctSolution = false;
 
-        // Create an initial population
-        Genotype<SudokuGene> population = algorithm.createInitialGenotype();
-        Chromosome<SudokuGene> fittest = population.getFittest();
-
-        // for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
-        for (int i = 0; i < algorithm.getSizeGenotype(); i++)
+        while (!correctSolution)
         {
-            fittest = population.getFittest();
+            double maxFitness = algorithm.getMaxFitness();
 
-            System.out.printf("Generation: %2d; Fittest: %3.0f / %3.0f; %s%n", i, fittest.calcFitnessValue(), maxFitness, fittest);
-            population = algorithm.evolvePopulation(population);
+            // Create an initial population
+            Genotype<SudokuGene> population = algorithm.createInitialGenotype();
+            Chromosome<SudokuGene> fittest = null;
 
-            // if (i == algorithm.getSizeGenotype() - 1)
-            // {
-            // // Neustart
-            // i = 0;
-            // population = algorithm.createInitialGenotype();
-            // fittest = population.getFittest();
-            // }
+            // for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
+            for (int i = 0; i < algorithm.getSizeGenotype(); i++)
+            {
+                fittest = population.getFittest();
+                double fitness = fittest.calcFitnessValue();
+
+                // System.out.printf("Generation: %2d; Fittest: %3.0f / %3.0f; %s%n", i, fitness, maxFitness, fittest);
+
+                if (fitness == maxFitness)
+                {
+                    break;
+                }
+
+                population = algorithm.evolvePopulation(population);
+
+                // if (i == algorithm.getSizeGenotype() - 1)
+                // {
+                // // Neustart
+                // i = 0;
+                // population = algorithm.createInitialGenotype();
+                // }
+            }
+
+            // 1215 = 3 * 405: In allen Zeilen, Spalten und Blöcken ist die Summe 45.
+            correctSolution = maxFitness == fittest.calcFitnessValue();
+
+            System.out.println(!correctSolution ? "Wrong Solution !!!" : "Solution found!");
+            System.out.printf("Genes: Fittest: %3.0f / %3.0f%s%n", fittest.calcFitnessValue(), maxFitness, fittest);
+
+            if (correctSolution)
+            {
+                break;
+            }
         }
-
-        // 1215 = 3 * 405: In allen Zeilen, Spalten und Blöcken ist die Summe 45.
-        System.out.println(maxFitness != fittest.calcFitnessValue() ? "Wrong Solution !!!" : "Solution found!");
-        System.out.printf("Genes: Fittest: %3.0f / %3.0f%s%n", fittest.calcFitnessValue(), maxFitness, fittest);
     }
 }

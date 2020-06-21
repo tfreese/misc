@@ -2,7 +2,6 @@
 package de.freese.ga.chromonome;
 
 import java.util.Objects;
-
 import de.freese.ga.algoritm.Algorithm;
 import de.freese.ga.gene.Gene;
 
@@ -38,6 +37,15 @@ public abstract class AbstractChromosome<G extends Gene<?>> implements Chromosom
     }
 
     /**
+     * @see de.freese.ga.chromonome.Chromosome#calcFitnessValue()
+     */
+    @Override
+    public double calcFitnessValue()
+    {
+        return getAlgorithm().calcFitnessValue(this);
+    }
+
+    /**
      * @see de.freese.ga.chromonome.Chromosome#contains(de.freese.ga.gene.Gene)
      */
     @Override
@@ -63,10 +71,9 @@ public abstract class AbstractChromosome<G extends Gene<?>> implements Chromosom
     }
 
     /**
-     * @see de.freese.ga.chromonome.Chromosome#getAlgorithm()
+     * @return {@link Algorithm}<G>
      */
-    @Override
-    public Algorithm<G> getAlgorithm()
+    protected Algorithm<G> getAlgorithm()
     {
         return this.algorithm;
     }
@@ -87,6 +94,15 @@ public abstract class AbstractChromosome<G extends Gene<?>> implements Chromosom
     public G[] getGenes()
     {
         return this.genes;
+    }
+
+    /**
+     * @see de.freese.ga.chromonome.Chromosome#populateChromosome()
+     */
+    @Override
+    public void populateChromosome()
+    {
+        getAlgorithm().populateChromosome(this);
     }
 
     /**

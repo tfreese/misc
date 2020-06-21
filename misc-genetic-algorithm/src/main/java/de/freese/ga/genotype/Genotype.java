@@ -3,7 +3,6 @@ package de.freese.ga.genotype;
 
 import de.freese.ga.algoritm.Algorithm;
 import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.chromonome.DefaultChromosome;
 import de.freese.ga.gene.Gene;
 
 /**
@@ -52,12 +51,14 @@ public interface Genotype<G extends Gene<?>>
 
     /**
      * Befüllt den Genotype mit Chromosomen.
+     * 
+     * @see Chromosome#populateChromosome()
      */
     public default void pupulateGenotype()
     {
         for (int i = 0; i < size(); i++)
         {
-            Chromosome<G> chromosome = new DefaultChromosome<>(getAlgorithm());
+            Chromosome<G> chromosome = getAlgorithm().createEmptyChromosome();
             chromosome.populateChromosome();
             setChromosome(i, chromosome);
         }

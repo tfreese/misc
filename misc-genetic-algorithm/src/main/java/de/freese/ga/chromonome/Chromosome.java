@@ -3,6 +3,7 @@ package de.freese.ga.chromonome;
 
 import de.freese.ga.algoritm.Algorithm;
 import de.freese.ga.gene.Gene;
+import de.freese.ga.genotype.Genotype;
 
 /**
  * Interface eines Chromosomes für genetische Algorythmen.<br>
@@ -14,14 +15,12 @@ import de.freese.ga.gene.Gene;
 public interface Chromosome<G extends Gene<?>>
 {
     /**
-     * Berechnet die Fitness-Funktion.
+     * Berechnet die Fitness-Funktion.<br>
      *
      * @return double
+     * @see Algorithm#calcFitnessValue(Chromosome)
      */
-    public default double calcFitnessValue()
-    {
-        return getAlgorithm().calcFitnessValue(this);
-    }
+    public double calcFitnessValue();
 
     /**
      * Prüft, ob der Typ und das Value des Genoms im Chromosom vorhanden ist.
@@ -30,11 +29,6 @@ public interface Chromosome<G extends Gene<?>>
      * @return boolean
      */
     public boolean contains(G gene);
-
-    /**
-     * @return {@link Algorithm}
-     */
-    public Algorithm<G> getAlgorithm();
 
     /**
      * Liefert das Genom am Index.
@@ -52,12 +46,12 @@ public interface Chromosome<G extends Gene<?>>
     public G[] getGenes();
 
     /**
-     * Befüllt das Chromosom mit Genen.
+     * Befüllt das Chromosom mit Genen.<br>
+     *
+     * @see Algorithm#populateChromosome(Chromosome)
+     * @see Genotype#pupulateGenotype()
      */
-    public default void populateChromosome()
-    {
-        getAlgorithm().pupulateChromosome(this);
-    }
+    public void populateChromosome();
 
     /**
      * Setzt das Genom am Index.

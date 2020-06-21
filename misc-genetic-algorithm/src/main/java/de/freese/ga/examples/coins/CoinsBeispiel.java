@@ -45,12 +45,12 @@ public class CoinsBeispiel
         // for (int i = 0; i < algorithm.getSizeGenotype(); i++)
         for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
         {
-            fittest = population.getFittest();
-
             // %8.3f = 8 Stellen, 3 davon nach dem Komma.
             System.out.printf("Generation: %2d; Fittest: %8.3f; %s = %d Cent%n", i, fittest.calcFitnessValue(), fittest,
                     Stream.of(fittest.getGenes()).mapToInt(Gene::getValue).sum());
             population = algorithm.evolvePopulation(population);
+
+            fittest = population.getFittest();
         }
 
         System.out.println("Solution found!");

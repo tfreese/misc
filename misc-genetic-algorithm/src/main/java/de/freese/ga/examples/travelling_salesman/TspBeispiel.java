@@ -43,7 +43,7 @@ public class TspBeispiel
 
         TspAlgorithm algorithm = new TspAlgorithm();
         // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(100); // Anzahl Chromosomen/Lösungen/Tour
+        algorithm.setSizeGenotype(200); // Anzahl Chromosomen/Lösungen/Tour
         // algorithm.setSizeChromosome(...); // Anzahl Städte = Anzahl Gene im Chromosom/Tour
         algorithm.setCities(cities);
 

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.chromonome.DefaultChromosome;
 import de.freese.ga.gene.Gene;
 import de.freese.ga.gene.ObjectGene;
 
@@ -48,7 +47,7 @@ public class TspAlgorithm extends AbstractAlgorithm<Gene<City>>
     public Chromosome<Gene<City>> crossover(final Chromosome<Gene<City>> parent1, final Chromosome<Gene<City>> parent2)
     {
         // Create new child tour
-        Chromosome<Gene<City>> childChromosome = new DefaultChromosome<>(parent1.getAlgorithm());
+        Chromosome<Gene<City>> childChromosome = createEmptyChromosome();
 
         // Get start and end sub tour positions for parent1's tour
         int startPos = getRandom().nextInt(parent1.size());
@@ -140,11 +139,11 @@ public class TspAlgorithm extends AbstractAlgorithm<Gene<City>>
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#pupulateChromosome(de.freese.ga.chromonome.Chromosome)
+     * @see de.freese.ga.algoritm.Algorithm#populateChromosome(de.freese.ga.chromonome.Chromosome)
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void pupulateChromosome(final Chromosome<Gene<City>> chromosome)
+    public void populateChromosome(final Chromosome<Gene<City>> chromosome)
     {
         List<Gene<City>> t = new ArrayList<>();
 
