@@ -8,7 +8,7 @@ import de.freese.ga.gene.Gene;
 
 /**
  * Interface eines Genotypes für genetische Algorythmen.<br>
- * Genotype = Collection of Chromosomes
+ * Genotype = Sammlung von Chromosomen / Lösungen
  *
  * @author Thomas Freese
  * @param <G> Konkreter Typ des Genoms
@@ -55,7 +55,6 @@ public interface Genotype<G extends Gene<?>>
      */
     public default void pupulateGenotype()
     {
-        // Loop and create individuals
         for (int i = 0; i < size(); i++)
         {
             Chromosome<G> chromosome = new DefaultChromosome<>(getAlgorithm());

@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import de.freese.ga.algoritm.AbstractAlgorithm;
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.chromonome.DefaultChromosome;
@@ -101,8 +101,7 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
             long coinsExisting = this.coinCounter.getOrDefault(coin.getValue(), 1L);
 
             // Zählen wie viele Münzen von diesem Wert im Chromosom bereits vorhanden sind.
-            long coinsInPopulation = Stream.of(population.getGenes()).filter(g -> g != null).filter(g -> g.getValue() == coin.getValue())
-                    .count();
+            long coinsInPopulation = Stream.of(population.getGenes()).filter(Objects::nonNull).filter(g -> g.getValue() == coin.getValue()).count();
 
             // Münze eines Wertes nur zuweisen, wenn noch welche übrig sind.
             if (coinsInPopulation < coinsExisting)
@@ -119,6 +118,24 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
     }
 
     /**
+     * Berechnet den Münzinhalt des Chromosoms in Cent.
+     *
+     * @param chromosome {@link Chromosome}
+     * @return int
+     */
+    protected int getCents(final Chromosome<Gene<Integer>> chromosome)
+    {
+        int amount = 0;
+
+        for (Gene<Integer> gene : chromosome.getGenes())
+        {
+            amount += gene.getValue();
+        }
+
+        return amount;
+    }
+
+    /**
      * @see de.freese.ga.algoritm.Algorithm#getMaxFitness()
      */
     @Override
@@ -127,6 +144,27 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
         // Keine Lösung bekannt.
         // return Double.MAX_VALUE;
         return 1000D;
+    }
+
+    /**
+     * Liefert die Anzahl der Münzen.
+     *
+     * @param chromosome {@link Chromosome}
+     * @return int
+     */
+    protected int getNumberOfCoins(final Chromosome<Gene<Integer>> chromosome)
+    {
+        int coins = 0;
+
+        for (Gene<Integer> gene : chromosome.getGenes())
+        {
+            if (gene.getValue() > 0)
+            {
+                coins++;
+            }
+        }
+
+        return coins;
     }
 
     /**
@@ -214,44 +252,5 @@ public class CoinsAlgorithm extends AbstractAlgorithm<Gene<Integer>>
         // @formatter:on
 
         return s;
-    }
-
-    /**
-     * Berechnet den Münzinhalt des Chromosoms in Cent.
-     *
-     * @param chromosome {@link Chromosome}
-     * @return int
-     */
-    protected int getCents(final Chromosome<Gene<Integer>> chromosome)
-    {
-        int amount = 0;
-
-        for (Gene<Integer> gene : chromosome.getGenes())
-        {
-            amount += gene.getValue();
-        }
-
-        return amount;
-    }
-
-    /**
-     * Liefert die Anzahl der Münzen.
-     *
-     * @param chromosome {@link Chromosome}
-     * @return int
-     */
-    protected int getNumberOfCoins(final Chromosome<Gene<Integer>> chromosome)
-    {
-        int coins = 0;
-
-        for (Gene<Integer> gene : chromosome.getGenes())
-        {
-            if (gene.getValue() > 0)
-            {
-                coins++;
-            }
-        }
-
-        return coins;
     }
 }

@@ -5,7 +5,7 @@ package de.freese.ga.gene;
  * Interface eines Genoms für genetische Algorythmen.
  *
  * @author Thomas Freese
- * @param <V> Konkreter Typ des Values.
+ * @param <V> Typ des Values.
  */
 public interface Gene<V> extends Comparable<Gene<V>>
 {

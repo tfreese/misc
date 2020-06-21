@@ -48,25 +48,25 @@ public class TspAlgorithm extends AbstractAlgorithm<Gene<City>>
     public Chromosome<Gene<City>> crossover(final Chromosome<Gene<City>> parent1, final Chromosome<Gene<City>> parent2)
     {
         // Create new child tour
-        Chromosome<Gene<City>> child = new DefaultChromosome<>(parent1.getAlgorithm());
+        Chromosome<Gene<City>> childChromosome = new DefaultChromosome<>(parent1.getAlgorithm());
 
         // Get start and end sub tour positions for parent1's tour
-        int startPos = (int) (Math.random() * parent1.size());
-        int endPos = (int) (Math.random() * parent1.size());
+        int startPos = getRandom().nextInt(parent1.size());
+        int endPos = getRandom().nextInt(parent1.size());
 
         // Loop and add the sub tour from parent1 to our child
-        for (int i = 0; i < child.size(); i++)
+        for (int i = 0; i < childChromosome.size(); i++)
         {
             // If our start position is less than the end position
             if ((startPos < endPos) && (i > startPos) && (i < endPos))
             {
-                child.setGene(i, parent1.getGene(i));
+                childChromosome.setGene(i, parent1.getGene(i));
             } // If our start position is larger
             else if (startPos > endPos)
             {
                 if (!((i < startPos) && (i > endPos)))
                 {
-                    child.setGene(i, parent1.getGene(i));
+                    childChromosome.setGene(i, parent1.getGene(i));
                 }
             }
         }
@@ -75,22 +75,22 @@ public class TspAlgorithm extends AbstractAlgorithm<Gene<City>>
         for (int i = 0; i < parent2.size(); i++)
         {
             // If child doesn't have the city add it
-            if (!child.contains(parent2.getGene(i)))
+            if (!childChromosome.contains(parent2.getGene(i)))
             {
                 // Loop to find a spare position in the child's tour
-                for (int ii = 0; ii < child.size(); ii++)
+                for (int ii = 0; ii < childChromosome.size(); ii++)
                 {
                     // Spare position found, add city
-                    if (child.getGene(ii) == null)
+                    if (childChromosome.getGene(ii) == null)
                     {
-                        child.setGene(ii, parent2.getGene(i));
+                        childChromosome.setGene(ii, parent2.getGene(i));
                         break;
                     }
                 }
             }
         }
 
-        return child;
+        return childChromosome;
     }
 
     /**

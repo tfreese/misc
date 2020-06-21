@@ -2,6 +2,7 @@
 package de.freese.ga.algoritm;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -166,9 +167,8 @@ public interface Algorithm<G extends Gene<?>>
         // @formatter:off
         IntStream.range(elitismOffset, genotype.size())
             .parallel()
-            .forEach(i -> {
-                mutate(newPopulation.getChromosome(i));
-            });
+            .forEach(i -> mutate(newPopulation.getChromosome(i)))
+            ;
         // @formatter:on
 
         return newPopulation;
@@ -194,6 +194,11 @@ public interface Algorithm<G extends Gene<?>>
      * @return double
      */
     public double getMutationRate();
+
+    /**
+     * @return {@link Random}
+     */
+    public Random getRandom();
 
     /**
      * Liefert die Größe des Chromosoms.
@@ -225,7 +230,7 @@ public interface Algorithm<G extends Gene<?>>
 
     /**
      * Zufällige Veränderung der Gene.<br>
-     * Die Mutation verändert zufällig ein oder mehrere Gene eines Chromsoms.
+     * Die Mutation verändert zufällig ein oder mehrere Gene eines Chromosoms.
      *
      * @param chromosome {@link Chromosome}
      */
@@ -251,7 +256,7 @@ public interface Algorithm<G extends Gene<?>>
             .forEach(i -> {
                 if (Math.random() < getMutationRate())
                 {
-                    int j = (int) (chromosome.size() * Math.random());
+                    int j = getRandom().nextInt(chromosome.size());
 
                     G gene1 = chromosome.getGene(i);
                     G gene2 = chromosome.getGene(j);
@@ -371,7 +376,7 @@ public interface Algorithm<G extends Gene<?>>
 
         for (int i = 0; i < getTournamentSize(); i++)
         {
-            int randomID = (int) (Math.random() * genotype.size());
+            int randomID = getRandom().nextInt(genotype.size());
 
             tournament.setChromosome(i, genotype.getChromosome(randomID));
         }

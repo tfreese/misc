@@ -3,7 +3,6 @@ package de.freese.ga.examples.travelling_salesman;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.gene.Gene;
 import de.freese.ga.genotype.Genotype;
@@ -44,7 +43,7 @@ public class TspBeispiel
 
         TspAlgorithm algorithm = new TspAlgorithm();
         // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(75); // Anzahl Chromosomen/Tour
+        algorithm.setSizeGenotype(100); // Anzahl Chromosomen/Lösungen/Tour
         // algorithm.setSizeChromosome(...); // Anzahl Städte = Anzahl Gene im Chromosom/Tour
         algorithm.setCities(cities);
 
@@ -57,8 +56,7 @@ public class TspBeispiel
         {
             fittest = population.getFittest();
 
-            System.out.printf("Generation: %2d; Fittest: %2.9f; Distance: %4.3f; %s%n", i, fittest.calcFitnessValue(),
-                    algorithm.getDistance(fittest), fittest);
+            System.out.printf("Generation: %2d; Fittest: %2.9f; Distance: %4.3f; %s%n", i, fittest.calcFitnessValue(), algorithm.getDistance(fittest), fittest);
             population = algorithm.evolvePopulation(population);
         }
 

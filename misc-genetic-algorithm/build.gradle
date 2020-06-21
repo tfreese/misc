@@ -1,4 +1,4 @@
-apply from: System.properties['user.home']+'/.gradle/java.gradle'
+apply plugin: 'java-library'
 
 dependencies {
 }

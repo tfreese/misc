@@ -5,10 +5,11 @@ import de.freese.ga.algoritm.Algorithm;
 import de.freese.ga.gene.Gene;
 
 /**
- * Interface eines Chromosomes für genetische Algorythmen.
+ * Interface eines Chromosomes für genetische Algorythmen.<br>
+ * Chromosome = Mögliche Lösung
  *
  * @author Thomas Freese
- * @param <G> Konkreter Typ des Genoms
+ * @param <G> Typ des Genoms
  */
 public interface Chromosome<G extends Gene<?>>
 {

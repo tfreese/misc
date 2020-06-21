@@ -4,7 +4,6 @@ package de.freese.ga.examples.coins;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.gene.Gene;
 import de.freese.ga.genotype.Genotype;
@@ -35,7 +34,7 @@ public class CoinsBeispiel
 
         CoinsAlgorithm algorithm = new CoinsAlgorithm();
         // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(50); // Anzahl Chromosomen/Pattern
+        algorithm.setSizeGenotype(50); // Anzahl Chromosomen/Lösungen
         algorithm.setExistingCoins(existingCoins);
         algorithm.setTargetCents(63); // max. 99 Cent
 

@@ -8,7 +8,7 @@ import de.freese.ga.gene.Gene;
  * Default-Implementierung eines {@link Chromosome}.<br>
  *
  * @author Thomas Freese
- * @param <G> Konkreter Typ des Genoms.
+ * @param <G> Typ des Genoms.
  */
 public class DefaultChromosome<G extends Gene<?>> extends AbstractChromosome<G>
 {

@@ -162,19 +162,13 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
         final DoubleAdder doubleAdder = new DoubleAdder();
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(r -> {
-            doubleAdder.add(calcRowFitness(r, chromosome));
-        });
+        IntStream.range(0, this.puzzleSize).parallel().forEach(r -> doubleAdder.add(calcRowFitness(r, chromosome)));
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(c -> {
-            doubleAdder.add(calcColumnFitness(c, chromosome));
-        });
+        IntStream.range(0, this.puzzleSize).parallel().forEach(c -> doubleAdder.add(calcColumnFitness(c, chromosome)));
 
         // max 405 = 9 x 45
-        IntStream.range(0, this.puzzleSize).parallel().forEach(b -> {
-            doubleAdder.add(calcBlockFitness(b, chromosome));
-        });
+        IntStream.range(0, this.puzzleSize).parallel().forEach(b -> doubleAdder.add(calcBlockFitness(b, chromosome)));
 
         double fitness = doubleAdder.sum();
 
@@ -262,9 +256,9 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
         IntStream.range(0, chromosome.size())
             .parallel()
             .forEach(i -> {
-                if (Math.random() < getMutationRate())
+                if (getRandom().nextDouble() < getMutationRate())
                 {
-                    int j = (int) (chromosome.size() * Math.random());
+                    int j = getRandom().nextInt(chromosome.size());
 
                     SudokuGene gene1 = chromosome.getGene(i);
                     SudokuGene gene2 = chromosome.getGene(j);
@@ -319,7 +313,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
     {
         SudokuGene[] genes = new SudokuGene[chromosome.size()];
 
-        // TODO Population pro Zeile testen.
+        // Population pro Zeile testen.
         // Set<Integer> set= IntStream.range(0, 9).collect(TreeSet::new, TreeSet::add,TreeSet::addAll);
         // Set<Integer> set= IntStream.range(0, 9).boxed().collect(Collectors.toSet());
 
@@ -333,13 +327,7 @@ public class SudokuAlgorithm extends AbstractAlgorithm<SudokuGene>
               if (gene == null)
               {
                   // Dann welche generieren.
-                  int n = 0;
-
-                  do
-                  {
-                      n = (int) (Math.random() * 10);
-                  }
-                  while ((n < 1) || (n > 9));
+                  int n = getRandom().nextInt(9) + 1;
 
                   gene = new SudokuGene(n, true);
               }

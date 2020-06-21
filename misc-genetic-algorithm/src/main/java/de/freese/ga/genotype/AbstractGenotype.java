@@ -2,7 +2,6 @@
 package de.freese.ga.genotype;
 
 import java.util.Objects;
-
 import de.freese.ga.algoritm.Algorithm;
 import de.freese.ga.chromonome.Chromosome;
 import de.freese.ga.gene.Gene;
@@ -11,7 +10,7 @@ import de.freese.ga.gene.Gene;
  * Basis-Implementierung eines {@link Genotype}.
  *
  * @author Thomas Freese
- * @param <G> Konkreter Typ des Genoms
+ * @param <G> Typ des Genoms
  */
 public abstract class AbstractGenotype<G extends Gene<?>> implements Genotype<G>
 {

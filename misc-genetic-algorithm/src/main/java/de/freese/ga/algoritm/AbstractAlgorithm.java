@@ -1,6 +1,8 @@
 // Erzeugt: 01.09.2015
 package de.freese.ga.algoritm;
 
+import java.security.SecureRandom;
+import java.util.Random;
 import de.freese.ga.gene.Gene;
 
 /**
@@ -29,6 +31,11 @@ public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<
     /**
      *
      */
+    private final Random random;
+
+    /**
+     *
+     */
     private int sizeChromosome = 0;
 
     /**
@@ -53,6 +60,8 @@ public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<
 
         this.sizeGenotype = sizeGenotype;
         this.sizeChromosome = sizeChromosome;
+        // this.random = new Random();
+        this.random = new SecureRandom();
     }
 
     /**
@@ -71,6 +80,15 @@ public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<
     public double getMutationRate()
     {
         return this.mutationRate;
+    }
+
+    /**
+     * @see de.freese.ga.algoritm.Algorithm#getRandom()
+     */
+    @Override
+    public Random getRandom()
+    {
+        return this.random;
     }
 
     /**

@@ -21,7 +21,7 @@ public class PatternBeispiel
 
         PatternAlgorithm algorithm = new PatternAlgorithm();
         // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(50); // Anzahl Chromosomen/Pattern
+        algorithm.setSizeGenotype(50); // Anzahl Chromosomen/Lösungen/Pattern
         algorithm.setSizeChromosome(pattern.length()); // Anzahl Gene im Chromosom/Pattern
         algorithm.setSolution(pattern);
 
