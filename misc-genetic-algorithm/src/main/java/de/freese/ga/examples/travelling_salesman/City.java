@@ -12,6 +12,7 @@ public class City
      *
      */
     private final String name;
+
     /**
      *
      */

@@ -1,27 +1,38 @@
 // Erzeugt: 01.09.2015
-package de.freese.ga.gene;
+package de.freese.ga;
 
 import java.util.Objects;
 
 /**
- * Basisklasse eines Genoms / {@link Gene}.
+ * Basisklasse eines Genoms / Gens für genetische Algorythmen.
  *
  * @author Thomas Freese
- * @param <V> Konkreter Typ des Values.
  */
-public abstract class AbstractGene<V> implements Gene<V>
+public class Gene implements Comparable<Gene>
 {
     /**
      *
      */
-    private V value = null;
+    private Object value = null;
 
     /**
-     *
+     * Erstellt ein neues {@link Gene} Object.
      */
-    public AbstractGene()
+    public Gene()
     {
         super();
+    }
+
+    /**
+     * Erstellt ein neues {@link Gene} Object.
+     *
+     * @param value Object
+     */
+    public Gene(final Object value)
+    {
+        super();
+
+        setValue(value);
     }
 
     /**
@@ -32,7 +43,7 @@ public abstract class AbstractGene<V> implements Gene<V>
             "unchecked", "rawtypes"
     })
     @Override
-    public int compareTo(final Gene<V> o)
+    public int compareTo(final Gene o)
     {
         if (o == null)
         {
@@ -64,38 +75,59 @@ public abstract class AbstractGene<V> implements Gene<V>
     }
 
     /**
-     * Selber Typ und selber Wert.
+     * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(final Object obj)
     {
-        if (obj == null)
-        {
-            return false;
-        }
-
-        if (obj == this)
+        if (this == obj)
         {
             return true;
         }
 
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof Gene))
         {
             return false;
         }
 
-        final Gene<?> other = (Gene<?>) obj;
+        Gene other = (Gene) obj;
 
-        return Objects.deepEquals(getValue(), other.getValue());
+        return Objects.equals(this.value, other.value);
     }
 
     /**
-     * @see de.freese.ga.gene.Gene#getValue()
+     * @return Boolean
      */
-    @Override
-    public V getValue()
+    public Boolean getBoolean()
     {
-        return this.value;
+        return getValue();
+    }
+
+    /**
+     * @return int
+     */
+    public int getInt()
+    {
+        return getValue();
+    }
+
+    /**
+     * @return Integer
+     */
+    public Integer getInteger()
+    {
+        return getValue();
+    }
+
+    /**
+     * Liefert den Wert des Genoms.
+     *
+     * @return Object
+     */
+    @SuppressWarnings("unchecked")
+    public <T> T getValue()
+    {
+        return (T) this.value;
     }
 
     /**
@@ -104,19 +136,15 @@ public abstract class AbstractGene<V> implements Gene<V>
     @Override
     public int hashCode()
     {
-        if (getValue() == null)
-        {
-            return -13;
-        }
-
-        return getValue().hashCode();
+        return Objects.hash(this.value);
     }
 
     /**
-     * @see de.freese.ga.gene.Gene#setValue(java.lang.Object)
+     * Setzt den Wert des Genoms.
+     *
+     * @param value Object
      */
-    @Override
-    public void setValue(final V value)
+    public void setValue(final Object value)
     {
         this.value = value;
     }

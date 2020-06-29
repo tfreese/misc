@@ -1,23 +1,24 @@
-// Created: 19.04.2018
+/**
+ * Created: 29.06.2020
+ */
+
 package de.freese.ga.examples.sudoku;
 
 import java.util.Objects;
-import de.freese.ga.gene.IntegerGene;
+import de.freese.ga.Gene;
 
 /**
- * Beim Sudoku dürfen die fest vorgegebenen Zahlen nicht verändert werden !
- *
  * @author Thomas Freese
  */
-public class SudokuGene extends IntegerGene
+public class SudokuGene extends Gene
 {
     /**
-     *
-     */
+    *
+    */
     private final boolean mutable;
 
     /**
-     * Erzeugt eine neue Instanz von {@link SudokuGene}.
+     * Erstellt ein neues {@link SudokuGene} Object.
      *
      * @param value Integer
      * @param mutable boolean
@@ -81,12 +82,12 @@ public class SudokuGene extends IntegerGene
     }
 
     /**
-     * @see de.freese.ga.gene.AbstractGene#setValue(java.lang.Object)
+     * @see de.freese.ga.Gene#setValue(java.lang.Object)
      */
     @Override
-    public void setValue(final Integer value)
+    public void setValue(final Object value)
     {
-        if (!this.mutable)
+        if (!isMutable())
         {
             return;
         }

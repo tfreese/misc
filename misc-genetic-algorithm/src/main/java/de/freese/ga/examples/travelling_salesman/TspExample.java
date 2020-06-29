@@ -1,18 +1,18 @@
-// Erzeugt: 26.08.2015
+/**
+ * Created: 29.06.2020
+ */
+
 package de.freese.ga.examples.travelling_salesman;
 
 import java.util.ArrayList;
 import java.util.List;
-import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.gene.Gene;
-import de.freese.ga.genotype.Genotype;
 
 /**
  * http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
  *
  * @author Thomas Freese
  */
-public class TspBeispiel
+public class TspExample
 {
     /**
      * @param args String[]
@@ -41,27 +41,30 @@ public class TspBeispiel
         cities.add(new City("S", 60, 20));
         cities.add(new City("T", 160, 20));
 
-        TspAlgorithm algorithm = new TspAlgorithm();
-        // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(200); // Anzahl Chromosomen/Lösungen/Tour
-        // algorithm.setSizeChromosome(...); // Anzahl Städte = Anzahl Gene im Chromosom/Tour
-        algorithm.setCities(cities);
+        TspConfig config = new TspConfig();
+        // config.setElitism(false);
+        config.setSizeGenotype(200); // Anzahl Chromosomen/Lösungen/Tour
+        config.setCities(cities);
+        // config.setTournamentSize((int) (config.getSizeGenotype() * 0.25D)); // Tournament auf 25% der Genotype-Größe.
 
         // Create an initial population
-        Genotype<Gene<City>> population = algorithm.createInitialGenotype();
-        Chromosome<Gene<City>> fittest = null;
+        TspGenotype population = new TspGenotype(config);
+        population.populate();
 
-        // for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
-        for (int i = 0; i < algorithm.getSizeGenotype(); i++)
+        TspChromosome fittest = population.getFittest();
+
+        for (int i = 0; i < config.getSizeGenotype(); i++)
         {
-            fittest = population.getFittest();
+            System.out.printf("Generation: %2d; Fittest: %2.9f; Distance: %4.3f; %s%n", i, fittest.calcFitnessValue(), fittest.getDistance(), fittest);
 
-            System.out.printf("Generation: %2d; Fittest: %2.9f; Distance: %4.3f; %s%n", i, fittest.calcFitnessValue(), algorithm.getDistance(fittest), fittest);
-            population = algorithm.evolvePopulation(population);
+            population = population.evolve();
+
+            fittest = population.getFittest();
         }
 
         // Print final results: minimum distance found: 871,117
+        System.out.println();
         System.out.println("Solution found!");
-        System.out.printf("Genes: %s; Final distance: %4.3f%n", fittest, algorithm.getDistance(fittest));
+        System.out.printf("Genes: %s; Final distance: %4.3f%n", fittest, fittest.getDistance());
     }
 }

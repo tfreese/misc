@@ -1,17 +1,20 @@
-// Erzeugt: 26.08.2015
+/**
+ * Created: 29.06.2020
+ */
+
 package de.freese.ga.examples.coins;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import de.freese.ga.chromonome.Chromosome;
-import de.freese.ga.gene.Gene;
-import de.freese.ga.genotype.Genotype;
+import de.freese.ga.Chromosome;
+import de.freese.ga.Gene;
+import de.freese.ga.Genotype;
 
 /**
  * @author Thomas Freese
  */
-public class CoinsBeispiel
+public class CoinsExample
 {
     /**
      * @param args String[]
@@ -32,28 +35,32 @@ public class CoinsBeispiel
         existingCoins.add(1);
         existingCoins.add(1);
 
-        CoinsAlgorithm algorithm = new CoinsAlgorithm();
-        // algorithm.setElitism(false);
-        algorithm.setSizeGenotype(50); // Anzahl Chromosomen/Lösungen
-        algorithm.setExistingCoins(existingCoins);
-        algorithm.setTargetCents(63); // max. 99 Cent
+        CoinConfig config = new CoinConfig();
+        // config.setElitism(false);
+        config.setSizeGenotype(50); // Anzahl Chromosomen/Lösungen
+        config.setExistingCoins(existingCoins);
+        config.setTargetCents(63); // max. 99 Cent
 
         // Create an initial population
-        Genotype<Gene<Integer>> population = algorithm.createInitialGenotype();
-        Chromosome<Gene<Integer>> fittest = population.getFittest();
+        Genotype population = new CoinGenotype(config);
+        population.populate();
 
-        // for (int i = 0; i < algorithm.getSizeGenotype(); i++)
-        for (int i = 0; fittest.calcFitnessValue() < algorithm.getMaxFitness(); i++)
+        Chromosome fittest = population.getFittest();
+
+        // for (int i = 0; i < config.getSizeGenotype(); i++)
+        for (int i = 0; fittest.calcFitnessValue() < config.getMaxFitness(); i++)
         {
             // %8.3f = 8 Stellen, 3 davon nach dem Komma.
             System.out.printf("Generation: %2d; Fittest: %8.3f; %s = %d Cent%n", i, fittest.calcFitnessValue(), fittest,
-                    Stream.of(fittest.getGenes()).mapToInt(Gene::getValue).sum());
-            population = algorithm.evolvePopulation(population);
+                    Stream.of(fittest.getGenes()).mapToInt(Gene::getInt).sum());
+
+            population = population.evolve();
 
             fittest = population.getFittest();
         }
 
+        System.out.println();
         System.out.println("Solution found!");
-        System.out.printf("Genes: %s = %d Cent%n", fittest, algorithm.getTargetCents());
+        System.out.printf("Genes: %s = %d Cent%n", fittest, config.getTargetCents());
     }
 }

@@ -1,17 +1,18 @@
-// Erzeugt: 01.09.2015
-package de.freese.ga.algoritm;
+/**
+ * Created: 29.06.2020
+ */
+
+package de.freese.ga;
 
 import java.security.SecureRandom;
 import java.util.Random;
-import de.freese.ga.gene.Gene;
 
 /**
- * Basisklasse eines {@link Algorithm}.
+ * Konfigurations-Objekt.
  *
  * @author Thomas Freese
- * @param <G> Konkreter Typ des Chromosoms.
  */
-public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<G>
+public class Config
 {
     /**
      * 50 %
@@ -22,6 +23,11 @@ public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<
      *
      */
     private boolean elitism = true;
+
+    /**
+    *
+    */
+    private double maxFitness = 0.0D;
 
     /**
      * 1,5%
@@ -49,133 +55,157 @@ public abstract class AbstractAlgorithm<G extends Gene<?>> implements Algorithm<
     private int tournamentSize = 5;
 
     /**
-     * Erzeugt eine neue Instanz von {@link AbstractAlgorithm}.
-     *
-     * @param sizeGenotype int
-     * @param sizeChromosome int
+     * Erstellt ein neues {@link Config} Object.
      */
-    public AbstractAlgorithm(final int sizeGenotype, final int sizeChromosome)
+    public Config()
     {
         super();
 
-        this.sizeGenotype = sizeGenotype;
-        this.sizeChromosome = sizeChromosome;
         // this.random = new Random();
         this.random = new SecureRandom();
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getCrossoverRate()
+     * Liefert die Rate der Vererbung eines Chromosoms.
+     *
+     * @return double
      */
-    @Override
     public double getCrossoverRate()
     {
         return this.crossoverRate;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getMutationRate()
+     * Liefert, wenn möglich, den max. Wert der Fitnessfunktion.
+     *
+     * @return double
      */
-    @Override
+    public double getMaxFitness()
+    {
+        return this.maxFitness;
+    }
+
+    /**
+     * Liefert die Rate der Mutation eines Chromosoms.
+     *
+     * @return double
+     */
     public double getMutationRate()
     {
         return this.mutationRate;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getRandom()
+     * @return {@link Random}
      */
-    @Override
     public Random getRandom()
     {
         return this.random;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getSizeChromosome()
+     * Liefert die Größe des Chromosoms.
+     *
+     * @return int
      */
-    @Override
     public int getSizeChromosome()
     {
         return this.sizeChromosome;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getSizeGenotype()
+     * Liefert die Größe des Genotyps.
+     *
+     * @return int
      */
-    @Override
     public int getSizeGenotype()
     {
         return this.sizeGenotype;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#getTournamentSize()
+     * Liefert die Größe der natürlichen Selektion für einen Genotyp.
+     *
+     * @return int
      */
-    @Override
     public int getTournamentSize()
     {
         return this.tournamentSize;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#isElitism()
+     * Beim Elitismus wird das fitteste Chromosom in die nächste Generation übernommen.
+     *
+     * @return boolean
      */
-    @Override
     public boolean isElitism()
     {
         return this.elitism;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setCrossoverRate(double)
+     * Setzt die Rate der Vererbung eines Chromosoms.
+     *
+     * @param rate double
      */
-    @Override
     public void setCrossoverRate(final double rate)
     {
         this.crossoverRate = rate;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setElitism(boolean)
+     * Beim Elitismus wird das fitteste Chromosom in die nächste Generation übernommen.
+     *
+     * @param elitism boolean
      */
-    @Override
     public void setElitism(final boolean elitism)
     {
         this.elitism = elitism;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setMutationRate(double)
+     * @param maxFitness double
      */
-    @Override
+    public void setMaxFitness(final double maxFitness)
+    {
+        this.maxFitness = maxFitness;
+    }
+
+    /**
+     * Setzt die Rate der Mutation eines Chromosoms.
+     *
+     * @param rate double
+     */
     public void setMutationRate(final double rate)
     {
         this.mutationRate = rate;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setSizeChromosome(int)
+     * Setzt die Größe des Chromosoms.
+     *
+     * @param size int
      */
-    @Override
     public void setSizeChromosome(final int size)
     {
         this.sizeChromosome = size;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setSizeGenotype(int)
+     * Setzt die Größe des Genotyps.
+     *
+     * @param size int
      */
-    @Override
     public void setSizeGenotype(final int size)
     {
         this.sizeGenotype = size;
     }
 
     /**
-     * @see de.freese.ga.algoritm.Algorithm#setTournamentSize(int)
+     * Setzt die Größe der natürlichen Selektion für einen Genotyp.
+     *
+     * @param size int
      */
-    @Override
     public void setTournamentSize(final int size)
     {
         this.tournamentSize = size;
