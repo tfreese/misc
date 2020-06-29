@@ -306,5 +306,4 @@ public abstract class Genotype
 
         return fittest;
     }
-
 }

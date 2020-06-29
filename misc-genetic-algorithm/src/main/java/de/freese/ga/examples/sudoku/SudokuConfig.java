@@ -82,27 +82,6 @@ public class SudokuConfig extends Config
     }
 
     /**
-     * @param s String
-     * @return int
-     */
-    int getNumber(final String s)
-    {
-        int n = 0;
-
-        try
-        {
-            n = Integer.parseInt(s);
-        }
-        catch (Exception ex)
-        {
-            // Ignore
-            n = 0;
-        }
-
-        return n;
-    }
-
-    /**
      * @return int
      */
     int getPuzzleBlockSize()
@@ -179,7 +158,7 @@ public class SudokuConfig extends Config
             {
                 int index = (row * this.puzzleSize) + col;
 
-                int number = getNumber(columns[col]);
+                int number = Integer.parseInt(columns[col]);
 
                 if (number > 0)
                 {

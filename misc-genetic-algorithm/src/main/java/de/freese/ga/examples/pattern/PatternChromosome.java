@@ -60,7 +60,7 @@ public class PatternChromosome extends Chromosome
     @Override
     public void populate()
     {
-        // Zufällige Iitialisierung.
+        // Zufällige Initialisierung.
         for (int i = 0; i < size(); i++)
         {
             setGene(i, new Gene(getConfig().getRandom().nextBoolean()));
