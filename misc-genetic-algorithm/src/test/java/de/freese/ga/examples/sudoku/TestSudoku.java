@@ -18,7 +18,7 @@ import org.junit.jupiter.api.TestMethodOrder;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
-class TestSudokuAlgorithm
+class TestSudoku
 {
     /**
     *

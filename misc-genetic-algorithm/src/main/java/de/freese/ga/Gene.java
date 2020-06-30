@@ -157,7 +157,7 @@ public class Gene implements Comparable<Gene>
     {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append(": ");
-        sb.append(getValue().toString());
+        sb.append(Objects.toString(getValue(), "null"));
 
         return sb.toString();
     }

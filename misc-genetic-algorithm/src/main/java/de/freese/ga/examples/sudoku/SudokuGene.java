@@ -94,4 +94,13 @@ public class SudokuGene extends Gene
 
         super.setValue(value);
     }
+
+    /**
+     * @see de.freese.ga.Gene#toString()
+     */
+    @Override
+    public String toString()
+    {
+        return super.toString() + "; " + isMutable();
+    }
 }

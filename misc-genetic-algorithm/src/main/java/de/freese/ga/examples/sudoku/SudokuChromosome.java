@@ -201,18 +201,18 @@ public class SudokuChromosome extends Chromosome
             {
                 int j = getConfig().getRandom().nextInt(size());
 
-                SudokuGene gene1 = getGene(i);
-                SudokuGene gene2 = getGene(j);
+                SudokuGene geneI = getGene(i);
+                SudokuGene geneJ = getGene(j);
 
                 // Nur veränderbare.
-                if (gene1.isMutable())
+                if (geneI.isMutable())
                 {
-                    setGene(i, new SudokuGene(gene2.getValue(), true));
+                    setGene(i, new SudokuGene(geneJ.getValue(), true));
                 }
 
-                if (gene2.isMutable())
+                if (geneJ.isMutable())
                 {
-                    setGene(j, new SudokuGene(gene1.getValue(), true));
+                    setGene(j, new SudokuGene(geneI.getValue(), true));
                 }
             }
         }
@@ -221,22 +221,22 @@ public class SudokuChromosome extends Chromosome
 //        IntStream.range(0, chromosome.size())
 //            .parallel()
 //            .forEach(i -> {
-//                if (getRandom().nextDouble() < getMutationRate())
+//                if (getConfig().getRandom().nextDouble() < getConfig().getMutationRate())
 //                {
 //                    int j = getRandom().nextInt(chromosome.size());
 //
-//                    SudokuGene gene1 = chromosome.getGene(i);
-//                    SudokuGene gene2 = chromosome.getGene(j);
+//                    SudokuGene geneI = chromosome.getGene(i);
+//                    SudokuGene geneJ = chromosome.getGene(j);
 //
 //                    // Nur veränderbare.
-//                    if (chromosome.getGene(i).isMutable())
+//                    if (geneI.isMutable())
 //                    {
-//                        chromosome.setGene(i, new SudokuGene(gene2.getValue(), true));
+//                        chromosome.setGene(i, new SudokuGene(geneJ.getValue(), true));
 //                    }
 //
-//                    if (chromosome.getGene(j).isMutable())
+//                    if (geneJ.isMutable())
 //                    {
-//                        chromosome.setGene(j, new SudokuGene(gene1.getValue(), true));
+//                        chromosome.setGene(j, new SudokuGene(geneI.getValue(), true));
 //                    }
 //                }
 //            });
@@ -281,7 +281,7 @@ public class SudokuChromosome extends Chromosome
 //              if (gene == null)
 //              {
 //                  // Dann welche generieren.
-//                  int n = getRandom().nextInt(9) + 1;
+//                  int n = getConfig().getRandom().nextInt(9) + 1;
 //
 //                  gene = new SudokuGene(n, true);
 //              }

@@ -28,11 +28,11 @@ public class SudokuBeispiel
             puzzle = config.parsePuzzle(inputStream);
         }
 
-        // algoconfigrithm.setElitism(true);
-        // config.setMutationRate(0.05D);
-        // config.setCrossoverRate(0.75D);
+        config.setElitism(true);
+        config.setSizeGenotype(5000); // Anzahl Chromosomen/Lösungen
         config.setTournamentSize(9);
-        config.setSizeGenotype(100); // Anzahl Chromosomen/Lösungen
+        config.setMutationRate(0.01D); // 1 %
+        config.setCrossoverRate(0.01D); // 1 %
         config.setPuzzle(puzzle);
 
         double maxFitness = config.getMaxFitness();
@@ -47,7 +47,7 @@ public class SudokuBeispiel
         {
             double fitness = fittest.calcFitnessValue();
 
-            System.out.printf("Generation: %2d; Fittest: %3.0f / %3.0f; %s%n", i, fitness, maxFitness, fittest);
+            System.out.printf("Generation: %2d; Fittest: %3.0f of %3.0f; %s%n", i, fitness, maxFitness, fittest);
 
             if (fitness == maxFitness)
             {
@@ -73,6 +73,6 @@ public class SudokuBeispiel
         double fitness = fittest.calcFitnessValue();
 
         System.out.println(fitness != maxFitness ? "Wrong Solution !!!" : "Solution found!");
-        System.out.printf("Genes: Fittest: %3.0f / %3.0f%s%n", fitness, maxFitness, fittest);
+        System.out.printf("Genes: Fittest: %3.0f of %3.0f%s%n", fitness, maxFitness, fittest);
     }
 }
