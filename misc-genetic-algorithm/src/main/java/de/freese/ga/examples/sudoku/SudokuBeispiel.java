@@ -28,7 +28,7 @@ public class SudokuBeispiel
             puzzle = config.parsePuzzle(inputStream);
         }
 
-        config.setElitism(true);
+        config.setElitism(false);
         config.setSizeGenotype(5000); // Anzahl Chromosomen/Lösungen
         config.setTournamentSize(9);
         config.setMutationRate(0.01D); // 1 %

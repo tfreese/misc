@@ -130,4 +130,15 @@ class TestSudoku
         assertEquals(612, chromosome.calcBlockFitness(7, puzzleBlockSize));
         assertEquals(639, chromosome.calcBlockFitness(8, puzzleBlockSize));
     }
+
+    /**
+     *
+     */
+    @Test
+    void test050CalcFitness()
+    {
+        double fitness = chromosome.calcFitnessValue();
+
+        assertEquals(9963.0, fitness);
+    }
 }

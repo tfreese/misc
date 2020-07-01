@@ -104,9 +104,9 @@ public class Gene implements Comparable<Gene>
     }
 
     /**
-     * @return int
+     * @return Double
      */
-    public int getInt()
+    public Double getDouble()
     {
         return getValue();
     }

@@ -38,6 +38,7 @@ import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.Provider.Service;
 import java.security.Security;
+import java.text.NumberFormat;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -103,7 +104,7 @@ public class Misc
                     }
                     catch (Exception ex)
                     {
-                        // NOOP
+                        // Ignore
                     }
 
                     return subFolder == 1;
@@ -162,6 +163,18 @@ public class Misc
         // ByteBuffer mit UTF8 in CharBuffer umwandeln.
         String originalString = decoder.decode(byteBuffer).toString();
         System.out.printf("Original: '%s'%n", originalString);
+    }
+
+    /**
+    *
+    */
+    static void collator()
+    {
+        // Collator collator = Collator.getInstance(Locale.GERMAN);
+        // collator.setStrength(Collator.PRIMARY);
+        //
+        // System.out.println("compare: " + collator.compare("4.9", "4.11"));
+        // System.out.println((int) '■');
     }
 
     /**
@@ -324,6 +337,28 @@ public class Misc
     }
 
     /**
+    *
+    */
+    static void embeddedJndi()
+    {
+        // SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
+        // SimpleNamingContextBuilder builder =
+        // SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+        // builder.bind("java:comp/env/bla", "BlaBla");
+        // // builder.activate();
+        //
+        // Context context = new InitialContext();
+        // Object object = context.lookup("java:comp/env/bla");
+        // System.out.println(object);
+        //
+        // builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
+        // builder.bind("java:comp/env/blo", "BloBlo");
+        // object = context.lookup("java:comp/env/blo");
+        //
+        // System.out.println(object);
+    }
+
+    /**
      * @throws Exception Falls was schief geht.
      */
     static void fileWalker() throws Exception
@@ -465,6 +500,8 @@ public class Misc
      */
     static void hostName() throws Exception
     {
+        // System.out.println(InetAddress.getByName("5.157.15.6").getHostName());
+
         String hostName = null;
 
         try
@@ -625,38 +662,15 @@ public class Misc
      */
     public static void main(final String[] args) throws Throwable
     {
-        // SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-        // SimpleNamingContextBuilder builder =
-        // SimpleNamingContextBuilder.emptyActivatedContextBuilder();
-        // builder.bind("java:comp/env/bla", "BlaBla");
-        // // builder.activate();
-        //
-        // Context context = new InitialContext();
-        // Object object = context.lookup("java:comp/env/bla");
-        // System.out.println(object);
-        //
-        // builder = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
-        // builder.bind("java:comp/env/blo", "BloBlo");
-        // object = context.lookup("java:comp/env/blo");
-        // System.out.println(object);
-        // Collator collator = Collator.getInstance(Locale.GERMAN);
-        // collator.setStrength(Collator.PRIMARY);
-        //
-        // System.out.println("compare: " + collator.compare("4.9", "4.11"));
-        // System.out.println((int) '■');
-        //
-        // System.out.println(InetAddress.getByName("5.157.15.6").getHostName());
-        // ***********************************************************************************
-        // systemMXBean();
-
-        // securityProviders();
-
-        // javaVersion();
-        // introspector();
         // byteBuffer();
         // copyPipedStreams();
+        // hostName();
+        // introspector();
+        // javaVersion();
+        reactor();
+        // securityProviders();
+        // systemMXBean();
         // textBlocks();
-        hostName();
     }
 
     /**
@@ -765,45 +779,68 @@ public class Misc
     /**
      * @throws Exception Falls was schief geht.
      */
-    static void react() throws Exception
+    static void reactor() throws Exception
     {
         Mono.just("Test").map(s -> s + s).subscribe(System.out::println);
-        Mono.just("").map(v -> null).onErrorReturn("null value").subscribe(System.out::println);// .onErrorReturn("null value")
+        Mono.just("").map(v -> null).onErrorReturn("null value").subscribe(System.out::println);
 
-        Thread.sleep(200);
         System.out.println();
 
-        Scheduler scheduler = Schedulers.fromExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+        Scheduler scheduler = Schedulers.fromExecutor(Executors.newFixedThreadPool(Schedulers.DEFAULT_POOL_SIZE));
         // subscribeOn(Scheduler scheduler)
 
-        Flux.just("Test1", "Test2", "Test3", "Test4").parallel().runOn(scheduler).map(s -> s + s).subscribe(v -> {
-            System.out.println(Thread.currentThread().getName() + ": " + v);
-        });
+        // @formatter:off
+        Flux.just("Test1", "Test2", "Test3", "Test4")
+            .parallel() // In wieviele Zweige soll der Stream gesplittet werden: Default Schedulers.DEFAULT_POOL_SIZE
+            .runOn(scheduler) // ThreadPool für die parallele Verarbeitung definieren.
+            .map(s -> s + s)
+            .subscribe(v -> System.out.println(Thread.currentThread().getName() + ": " + v))
+            ;
+        // @formatter:on
 
-        Thread.sleep(200);
         System.out.println();
 
-        Flux.just("Test1", "Test2", "Test3").parallel(2).runOn(scheduler).map(v -> v.endsWith("1") ? null : v).map(s -> s + s).subscribe(v -> {
-            System.out.println(Thread.currentThread().getName() + ": " + v);
-        }, th -> System.out.println("Exception: " + th)); // , th -> System.out.println("Exception: " + th)
+        // @formatter:off
+        Flux.just("Test1", "Test2", "Test3")
+            .parallel(2)
+            .runOn(scheduler)
+            .map(v -> v.endsWith("1") ? null : v)
+            .map(s -> s + s)
+            .subscribe(v -> System.out.println(Thread.currentThread().getName() + ": " + v), th -> System.out.println("Exception: " + th))
+            ;
+        // @formatter:on
 
-        Thread.sleep(200);
         System.out.println();
 
         // Hooks.onOperatorDebug();
-        Flux.just("Test1", "Test2", "Test3", null).parallel().runOn(scheduler).filter(StringUtils::isNotBlank).map(s -> s + s).doOnError(System.out::println)
-                .subscribe(v -> {
-                    System.out.println(Thread.currentThread().getName() + ": " + v);
-                }); // .doOnError(System.out::println)
+        // @formatter:off
+        Flux.just("Test1", "Test2", "Test3", null)
+            .parallel()
+            .runOn(scheduler)
+            .filter(StringUtils::isNotBlank)
+            .map(s -> s + s)
+            .doOnError(th -> System.out.println("Exception: " + th))
+            .subscribe(v -> System.out.println(Thread.currentThread().getName() + ": " + v))
+            ;
+        // @formatter:on
 
-        Thread.sleep(200);
         System.out.println();
 
         // Test mit StepVerifier (io.projectreactor:reactor-test)
         Flux<String> source = Flux.just("foo", "bar");
         source = source.concatWith(Mono.error(new IllegalArgumentException("boom")));
 
-        StepVerifier.create(source).expectNext("foo").expectNext("bar").expectErrorMessage("boom").verify();
+        // @formatter:off
+        StepVerifier.create(source)
+            .expectNext("foo")
+            .expectNext("bar")
+            .expectErrorMessage("boom")
+            .verify()
+            ;
+        // @formatter:on
+
+        // Irgendein Thread hängt hier noch ...
+        System.exit(0);
     }
 
     /**
@@ -841,17 +878,16 @@ public class Misc
      */
     static void rrd() throws Exception
     {
-        // try (RandomAccessFile raf = new RandomAccessFile("file.dat", "rw"))
+        Path path = Paths.get(System.getProperty("user.dir"), "target", "mapped.dat");
+
+        // try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "rw"))
         // {
         // // Erstellt leere Datei fester Größe.
         // raf.setLength(8 * 1024);
         // }
 
-        // String file = System.getProperty("user.home") + File.separator + "mapped.dat";
-        Path path = Paths.get(System.getProperty("user.home"), "mapped.dat");
-
-        // try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "rw");
         // FileChannel fileChannel = raf.getChannel())
+
         try (FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.READ, StandardOpenOption.WRITE))
         {
             long fileSize = 8 * 1024; // 8 kB
@@ -892,7 +928,7 @@ public class Misc
         // Multi int-Read mit MappedByteBuffer.
         try (FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            // Bereich der Datei im Buffer mappen, nur die ersten 12 Bytes = 3 Integers.
+            // Bereich der Datei im Buffer mappen, nur jeweils 12 Bytes = 3 Integers.
             MappedByteBuffer buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, 12);
 
             System.out.println(buffer.getInt());
@@ -905,6 +941,7 @@ public class Misc
         // Einzel int-Read mit ByteBuffer (allocate).
         try (FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ))
         {
+            // Nur jeweils 4 Bytes = 1 Integer.
             ByteBuffer buffer = ByteBuffer.allocate(4);
 
             fileChannel.read(buffer);
@@ -927,7 +964,7 @@ public class Misc
         // Multi int-Read mit ByteBuffer (allocate).
         try (FileChannel fileChannel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            // Nur die ersten 12 Bytes = 3 Integers.
+            // Nur jeweils 12 Bytes = 3 Integers.
             ByteBuffer buffer = ByteBuffer.allocate(12);
 
             fileChannel.read(buffer);
@@ -965,6 +1002,27 @@ public class Misc
     /**
     *
     */
+    static void showMemory()
+    {
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory();
+        long allocatedMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+
+        long divider = 1024 * 1024;
+        String unit = "MB";
+
+        NumberFormat format = NumberFormat.getInstance();
+
+        System.out.printf("Free memory: %s%n", format.format(freeMemory / divider) + unit);
+        System.out.printf("Allocated memory: %s%n", format.format(allocatedMemory / divider) + unit);
+        System.out.printf("Max memory: %s%n", format.format(maxMemory / divider) + unit);
+        System.out.printf("Total free memory: %s%n", format.format((freeMemory + (maxMemory - allocatedMemory)) / divider) + unit);
+    }
+
+    /**
+    *
+    */
     static void splitList()
     {
         List<Integer> intList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
@@ -984,11 +1042,6 @@ public class Misc
     static void systemMXBean() throws Exception
     {
         System.out.println("\nOperatingSystemMXBean");
-
-        // Runtime runtime = Runtime.getRuntime();
-        // long maxMemory = runtime.maxMemory();
-        // long allocatedMemory = runtime.totalMemory();
-        // long freeMemory = runtime.freeMemory();
 
         OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
@@ -1037,15 +1090,15 @@ public class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-                select
-                *
-                from \
-                "table"
+            select
+            *
+            from \
+            "table"
 
-                where\n
-                \t1 = 1
-                    order by %s asc;
-                """.formatted("column");
+            where\n
+            \t1 = 1
+                order by %s asc;
+            """.formatted("column");
 
         System.out.println(sql);
     }

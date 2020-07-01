@@ -66,16 +66,16 @@ public class SudokuConfig extends Config
 
         double fitness = 0.0D;
 
-        // 405: Summe aller Zeilen = 9 * 45
+        // 405: Summe aller Zeilen = 45 x 9
         fitness += this.puzzleSize * puzzleSum;
 
-        // // 405: Summe aller Spalten = 9 * 45
+        // // 405: Summe aller Spalten = 45 x 9
         // fitness += this.puzzleSize * this.puzzleSum;
         //
-        // // 405: Summe aller Blöcke = 9 * 45
+        // // 405: Summe aller Blöcke = 45 x 9
         // fitness += this.puzzleSize * this.puzzleSum;
 
-        // 405 * 3 = 1215
+        // 405 x 3 = 1215
         fitness *= 3;
 
         return fitness;

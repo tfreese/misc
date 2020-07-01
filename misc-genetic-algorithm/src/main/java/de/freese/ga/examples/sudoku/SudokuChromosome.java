@@ -133,15 +133,16 @@ public class SudokuChromosome extends Chromosome
 
         double fitness = 0.0D;
 
-        // max 405 = 9 x 45
+        // Soll: 45 x 9 = 405
         fitness += IntStream.range(0, puzzleSize).mapToDouble(r -> calcRowFitness(r)).sum();
 
-        // max 405 = 9 x 45
+        // Soll: 45 x 9 = 405
         fitness += IntStream.range(0, puzzleSize).mapToDouble(c -> calcColumnFitness(c, puzzleSize)).sum();
 
-        // max 405 = 9 x 45
+        // Soll: 45 x 9 = 405
         fitness += IntStream.range(0, puzzleSize).mapToDouble(b -> calcBlockFitness(b, puzzleBlockSize)).sum();
 
+        // Soll: 405 x 3 = 1215
         return fitness;
     }
 

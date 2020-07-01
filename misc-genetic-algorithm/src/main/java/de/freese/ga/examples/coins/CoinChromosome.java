@@ -34,7 +34,7 @@ public class CoinChromosome extends Chromosome
     public double calcFitnessValue()
     {
         // Münzinhalt des Chromosoms in Cent.
-        int cents = Stream.of(getGenes()).mapToInt(Gene::getInt).sum();
+        int cents = Stream.of(getGenes()).mapToInt(Gene::getInteger).sum();
 
         int targetCent = getConfig().getTargetCents();
 
@@ -94,7 +94,7 @@ public class CoinChromosome extends Chromosome
     {
         // @formatter:off
         String s = Stream.of(getGenes())
-                 .map(Gene::getInt)
+                 .map(Gene::getInteger)
                  .filter(coin -> coin > 0)
                  .map(Object::toString)
                  .collect(Collectors.joining(" + "));
