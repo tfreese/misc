@@ -3,14 +3,13 @@
  */
 package de.freese.sonstiges.configuration;
 
-import java.io.FileReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.Properties;
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.CompositeConfiguration;
 import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.ConfigurationConverter;
 import org.apache.commons.configuration2.EnvironmentConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.SystemConfiguration;
@@ -22,7 +21,6 @@ public class ConfigurationDemo
 {
     /**
      * @param args String[]
-     *
      * @throws Exception Falls was schief geht.
      */
     public static void main(final String[] args) throws Exception
@@ -31,7 +29,8 @@ public class ConfigurationDemo
         configuration.addConfiguration(new EnvironmentConfiguration());
         configuration.addConfiguration(new SystemConfiguration());
 
-        try (Reader reader = new FileReader("bundles/statusbar.properties"))
+        // try (Reader reader = new FileReader("src/main/resources/simplelogger.properties"))
+        try (Reader reader = Files.newBufferedReader(Paths.get("src/main/resources/simplelogger.properties")))
         {
             PropertiesConfiguration config = new PropertiesConfiguration();
             config.read(reader);
@@ -50,18 +49,18 @@ public class ConfigurationDemo
             String key = iterator.next();
             String value = configuration.getString(key);
 
-            System.out.printf("Key = %s,\t\tValue = %s\n", key, value);
+            System.out.printf("Key = %s,\t\tValue = %s%nn", key, value);
         }
 
         System.out.println();
 
-        System.out.printf("Key = %s,\t\tValue = %s\n", "statusbar.animation.rate",
-                          configuration.getInteger("statusbar.animation.rate", null));
+        System.out.printf("Key = %s,\t\tValue = %s%nn", "org.slf4j.simpleLogger.showDateTime",
+                configuration.getBoolean("org.slf4j.simpleLogger.showDateTime", null));
 
         System.out.println();
 
-        Properties properties = ConfigurationConverter.getProperties(configuration);
-        properties.list(System.out);
+        // Properties properties = ConfigurationConverter.getProperties(configuration);
+        // properties.list(System.out);
     }
 
     /**
