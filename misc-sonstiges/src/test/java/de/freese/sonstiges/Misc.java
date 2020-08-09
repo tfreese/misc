@@ -1,5 +1,13 @@
 package de.freese.sonstiges;
 
+import de.freese.sonstiges.xml.jaxb.model.DJ;
+import org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
+
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -69,13 +77,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
-import de.freese.sonstiges.xml.jaxb.model.DJ;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.test.StepVerifier;
 
 /**
  * @author Thomas Freese
@@ -92,14 +93,14 @@ public class Misc
         try (Stream<Path> stream = Files.list(basePath))
         {
             //@formatter:off
-            stream.filter(p -> Files.isDirectory(p))
+            stream.filter(Files::isDirectory)
                 .filter(p -> {
                     long subFolder = 0 ;
 
                     try(Stream<Path> subStream = Files.list(p))
                     {
                         subFolder = subStream
-                                .filter(p2 -> Files.isDirectory(p2))
+                                .filter(Files::isDirectory)
                                 .count();
                     }
                     catch (Exception ex)
@@ -166,8 +167,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void collator()
     {
         // Collator collator = Collator.getInstance(Locale.GERMAN);
@@ -178,10 +179,12 @@ public class Misc
     }
 
     /**
-     * @param source {@link InputStream}
-     * @param sink {@link OutputStream}
+     * @param source     {@link InputStream}
+     * @param sink       {@link OutputStream}
      * @param bufferSize int
+     *
      * @return long
+     *
      * @throws IOException Falls was schief geht.
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
@@ -234,7 +237,8 @@ public class Misc
         {
             AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
 
-            Runnable runnable = () -> {
+            Runnable runnable = () ->
+            {
                 System.out.println("Start Source copy: " + Thread.currentThread().getName());
 
                 try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
@@ -300,8 +304,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void dateTime()
     {
         System.out.println("01: " + Instant.now()); // UTC time-zone
@@ -337,8 +341,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void embeddedJndi()
     {
         // SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
@@ -395,7 +399,7 @@ public class Misc
         }
 
         System.out.printf("%nFiles.walkFileTree%n");
-        Files.walkFileTree(path, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(path, new SimpleFileVisitor<>()
         {
             String indent = "";
 
@@ -454,8 +458,9 @@ public class Misc
      * Pattern "lllll_UUUUU_dddddd." returns "vrifa_EMFCQ_399671."<br>
      * <br>
      *
-     * @param random {@link Random}
+     * @param random  {@link Random}
      * @param pattern String
+     *
      * @return String
      */
     static String generatePW(final Random random, final String pattern)
@@ -471,24 +476,10 @@ public class Misc
 
             switch (c)
             {
-                case 'l':
-                    // Kleinbuchstaben
-                    sb.append((char) (97 + random.nextInt(26)));
-                    break;
-
-                case 'U':
-                    // Großbuchstaben
-                    sb.append((char) (65 + random.nextInt(26)));
-                    break;
-
-                case 'd':
-                    // Zahlen
-                    sb.append(random.nextInt(10));
-                    break;
-
-                default:
-                    sb.append(c);
-                    break;
+                case 'l' -> sb.append((char) (97 + random.nextInt(26))); // Kleinbuchstaben
+                case 'U' -> sb.append((char) (65 + random.nextInt(26))); // Großbuchstaben
+                case 'd' -> sb.append(random.nextInt(10)); // Zahlen
+                default -> sb.append(c);
             }
         }
 
@@ -632,7 +623,8 @@ public class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = (path) -> {
+        DirectoryStream.Filter<Path> filter = (path) ->
+        {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
 
@@ -658,12 +650,14 @@ public class Misc
 
     /**
      * @param args String[]
+     *
      * @throws Throwable Falls was schief geht.
      */
     public static void main(final String[] args) throws Throwable
     {
         // byteBuffer();
         // copyPipedStreams();
+        System.out.println(generatePW(new java.security.SecureRandom(), "lllll_UUUUU_dddddd."));
         // hostName();
         // introspector();
         // javaVersion();
@@ -671,11 +665,13 @@ public class Misc
         // securityProviders();
         // systemMXBean();
         // textBlocks();
+        System.out.println("args = " + java.util.Arrays.deepToString(args));
+        System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
     }
 
     /**
-    *
-    */
+     *
+     */
     static void printCharsets()
     {
         System.out.printf("Charsets: Default=%s", Charset.defaultCharset());
@@ -689,8 +685,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void printTimeZones()
     {
         System.out.printf("TimeZones: Default=%s", TimeZone.getDefault());
@@ -1000,8 +996,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void showMemory()
     {
         Runtime runtime = Runtime.getRuntime();
@@ -1021,8 +1017,8 @@ public class Misc
     }
 
     /**
-    *
-    */
+     *
+     */
     static void splitList()
     {
         List<Integer> intList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
@@ -1030,7 +1026,8 @@ public class Misc
         Map<Integer, List<Integer>> groups = intList.stream().collect(Collectors.groupingBy(s -> (s - 1) / 3));
         List<List<Integer>> subSets = new ArrayList<>(groups.values());
 
-        subSets.forEach(list -> {
+        subSets.forEach(list ->
+        {
             System.out.println("\nSub-List:");
             list.forEach(System.out::println);
         });
@@ -1090,15 +1087,15 @@ public class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-            select
-            *
-            from \
-            "table"
+                select
+                *
+                from \
+                "table"
 
-            where\n
-            \t1 = 1
-                order by %s asc;
-            """.formatted("column");
+                where\n
+                \t1 = 1
+                    order by %s asc;
+                """.formatted("column");
 
         System.out.println(sql);
     }
