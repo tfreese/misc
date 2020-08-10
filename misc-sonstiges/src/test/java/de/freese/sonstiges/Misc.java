@@ -45,6 +45,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.Provider.Service;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.text.NumberFormat;
 import java.time.Clock;
@@ -81,7 +82,7 @@ import java.util.stream.Stream;
 /**
  * @author Thomas Freese
  */
-public class Misc
+public final class Misc
 {
     /**
      * @throws Exception Falls was schief geht.
@@ -404,7 +405,7 @@ public class Misc
             String indent = "";
 
             /**
-             * @see java.nio.file.SimpleFileVisitor#postVisitDirectory(java.lang.Object, java.io.IOException)
+             * @see SimpleFileVisitor#postVisitDirectory(Object, IOException)
              */
             @Override
             public FileVisitResult postVisitDirectory(final Path dir, final IOException exc) throws IOException
@@ -418,7 +419,7 @@ public class Misc
             }
 
             /**
-             * @see java.nio.file.SimpleFileVisitor#preVisitDirectory(java.lang.Object, java.nio.file.attribute.BasicFileAttributes)
+             * @see SimpleFileVisitor#preVisitDirectory(Object, BasicFileAttributes)
              */
             @Override
             public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException
@@ -435,7 +436,7 @@ public class Misc
             }
 
             /**
-             * @see java.nio.file.SimpleFileVisitor#visitFile(java.lang.Object, java.nio.file.attribute.BasicFileAttributes)
+             * @see SimpleFileVisitor#visitFile(Object, BasicFileAttributes)
              */
             @Override
             public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
@@ -623,7 +624,7 @@ public class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = (path) ->
+        DirectoryStream.Filter<Path> filter = path ->
         {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
@@ -657,7 +658,7 @@ public class Misc
     {
         // byteBuffer();
         // copyPipedStreams();
-        System.out.println(generatePW(new java.security.SecureRandom(), "lllll_UUUUU_dddddd."));
+        System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
         // hostName();
         // introspector();
         // javaVersion();
@@ -665,7 +666,7 @@ public class Misc
         // securityProviders();
         // systemMXBean();
         // textBlocks();
-        System.out.println("args = " + java.util.Arrays.deepToString(args));
+        System.out.println("args = " + Arrays.deepToString(args));
         System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
     }
 
