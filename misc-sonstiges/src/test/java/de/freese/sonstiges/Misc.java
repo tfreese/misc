@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +28,9 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +41,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.Provider.Service;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.text.NumberFormat;
 import java.time.Clock;
@@ -70,8 +73,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
+import java.util.stream.StreamSupport;
+
+import javax.swing.filechooser.FileSystemView;
+
 import de.freese.sonstiges.xml.jaxb.model.DJ;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -85,20 +92,22 @@ public final class Misc
 {
     /**
      * @param args String[]
+     *
      * @throws Throwable Falls was schief geht.
      */
     public static void main(final String[] args) throws Throwable
     {
-        System.out.println("args = " + Arrays.deepToString(args));
-        System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
+//        System.out.println("args = " + Arrays.deepToString(args));
+//        System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
 
         // byteBuffer();
         // copyPipedStreams();
-        System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
+        fileSystems();
+//        System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
         // hostName();
         // introspector();
         // javaVersion();
-        listDirectories();
+//        listDirectories();
         // reactor();
         // securityProviders();
         // systemMXBean();
@@ -201,10 +210,12 @@ public final class Misc
     }
 
     /**
-     * @param source {@link InputStream}
-     * @param sink {@link OutputStream}
+     * @param source     {@link InputStream}
+     * @param sink       {@link OutputStream}
      * @param bufferSize int
+     *
      * @return long
+     *
      * @throws IOException Falls was schief geht.
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
@@ -257,7 +268,8 @@ public final class Misc
         {
             AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
 
-            Runnable runnable = () -> {
+            Runnable runnable = () ->
+            {
                 System.out.println("Start Source copy: " + Thread.currentThread().getName());
 
                 try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
@@ -384,6 +396,69 @@ public final class Misc
     /**
      * @throws Exception Falls was schief geht.
      */
+    static void fileSystems() throws Exception
+    {
+        FileSystem defaultFileSystem = FileSystems.getDefault();
+
+        for (FileStore store : defaultFileSystem.getFileStores())
+        {
+            long total = store.getTotalSpace() / 1024 / 1024 / 1024;
+            long used = (store.getTotalSpace() - store.getUnallocatedSpace()) / 1024 / 1024 / 1024;
+            long avail = store.getUsableSpace() / 1024 / 1024 / 1024;
+
+            System.out.format("%-20s %8d %8d %8d%n", store, total, used, avail);
+        }
+
+        System.out.println();
+
+        for (Path rootPath : defaultFileSystem.getRootDirectories())
+        {
+            FileStore fileStore = Files.getFileStore(rootPath);
+
+            System.out.println("RootPath: " + rootPath + ", FileStore: " + fileStore);
+            // if(fileStore.type().toLowerCase().contains("udf")) {
+            // if(fileStore.getTotalSpace()>10000000000L) { //Blu-ray
+            // return "bluray:///" + rootPath.toString();
+            // }
+            // else {
+            // return "dvdsimple:///" + rootPath.toString(); //DVD
+            // }
+            // }
+        }
+
+        System.out.println();
+
+        FileSystemView fsv = FileSystemView.getFileSystemView();
+
+        for (File file : File.listRoots())
+        {
+            System.out.println("Drive Name: " + file);
+            System.out.println("Display Name: " + fsv.getSystemDisplayName(file));
+            System.out.println("Description: " + fsv.getSystemTypeDescription(file));
+            System.out.println();
+        }
+
+        System.out.println();
+
+        for (Path path : List.of(Paths.get("pom.xml"), Paths.get(System.getProperty("user.home"), ".xinitrc"), Paths.get(System.getProperty("user.home"), ".m2", "settings.xml"), Paths.get(System.getProperty("java.io.tmpdir"))))
+        {
+            System.out.println("Path: " + path + ", Size=" + Files.size(path));
+            System.out.println("Path Root: " + path.getRoot());
+            System.out.println("Path FileSystem: " + path.getFileSystem());
+
+            FileStore fileStore = Files.getFileStore(path);
+            System.out.println("Path FileStore: " + fileStore.toString() + ", Name:" + fileStore.name() + ", Type: " + fileStore.type());
+
+            System.out.println("Path Display Name: " + fsv.getSystemDisplayName(path.toFile()));
+            System.out.println("Path Description: " + fsv.getSystemTypeDescription(path.toFile()));
+            System.out.println(StreamSupport.stream(path.getFileSystem().getFileStores().spliterator(), false).map(FileStore::toString).collect(Collectors.joining(", ")));
+            System.out.println();
+        }
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
     static void fileWalker() throws Exception
     {
         final Path path = Paths.get(System.getProperty("user.home"), "mediathek", "musik", "ATC");
@@ -477,8 +552,9 @@ public final class Misc
      * Pattern "lllll_UUUUU_dddddd." returns "vrifa_EMFCQ_399671."<br>
      * <br>
      *
-     * @param random {@link Random}
+     * @param random  {@link Random}
      * @param pattern String
+     *
      * @return String
      */
     static String generatePW(final Random random, final String pattern)
@@ -641,7 +717,8 @@ public final class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = path -> {
+        DirectoryStream.Filter<Path> filter = path ->
+        {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
 
@@ -861,7 +938,7 @@ public final class Misc
         text = text.replace("\"", "\\\""); // " -> \"
         System.out.println(text);
 
-        text = text.replace("\'", "\\\'"); // ' -> \'
+        text = text.replace("'", "\\'"); // ' -> \'
         System.out.println(text);
 
         text = text.replace(" \\ ", ""); // ' \ ' -> ''
@@ -1025,7 +1102,8 @@ public final class Misc
         Map<Integer, List<Integer>> groups = intList.stream().collect(Collectors.groupingBy(s -> (s - 1) / 3));
         List<List<Integer>> subSets = new ArrayList<>(groups.values());
 
-        subSets.forEach(list -> {
+        subSets.forEach(list ->
+        {
             System.out.println("\nSub-List:");
             list.forEach(System.out::println);
         });
@@ -1085,15 +1163,16 @@ public final class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-            select
-            *
-            from \
-            "table"
+                select
+                *
+                from \
+                "table"
 
-            where\n
-            \t1 = 1
-                order by %s asc;
-            """.formatted("column");
+                where
+                                
+                \t1 = 1
+                    order by %s asc;
+                """.formatted("column");
 
         System.out.println(sql);
     }
