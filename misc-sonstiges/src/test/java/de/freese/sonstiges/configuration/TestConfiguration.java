@@ -4,7 +4,9 @@
 package de.freese.sonstiges.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Properties;
+
 import org.apache.commons.configuration2.AbstractConfiguration;
 import org.apache.commons.configuration2.BaseConfiguration;
 import org.apache.commons.configuration2.CompositeConfiguration;
@@ -18,14 +20,6 @@ import org.junit.jupiter.api.Test;
  */
 class TestConfiguration
 {
-    /**
-     * Erstellt ein neues {@link TestConfiguration} Objekt.
-     */
-    TestConfiguration()
-    {
-        super();
-    }
-
     /**
      * @throws Exception Falls was schief geht.
      */

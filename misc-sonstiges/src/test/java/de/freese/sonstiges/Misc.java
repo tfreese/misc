@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -102,16 +101,18 @@ public final class Misc
 
         // byteBuffer();
         // copyPipedStreams();
-        fileSystems();
+//        dateTime();
+//        fileSystems();
 //        System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
         // hostName();
-        // introspector();
+//        introspector();
         // javaVersion();
 //        listDirectories();
         // reactor();
         // securityProviders();
+//        splitList();
         // systemMXBean();
-        // textBlocks();
+        textBlocks();
     }
 
     /**
@@ -483,13 +484,7 @@ public final class Misc
         System.out.printf("%nFiles.newDirectoryStream%n");
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path))
         {
-            Iterator<Path> iter = stream.iterator();
-
-            while (iter.hasNext())
-            {
-                Path p = iter.next();
-                System.out.println(p);
-            }
+            stream.forEach(System.out::println);
         }
 
         System.out.printf("%nFiles.walkFileTree%n");
@@ -559,8 +554,8 @@ public final class Misc
      */
     static String generatePW(final Random random, final String pattern)
     {
-        Objects.requireNonNull(random, () -> "random is required");
-        Objects.requireNonNull(pattern, () -> "pattern is required");
+        Objects.requireNonNull(random, "random is required");
+        Objects.requireNonNull(pattern, "pattern is required");
 
         StringBuilder sb = new StringBuilder();
 
@@ -666,7 +661,7 @@ public final class Misc
     }
 
     /**
-     *
+     * see
      */
     static void javaVersion()
     {

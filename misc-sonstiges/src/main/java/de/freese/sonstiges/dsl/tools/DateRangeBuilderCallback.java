@@ -1,7 +1,4 @@
-/**
- * Created: 14.06.2012
- */
-
+// Created: 14.06.2012
 package de.freese.sonstiges.dsl.tools;
 
 import java.util.Date;
@@ -14,7 +11,7 @@ public interface DateRangeBuilderCallback
 {
     /**
      * @param from {@link Date}
-     * @param to {@link Date}
+     * @param to   {@link Date}
      */
     public void setDateRange(Date from, Date to);
 }

@@ -11,58 +11,58 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "dj")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder =
-{
-		"firstName", "lastName"
-})
+        {
+                "firstName", "lastName"
+        })
 public class DJ
 {
-	/**
-	 *
-	 */
-	private String firstName = null;
+    /**
+     *
+     */
+    private String firstName = null;
 
-	/**
-	 *
-	 */
-	private String lastName = null;
+    /**
+     *
+     */
+    private String lastName = null;
 
-	/**
-	 * Erstellt ein neues {@link DJ} Object.
-	 */
-	public DJ()
-	{
-		super();
-	}
+    /**
+     * Erstellt ein neues {@link DJ} Object.
+     */
+    public DJ()
+    {
+        super();
+    }
 
-	/**
-	 * @return String
-	 */
-	public String getLastName()
-	{
-		return this.lastName;
-	}
+    /**
+     * @return String
+     */
+    public String getLastName()
+    {
+        return this.lastName;
+    }
 
-	/**
-	 * @param lastName String
-	 */
-	public void setLastName(final String lastName)
-	{
-		this.lastName = lastName;
-	}
+    /**
+     * @param lastName String
+     */
+    public void setLastName(final String lastName)
+    {
+        this.lastName = lastName;
+    }
 
-	/**
-	 * @return String
-	 */
-	public String getFirstName()
-	{
-		return this.firstName;
-	}
+    /**
+     * @return String
+     */
+    public String getFirstName()
+    {
+        return this.firstName;
+    }
 
-	/**
-	 * @param name String
-	 */
-	public void setFirstName(final String name)
-	{
-		this.firstName = name;
-	}
+    /**
+     * @param name String
+     */
+    public void setFirstName(final String name)
+    {
+        this.firstName = name;
+    }
 }

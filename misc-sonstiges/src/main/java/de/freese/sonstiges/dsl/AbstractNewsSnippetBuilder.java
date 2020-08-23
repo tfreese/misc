@@ -1,116 +1,114 @@
-/**
- * Created: 14.06.2012
- */
-
+//Created: 14.06.2012
 package de.freese.sonstiges.dsl;
 
 /**
- * @author Thomas Freese
  * @param <T> Konkreter Objekttyp
+ *
+ * @author Thomas Freese
  */
 public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBuilder<?>>
 {
-	/**
-	 * 
-	 */
-	private final NewsSnippet objectUnderConstruction;
+    /**
+     *
+     */
+    private final NewsSnippet objectUnderConstruction;
 
-	/**
-	 * 
-	 */
-	private final Topic topic;
+    /**
+     *
+     */
+    private final Topic topic;
 
-	/**
-	 * Erstellt ein neues {@link AbstractNewsSnippetBuilder} Object.
-	 * 
-	 * @param topic {@link Topic}
-	 * @param objectUnderConstruction {@link NewsSnippet}
-	 */
-	protected AbstractNewsSnippetBuilder(final Topic topic,
-			final NewsSnippet objectUnderConstruction)
-	{
-		super();
+    /**
+     * Erstellt ein neues {@link AbstractNewsSnippetBuilder} Object.
+     *
+     * @param topic                   {@link Topic}
+     * @param objectUnderConstruction {@link NewsSnippet}
+     */
+    protected AbstractNewsSnippetBuilder(final Topic topic,
+                                         final NewsSnippet objectUnderConstruction)
+    {
+        super();
 
-		this.topic = topic;
-		this.objectUnderConstruction = objectUnderConstruction;
-	}
+        this.topic = topic;
+        this.objectUnderConstruction = objectUnderConstruction;
+    }
 
-	/**
-	 * Erstellt ein neues {@link AbstractNewsSnippetBuilder} Object.
-	 * 
-	 * @param topic {@link Topic}
-	 * @param title String
-	 */
-	protected AbstractNewsSnippetBuilder(final Topic topic, final String title)
-	{
-		super();
+    /**
+     * Erstellt ein neues {@link AbstractNewsSnippetBuilder} Object.
+     *
+     * @param topic {@link Topic}
+     * @param title String
+     */
+    protected AbstractNewsSnippetBuilder(final Topic topic, final String title)
+    {
+        super();
 
-		this.topic = topic;
+        this.topic = topic;
 
-		this.objectUnderConstruction = new NewsSnippet(title);
-		this.objectUnderConstruction.setTopic(topic);
-	}
+        this.objectUnderConstruction = new NewsSnippet(title);
+        this.objectUnderConstruction.setTopic(topic);
+    }
 
-	/**
-	 * 
-	 */
-	public abstract void add();
+    /**
+     *
+     */
+    public abstract void add();
 
-	/**
-	 * @param content String
-	 * @return {@link AbstractNewsSnippetBuilder}
-	 */
-	@SuppressWarnings("unchecked")
-	public T containing(final String content)
-	{
-		getObjectUnderConstruction().setContent(content);
+    /**
+     * @param content String
+     *
+     * @return {@link AbstractNewsSnippetBuilder}
+     */
+    public T containing(final String content)
+    {
+        getObjectUnderConstruction().setContent(content);
 
-		return (T) this;
-	}
+        return (T) this;
+    }
 
-	/**
-	 * @param description String
-	 * @return {@link AbstractNewsSnippetBuilder}
-	 */
-	@SuppressWarnings("unchecked")
-	public T describe(final String description)
-	{
-		getObjectUnderConstruction().setDescription(description);
+    /**
+     * @param description String
+     *
+     * @return {@link AbstractNewsSnippetBuilder}
+     */
+    public T describe(final String description)
+    {
+        getObjectUnderConstruction().setDescription(description);
 
-		return (T) this;
-	}
+        return (T) this;
+    }
 
-	/**
-	 * @return {@link NewsSnippet}
-	 */
-	protected NewsSnippet getObjectUnderConstruction()
-	{
-		return this.objectUnderConstruction;
-	}
+    /**
+     * @param tags String[]
+     *
+     * @return {@link AbstractNewsSnippetBuilder}
+     */
+    public T taggedBy(final String... tags)
+    {
+        for (String tag : tags)
+        {
+            if (!getObjectUnderConstruction().getTags().contains(tag))
+            {
+                getObjectUnderConstruction().getTags().add(tag);
+            }
+        }
 
-	/**
-	 * @return {@link Topic}
-	 */
-	protected Topic getTopic()
-	{
-		return this.topic;
-	}
+        return (T) this;
+    }
 
-	/**
-	 * @param tags String[]
-	 * @return {@link AbstractNewsSnippetBuilder}
-	 */
-	@SuppressWarnings("unchecked")
-	public T taggedBy(final String...tags)
-	{
-		for (String tag : tags)
-		{
-			if (!getObjectUnderConstruction().getTags().contains(tag))
-			{
-				getObjectUnderConstruction().getTags().add(tag);
-			}
-		}
+    /**
+     * @return {@link NewsSnippet}
+     */
+    protected NewsSnippet getObjectUnderConstruction()
+    {
+        return this.objectUnderConstruction;
+    }
 
-		return (T) this;
-	}
+    /**
+     * @return {@link Topic}
+     */
+    protected Topic getTopic()
+    {
+        return this.topic;
+    }
 }

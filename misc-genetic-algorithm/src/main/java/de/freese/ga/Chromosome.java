@@ -1,7 +1,4 @@
-/**
- * Created: 29.06.2020
- */
-
+//Created: 29.06.2020
 package de.freese.ga;
 
 import java.util.Objects;
@@ -20,8 +17,8 @@ public abstract class Chromosome
     private final Config config;
 
     /**
-    *
-    */
+     *
+     */
     private final Gene[] genes;
 
     /**
@@ -46,6 +43,7 @@ public abstract class Chromosome
 
     /**
      * @param gene {@link Gene}
+     *
      * @return boolean
      */
     public boolean contains(final Gene gene)
@@ -70,17 +68,10 @@ public abstract class Chromosome
     }
 
     /**
-     * @return {@link Config}
-     */
-    protected Config getConfig()
-    {
-        return this.config;
-    }
-
-    /**
      * Liefert das Genom am Index.
      *
      * @param index int
+     *
      * @return {@link Gene}
      */
     public Gene getGene(final int index)
@@ -145,7 +136,7 @@ public abstract class Chromosome
      * Setzt das Genom am Index.
      *
      * @param index int
-     * @param gene {@link Gene}
+     * @param gene  {@link Gene}
      */
     public void setGene(final int index, final Gene gene)
     {
@@ -160,5 +151,13 @@ public abstract class Chromosome
     public int size()
     {
         return getGenes().length;
+    }
+
+    /**
+     * @return {@link Config}
+     */
+    protected Config getConfig()
+    {
+        return this.config;
     }
 }

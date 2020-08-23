@@ -1,14 +1,13 @@
-/**
- * Created: 21.06.2020
- */
-
+// Created: 21.06.2020
 package de.freese.ga.examples.sudoku;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -21,8 +20,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 class TestSudoku
 {
     /**
-    *
-    */
+     *
+     */
     private static SudokuChromosome chromosome = null;
 
     /**

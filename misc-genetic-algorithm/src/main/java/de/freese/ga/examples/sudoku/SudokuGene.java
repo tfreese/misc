@@ -1,10 +1,8 @@
-/**
- * Created: 29.06.2020
- */
-
+//Created: 29.06.2020
 package de.freese.ga.examples.sudoku;
 
 import java.util.Objects;
+
 import de.freese.ga.Gene;
 
 /**
@@ -13,14 +11,14 @@ import de.freese.ga.Gene;
 public class SudokuGene extends Gene
 {
     /**
-    *
-    */
+     *
+     */
     private final boolean mutable;
 
     /**
      * Erstellt ein neues {@link SudokuGene} Object.
      *
-     * @param value Integer
+     * @param value   Integer
      * @param mutable boolean
      */
     public SudokuGene(final Integer value, final boolean mutable)

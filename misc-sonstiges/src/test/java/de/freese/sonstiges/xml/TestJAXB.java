@@ -1,21 +1,24 @@
 package de.freese.sonstiges.xml;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+
+import de.freese.sonstiges.xml.jaxb.model.Club;
+import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
+import de.freese.sonstiges.xml.jaxb.model.DJ;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import de.freese.sonstiges.xml.jaxb.model.Club;
-import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
-import de.freese.sonstiges.xml.jaxb.model.DJ;
 
 /**
  * @author Thomas Freese
@@ -24,8 +27,8 @@ import de.freese.sonstiges.xml.jaxb.model.DJ;
 class TestJAXB
 {
     /**
-    *
-    */
+     *
+     */
     private static byte[] bytes = null;
 
     /**
@@ -49,7 +52,7 @@ class TestJAXB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void test1ToXML() throws Exception
+    void test010ToXML() throws Exception
     {
         Club club = ClubFactory.createClub();
 
@@ -73,7 +76,7 @@ class TestJAXB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void test2FromXML() throws Exception
+    void test020FromXML() throws Exception
     {
         System.out.println(new String(TestJAXB.bytes, StandardCharsets.UTF_8));
 

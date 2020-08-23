@@ -1,13 +1,13 @@
-/**
- * Created: 20.01.2011
- */
+// Created: 20.01.2011
 package de.freese.sonstiges;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.apache.lucene.analysis.de.GermanLightStemmer;
 import org.apache.lucene.analysis.de.GermanMinimalStemmer;
 import org.junit.jupiter.api.DynamicNode;
@@ -25,21 +25,6 @@ import org.tartarus.snowball.ext.GermanStemmer;
 class TestStemmer
 {
     /**
-     * Interface für verschiedene Stemmer Implementierungen.
-     *
-     * @author Thomas Freese
-     */
-    @FunctionalInterface
-    private static interface Stemmer
-    {
-        /**
-         * @param charSequence String
-         * @return String
-         */
-        String stem(String charSequence);
-    }
-
-    /**
      *
      */
     // @formatter:off
@@ -49,17 +34,35 @@ class TestStemmer
             //, Arguments.of("Lucene German Minimal", wrap(new GermanMinimalStemmer()))
             , Arguments.of("Lucene German Light", wrap(new GermanLightStemmer()))
             );
+
+    /**
+     * Interface für verschiedene Stemmer Implementierungen.
+     *
+     * @author Thomas Freese
+     */
+    @FunctionalInterface
+    private static interface Stemmer
+    {
+        /**
+         * @param charSequence String
+         *
+         * @return String
+         */
+        String stem(String charSequence);
+    }
     // @formatter:on
 
     /**
      * @param stemmerImpl Object
+     *
      * @return {@link Stemmer}
      */
     private static Stemmer wrap(final Object stemmerImpl)
     {
         if (stemmerImpl instanceof SnowballProgram)
         {
-            return (value) -> {
+            return (value) ->
+            {
                 ((SnowballProgram) stemmerImpl).setCurrent(value);
                 ((SnowballProgram) stemmerImpl).stem();
 
@@ -68,7 +71,8 @@ class TestStemmer
         }
         else if (stemmerImpl instanceof GermanMinimalStemmer)
         {
-            return (value) -> {
+            return (value) ->
+            {
                 char[] ca = value.toCharArray();
                 int lenght = ((GermanMinimalStemmer) stemmerImpl).stem(ca, ca.length);
 
@@ -77,7 +81,8 @@ class TestStemmer
         }
         else if (stemmerImpl instanceof GermanLightStemmer)
         {
-            return (value) -> {
+            return (value) ->
+            {
                 char[] ca = value.toCharArray();
                 int lenght = ((GermanLightStemmer) stemmerImpl).stem(ca, ca.length);
 
@@ -92,6 +97,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testBaeume(final Stemmer stemmer) throws Exception
@@ -102,6 +108,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testBaum(final Stemmer stemmer) throws Exception
@@ -112,6 +119,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testBewaldet(final Stemmer stemmer) throws Exception
@@ -142,7 +150,7 @@ class TestStemmer
                                         dynamicTest("testTagung", () -> testTagung((Stemmer) arg.get()[1])),
                                         dynamicTest("testWaelder", () -> testWaelder((Stemmer) arg.get()[1])),
                                         dynamicTest("testWald", () -> testWald((Stemmer) arg.get()[1])),
-                                        dynamicTest("testWeiße", () -> testWeiße((Stemmer) arg.get()[1]))
+                                        dynamicTest("testWeiße", () -> testWeisse((Stemmer) arg.get()[1]))
                                 )
                             )
                     )
@@ -152,6 +160,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testHuehner(final Stemmer stemmer) throws Exception
@@ -162,6 +171,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testHuhn(final Stemmer stemmer) throws Exception
@@ -172,6 +182,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testTaegig(final Stemmer stemmer) throws Exception
@@ -182,6 +193,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testTage(final Stemmer stemmer) throws Exception
@@ -192,6 +204,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testTagung(final Stemmer stemmer) throws Exception
@@ -202,6 +215,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testWaelder(final Stemmer stemmer) throws Exception
@@ -212,6 +226,7 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
     void testWald(final Stemmer stemmer) throws Exception
@@ -222,9 +237,10 @@ class TestStemmer
 
     /**
      * @param stemmer {@link Stemmer}
+     *
      * @throws Exception Falls was schief geht.
      */
-    void testWeiße(final Stemmer stemmer) throws Exception
+    void testWeisse(final Stemmer stemmer) throws Exception
     {
         String stem = stemmer.stem("weisse");
         assertEquals("weiss", stem);

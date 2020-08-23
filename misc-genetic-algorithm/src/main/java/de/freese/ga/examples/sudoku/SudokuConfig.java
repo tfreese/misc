@@ -1,7 +1,4 @@
-/**
- * Created: 29.06.2020
- */
-
+// Created: 29.06.2020
 package de.freese.ga.examples.sudoku;
 
 import java.io.BufferedReader;
@@ -14,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+
 import de.freese.ga.Config;
 
 /**
@@ -25,16 +23,14 @@ public class SudokuConfig extends Config
      * Beim Sudoku dürfen die fest vorgegebenen Zahlen nicht verändert werden !
      */
     private final Map<Integer, SudokuGene> fixNumbers = new TreeMap<>();
-
-    /**
-    *
-    */
-    private int puzzleBlockSize = (int) Math.sqrt(this.puzzleSize);
-
     /**
      *
      */
     private int puzzleSize = 9;
+    /**
+     *
+     */
+    private int puzzleBlockSize = (int) Math.sqrt(this.puzzleSize);
 
     /**
      * Erstellt ein neues {@link SudokuConfig} Object.
@@ -42,14 +38,6 @@ public class SudokuConfig extends Config
     public SudokuConfig()
     {
         super();
-    }
-
-    /**
-     * @return {@link Map}
-     */
-    Map<Integer, SudokuGene> getFixNumbers()
-    {
-        return this.fixNumbers;
     }
 
     /**
@@ -82,24 +70,10 @@ public class SudokuConfig extends Config
     }
 
     /**
-     * @return int
-     */
-    int getPuzzleBlockSize()
-    {
-        return this.puzzleBlockSize;
-    }
-
-    /**
-     * @return int
-     */
-    int getPuzzleSize()
-    {
-        return this.puzzleSize;
-    }
-
-    /**
      * @param inputStream {@link InputStream}
+     *
      * @return {@link List}>
+     *
      * @throws IOException Falls was schief geht.
      */
     public List<String[]> parsePuzzle(final InputStream inputStream) throws IOException
@@ -168,5 +142,29 @@ public class SudokuConfig extends Config
         }
 
         setSizeChromosome(this.puzzleSize * this.puzzleSize);
+    }
+
+    /**
+     * @return {@link Map}
+     */
+    Map<Integer, SudokuGene> getFixNumbers()
+    {
+        return this.fixNumbers;
+    }
+
+    /**
+     * @return int
+     */
+    int getPuzzleBlockSize()
+    {
+        return this.puzzleBlockSize;
+    }
+
+    /**
+     * @return int
+     */
+    int getPuzzleSize()
+    {
+        return this.puzzleSize;
     }
 }

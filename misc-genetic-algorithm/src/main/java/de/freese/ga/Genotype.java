@@ -1,7 +1,4 @@
-/**
- * Created: 29.06.2020
- */
-
+// Created: 29.06.2020
 package de.freese.ga;
 
 import java.util.Map.Entry;
@@ -22,13 +19,13 @@ import java.util.stream.Stream;
 public abstract class Genotype
 {
     /**
-    *
-    */
+     *
+     */
     private final Chromosome[] chromosomes;
 
     /**
-    *
-    */
+     *
+     */
     private final Config config;
 
     /**
@@ -45,7 +42,7 @@ public abstract class Genotype
      * Erstellt ein neues {@link Genotype} Object.
      *
      * @param config {@link Config}
-     * @param size int
+     * @param size   int
      */
     protected Genotype(final Config config, final int size)
     {
@@ -76,7 +73,9 @@ public abstract class Genotype
      * Erzeugt einen neuen leeren Genotype / Population.<br>
      *
      * @param size int
+     *
      * @return {@link Genotype}
+     *
      * @see Genotype#tournamentSelection()
      */
     public abstract Genotype createEmptyGenotype(int size);
@@ -87,6 +86,7 @@ public abstract class Genotype
      *
      * @param parent1 {@link Chromosome}
      * @param parent2 {@link Chromosome}
+     *
      * @return {@link Chromosome}
      */
     public Chromosome crossover(final Chromosome parent1, final Chromosome parent2)
@@ -192,27 +192,12 @@ public abstract class Genotype
      * Liefert das Chromosom am Index.
      *
      * @param index int
+     *
      * @return {@link Chromosome}
      */
     public Chromosome getChromosome(final int index)
     {
         return getChromosomes()[index];
-    }
-
-    /**
-     * @return {@link Chromosome}[]
-     */
-    protected Chromosome[] getChromosomes()
-    {
-        return this.chromosomes;
-    }
-
-    /**
-     * @return {@link Config}
-     */
-    protected Config getConfig()
-    {
-        return this.config;
     }
 
     /**
@@ -272,7 +257,7 @@ public abstract class Genotype
     /**
      * Setzt das Chromosom am Index.
      *
-     * @param index int
+     * @param index      int
      * @param chromosome {@link Chromosome}
      */
     public void setChromosome(final int index, final Chromosome chromosome)
@@ -310,5 +295,21 @@ public abstract class Genotype
         Chromosome fittest = tournament.getFittest();
 
         return fittest;
+    }
+
+    /**
+     * @return {@link Chromosome}[]
+     */
+    protected Chromosome[] getChromosomes()
+    {
+        return this.chromosomes;
+    }
+
+    /**
+     * @return {@link Config}
+     */
+    protected Config getConfig()
+    {
+        return this.config;
     }
 }

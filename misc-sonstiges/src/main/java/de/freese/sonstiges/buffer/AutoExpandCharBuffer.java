@@ -15,6 +15,11 @@ import java.nio.charset.CharsetEncoder;
 public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuffer>
 {
     /**
+     *
+     */
+    private static final String CRLF = "\r\n";
+
+    /**
      * @author Thomas Freese
      */
     public static class Builder extends AbstractBuilder<AutoExpandCharBuffer>
@@ -30,6 +35,21 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
         }
 
         /**
+         * carriage return line feed (NETASCII_EOL)<br>
+         * Default: "\r\n"
+         *
+         * @param crlf String
+         *
+         * @return {@link Builder}
+         */
+        public Builder crlf(final String crlf)
+        {
+            getAutoExpandBuffer().crlf = crlf;
+
+            return this;
+        }
+
+        /**
          * @see de.freese.sonstiges.buffer.AbstractAutoExpandBuffer.AbstractBuilder#createAutoExpandBuffer(int)
          */
         @Override
@@ -39,31 +59,13 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
 
             return new AutoExpandCharBuffer(charBuffer);
         }
-
-        /**
-         * carriage return line feed (NETASCII_EOL)<br>
-         * Default: "\r\n"
-         *
-         * @param crlf String
-         * @return {@link Builder}
-         */
-        public Builder crlf(final String crlf)
-        {
-            getAutoExpandBuffer().crlf = crlf;
-
-            return this;
-        }
     }
-
-    /**
-    *
-    */
-    private static final String CRLF = "\r\n";
 
     /**
      * Erzeugt einen neuen Builder.
      *
      * @param capacity int
+     *
      * @return {@link Builder}
      */
     public static Builder builder(final int capacity)
@@ -87,15 +89,75 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
     }
 
     /**
-     * Fügt CRLF an, wenn dieser != null.
+     * @param encoder {@link CharsetEncoder}
+     *
+     * @return {@link ByteBuffer}
+     *
+     * @throws CharacterCodingException Falls was schief geht.
      */
-    private void appendCRLF()
+    public ByteBuffer encode(final CharsetEncoder encoder) throws CharacterCodingException
     {
-        if (getCRLF() != null)
-        {
-            autoExpand(getCRLF().length());
-            getBuffer().put(getCRLF());
-        }
+        return encoder.reset().encode(getBuffer());
+    }
+
+    /**
+     * @param src {@link CharSequence}
+     *
+     * @return {@link AutoExpandCharBuffer}
+     *
+     * @see CharBuffer#put(String)
+     */
+    public AutoExpandCharBuffer put(final CharSequence src)
+    {
+        return put(src, 0, src.length());
+    }
+
+    /**
+     * @param src   {@link CharSequence}
+     * @param start int
+     * @param end   int
+     *
+     * @return {@link AutoExpandCharBuffer}
+     *
+     * @see CharBuffer#put(String, int, int)
+     */
+    public AutoExpandCharBuffer put(final CharSequence src, final int start, final int end)
+    {
+        autoExpand(end - start);
+
+        getBuffer().put(src.toString(), start, end);
+
+        appendCRLF();
+
+        return this;
+    }
+
+    /**
+     * @param format String
+     * @param args   Object[]
+     *
+     * @return {@link AutoExpandCharBuffer}
+     *
+     * @see String#format(String, Object...)
+     */
+    public AutoExpandCharBuffer putf(final String format, final Object... args)
+    {
+        String s = String.format(format, args);
+
+        return put(s, 0, s.length());
+    }
+
+    /**
+     * Fügt eine Leerzeile hinzu.<br>
+     * Default: "\r\n"
+     *
+     * @return {@link AutoExpandCharBuffer}
+     */
+    public AutoExpandCharBuffer putln()
+    {
+        appendCRLF();
+
+        return this;
     }
 
     /**
@@ -133,13 +195,15 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
     }
 
     /**
-     * @param encoder {@link CharsetEncoder}
-     * @return {@link ByteBuffer}
-     * @throws CharacterCodingException Falls was schief geht.
+     * Fügt CRLF an, wenn dieser != null.
      */
-    public ByteBuffer encode(final CharsetEncoder encoder) throws CharacterCodingException
+    private void appendCRLF()
     {
-        return encoder.reset().encode(getBuffer());
+        if (getCRLF() != null)
+        {
+            autoExpand(getCRLF().length());
+            getBuffer().put(getCRLF());
+        }
     }
 
     /**
@@ -150,59 +214,5 @@ public final class AutoExpandCharBuffer extends AbstractAutoExpandBuffer<CharBuf
     private String getCRLF()
     {
         return this.crlf;
-    }
-
-    /**
-     * @see CharBuffer#put(String)
-     * @param src {@link CharSequence}
-     * @return {@link AutoExpandCharBuffer}
-     */
-    public AutoExpandCharBuffer put(final CharSequence src)
-    {
-        return put(src, 0, src.length());
-    }
-
-    /**
-     * @see CharBuffer#put(String, int, int)
-     * @param src {@link CharSequence}
-     * @param start int
-     * @param end int
-     * @return {@link AutoExpandCharBuffer}
-     */
-    public AutoExpandCharBuffer put(final CharSequence src, final int start, final int end)
-    {
-        autoExpand(end - start);
-
-        getBuffer().put(src.toString(), start, end);
-
-        appendCRLF();
-
-        return this;
-    }
-
-    /**
-     * @see String#format(String, Object...)
-     * @param format String
-     * @param args Object[]
-     * @return {@link AutoExpandCharBuffer}
-     */
-    public AutoExpandCharBuffer putf(final String format, final Object...args)
-    {
-        String s = String.format(format, args);
-
-        return put(s, 0, s.length());
-    }
-
-    /**
-     * Fügt eine Leerzeile hinzu.<br>
-     * Default: "\r\n"
-     *
-     * @return {@link AutoExpandCharBuffer}
-     */
-    public AutoExpandCharBuffer putln()
-    {
-        appendCRLF();
-
-        return this;
     }
 }

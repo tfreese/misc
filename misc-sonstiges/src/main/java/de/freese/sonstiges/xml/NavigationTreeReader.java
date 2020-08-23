@@ -3,6 +3,7 @@ package de.freese.sonstiges.xml;
 
 import java.io.File;
 import java.net.URL;
+
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -13,6 +14,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+
 import org.xml.sax.SAXParseException;
 
 /**
@@ -22,6 +24,7 @@ public class NavigationTreeReader
 {
     /**
      * @param args String[]
+     *
      * @throws Exception Fehler
      */
     public static void main(final String[] args) throws Exception
@@ -63,6 +66,7 @@ public class NavigationTreeReader
 
     /**
      * @param reader {@link XMLStreamReader}
+     *
      * @throws XMLStreamException Falls was schief geht.
      */
     private static void parseDocument(final XMLStreamReader reader) throws XMLStreamException
@@ -79,6 +83,7 @@ public class NavigationTreeReader
 
     /**
      * @param reader {@link XMLStreamReader}
+     *
      * @throws XMLStreamException Falls was schief geht.
      */
     private static void parseRestOfDocument(final XMLStreamReader reader) throws XMLStreamException
