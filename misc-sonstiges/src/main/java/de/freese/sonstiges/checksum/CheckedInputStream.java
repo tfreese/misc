@@ -10,78 +10,77 @@ import java.util.zip.Checksum;
  */
 public class CheckedInputStream extends FilterInputStream
 {
-	/**
-     * 
+    /**
+     *
      */
-	private Checksum cksum = null;
+    private Checksum cksum;
 
-	/**
-	 * Creates a new {@link CheckedInputStream} object.
-	 * 
-	 * @param in {@link InputStream}
-	 * @param cksum {@link Checksum}
-	 */
-	public CheckedInputStream(final InputStream in, final Checksum cksum)
-	{
-		super(in);
+    /**
+     * Creates a new {@link CheckedInputStream} object.
+     *
+     * @param in {@link InputStream}
+     * @param cksum {@link Checksum}
+     */
+    public CheckedInputStream(final InputStream in, final Checksum cksum)
+    {
+        super(in);
 
-		this.cksum = cksum;
-	}
+        this.cksum = cksum;
+    }
 
-	/**
-	 * @return {@link Checksum}
-	 */
-	public Checksum getChecksum()
-	{
-		return this.cksum;
-	}
+    /**
+     * @return {@link Checksum}
+     */
+    public Checksum getChecksum()
+    {
+        return this.cksum;
+    }
 
-	/**
-	 * @see java.io.FilterInputStream#read()
-	 */
-	@Override
-	public int read() throws IOException
-	{
-		int b = this.in.read();
+    /**
+     * @see java.io.FilterInputStream#read()
+     */
+    @Override
+    public int read() throws IOException
+    {
+        int b = this.in.read();
 
-		if (b != -1)
-		{
-			this.cksum.update(b);
-		}
+        if (b != -1)
+        {
+            this.cksum.update(b);
+        }
 
-		return b;
-	}
+        return b;
+    }
 
-	/**
-	 * @see java.io.FilterInputStream#read(byte[])
-	 */
-	@Override
-	public int read(final byte[] b) throws IOException
-	{
-		int len;
-		len = this.in.read(b, 0, b.length);
+    /**
+     * @see java.io.FilterInputStream#read(byte[])
+     */
+    @Override
+    public int read(final byte[] b) throws IOException
+    {
+        int bytesRead = this.in.read(b, 0, b.length);
 
-		if (len != -1)
-		{
-			this.cksum.update(b, 0, len);
-		}
+        if (bytesRead != -1)
+        {
+            this.cksum.update(b, 0, bytesRead);
+        }
 
-		return len;
-	}
+        return bytesRead;
+    }
 
-	/**
-	 * @see java.io.FilterInputStream#read(byte[], int, int)
-	 */
-	@Override
-	public int read(final byte[] b, final int off, final int len) throws IOException
-	{
-		int m_Len = this.in.read(b, off, len);
+    /**
+     * @see java.io.FilterInputStream#read(byte[], int, int)
+     */
+    @Override
+    public int read(final byte[] b, final int off, final int len) throws IOException
+    {
+        int bytesRead = this.in.read(b, off, len);
 
-		if (m_Len != -1)
-		{
-			this.cksum.update(b, off, m_Len);
-		}
+        if (bytesRead != -1)
+        {
+            this.cksum.update(b, off, bytesRead);
+        }
 
-		return m_Len;
-	}
+        return bytesRead;
+    }
 }

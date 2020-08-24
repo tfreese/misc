@@ -1,9 +1,8 @@
-//Created: 14.06.2012
+// Created: 14.06.2012
 package de.freese.sonstiges.dsl;
 
 /**
  * @param <T> Konkreter Objekttyp
- *
  * @author Thomas Freese
  */
 public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBuilder<?>>
@@ -21,11 +20,10 @@ public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBu
     /**
      * Erstellt ein neues {@link AbstractNewsSnippetBuilder} Object.
      *
-     * @param topic                   {@link Topic}
+     * @param topic {@link Topic}
      * @param objectUnderConstruction {@link NewsSnippet}
      */
-    protected AbstractNewsSnippetBuilder(final Topic topic,
-                                         final NewsSnippet objectUnderConstruction)
+    protected AbstractNewsSnippetBuilder(final Topic topic, final NewsSnippet objectUnderConstruction)
     {
         super();
 
@@ -56,9 +54,9 @@ public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBu
 
     /**
      * @param content String
-     *
      * @return {@link AbstractNewsSnippetBuilder}
      */
+    @SuppressWarnings("unchecked")
     public T containing(final String content)
     {
         getObjectUnderConstruction().setContent(content);
@@ -68,9 +66,9 @@ public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBu
 
     /**
      * @param description String
-     *
      * @return {@link AbstractNewsSnippetBuilder}
      */
+    @SuppressWarnings("unchecked")
     public T describe(final String description)
     {
         getObjectUnderConstruction().setDescription(description);
@@ -80,10 +78,10 @@ public abstract class AbstractNewsSnippetBuilder<T extends AbstractNewsSnippetBu
 
     /**
      * @param tags String[]
-     *
      * @return {@link AbstractNewsSnippetBuilder}
      */
-    public T taggedBy(final String... tags)
+    @SuppressWarnings("unchecked")
+    public T taggedBy(final String...tags)
     {
         for (String tag : tags)
         {

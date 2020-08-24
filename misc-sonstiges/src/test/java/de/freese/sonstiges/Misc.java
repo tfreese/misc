@@ -73,11 +73,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import javax.swing.filechooser.FileSystemView;
-
-import de.freese.sonstiges.xml.jaxb.model.DJ;
 import org.apache.commons.lang3.StringUtils;
+import de.freese.sonstiges.xml.jaxb.model.DJ;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -91,26 +89,25 @@ public final class Misc
 {
     /**
      * @param args String[]
-     *
      * @throws Throwable Falls was schief geht.
      */
     public static void main(final String[] args) throws Throwable
     {
-//        System.out.println("args = " + Arrays.deepToString(args));
-//        System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
+        // System.out.println("args = " + Arrays.deepToString(args));
+        // System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
 
         // byteBuffer();
         // copyPipedStreams();
-//        dateTime();
-//        fileSystems();
-//        System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
+        // dateTime();
+        // fileSystems();
+        // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
         // hostName();
-//        introspector();
+        // introspector();
         // javaVersion();
-//        listDirectories();
+        // listDirectories();
         // reactor();
         // securityProviders();
-//        splitList();
+        // splitList();
         // systemMXBean();
         textBlocks();
     }
@@ -211,12 +208,10 @@ public final class Misc
     }
 
     /**
-     * @param source     {@link InputStream}
-     * @param sink       {@link OutputStream}
+     * @param source {@link InputStream}
+     * @param sink {@link OutputStream}
      * @param bufferSize int
-     *
      * @return long
-     *
      * @throws IOException Falls was schief geht.
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
@@ -269,8 +264,7 @@ public final class Misc
         {
             AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
 
-            Runnable runnable = () ->
-            {
+            Runnable runnable = () -> {
                 System.out.println("Start Source copy: " + Thread.currentThread().getName());
 
                 try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
@@ -397,6 +391,7 @@ public final class Misc
     /**
      * @throws Exception Falls was schief geht.
      */
+    @SuppressWarnings("resource")
     static void fileSystems() throws Exception
     {
         FileSystem defaultFileSystem = FileSystems.getDefault();
@@ -441,7 +436,8 @@ public final class Misc
 
         System.out.println();
 
-        for (Path path : List.of(Paths.get("pom.xml"), Paths.get(System.getProperty("user.home"), ".xinitrc"), Paths.get(System.getProperty("user.home"), ".m2", "settings.xml"), Paths.get(System.getProperty("java.io.tmpdir"))))
+        for (Path path : List.of(Paths.get("pom.xml"), Paths.get(System.getProperty("user.home"), ".xinitrc"),
+                Paths.get(System.getProperty("user.home"), ".m2", "settings.xml"), Paths.get(System.getProperty("java.io.tmpdir"))))
         {
             System.out.println("Path: " + path + ", Size=" + Files.size(path));
             System.out.println("Path Root: " + path.getRoot());
@@ -452,7 +448,8 @@ public final class Misc
 
             System.out.println("Path Display Name: " + fsv.getSystemDisplayName(path.toFile()));
             System.out.println("Path Description: " + fsv.getSystemTypeDescription(path.toFile()));
-            System.out.println(StreamSupport.stream(path.getFileSystem().getFileStores().spliterator(), false).map(FileStore::toString).collect(Collectors.joining(", ")));
+            System.out.println(
+                    StreamSupport.stream(path.getFileSystem().getFileStores().spliterator(), false).map(FileStore::toString).collect(Collectors.joining(", ")));
             System.out.println();
         }
     }
@@ -547,9 +544,8 @@ public final class Misc
      * Pattern "lllll_UUUUU_dddddd." returns "vrifa_EMFCQ_399671."<br>
      * <br>
      *
-     * @param random  {@link Random}
+     * @param random {@link Random}
      * @param pattern String
-     *
      * @return String
      */
     static String generatePW(final Random random, final String pattern)
@@ -712,8 +708,7 @@ public final class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = path ->
-        {
+        DirectoryStream.Filter<Path> filter = path -> {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
 
@@ -1097,8 +1092,7 @@ public final class Misc
         Map<Integer, List<Integer>> groups = intList.stream().collect(Collectors.groupingBy(s -> (s - 1) / 3));
         List<List<Integer>> subSets = new ArrayList<>(groups.values());
 
-        subSets.forEach(list ->
-        {
+        subSets.forEach(list -> {
             System.out.println("\nSub-List:");
             list.forEach(System.out::println);
         });
@@ -1158,16 +1152,16 @@ public final class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-                select
-                *
-                from \
-                "table"
+            select
+            *
+            from \
+            "table"
 
-                where
-                                
-                \t1 = 1
-                    order by %s asc;
-                """.formatted("column");
+            where
+
+            \t1 = 1
+                order by %s asc;
+            """.formatted("column");
 
         System.out.println(sql);
     }
