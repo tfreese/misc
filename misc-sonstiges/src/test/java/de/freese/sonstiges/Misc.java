@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.Pipe;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -65,17 +66,21 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
 import javax.swing.filechooser.FileSystemView;
-import org.apache.commons.lang3.StringUtils;
+
 import de.freese.sonstiges.xml.jaxb.model.DJ;
+import org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -87,31 +92,6 @@ import reactor.test.StepVerifier;
  */
 public final class Misc
 {
-    /**
-     * @param args String[]
-     * @throws Throwable Falls was schief geht.
-     */
-    public static void main(final String[] args) throws Throwable
-    {
-        // System.out.println("args = " + Arrays.deepToString(args));
-        // System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
-
-        // byteBuffer();
-        // copyPipedStreams();
-        // dateTime();
-        // fileSystems();
-        // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
-        // hostName();
-        // introspector();
-        // javaVersion();
-        // listDirectories();
-        // reactor();
-        // securityProviders();
-        // splitList();
-        // systemMXBean();
-        textBlocks();
-    }
-
     /**
      * @throws Exception Falls was schief geht.
      */
@@ -208,10 +188,12 @@ public final class Misc
     }
 
     /**
-     * @param source {@link InputStream}
-     * @param sink {@link OutputStream}
+     * @param source     {@link InputStream}
+     * @param sink       {@link OutputStream}
      * @param bufferSize int
+     *
      * @return long
+     *
      * @throws IOException Falls was schief geht.
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
@@ -264,7 +246,8 @@ public final class Misc
         {
             AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
 
-            Runnable runnable = () -> {
+            Runnable runnable = () ->
+            {
                 System.out.println("Start Source copy: " + Thread.currentThread().getName());
 
                 try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
@@ -391,7 +374,6 @@ public final class Misc
     /**
      * @throws Exception Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     static void fileSystems() throws Exception
     {
         FileSystem defaultFileSystem = FileSystems.getDefault();
@@ -544,8 +526,9 @@ public final class Misc
      * Pattern "lllll_UUUUU_dddddd." returns "vrifa_EMFCQ_399671."<br>
      * <br>
      *
-     * @param random {@link Random}
+     * @param random  {@link Random}
      * @param pattern String
+     *
      * @return String
      */
     static String generatePW(final Random random, final String pattern)
@@ -708,7 +691,8 @@ public final class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = path -> {
+        DirectoryStream.Filter<Path> filter = path ->
+        {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
 
@@ -733,6 +717,95 @@ public final class Misc
         {
             childs.forEach(System.out::println);
         }
+    }
+
+    /**
+     * @param args String[]
+     *
+     * @throws Throwable Falls was schief geht.
+     */
+    public static void main(final String[] args) throws Throwable
+    {
+        // System.out.println("args = " + Arrays.deepToString(args));
+        // System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
+
+        // byteBuffer();
+        // copyPipedStreams();
+        // dateTime();
+        // fileSystems();
+        // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
+        // hostName();
+        // introspector();
+        // javaVersion();
+        // listDirectories();
+        nioPipe();
+        // reactor();
+        // securityProviders();
+        // splitList();
+        // systemMXBean();
+//        textBlocks();
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    static void nioPipe() throws Exception
+    {
+        Pipe pipe = Pipe.open();
+
+        Callable<Void> writeCallable = () ->
+        {
+            // Schreiben
+            Pipe.SinkChannel sinkChannel = pipe.sink();
+
+            ByteBuffer buf = ByteBuffer.allocateDirect(24);
+
+            for (int i = 1; i <= 3; i++)
+            {
+                System.out.printf("%s-%s: write %d%n", Thread.currentThread().getName(), "Misc.nioPipe", i);
+                buf.putInt(i);
+            }
+
+            buf.flip();
+
+            while (buf.hasRemaining())
+            {
+                sinkChannel.write(buf);
+            }
+
+            return null;
+        };
+
+        Callable<Void> readCallable = () ->
+        {
+            // Lesen
+            Pipe.SourceChannel sourceChannel = pipe.source();
+
+            ByteBuffer buf = ByteBuffer.allocate(24);
+
+            int bytesRead = sourceChannel.read(buf);
+            buf.flip();
+
+            System.out.printf("%s-%s: bytesRead=%d%n", Thread.currentThread().getName(), "Misc.nioPipe", bytesRead);
+
+            while (buf.hasRemaining())
+            {
+                System.out.printf("%s-%s: read %d%n", Thread.currentThread().getName(), "Misc.nioPipe", buf.getInt());
+            }
+
+            return null;
+        };
+
+        writeCallable.call();
+        readCallable.call();
+
+        System.out.println();
+
+        // Reihenfolge absichtlich vertauscht,
+        Future<Void> readFuture = ForkJoinPool.commonPool().submit(readCallable);
+        ForkJoinPool.commonPool().submit(writeCallable);
+
+        readFuture.get();
     }
 
     /**
@@ -1092,7 +1165,8 @@ public final class Misc
         Map<Integer, List<Integer>> groups = intList.stream().collect(Collectors.groupingBy(s -> (s - 1) / 3));
         List<List<Integer>> subSets = new ArrayList<>(groups.values());
 
-        subSets.forEach(list -> {
+        subSets.forEach(list ->
+        {
             System.out.println("\nSub-List:");
             list.forEach(System.out::println);
         });
@@ -1152,16 +1226,16 @@ public final class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-            select
-            *
-            from \
-            "table"
+                select
+                *
+                from \
+                "table"
 
-            where
+                where
 
-            \t1 = 1
-                order by %s asc;
-            """.formatted("column");
+                \t1 = 1
+                    order by %s asc;
+                """.formatted("column");
 
         System.out.println(sql);
     }
