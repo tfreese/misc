@@ -71,6 +71,10 @@
 			<artifactId>jackson-dataformat-xml</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
 		</dependency>
