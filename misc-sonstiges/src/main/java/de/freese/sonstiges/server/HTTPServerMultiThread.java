@@ -46,300 +46,9 @@ import de.freese.sonstiges.server.handler.IoHandler;
 public class HTTPServerMultiThread
 {
     /**
-     * Ein {@link Runnable} Wrapper, welcher den Namen des aktuellen Threads durch den eigenen ersetzt.<br>
-     * Nach der run-Methode wird der Original-Name wiederhergestellt.
-     *
-     * @author Thomas Freese
-     */
-    private static class NamePreservingRunnable implements Runnable
-    {
-        /**
-        *
-        */
-        private final Runnable runnable;
-
-        /**
-        *
-        */
-        private final String runnableName;
-
-        /**
-         * Erstellt ein neues {@link NamePreservingRunnable} Object.
-         *
-         * @param runnable {@link Runnable}
-         * @param runnableName String
-         */
-        public NamePreservingRunnable(final Runnable runnable, final String runnableName)
-        {
-            super();
-
-            this.runnable = Objects.requireNonNull(runnable, "runnable required");
-            this.runnableName = Objects.requireNonNull(runnableName, "runnableName required");
-        }
-
-        /**
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run()
-        {
-            final Thread currentThread = Thread.currentThread();
-            String oldName = currentThread.getName();
-
-            setName(currentThread, this.runnableName);
-
-            try
-            {
-                this.runnable.run();
-            }
-            finally
-            {
-                setName(currentThread, oldName);
-            }
-        }
-
-        /**
-         * Ändert den Namen des Threads.<br>
-         * Eine auftretende {@link SecurityException} wird als Warning geloggt.
-         *
-         * @param thread {@link Thread}
-         * @param name String
-         */
-        private void setName(final Thread thread, final String name)
-        {
-            try
-            {
-                thread.setName(name);
-            }
-            catch (SecurityException sex)
-            {
-                if (LOGGER.isWarnEnabled())
-                {
-                    LOGGER.warn("Failed to set the thread name.", sex);
-                }
-            }
-        }
-    }
-    /**
-     * Übernimmt das Connection-Handling.<br>
-     * Ein Processor kann für mehrere Connections zuständig sein.
-     *
-     * @author Thomas Freese
-     */
-    private static class Processor implements Runnable
-    {
-        /**
-        *
-        */
-        private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
-
-        /**
-        *
-        */
-        private final IoHandler ioHandler;
-
-        /**
-        *
-        */
-        private boolean isShutdown = false;
-
-        /**
-         * Queue für die neuen {@link SocketChannel}s.
-         */
-        private final Queue<SocketChannel> newSessions = new ConcurrentLinkedQueue<>();
-
-        /**
-        *
-        */
-        private final Selector selector;
-
-        /**
-        *
-        */
-        private final Semaphore stopLock = new Semaphore(1, true);
-
-        /**
-         * Erstellt ein neues {@link Processor} Object.
-         *
-         * @param ioHandler {@link IoHandler}
-         * @throws IOException Falls was schief geht.
-         */
-        public Processor(final IoHandler ioHandler) throws IOException
-        {
-            super();
-
-            this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
-            this.selector = Selector.open();
-        }
-
-        /**
-         * Neue Session zum Processor hinzufügen.
-         *
-         * @param socketChannel {@link SocketChannel}
-         * @throws IOException Falls was schief geht.
-         */
-        @SuppressWarnings("resource")
-        public void addSession(final SocketChannel socketChannel) throws IOException
-        {
-            Objects.requireNonNull(socketChannel, "socketChannel required");
-
-            this.newSessions.add(socketChannel);
-
-            this.selector.wakeup();
-        }
-
-        /**
-         * @return {@link Logger}
-         */
-        private Logger getLogger()
-        {
-            return LOGGER;
-        }
-
-        /**
-         * Die neuen Sessions zum Selector hinzufügen.
-         *
-         * @throws IOException Falls was schief geht.
-         */
-        @SuppressWarnings("resource")
-        private void processNewSessions() throws IOException
-        {
-            // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
-            // this.newSessions.poll())
-            while (!this.newSessions.isEmpty())
-            {
-                SocketChannel socketChannel = this.newSessions.poll();
-
-                if (socketChannel == null)
-                {
-                    continue;
-                }
-
-                socketChannel.configureBlocking(false);
-
-                getLogger().debug("attach new session: {}", socketChannel);
-
-                @SuppressWarnings("unused")
-                SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
-                // sk.attach(obj)
-            }
-        }
-
-        /**
-         * @see java.lang.Runnable#run()
-         */
-        @Override
-        public void run()
-        {
-            this.stopLock.acquireUninterruptibly();
-
-            try
-            {
-                while (!Thread.interrupted())
-                {
-                    int readyChannels = this.selector.select();
-
-                    if (this.isShutdown || !this.selector.isOpen())
-                    {
-                        break;
-                    }
-
-                    if (readyChannels > 0)
-                    {
-                        Set<SelectionKey> selected = this.selector.selectedKeys();
-                        Iterator<SelectionKey> iterator = selected.iterator();
-
-                        while (iterator.hasNext())
-                        {
-                            SelectionKey selectionKey = iterator.next();
-                            iterator.remove();
-
-                            if (!selectionKey.isValid())
-                            {
-                                getLogger().debug("SelectionKey not valid: {}", selectionKey);
-                            }
-
-                            if (selectionKey.isReadable())
-                            {
-                                getLogger().debug("Read Request");
-
-                                // Request lesen.
-                                this.ioHandler.read(selectionKey, getLogger());
-                            }
-                            else if (selectionKey.isWritable())
-                            {
-                                getLogger().debug("Write Response");
-
-                                // Response schreiben.
-                                this.ioHandler.write(selectionKey, getLogger());
-                            }
-                        }
-
-                        selected.clear();
-                    }
-
-                    // Die neuen Sessions zum Selector hinzufügen.
-                    processNewSessions();
-                }
-            }
-            catch (Exception ex)
-            {
-                getLogger().error(null, ex);
-            }
-            finally
-            {
-                this.stopLock.release();
-            }
-        }
-
-        /**
-         * Stoppen des Processors.
-         */
-        protected void stop()
-        {
-            getLogger().debug("stopping Processor");
-
-            this.isShutdown = true;
-            this.selector.wakeup();
-
-            this.stopLock.acquireUninterruptibly();
-
-            try
-            {
-                Set<SelectionKey> selected = this.selector.selectedKeys();
-                Iterator<SelectionKey> iterator = selected.iterator();
-
-                while (iterator.hasNext())
-                {
-                    SelectionKey selectionKey = iterator.next();
-                    iterator.remove();
-
-                    if (selectionKey != null)
-                    {
-                        selectionKey.cancel();
-                    }
-                }
-
-                if (this.selector.isOpen())
-                {
-                    this.selector.close();
-                }
-            }
-            catch (IOException ex)
-            {
-                getLogger().error(null, ex);
-            }
-            finally
-            {
-                this.stopLock.release();
-            }
-        }
-    }
-
-    /**
     *
     */
-    private final static Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
 
     /**
      * @param args String[]
@@ -500,6 +209,297 @@ public class HTTPServerMultiThread
     }
 
     /**
+     * Ein {@link Runnable} Wrapper, welcher den Namen des aktuellen Threads durch den eigenen ersetzt.<br>
+     * Nach der run-Methode wird der Original-Name wiederhergestellt.
+     *
+     * @author Thomas Freese
+     */
+    private static class NamePreservingRunnable implements Runnable
+    {
+        /**
+        *
+        */
+        private final Runnable runnable;
+
+        /**
+        *
+        */
+        private final String runnableName;
+
+        /**
+         * Erstellt ein neues {@link NamePreservingRunnable} Object.
+         *
+         * @param runnable {@link Runnable}
+         * @param runnableName String
+         */
+        public NamePreservingRunnable(final Runnable runnable, final String runnableName)
+        {
+            super();
+
+            this.runnable = Objects.requireNonNull(runnable, "runnable required");
+            this.runnableName = Objects.requireNonNull(runnableName, "runnableName required");
+        }
+
+        /**
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run()
+        {
+            final Thread currentThread = Thread.currentThread();
+            String oldName = currentThread.getName();
+
+            setName(currentThread, this.runnableName);
+
+            try
+            {
+                this.runnable.run();
+            }
+            finally
+            {
+                setName(currentThread, oldName);
+            }
+        }
+
+        /**
+         * Ändert den Namen des Threads.<br>
+         * Eine auftretende {@link SecurityException} wird als Warning geloggt.
+         *
+         * @param thread {@link Thread}
+         * @param name String
+         */
+        private void setName(final Thread thread, final String name)
+        {
+            try
+            {
+                thread.setName(name);
+            }
+            catch (SecurityException sex)
+            {
+                if (LOGGER.isWarnEnabled())
+                {
+                    LOGGER.warn("Failed to set the thread name.", sex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Übernimmt das Connection-Handling.<br>
+     * Ein Processor kann für mehrere Connections zuständig sein.
+     *
+     * @author Thomas Freese
+     */
+    @SuppressWarnings("resource")
+    private static class Processor implements Runnable
+    {
+        /**
+        *
+        */
+        private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+
+        /**
+        *
+        */
+        private final IoHandler ioHandler;
+
+        /**
+        *
+        */
+        private boolean isShutdown;
+
+        /**
+         * Queue für die neuen {@link SocketChannel}s.
+         */
+        private final Queue<SocketChannel> newSessions = new ConcurrentLinkedQueue<>();
+
+        /**
+        *
+        */
+        private final Selector selector;
+
+        /**
+        *
+        */
+        private final Semaphore stopLock = new Semaphore(1, true);
+
+        /**
+         * Erstellt ein neues {@link Processor} Object.
+         *
+         * @param ioHandler {@link IoHandler}
+         * @throws IOException Falls was schief geht.
+         */
+        public Processor(final IoHandler ioHandler) throws IOException
+        {
+            super();
+
+            this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
+            this.selector = Selector.open();
+        }
+
+        /**
+         * Neue Session zum Processor hinzufügen.
+         *
+         * @param socketChannel {@link SocketChannel}
+         * @throws IOException Falls was schief geht.
+         */
+        public void addSession(final SocketChannel socketChannel) throws IOException
+        {
+            Objects.requireNonNull(socketChannel, "socketChannel required");
+
+            this.newSessions.add(socketChannel);
+
+            this.selector.wakeup();
+        }
+
+        /**
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run()
+        {
+            this.stopLock.acquireUninterruptibly();
+
+            try
+            {
+                while (!Thread.interrupted())
+                {
+                    int readyChannels = this.selector.select();
+
+                    if (this.isShutdown || !this.selector.isOpen())
+                    {
+                        break;
+                    }
+
+                    if (readyChannels > 0)
+                    {
+                        Set<SelectionKey> selected = this.selector.selectedKeys();
+                        Iterator<SelectionKey> iterator = selected.iterator();
+
+                        while (iterator.hasNext())
+                        {
+                            SelectionKey selectionKey = iterator.next();
+                            iterator.remove();
+
+                            if (!selectionKey.isValid())
+                            {
+                                getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            }
+
+                            if (selectionKey.isReadable())
+                            {
+                                getLogger().debug("Read Request: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+
+                                // Request lesen.
+                                this.ioHandler.read(selectionKey);
+                            }
+                            else if (selectionKey.isWritable())
+                            {
+                                getLogger().debug("Write Response: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+
+                                // Response schreiben.
+                                this.ioHandler.write(selectionKey);
+                            }
+                        }
+
+                        selected.clear();
+                    }
+
+                    // Die neuen Sessions zum Selector hinzufügen.
+                    processNewSessions();
+                }
+            }
+            catch (Exception ex)
+            {
+                getLogger().error(null, ex);
+            }
+            finally
+            {
+                this.stopLock.release();
+            }
+        }
+
+        /**
+         * @return {@link Logger}
+         */
+        private Logger getLogger()
+        {
+            return LOGGER;
+        }
+
+        /**
+         * Die neuen Sessions zum Selector hinzufügen.
+         *
+         * @throws IOException Falls was schief geht.
+         */
+        private void processNewSessions() throws IOException
+        {
+            // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
+            // this.newSessions.poll())
+            while (!this.newSessions.isEmpty())
+            {
+                SocketChannel socketChannel = this.newSessions.poll();
+
+                if (socketChannel == null)
+                {
+                    continue;
+                }
+
+                socketChannel.configureBlocking(false);
+
+                getLogger().debug("attach new session: {}", socketChannel.getRemoteAddress());
+
+                @SuppressWarnings("unused")
+                SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
+                // sk.attach(obj)
+            }
+        }
+
+        /**
+         * Stoppen des Processors.
+         */
+        protected void stop()
+        {
+            getLogger().debug("stopping Processor");
+
+            this.isShutdown = true;
+            this.selector.wakeup();
+
+            this.stopLock.acquireUninterruptibly();
+
+            try
+            {
+                Set<SelectionKey> selected = this.selector.selectedKeys();
+                Iterator<SelectionKey> iterator = selected.iterator();
+
+                while (iterator.hasNext())
+                {
+                    SelectionKey selectionKey = iterator.next();
+                    iterator.remove();
+
+                    if (selectionKey != null)
+                    {
+                        selectionKey.cancel();
+                    }
+                }
+
+                if (this.selector.isOpen())
+                {
+                    this.selector.close();
+                }
+            }
+            catch (IOException ex)
+            {
+                getLogger().error(null, ex);
+            }
+            finally
+            {
+                this.stopLock.release();
+            }
+        }
+    }
+
+    /**
      *
      */
     private final ExecutorService executorService;
@@ -507,12 +507,12 @@ public class HTTPServerMultiThread
     /**
     *
     */
-    private IoHandler ioHandler = null;
+    private IoHandler ioHandler;
 
     /**
     *
     */
-    private boolean isShutdown = false;
+    private boolean isShutdown;
 
     /**
     *
@@ -534,7 +534,7 @@ public class HTTPServerMultiThread
     /**
     *
     */
-    private Selector selector = null;
+    private Selector selector;
 
     /**
     *
@@ -544,7 +544,7 @@ public class HTTPServerMultiThread
     /**
     *
     */
-    private ServerSocketChannel serverSocketChannel = null;
+    private ServerSocketChannel serverSocketChannel;
 
     /**
     *
@@ -579,135 +579,6 @@ public class HTTPServerMultiThread
 
         this.executorService = Objects.requireNonNull(executorService, "executorService required");
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
-    }
-
-    /**
-     * @return {@link ExecutorService}
-     */
-    protected ExecutorService getExecutorService()
-    {
-        return this.executorService;
-    }
-
-    /**
-     * @return {@link IoHandler}
-     */
-    protected IoHandler getIoHandler()
-    {
-        return this.ioHandler;
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return LOGGER;
-    }
-
-    /**
-     * @return int
-     */
-    protected int getNumOfProcessors()
-    {
-        return this.numOfProcessors;
-    }
-
-    /**
-     * @return {@link SelectorProvider}
-     */
-    protected SelectorProvider getSelectorProvider()
-    {
-        return this.selectorProvider;
-    }
-
-    /**
-     * Wartet auf neue Connections.
-     */
-    @SuppressWarnings("resource")
-    private void listen()
-    {
-        getLogger().info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
-
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            while (!Thread.interrupted())
-            {
-                int readyChannels = this.selector.select();
-
-                if (this.isShutdown || !this.selector.isOpen())
-                {
-                    break;
-                }
-
-                if (readyChannels > 0)
-                {
-                    Set<SelectionKey> selected = this.selector.selectedKeys();
-                    Iterator<SelectionKey> iterator = selected.iterator();
-
-                    while (iterator.hasNext())
-                    {
-                        SelectionKey selectionKey = iterator.next();
-                        iterator.remove();
-
-                        if (!selectionKey.isValid())
-                        {
-                            getLogger().debug("SelectionKey not valid: {}", selectionKey);
-                        }
-
-                        if (selectionKey.isAcceptable())
-                        {
-                            // Verbindung mit Client herstellen.
-                            SocketChannel socketChannel = this.serverSocketChannel.accept();
-
-                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
-                            getLogger().debug("add new session: {}", socketChannel);
-
-                            // Socket dem Processor übergeben.
-                            nextProcessor().addSession(socketChannel);
-                        }
-                        else if (selectionKey.isConnectable())
-                        {
-                            getLogger().debug("Client Connected");
-                        }
-                    }
-
-                    selected.clear();
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
-        }
-    }
-
-    /**
-     * Liefert den nächsten {@link Processor} im RoundRobin-Verfahren.<br>
-     *
-     * @return {@link Processor}
-     * @throws IOException Falls was schief geht.
-     */
-    private synchronized Processor nextProcessor() throws IOException
-    {
-        if (this.isShutdown)
-        {
-            return null;
-        }
-
-        // Ersten Processor entnehmen.
-        Processor processor = this.processors.poll();
-
-        // Processor wieder hinten dran hängen.
-        this.processors.add(processor);
-
-        return processor;
     }
 
     /**
@@ -794,5 +665,133 @@ public class HTTPServerMultiThread
         {
             this.stopLock.release();
         }
+    }
+
+    /**
+     * Wartet auf neue Connections.
+     */
+    @SuppressWarnings("resource")
+    private void listen()
+    {
+        getLogger().info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
+
+        this.stopLock.acquireUninterruptibly();
+
+        try
+        {
+            while (!Thread.interrupted())
+            {
+                int readyChannels = this.selector.select();
+
+                if (this.isShutdown || !this.selector.isOpen())
+                {
+                    break;
+                }
+
+                if (readyChannels > 0)
+                {
+                    Set<SelectionKey> selected = this.selector.selectedKeys();
+                    Iterator<SelectionKey> iterator = selected.iterator();
+
+                    while (iterator.hasNext())
+                    {
+                        SelectionKey selectionKey = iterator.next();
+                        iterator.remove();
+
+                        if (!selectionKey.isValid())
+                        {
+                            getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                        }
+
+                        if (selectionKey.isAcceptable())
+                        {
+                            // Verbindung mit Client herstellen.
+                            SocketChannel socketChannel = this.serverSocketChannel.accept();
+
+                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
+
+                            // Socket dem Processor übergeben.
+                            nextProcessor().addSession(socketChannel);
+                        }
+                        else if (selectionKey.isConnectable())
+                        {
+                            getLogger().debug("Client Connected: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                        }
+                    }
+
+                    selected.clear();
+                }
+            }
+        }
+        catch (IOException ex)
+        {
+            getLogger().error(null, ex);
+        }
+        finally
+        {
+            this.stopLock.release();
+        }
+    }
+
+    /**
+     * Liefert den nächsten {@link Processor} im RoundRobin-Verfahren.<br>
+     *
+     * @return {@link Processor}
+     * @throws IOException Falls was schief geht.
+     */
+    private synchronized Processor nextProcessor() throws IOException
+    {
+        if (this.isShutdown)
+        {
+            return null;
+        }
+
+        // Ersten Processor entnehmen.
+        Processor processor = this.processors.poll();
+
+        // Processor wieder hinten dran hängen.
+        this.processors.add(processor);
+
+        return processor;
+    }
+
+    /**
+     * @return {@link ExecutorService}
+     */
+    protected ExecutorService getExecutorService()
+    {
+        return this.executorService;
+    }
+
+    /**
+     * @return {@link IoHandler}
+     */
+    protected IoHandler getIoHandler()
+    {
+        return this.ioHandler;
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
+     * @return int
+     */
+    protected int getNumOfProcessors()
+    {
+        return this.numOfProcessors;
+    }
+
+    /**
+     * @return {@link SelectorProvider}
+     */
+    protected SelectorProvider getSelectorProvider()
+    {
+        return this.selectorProvider;
     }
 }

@@ -6,6 +6,8 @@ package de.freese.sonstiges.server.handler;
 
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Verarbeitet den Request und Response.<br>
@@ -35,6 +37,11 @@ public abstract class AbstractIoHandler implements IoHandler
     });
 
     /**
+    *
+    */
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    /**
      * Erstellt ein neues {@link AbstractIoHandler} Object.
      */
     public AbstractIoHandler()
@@ -56,5 +63,13 @@ public abstract class AbstractIoHandler implements IoHandler
     protected CharsetEncoder getCharsetEncoder()
     {
         return this.CHARSET_ENCODER.get().reset();
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return this.logger;
     }
 }

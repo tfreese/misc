@@ -7,7 +7,6 @@ package de.freese.sonstiges.server.handler;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.slf4j.Logger;
 
 /**
  * Verarbeitet den Request und Response.
@@ -33,17 +32,15 @@ public interface IoHandler
      * Verarbeitet den Request.
      *
      * @param selectionKey {@link SelectionKey}
-     * @param logger {@link Logger}
      * @throws Exception Falls was schief geht.
      */
-    public void read(final SelectionKey selectionKey, final Logger logger) throws Exception;
+    public void read(final SelectionKey selectionKey) throws Exception;
 
     /**
      * Verarbeitet den Response.
      *
      * @param selectionKey {@link SelectionKey}
-     * @param logger {@link Logger}
      * @throws Exception Falls was schief geht.
      */
-    public void write(final SelectionKey selectionKey, final Logger logger) throws Exception;
+    public void write(final SelectionKey selectionKey) throws Exception;
 }

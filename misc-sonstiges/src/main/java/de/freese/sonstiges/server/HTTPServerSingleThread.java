@@ -112,7 +112,7 @@ public class HTTPServerSingleThread
 
                     CharBuffer charBuffer = charset.decode(buffer);
 
-                    LOGGER.debug("\n" + charBuffer.toString().trim());
+                    LOGGER.debug("\n{}", charBuffer.toString().trim());
 
                     buffer.clear();
                 }
@@ -140,12 +140,12 @@ public class HTTPServerSingleThread
     /**
      *
      */
-    private IoHandler ioHandler = null;
+    private IoHandler ioHandler;
 
     /**
      *
      */
-    private boolean isShutdown = false;
+    private boolean isShutdown;
 
     /**
     *
@@ -155,7 +155,7 @@ public class HTTPServerSingleThread
     /**
     *
     */
-    private Selector selector = null;
+    private Selector selector;
 
     /**
      *
@@ -165,7 +165,7 @@ public class HTTPServerSingleThread
     /**
     *
     */
-    private ServerSocketChannel serverSocketChannel = null;
+    private ServerSocketChannel serverSocketChannel;
 
     /**
     *
@@ -196,115 +196,6 @@ public class HTTPServerSingleThread
 
         this.port = port;
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
-    }
-
-    /**
-     * @return {@link IoHandler}
-     */
-    protected IoHandler getIoHandler()
-    {
-        return this.ioHandler;
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return LOGGER;
-    }
-
-    /**
-     * @return {@link SelectorProvider}
-     */
-    protected SelectorProvider getSelectorProvider()
-    {
-        return this.selectorProvider;
-    }
-
-    /**
-     * Wartet auf neue Connections.
-     */
-    @SuppressWarnings("resource")
-    private void listen()
-    {
-        LOGGER.info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
-
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            while (!Thread.interrupted())
-            {
-                int readyChannels = this.selector.select();
-
-                if (this.isShutdown || !this.selector.isOpen())
-                {
-                    break;
-                }
-
-                if (readyChannels > 0)
-                {
-                    Set<SelectionKey> selected = this.selector.selectedKeys();
-                    Iterator<SelectionKey> iterator = selected.iterator();
-
-                    while (iterator.hasNext())
-                    {
-                        SelectionKey selectionKey = iterator.next();
-                        iterator.remove();
-
-                        if (!selectionKey.isValid())
-                        {
-                            getLogger().debug("SelectionKey not valid: {}", selectionKey);
-                        }
-
-                        if (selectionKey.isAcceptable())
-                        {
-                            // Verbindung mit Client herstellen.
-                            SocketChannel socketChannel = this.serverSocketChannel.accept();
-                            socketChannel.configureBlocking(false);
-                            socketChannel.register(this.selector, SelectionKey.OP_READ);
-
-                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
-
-                            // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
-                            // sk.attach(obj)
-
-                            // Selector aufwecken.
-                            this.selector.wakeup();
-                        }
-                        else if (selectionKey.isConnectable())
-                        {
-                            getLogger().debug("Client Connected");
-                        }
-                        else if (selectionKey.isReadable())
-                        {
-                            getLogger().debug("Read Request");
-
-                            // Request lesen.
-                            getIoHandler().read(selectionKey, getLogger());
-                        }
-                        else if (selectionKey.isWritable())
-                        {
-                            getLogger().debug("Write Response");
-
-                            // Response schreiben.
-                            getIoHandler().write(selectionKey, getLogger());
-                        }
-                    }
-
-                    selected.clear();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
-        }
     }
 
     /**
@@ -379,5 +270,114 @@ public class HTTPServerSingleThread
         {
             this.stopLock.release();
         }
+    }
+
+    /**
+     * Wartet auf neue Connections.
+     */
+    @SuppressWarnings("resource")
+    private void listen()
+    {
+        LOGGER.info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
+
+        this.stopLock.acquireUninterruptibly();
+
+        try
+        {
+            while (!Thread.interrupted())
+            {
+                int readyChannels = this.selector.select();
+
+                if (this.isShutdown || !this.selector.isOpen())
+                {
+                    break;
+                }
+
+                if (readyChannels > 0)
+                {
+                    Set<SelectionKey> selected = this.selector.selectedKeys();
+                    Iterator<SelectionKey> iterator = selected.iterator();
+
+                    while (iterator.hasNext())
+                    {
+                        SelectionKey selectionKey = iterator.next();
+                        iterator.remove();
+
+                        if (!selectionKey.isValid())
+                        {
+                            getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                        }
+
+                        if (selectionKey.isAcceptable())
+                        {
+                            // Verbindung mit Client herstellen.
+                            SocketChannel socketChannel = this.serverSocketChannel.accept();
+                            socketChannel.configureBlocking(false);
+                            socketChannel.register(this.selector, SelectionKey.OP_READ);
+
+                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
+
+                            // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
+                            // sk.attach(obj)
+
+                            // Selector aufwecken.
+                            this.selector.wakeup();
+                        }
+                        else if (selectionKey.isConnectable())
+                        {
+                            getLogger().debug("Client Connected: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                        }
+                        else if (selectionKey.isReadable())
+                        {
+                            getLogger().debug("Read Request: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+
+                            // Request lesen.
+                            getIoHandler().read(selectionKey);
+                        }
+                        else if (selectionKey.isWritable())
+                        {
+                            getLogger().debug("Write Response: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+
+                            // Response schreiben.
+                            getIoHandler().write(selectionKey);
+                        }
+                    }
+
+                    selected.clear();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
+        finally
+        {
+            this.stopLock.release();
+        }
+    }
+
+    /**
+     * @return {@link IoHandler}
+     */
+    protected IoHandler getIoHandler()
+    {
+        return this.ioHandler;
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
+     * @return {@link SelectorProvider}
+     */
+    protected SelectorProvider getSelectorProvider()
+    {
+        return this.selectorProvider;
     }
 }

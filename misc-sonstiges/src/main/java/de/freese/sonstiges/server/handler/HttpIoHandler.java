@@ -11,8 +11,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.util.Date;
-import org.slf4j.Logger;
+import java.time.LocalDateTime;
 
 /**
  * Verarbeitet den Request und Response.<br>
@@ -32,10 +31,10 @@ public class HttpIoHandler extends AbstractIoHandler
     }
 
     /**
-     * @see de.freese.sonstiges.server.handler.IoHandler#read(java.nio.channels.SelectionKey, org.slf4j.Logger)
+     * @see de.freese.sonstiges.server.handler.IoHandler#read(java.nio.channels.SelectionKey)
      */
     @Override
-    public void read(final SelectionKey selectionKey, final Logger logger) throws Exception
+    public void read(final SelectionKey selectionKey) throws Exception
     {
         CharsetDecoder charsetDecoder = getCharsetDecoder();
 
@@ -50,7 +49,7 @@ public class HttpIoHandler extends AbstractIoHandler
 
             CharBuffer charBuffer = charsetDecoder.decode(inputBuffer);
 
-            logger.debug("\n" + charBuffer.toString().trim());
+            getLogger().debug("\n{}", charBuffer.toString().trim());
 
             inputBuffer.clear();
         }
@@ -60,10 +59,10 @@ public class HttpIoHandler extends AbstractIoHandler
     }
 
     /**
-     * @see de.freese.sonstiges.server.handler.IoHandler#write(java.nio.channels.SelectionKey, org.slf4j.Logger)
+     * @see de.freese.sonstiges.server.handler.IoHandler#write(java.nio.channels.SelectionKey)
      */
     @Override
-    public void write(final SelectionKey selectionKey, final Logger logger) throws Exception
+    public void write(final SelectionKey selectionKey) throws Exception
     {
         CharsetEncoder charsetEncoder = getCharsetEncoder();
 
@@ -77,7 +76,7 @@ public class HttpIoHandler extends AbstractIoHandler
         charBufferBody.put("<meta charset=\"UTF-8\">").put("\r\n");
         charBufferBody.put("</head>").put("\r\n");
         charBufferBody.put("<body>").put("\r\n");
-        charBufferBody.put("Date: " + new Date().toString() + "<br>").put("\r\n");
+        charBufferBody.put("Date: " + LocalDateTime.now() + "<br>").put("\r\n");
         charBufferBody.put("</body>").put("\r\n");
         charBufferBody.put("</html>").put("\r\n");
 
