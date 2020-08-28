@@ -738,9 +738,10 @@ public final class Misc
         // introspector();
         // javaVersion();
         // listDirectories();
-        nioPipe();
+//        nioPipe();
         // reactor();
         // securityProviders();
+        shift();
         // splitList();
         // systemMXBean();
 //        textBlocks();
@@ -1128,6 +1129,31 @@ public final class Misc
                 {
                     System.out.printf("Algorithm name: \"%s\"%n", service.getAlgorithm());
                 }
+            }
+
+            System.out.println();
+        }
+    }
+
+    /**
+     *
+     */
+    static void shift()
+    {
+        for (int n = 0; n < 40; n++)
+        {
+            System.out.printf("n = %d%n", n);
+
+            // Liefert den höchsten Wert (power of 2), der kleiner als n ist.
+            int nn = Integer.highestOneBit(n);
+
+            System.out.printf("Integer.highestOneBit = %d%n", nn);
+
+            for (int i = 0; i < 3; i++)
+            {
+                // << 1: Bit-Shift nach links,  vergrößert  um power of 2; 1,2,4,8,16,32,...
+                // >> 1: Bit-Shift nach rechts, verkleinert um power of 2; ...,32,16,8,4,2,1
+                System.out.printf("%d << %d = %d;   %d >> %d = %d%n", nn, i, nn << i, nn, i, nn >> i);
             }
 
             System.out.println();
