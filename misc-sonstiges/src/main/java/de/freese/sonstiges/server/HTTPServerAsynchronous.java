@@ -225,7 +225,7 @@ public class HTTPServerAsynchronous
 
             try
             {
-                getLogger().debug("Read Request: {}", channel.getRemoteAddress());
+                getLogger().debug("{}: Read Request", channel.getRemoteAddress());
             }
             catch (IOException ioex)
             {
@@ -326,7 +326,7 @@ public class HTTPServerAsynchronous
 
             try
             {
-                getLogger().debug("Write Response: {}", channel.getRemoteAddress());
+                getLogger().debug("{}: Write Response", channel.getRemoteAddress());
             }
             catch (IOException ioex)
             {
@@ -470,7 +470,7 @@ public class HTTPServerAsynchronous
             {
                 try
                 {
-                    getLogger().debug("Connection Accepted: {}", channel.getRemoteAddress());
+                    getLogger().debug("{}: Connection Accepted", channel.getRemoteAddress());
                 }
                 catch (IOException ioex)
                 {

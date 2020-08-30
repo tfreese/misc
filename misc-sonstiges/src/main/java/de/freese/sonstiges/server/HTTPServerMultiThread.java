@@ -46,18 +46,14 @@ import de.freese.sonstiges.server.handler.IoHandler;
 public class HTTPServerMultiThread
 {
     /**
-    *
-    */
+     *
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
 
     /**
      * @param args String[]
      * @throws Exception Falls was schief geht.
      */
-    @SuppressWarnings(
-    {
-            "resource", "unused"
-    })
     public static void main(final String[] args) throws Exception
     {
         final SelectorProvider selectorProvider = SelectorProvider.provider();
@@ -217,13 +213,13 @@ public class HTTPServerMultiThread
     private static class NamePreservingRunnable implements Runnable
     {
         /**
-        *
-        */
+         *
+         */
         private final Runnable runnable;
 
         /**
-        *
-        */
+         *
+         */
         private final String runnableName;
 
         /**
@@ -290,37 +286,32 @@ public class HTTPServerMultiThread
      *
      * @author Thomas Freese
      */
-    @SuppressWarnings("resource")
     private static class Processor implements Runnable
     {
         /**
-        *
-        */
+         *
+         */
         private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
 
         /**
-        *
-        */
+         *
+         */
         private final IoHandler ioHandler;
-
         /**
-        *
-        */
+         *
+         */
         private boolean isShutdown;
-
         /**
          * Queue für die neuen {@link SocketChannel}s.
          */
         private final Queue<SocketChannel> newSessions = new ConcurrentLinkedQueue<>();
-
         /**
-        *
-        */
+         *
+         */
         private final Selector selector;
-
         /**
-        *
-        */
+         *
+         */
         private final Semaphore stopLock = new Semaphore(1, true);
 
         /**
@@ -347,7 +338,12 @@ public class HTTPServerMultiThread
         {
             Objects.requireNonNull(socketChannel, "socketChannel required");
 
-            this.newSessions.add(socketChannel);
+            // this.newSessions.add(socketChannel);
+
+            // Den neuen Socket direkt registrieren geht auch.
+            socketChannel.configureBlocking(false);
+            getLogger().debug("{}: attach new session", socketChannel.getRemoteAddress());
+            SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
 
             this.selector.wakeup();
         }
@@ -383,19 +379,19 @@ public class HTTPServerMultiThread
 
                             if (!selectionKey.isValid())
                             {
-                                getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                                getLogger().debug("{}: SelectionKey not valid", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
                             }
 
                             if (selectionKey.isReadable())
                             {
-                                getLogger().debug("Read Request: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                                getLogger().debug("{}: Read Request", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
 
                                 // Request lesen.
                                 this.ioHandler.read(selectionKey);
                             }
                             else if (selectionKey.isWritable())
                             {
-                                getLogger().debug("Write Response: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                                getLogger().debug("{}: Write Response", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
 
                                 // Response schreiben.
                                 this.ioHandler.write(selectionKey);
@@ -447,9 +443,8 @@ public class HTTPServerMultiThread
 
                 socketChannel.configureBlocking(false);
 
-                getLogger().debug("attach new session: {}", socketChannel.getRemoteAddress());
+                getLogger().debug("{}: attach new session", socketChannel.getRemoteAddress());
 
-                @SuppressWarnings("unused")
                 SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
                 // sk.attach(obj)
             }
@@ -503,52 +498,43 @@ public class HTTPServerMultiThread
      *
      */
     private final ExecutorService executorService;
-
     /**
-    *
-    */
+     *
+     */
     private IoHandler ioHandler;
-
     /**
-    *
-    */
+     *
+     */
     private boolean isShutdown;
-
     /**
-    *
-    */
+     *
+     */
     private final int numOfProcessors = 3;
-
     /**
-    *
-    */
+     *
+     */
     private final int port;
-
     /**
      * Queue für die {@link Processor}.
      */
     // private final Queue<Processor> processors = new ArrayBlockingQueue<>(NUM_OF_PROCESSORS);
     // private final Queue<Processor> processors = new ConcurrentLinkedQueue<>();
     private final LinkedList<Processor> processors = new LinkedList<>();
-
     /**
-    *
-    */
+     *
+     */
     private Selector selector;
-
     /**
-    *
-    */
+     *
+     */
     private final SelectorProvider selectorProvider;
-
     /**
-    *
-    */
+     *
+     */
     private ServerSocketChannel serverSocketChannel;
-
     /**
-    *
-    */
+     *
+     */
     private final Semaphore stopLock = new Semaphore(1, true);
 
     /**
@@ -594,7 +580,6 @@ public class HTTPServerMultiThread
      *
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     public void start() throws IOException
     {
         getLogger().info("starting server on port: {}", this.port);
@@ -610,7 +595,6 @@ public class HTTPServerMultiThread
         socket.setReuseAddress(true);
         socket.bind(new InetSocketAddress(this.port), 50);
 
-        @SuppressWarnings("unused")
         SelectionKey selectionKey = this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
         // selectionKey.attach(this);
 
@@ -670,7 +654,6 @@ public class HTTPServerMultiThread
     /**
      * Wartet auf neue Connections.
      */
-    @SuppressWarnings("resource")
     private void listen()
     {
         getLogger().info("server listening on port: {}", this.serverSocketChannel.socket().getLocalPort());
@@ -700,7 +683,7 @@ public class HTTPServerMultiThread
 
                         if (!selectionKey.isValid())
                         {
-                            getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: SelectionKey not valid", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
                         }
 
                         if (selectionKey.isAcceptable())
@@ -708,14 +691,14 @@ public class HTTPServerMultiThread
                             // Verbindung mit Client herstellen.
                             SocketChannel socketChannel = this.serverSocketChannel.accept();
 
-                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
+                            getLogger().debug("{}: Connection Accepted", socketChannel.getRemoteAddress());
 
                             // Socket dem Processor übergeben.
                             nextProcessor().addSession(socketChannel);
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            getLogger().debug("Client Connected: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: Client Connected", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
                         }
                     }
 

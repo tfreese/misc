@@ -305,7 +305,7 @@ public class HTTPServerSingleThread
 
                         if (!selectionKey.isValid())
                         {
-                            getLogger().debug("SelectionKey not valid: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: SelectionKey not valid", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
                         }
 
                         if (selectionKey.isAcceptable())
@@ -315,7 +315,7 @@ public class HTTPServerSingleThread
                             socketChannel.configureBlocking(false);
                             socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-                            getLogger().debug("Connection Accepted: {}", socketChannel.getRemoteAddress());
+                            getLogger().debug("{}: Connection Accepted", socketChannel.getRemoteAddress());
 
                             // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
                             // sk.attach(obj)
@@ -325,18 +325,18 @@ public class HTTPServerSingleThread
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            getLogger().debug("Client Connected: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: Client Connected", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
                         }
                         else if (selectionKey.isReadable())
                         {
-                            getLogger().debug("Read Request: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: Read Request", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
 
                             // Request lesen.
                             getIoHandler().read(selectionKey);
                         }
                         else if (selectionKey.isWritable())
                         {
-                            getLogger().debug("Write Response: {}", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
+                            getLogger().debug("{}: Write Response", ((SocketChannel) selectionKey.channel()).getRemoteAddress());
 
                             // Response schreiben.
                             getIoHandler().write(selectionKey);
