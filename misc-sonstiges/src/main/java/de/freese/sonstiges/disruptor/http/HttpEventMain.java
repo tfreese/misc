@@ -40,9 +40,6 @@ public class HttpEventMain
 
         int bufferSize = 1024;
 
-        // Executor executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()); // a thread pool to which we can assign tasks
-        // Disruptor<HttpEvent> disruptor = new Disruptor<>(factory, bufferSize, executor);
-
         // Disruptor<HttpEvent> disruptor = new Disruptor(factory, bufferSize, DaemonThreadFactory.INSTANCE);
         Disruptor<HttpEvent> disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BusySpinWaitStrategy());
 
@@ -51,7 +48,7 @@ public class HttpEventMain
 
         for (int i = 0; i < handlers.length; i++)
         {
-            handlers[i] = new HttpEventHandler(i, server.getMapResponse());
+            handlers[i] = new HttpEventHandler(i, server.getMapResponseReady());
         }
 
         disruptor.handleEventsWith(handlers).then(new CleaningEventHandler());
@@ -60,7 +57,7 @@ public class HttpEventMain
 
         RingBuffer<HttpEvent> ringBuffer = disruptor.getRingBuffer();
 
-        server.setProducer(new HttpEventProducer(ringBuffer, server.getMapResponse()));
+        server.setProducer(new HttpEventProducer(ringBuffer, server.getMapResponseReady()));
 
         System.out.println("\n====================Server Details====================");
         System.out.println("Server Machine: " + InetAddress.getLocalHost().getCanonicalHostName());
@@ -90,7 +87,7 @@ public class HttpEventMain
     /**
      *
      */
-    private Map<String, Object> mapResponse;
+    private Map<String, Boolean> mapResponseReady;
 
     /**
      *
@@ -118,39 +115,14 @@ public class HttpEventMain
 
         this.addr = addr;
         this.port = port;
-        this.mapResponse = new ConcurrentHashMap<>();
+        this.mapResponseReady = new ConcurrentHashMap<>();
         this.mapKey = new ConcurrentHashMap<>();
-    }
-
-    /**
-     * @return {@link Map}
-     */
-    public Map<String, Object> getMapResponse()
-    {
-        return this.mapResponse;
-    }
-
-    /**
-     * @return int
-     */
-    public int getPort()
-    {
-        return this.port;
-    }
-
-    /**
-     * @param producer {@link HttpEventProducer}
-     */
-    public void setProducer(final HttpEventProducer producer)
-    {
-        this.producer = producer;
     }
 
     /**
      * @param key {@link SelectionKey}
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     private void accept(final SelectionKey key) throws IOException
     {
         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
@@ -164,10 +136,25 @@ public class HttpEventMain
     }
 
     /**
+     * @return {@link Map}
+     */
+    public Map<String, Boolean> getMapResponseReady()
+    {
+        return this.mapResponseReady;
+    }
+
+    /**
+     * @return int
+     */
+    public int getPort()
+    {
+        return this.port;
+    }
+
+    /**
      * @param key {@link SelectionKey}
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     private void read(final SelectionKey key) throws IOException
     {
         SocketChannel channel = (SocketChannel) key.channel();
@@ -187,11 +174,12 @@ public class HttpEventMain
             return;
         }
 
-        String requestID = RandomStringUtils.random(15, true, true);
+        String remoteAddr = channel.getRemoteAddress().toString();
+        String requestID = remoteAddr + "_" + RandomStringUtils.randomNumeric(4);
 
-        while (this.mapKey.containsValue(requestID) || this.mapResponse.containsKey(requestID))
+        while (this.mapKey.containsValue(requestID) || this.mapResponseReady.containsKey(requestID))
         {
-            requestID = RandomStringUtils.random(15, true, true);
+            requestID = remoteAddr + "_" + RandomStringUtils.randomNumeric(4);
         }
 
         this.mapKey.put(key, requestID);
@@ -208,23 +196,30 @@ public class HttpEventMain
     private boolean responseReady(final SelectionKey key)
     {
         String requestId = this.mapKey.get(key);
-        String response = this.mapResponse.get(requestId).toString();
+        boolean responseReady = this.mapResponseReady.getOrDefault(requestId, false);
 
-        if ("0".equals(response))
+        if (!responseReady)
         {
             return false;
         }
 
         this.mapKey.remove(key);
-        this.mapResponse.remove(requestId);
+        this.mapResponseReady.remove(requestId);
 
         return true;
     }
 
     /**
+     * @param producer {@link HttpEventProducer}
+     */
+    public void setProducer(final HttpEventProducer producer)
+    {
+        this.producer = producer;
+    }
+
+    /**
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     private void start() throws IOException
     {
         this.selector = Selector.open();
@@ -278,7 +273,6 @@ public class HttpEventMain
      * @param key {@link SelectionKey}
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     private void write(final SelectionKey key) throws IOException
     {
         if (responseReady(key))
@@ -288,8 +282,8 @@ public class HttpEventMain
 
             buffer.flip();
             channel.write(buffer);
-            channel.close();
 
+            channel.close();
             key.cancel();
         }
     }

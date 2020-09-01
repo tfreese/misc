@@ -60,7 +60,7 @@ public class Gene implements Comparable<Gene>
 
         if (getValue() instanceof Comparable)
         {
-            comp = ((Comparable) getValue()).compareTo(o.getValue());
+            comp = ((Comparable<?>) getValue()).compareTo(o.getValue());
         }
         else
         {
@@ -120,9 +120,19 @@ public class Gene implements Comparable<Gene>
      *
      * @return Object
      */
+    @SuppressWarnings("unchecked")
     public <T> T getValue()
     {
         return (T) this.value;
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(this.value);
     }
 
     /**
@@ -133,15 +143,6 @@ public class Gene implements Comparable<Gene>
     public void setValue(final Object value)
     {
         this.value = value;
-    }
-
-    /**
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(this.value);
     }
 
     /**

@@ -20,43 +20,18 @@ public class HttpEventHandler implements EventHandler<HttpEvent>
     /**
      *
      */
-    private Map<String, Object> mapResponse;
+    private Map<String, Boolean> mapResponseReady;
 
     /**
      * Erstellt ein neues {@link HttpEventHandler} Object.
      *
      * @param id int
-     * @param mapResponse {@link Map}
+     * @param mapResponseReady {@link Map}
      */
-    public HttpEventHandler(final int id, final Map<String, Object> mapResponse)
+    public HttpEventHandler(final int id, final Map<String, Boolean> mapResponseReady)
     {
         this.id = id;
-        this.mapResponse = mapResponse;
-    }
-
-    /**
-     * @see EventHandler#onEvent(Object, long, boolean)
-     */
-    @Override
-    public void onEvent(final HttpEvent event, final long sequence, final boolean endOfBatch) throws Exception
-    {
-        if ((sequence % Runtime.getRuntime().availableProcessors()) == this.id)
-        {
-            System.out.printf("%s_HttpEventHandler.onEvent: Sequence %d%n", Thread.currentThread().getName(), sequence);
-
-            String requestId = event.getRequestId();
-            ByteBuffer buffer = event.getBuffer();
-            int numRead = event.getNumRead();
-
-            ByteBuffer responseBuffer = handleRequest(buffer, numRead, sequence);
-
-            if (responseBuffer == null)
-            {
-                return;
-            }
-
-            this.mapResponse.put(requestId, responseBuffer);
-        }
+        this.mapResponseReady = mapResponseReady;
     }
 
     /**
@@ -88,6 +63,31 @@ public class HttpEventHandler implements EventHandler<HttpEvent>
         buffer.put((response).getBytes(StandardCharsets.UTF_8));
 
         return buffer;
+    }
+
+    /**
+     * @see EventHandler#onEvent(Object, long, boolean)
+     */
+    @Override
+    public void onEvent(final HttpEvent event, final long sequence, final boolean endOfBatch) throws Exception
+    {
+        if ((sequence % Runtime.getRuntime().availableProcessors()) == this.id)
+        {
+            System.out.printf("%s_HttpEventHandler.onEvent: RequestId=%s, Sequence=%d%n", Thread.currentThread().getName(), event.getRequestId(), sequence);
+
+            String requestId = event.getRequestId();
+            ByteBuffer buffer = event.getBuffer();
+            int numRead = event.getNumRead();
+
+            ByteBuffer responseBuffer = handleRequest(buffer, numRead, sequence);
+
+            if (responseBuffer == null)
+            {
+                return;
+            }
+
+            this.mapResponseReady.put(requestId, Boolean.TRUE);
+        }
     }
 
     /**

@@ -13,7 +13,7 @@ public class HttpEventProducer
     /**
      *
      */
-    private final Map<String, Object> mapResponse;
+    private final Map<String, Boolean> mapResponseReady;
 
     /**
      *
@@ -24,14 +24,14 @@ public class HttpEventProducer
      * Erstellt ein neues {@link HttpEventProducer} Object.
      *
      * @param ringBuffer {@link RingBuffer}
-     * @param mapResponse {@link Map}
+     * @param mapResponseReady {@link Map}
      */
-    public HttpEventProducer(final RingBuffer<HttpEvent> ringBuffer, final Map<String, Object> mapResponse)
+    public HttpEventProducer(final RingBuffer<HttpEvent> ringBuffer, final Map<String, Boolean> mapResponseReady)
     {
         super();
 
         this.ringBuffer = ringBuffer;
-        this.mapResponse = mapResponse;
+        this.mapResponseReady = mapResponseReady;
     }
 
     /**
@@ -52,7 +52,7 @@ public class HttpEventProducer
         }
         finally
         {
-            this.mapResponse.put(requestId, "0");
+            this.mapResponseReady.put(requestId, Boolean.FALSE);
             this.ringBuffer.publish(sequence);
         }
     }

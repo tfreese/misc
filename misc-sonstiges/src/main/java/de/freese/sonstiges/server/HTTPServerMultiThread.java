@@ -9,20 +9,16 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,165 +41,6 @@ import de.freese.sonstiges.server.handler.IoHandler;
  */
 public class HTTPServerMultiThread
 {
-    /**
-     *
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
-
-    /**
-     * @param args String[]
-     * @throws Exception Falls was schief geht.
-     */
-    public static void main(final String[] args) throws Exception
-    {
-        final SelectorProvider selectorProvider = SelectorProvider.provider();
-
-        int poolSize = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
-
-        HTTPServerMultiThread server = new HTTPServerMultiThread(8001, executorService, selectorProvider);
-        server.setIoHandler(new HttpIoHandler());
-        server.start();
-
-        System.out.println();
-        System.out.println();
-        System.out.println("******************************************************************************************************************");
-        System.out.println("You're using an IDE, click in this console and press ENTER to call System.exit() and trigger the shutdown routine.");
-        System.out.println("******************************************************************************************************************");
-        System.out.println();
-        System.out.println();
-
-        // Console für programmatische Eingabe simulieren.
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(pos);
-        // System.setIn(pis);
-
-        // Client Task starten
-        executorService.submit((Callable<Void>) () -> {
-
-            Thread.sleep(1000);
-
-            InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
-            Charset charset = IoHandler.DEFAULT_CHARSET;
-
-            try (SocketChannel client = SocketChannel.open(serverAddress))
-            {
-                client.configureBlocking(true);
-
-                // Request
-                CharBuffer charBufferHeader = CharBuffer.allocate(256);
-                charBufferHeader.put("GET / HTTP/1.1").put("\r\n");
-                charBufferHeader.put("Host: localhost:8001").put("\r\n");
-                charBufferHeader.put("User-Agent: " + HTTPServerMultiThread.class.getSimpleName()).put("\r\n");
-                charBufferHeader.put("Accept: text/html").put("\r\n");
-                charBufferHeader.put("Accept-Language: de").put("\r\n");
-                charBufferHeader.put("Accept-Encoding: gzip, deflate").put("\r\n");
-                charBufferHeader.put("Connection: keep-alive").put("\r\n");
-                charBufferHeader.put("").put("\r\n");
-                charBufferHeader.flip();
-
-                ByteBuffer buffer = charset.encode(charBufferHeader);
-                // int bytesWritten = 0;
-
-                while (buffer.hasRemaining())
-                {
-                    // bytesWritten +=
-                    client.write(buffer);
-                }
-
-                // Response
-                buffer = ByteBuffer.allocate(1024);
-
-                while (client.read(buffer) > 0)
-                {
-                    buffer.flip();
-
-                    CharBuffer charBuffer = charset.decode(buffer);
-
-                    LOGGER.debug("\n" + charBuffer.toString().trim());
-
-                    buffer.clear();
-                }
-            }
-
-            // Console simulieren.
-            // pos.write(0);
-
-            return null;
-        });
-
-        try
-        {
-            System.in.read();
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-
-        server.stop();
-        HTTPServerMultiThread.shutdown(executorService, LOGGER);
-        System.exit(0);
-    }
-
-    /**
-     * Shutdown des {@link ExecutorService}.
-     *
-     * @param executorService {@link ExecutorService}
-     * @param logger {@link Logger}
-     */
-    public static void shutdown(final ExecutorService executorService, final Logger logger)
-    {
-        logger.info("shutdown ExecutorService");
-
-        if (executorService == null)
-        {
-            return;
-        }
-
-        executorService.shutdown();
-
-        try
-        {
-            // Wait a while for existing tasks to terminate.
-            if (!executorService.awaitTermination(10, TimeUnit.SECONDS))
-            {
-                if (logger.isWarnEnabled())
-                {
-                    logger.warn("Timed out while waiting for executorService");
-                }
-
-                // Cancel currently executing tasks.
-                for (Runnable remainingTask : executorService.shutdownNow())
-                {
-                    if (remainingTask instanceof Future)
-                    {
-                        ((Future<?>) remainingTask).cancel(true);
-                    }
-                }
-
-                // Wait a while for tasks to respond to being cancelled
-                if (!executorService.awaitTermination(5, TimeUnit.SECONDS))
-                {
-                    logger.error("Pool did not terminate");
-                }
-            }
-        }
-        catch (InterruptedException iex)
-        {
-            if (logger.isWarnEnabled())
-            {
-                logger.warn("Interrupted while waiting for executorService");
-            }
-
-            // (Re-)Cancel if current thread also interrupted.
-            executorService.shutdownNow();
-
-            // Preserve interrupt status.
-            Thread.currentThread().interrupt();
-        }
-    }
-
     /**
      * Ein {@link Runnable} Wrapper, welcher den Namen des aktuellen Threads durch den eigenen ersetzt.<br>
      * Nach der run-Methode wird der Original-Name wiederhergestellt.
@@ -343,9 +180,45 @@ public class HTTPServerMultiThread
             // Den neuen Socket direkt registrieren geht auch.
             socketChannel.configureBlocking(false);
             getLogger().debug("{}: attach new session", socketChannel.getRemoteAddress());
-            SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
+            socketChannel.register(this.selector, SelectionKey.OP_READ);
 
             this.selector.wakeup();
+        }
+
+        /**
+         * @return {@link Logger}
+         */
+        private Logger getLogger()
+        {
+            return LOGGER;
+        }
+
+        /**
+         * Die neuen Sessions zum Selector hinzufügen.
+         *
+         * @throws IOException Falls was schief geht.
+         */
+        private void processNewSessions() throws IOException
+        {
+            // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
+            // this.newSessions.poll())
+            while (!this.newSessions.isEmpty())
+            {
+                SocketChannel socketChannel = this.newSessions.poll();
+
+                if (socketChannel == null)
+                {
+                    continue;
+                }
+
+                socketChannel.configureBlocking(false);
+
+                getLogger().debug("{}: attach new session", socketChannel.getRemoteAddress());
+
+                // SelectionKey selectionKey =
+                socketChannel.register(this.selector, SelectionKey.OP_READ);
+                // selectionKey.attach(obj)
+            }
         }
 
         /**
@@ -416,41 +289,6 @@ public class HTTPServerMultiThread
         }
 
         /**
-         * @return {@link Logger}
-         */
-        private Logger getLogger()
-        {
-            return LOGGER;
-        }
-
-        /**
-         * Die neuen Sessions zum Selector hinzufügen.
-         *
-         * @throws IOException Falls was schief geht.
-         */
-        private void processNewSessions() throws IOException
-        {
-            // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
-            // this.newSessions.poll())
-            while (!this.newSessions.isEmpty())
-            {
-                SocketChannel socketChannel = this.newSessions.poll();
-
-                if (socketChannel == null)
-                {
-                    continue;
-                }
-
-                socketChannel.configureBlocking(false);
-
-                getLogger().debug("{}: attach new session", socketChannel.getRemoteAddress());
-
-                SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
-                // sk.attach(obj)
-            }
-        }
-
-        /**
          * Stoppen des Processors.
          */
         protected void stop()
@@ -491,6 +329,166 @@ public class HTTPServerMultiThread
             {
                 this.stopLock.release();
             }
+        }
+    }
+
+    /**
+     *
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerMultiThread.class);
+
+    /**
+     * @param args String[]
+     * @throws Exception Falls was schief geht.
+     */
+    public static void main(final String[] args) throws Exception
+    {
+        final SelectorProvider selectorProvider = SelectorProvider.provider();
+
+        int poolSize = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+        ExecutorService executorService = Executors.newFixedThreadPool(poolSize);
+
+        HTTPServerMultiThread server = new HTTPServerMultiThread(8001, executorService, selectorProvider);
+        server.setIoHandler(new HttpIoHandler());
+        server.start();
+
+        System.out.println();
+        System.out.println();
+        System.out.println("******************************************************************************************************************");
+        System.out.println("You're using an IDE, click in this console and press ENTER to call System.exit() and trigger the shutdown routine.");
+        System.out.println("******************************************************************************************************************");
+        System.out.println();
+        System.out.println();
+
+        // Console für programmatische Eingabe simulieren.
+        PipedOutputStream pos = new PipedOutputStream();
+        PipedInputStream pis = new PipedInputStream(pos);
+        // System.setIn(pis);
+
+        // Client Task starten
+        // executorService.submit((Callable<Void>) () -> {
+        //
+        // Thread.sleep(1000);
+        //
+        // InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
+        // Charset charset = IoHandler.DEFAULT_CHARSET;
+        //
+        // try (SocketChannel client = SocketChannel.open(serverAddress))
+        // {
+        // client.configureBlocking(true);
+        //
+        // // Request
+        // CharBuffer charBufferHeader = CharBuffer.allocate(256);
+        // charBufferHeader.put("GET / HTTP/1.1").put("\r\n");
+        // charBufferHeader.put("Host: localhost:8001").put("\r\n");
+        // charBufferHeader.put("User-Agent: " + HTTPServerMultiThread.class.getSimpleName()).put("\r\n");
+        // charBufferHeader.put("Accept: text/html").put("\r\n");
+        // charBufferHeader.put("Accept-Language: de").put("\r\n");
+        // charBufferHeader.put("Accept-Encoding: gzip, deflate").put("\r\n");
+        // charBufferHeader.put("Connection: keep-alive").put("\r\n");
+        // charBufferHeader.put("").put("\r\n");
+        // charBufferHeader.flip();
+        //
+        // ByteBuffer buffer = charset.encode(charBufferHeader);
+        // // int bytesWritten = 0;
+        //
+        // while (buffer.hasRemaining())
+        // {
+        // // bytesWritten +=
+        // client.write(buffer);
+        // }
+        //
+        // // Response
+        // buffer = ByteBuffer.allocate(1024);
+        //
+        // while (client.read(buffer) > 0)
+        // {
+        // buffer.flip();
+        //
+        // CharBuffer charBuffer = charset.decode(buffer);
+        //
+        // LOGGER.debug("\n" + charBuffer.toString().trim());
+        //
+        // buffer.clear();
+        // }
+        // }
+        //
+        // // Console simulieren.
+        // // pos.write(0);
+        //
+        // return null;
+        // });
+
+        try
+
+        {
+            System.in.read();
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+
+        server.stop();
+        HTTPServerMultiThread.shutdown(executorService, LOGGER);
+        System.exit(0);
+    }
+
+    /**
+     * Shutdown des {@link ExecutorService}.
+     *
+     * @param executorService {@link ExecutorService}
+     * @param logger {@link Logger}
+     */
+    public static void shutdown(final ExecutorService executorService, final Logger logger)
+    {
+        logger.info("shutdown ExecutorService");
+
+        if (executorService == null)
+        {
+            return;
+        }
+
+        executorService.shutdown();
+
+        try
+        {
+            // Wait a while for existing tasks to terminate.
+            if (!executorService.awaitTermination(10, TimeUnit.SECONDS))
+            {
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Timed out while waiting for executorService");
+                }
+
+                // Cancel currently executing tasks.
+                for (Runnable remainingTask : executorService.shutdownNow())
+                {
+                    if (remainingTask instanceof Future)
+                    {
+                        ((Future<?>) remainingTask).cancel(true);
+                    }
+                }
+
+                // Wait a while for tasks to respond to being cancelled
+                if (!executorService.awaitTermination(5, TimeUnit.SECONDS))
+                {
+                    logger.error("Pool did not terminate");
+                }
+            }
+        }
+        catch (InterruptedException iex)
+        {
+            if (logger.isWarnEnabled())
+            {
+                logger.warn("Interrupted while waiting for executorService");
+            }
+
+            // (Re-)Cancel if current thread also interrupted.
+            executorService.shutdownNow();
+
+            // Preserve interrupt status.
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -568,87 +566,43 @@ public class HTTPServerMultiThread
     }
 
     /**
-     * @param ioHandler {@link IoHandler}
+     * @return {@link ExecutorService}
      */
-    public void setIoHandler(final IoHandler ioHandler)
+    protected ExecutorService getExecutorService()
     {
-        this.ioHandler = ioHandler;
+        return this.executorService;
     }
 
     /**
-     * Starten des Servers.
-     *
-     * @throws IOException Falls was schief geht.
+     * @return {@link IoHandler}
      */
-    public void start() throws IOException
+    protected IoHandler getIoHandler()
     {
-        getLogger().info("starting server on port: {}", this.port);
-
-        Objects.requireNonNull(this.ioHandler, "ioHandler requried");
-
-        this.selector = getSelectorProvider().openSelector();
-
-        this.serverSocketChannel = getSelectorProvider().openServerSocketChannel();
-        this.serverSocketChannel.configureBlocking(false);
-
-        ServerSocket socket = this.serverSocketChannel.socket();
-        socket.setReuseAddress(true);
-        socket.bind(new InetSocketAddress(this.port), 50);
-
-        SelectionKey selectionKey = this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
-        // selectionKey.attach(this);
-
-        // Erzeugen der Prozessoren.
-        while (this.processors.size() < getNumOfProcessors())
-        {
-            Processor processor = new Processor(getIoHandler());
-
-            this.processors.add(processor);
-            getExecutorService().execute(new NamePreservingRunnable(processor, "Processor-" + this.processors.size()));
-        }
-
-        getExecutorService().execute(new NamePreservingRunnable(this::listen, getClass().getSimpleName()));
+        return this.ioHandler;
     }
 
     /**
-     * Stoppen des Servers.
+     * @return {@link Logger}
      */
-    public void stop()
+    protected Logger getLogger()
     {
-        getLogger().info("stopping server on port: {}", this.port);
+        return LOGGER;
+    }
 
-        this.isShutdown = true;
+    /**
+     * @return int
+     */
+    protected int getNumOfProcessors()
+    {
+        return this.numOfProcessors;
+    }
 
-        this.processors.forEach(Processor::stop);
-
-        this.selector.wakeup();
-
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            SelectionKey selectionKey = this.serverSocketChannel.keyFor(this.selector);
-
-            if (selectionKey != null)
-            {
-                selectionKey.cancel();
-            }
-
-            this.serverSocketChannel.close();
-
-            if (this.selector.isOpen())
-            {
-                this.selector.close();
-            }
-        }
-        catch (IOException ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
-        }
+    /**
+     * @return {@link SelectorProvider}
+     */
+    protected SelectorProvider getSelectorProvider()
+    {
+        return this.selectorProvider;
     }
 
     /**
@@ -739,42 +693,88 @@ public class HTTPServerMultiThread
     }
 
     /**
-     * @return {@link ExecutorService}
+     * @param ioHandler {@link IoHandler}
      */
-    protected ExecutorService getExecutorService()
+    public void setIoHandler(final IoHandler ioHandler)
     {
-        return this.executorService;
+        this.ioHandler = ioHandler;
     }
 
     /**
-     * @return {@link IoHandler}
+     * Starten des Servers.
+     *
+     * @throws IOException Falls was schief geht.
      */
-    protected IoHandler getIoHandler()
+    public void start() throws IOException
     {
-        return this.ioHandler;
+        getLogger().info("starting server on port: {}", this.port);
+
+        Objects.requireNonNull(this.ioHandler, "ioHandler requried");
+
+        this.selector = getSelectorProvider().openSelector();
+
+        this.serverSocketChannel = getSelectorProvider().openServerSocketChannel();
+        this.serverSocketChannel.configureBlocking(false);
+
+        ServerSocket socket = this.serverSocketChannel.socket();
+        socket.setReuseAddress(true);
+        socket.bind(new InetSocketAddress(this.port), 50);
+
+        // SelectionKey selectionKey =
+        // this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
+        // selectionKey.attach(this);
+
+        // Erzeugen der Prozessoren.
+        while (this.processors.size() < getNumOfProcessors())
+        {
+            Processor processor = new Processor(getIoHandler());
+
+            this.processors.add(processor);
+            getExecutorService().execute(new NamePreservingRunnable(processor, "Processor-" + this.processors.size()));
+        }
+
+        listen();
+        // getExecutorService().execute(new NamePreservingRunnable(this::listen, getClass().getSimpleName()));
     }
 
     /**
-     * @return {@link Logger}
+     * Stoppen des Servers.
      */
-    protected Logger getLogger()
+    public void stop()
     {
-        return LOGGER;
-    }
+        getLogger().info("stopping server on port: {}", this.port);
 
-    /**
-     * @return int
-     */
-    protected int getNumOfProcessors()
-    {
-        return this.numOfProcessors;
-    }
+        this.isShutdown = true;
 
-    /**
-     * @return {@link SelectorProvider}
-     */
-    protected SelectorProvider getSelectorProvider()
-    {
-        return this.selectorProvider;
+        this.processors.forEach(Processor::stop);
+
+        this.selector.wakeup();
+
+        this.stopLock.acquireUninterruptibly();
+
+        try
+        {
+            SelectionKey selectionKey = this.serverSocketChannel.keyFor(this.selector);
+
+            if (selectionKey != null)
+            {
+                selectionKey.cancel();
+            }
+
+            this.serverSocketChannel.close();
+
+            if (this.selector.isOpen())
+            {
+                this.selector.close();
+            }
+        }
+        catch (IOException ex)
+        {
+            getLogger().error(null, ex);
+        }
+        finally
+        {
+            this.stopLock.release();
+        }
     }
 }
