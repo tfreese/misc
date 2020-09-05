@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
  * @author Thomas Freese
  * @see IoHandler
  */
-public class HttpIoHandler extends AbstractIoHandler
+public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
 {
     /**
      * Erstellt ein neues {@link HttpIoHandler} Object.
@@ -31,7 +31,7 @@ public class HttpIoHandler extends AbstractIoHandler
     }
 
     /**
-     * @see de.freese.sonstiges.server.handler.IoHandler#read(java.nio.channels.SelectionKey)
+     * @see de.freese.sonstiges.server.handler.IoHandler#read(java.lang.Object)
      */
     @Override
     public void read(final SelectionKey selectionKey)
@@ -66,7 +66,7 @@ public class HttpIoHandler extends AbstractIoHandler
     }
 
     /**
-     * @see de.freese.sonstiges.server.handler.IoHandler#write(java.nio.channels.SelectionKey)
+     * @see de.freese.sonstiges.server.handler.IoHandler#write(java.lang.Object)
      */
     @Override
     public void write(final SelectionKey selectionKey)

@@ -14,9 +14,10 @@ import org.slf4j.LoggerFactory;
  * Basis-Implementierung des {@link IoHandler}.
  *
  * @author Thomas Freese
+ * @param <T> Type
  * @see IoHandler
  */
-public abstract class AbstractIoHandler implements IoHandler
+public abstract class AbstractIoHandler<T> implements IoHandler<T>
 {
     /**
     *

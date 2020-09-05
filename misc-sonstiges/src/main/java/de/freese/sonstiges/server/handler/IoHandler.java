@@ -12,8 +12,9 @@ import java.nio.charset.StandardCharsets;
  * Verarbeitet den Request und Response.
  *
  * @author Thomas Freese
+ * @param <T> Type
  */
-public interface IoHandler
+public interface IoHandler<T>
 {
     /**
      *
@@ -31,14 +32,14 @@ public interface IoHandler
     /**
      * Verarbeitet den Request.
      *
-     * @param selectionKey {@link SelectionKey}
+     * @param input {@link SelectionKey}
      */
-    public void read(final SelectionKey selectionKey);
+    public void read(final T input);
 
     /**
      * Verarbeitet den Response.
      *
-     * @param selectionKey {@link SelectionKey}
+     * @param outpuT {@link SelectionKey}
      */
-    public void write(final SelectionKey selectionKey);
+    public void write(final T outpuT);
 }

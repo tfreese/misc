@@ -13,16 +13,12 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
@@ -30,100 +26,194 @@ import de.freese.sonstiges.server.handler.IoHandler;
  *
  * @author Thomas Freese
  */
-public class HTTPServerAsynchronous
+public class HTTPServerAsynchronous implements Runnable
 {
+    /**
+     * @author Thomas Freese
+     */
+    private static class HttpReadHandler implements CompletionHandler<Integer, MyAttachment>
+    {
+        /**
+         *
+         */
+        private static final Logger LOGGER = LoggerFactory.getLogger(HttpReadHandler.class);
+
+        /**
+         * @see java.nio.channels.CompletionHandler#completed(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public void completed(final Integer bytesRead, final MyAttachment attachment)
+        {
+            AsynchronousSocketChannel channel = attachment.channel;
+            ByteBuffer byteBuffer = attachment.byteBuffer;
+            StringBuilder httpHeader = attachment.httpHeader;
+
+            try
+            {
+                LOGGER.debug("{}: Read Request", channel.getRemoteAddress());
+            }
+            catch (IOException ioex)
+            {
+                failed(ioex, null);
+            }
+
+            if (bytesRead <= 0)
+            {
+                // Nichts mehr zum lesen, Request vollständig.
+                // Write Vorgang an anderen Thread übergeben.
+                write(channel);
+                return;
+            }
+
+            Charset charset = IoHandler.DEFAULT_CHARSET;
+
+            byteBuffer.flip();
+            CharBuffer charBuffer = charset.decode(byteBuffer);
+
+            String request = charBuffer.toString();
+            LOGGER.debug("\n{}", request);
+
+            httpHeader.append(request);
+
+            byteBuffer.clear();
+
+            int length = httpHeader.length();
+
+            char[] endOfHeader = new char[4];
+            httpHeader.getChars(length - 4, length, endOfHeader, 0);
+
+            if ((endOfHeader[0] == '\r') && (endOfHeader[1] == '\n') && (endOfHeader[2] == '\r') && (endOfHeader[3] == '\n'))
+            {
+                // Leerzeile = Ende des HttpHeaders.
+                write(channel);
+            }
+            else
+            {
+                // Nächster Lese Vorgang in diesem Thread,
+                channel.read(byteBuffer, attachment, this);
+
+                // Nächster Lese Vorgang im anderen Thread.
+                // read(channel, byteBuffer);
+            }
+        }
+
+        /**
+         * @see java.nio.channels.CompletionHandler#failed(java.lang.Throwable, java.lang.Object)
+         */
+        @Override
+        public void failed(final Throwable exc, final MyAttachment attachment)
+        {
+            AsynchronousSocketChannel channel = attachment.channel;
+
+            close(channel, LOGGER);
+            LOGGER.error(null, exc);
+        }
+    }
+
+    /**
+     * @author Thomas Freese
+     */
+    private static class HttpWriteHandler implements CompletionHandler<Integer, MyAttachment>
+    {
+        /**
+         *
+         */
+        private final Logger LOGGER = LoggerFactory.getLogger(HttpWriteHandler.class);
+
+        /**
+         * @see java.nio.channels.CompletionHandler#completed(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public void completed(final Integer result, final MyAttachment attachment)
+        {
+            AsynchronousSocketChannel channel = attachment.channel;
+            ByteBuffer byteBuffer = attachment.byteBuffer;
+
+            try
+            {
+                this.LOGGER.debug("{}: Write Response", channel.getRemoteAddress());
+            }
+            catch (IOException ioex)
+            {
+                failed(ioex, null);
+            }
+
+            while (byteBuffer.hasRemaining())
+            {
+                channel.write(byteBuffer, null, this);
+            }
+
+            close(channel, this.LOGGER);
+        }
+
+        /**
+         * @see java.nio.channels.CompletionHandler#failed(java.lang.Throwable, java.lang.Object)
+         */
+        @Override
+        public void failed(final Throwable exc, final MyAttachment attachment)
+        {
+            AsynchronousSocketChannel channel = attachment.channel;
+
+            close(channel, this.LOGGER);
+            this.LOGGER.error(null, exc);
+        }
+    }
+
+    /**
+     * @author Thomas Freese
+     */
+    private static class MyAttachment
+    {
+        /**
+         *
+         */
+        ByteBuffer byteBuffer;
+
+        /**
+         *
+         */
+        AsynchronousSocketChannel channel;
+
+        /**
+         *
+         */
+        StringBuilder httpHeader = new StringBuilder();
+    }
+
     /**
      *
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerAsynchronous.class);
 
     /**
-     * @param args String[]
-     * @throws Exception Falls was schief geht.
+     * @param channel {@link AsynchronousSocketChannel}
+     * @param logger {@link Logger}
      */
-    public static void main(final String[] args) throws Exception
+    private static void close(final AsynchronousSocketChannel channel, final Logger logger)
     {
-        int poolSize = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
-        AsynchronousChannelGroup channelGroup = AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(poolSize));
-
-        HTTPServerAsynchronous server = new HTTPServerAsynchronous(8001, channelGroup);
-        server.setIoHandler(new HttpIoHandler());
-        server.start();
-
-        System.out.println();
-        System.out.println();
-        System.out.println("******************************************************************************************************************");
-        System.out.println("You're using an IDE, click in this console and press ENTER to call System.exit() and trigger the shutdown routine.");
-        System.out.println("******************************************************************************************************************");
-        System.out.println();
-        System.out.println();
-
-        // Client Task starten
-        ForkJoinPool.commonPool().submit((Callable<Void>) () -> {
-
-            Thread.sleep(1000);
-
-            InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
-            Charset charset = IoHandler.DEFAULT_CHARSET;
-
-            // try (SocketChannel client = SocketChannel.open(hostAddress))
-            try (AsynchronousSocketChannel client = AsynchronousSocketChannel.open(channelGroup))
-            {
-                Future<Void> futureConnect = client.connect(serverAddress);
-                futureConnect.get();
-
-                // Request
-                CharBuffer charBufferHeader = CharBuffer.allocate(256);
-                charBufferHeader.put("GET / HTTP/1.1").put("\r\n");
-                charBufferHeader.put("Host: localhost:8001").put("\r\n");
-                charBufferHeader.put("User-Agent: " + HTTPServerAsynchronous.class.getSimpleName()).put("\r\n");
-                charBufferHeader.put("Accept: text/html").put("\r\n");
-                charBufferHeader.put("Accept-Language: de").put("\r\n");
-                charBufferHeader.put("Accept-Encoding: gzip, deflate").put("\r\n");
-                charBufferHeader.put("Connection: keep-alive").put("\r\n");
-                charBufferHeader.put("").put("\r\n");
-                charBufferHeader.flip();
-
-                ByteBuffer buffer = charset.encode(charBufferHeader);
-
-                Future<Integer> futureRequest = client.write(buffer);
-
-                while (futureRequest.get() > 0)
-                {
-                    futureRequest = client.write(buffer);
-                }
-
-                // Response
-                buffer = ByteBuffer.allocate(256);
-                Future<Integer> futureResponse = client.read(buffer);
-
-                while (futureResponse.get() > 0)
-                {
-                    buffer.flip();
-
-                    CharBuffer charBuffer = charset.decode(buffer);
-
-                    LOGGER.debug("\n{}", charBuffer.toString().trim());
-
-                    buffer.clear();
-                    futureResponse = client.read(buffer);
-                }
-            }
-
-            return null;
-        });
-
         try
         {
-            System.in.read();
+            channel.shutdownInput();
+            channel.shutdownOutput();
+            channel.close();
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
-            ex.printStackTrace();
+            logger.error(null, ex);
         }
+    }
 
-        server.stop();
-        System.exit(0);
+    /**
+     * @param channel {@link AsynchronousSocketChannel}
+     * @param byteBuffer {@link ByteBuffer}
+     */
+    private static void read(final AsynchronousSocketChannel channel, final ByteBuffer byteBuffer)
+    {
+        MyAttachment attachment = new MyAttachment();
+        attachment.channel = channel;
+        attachment.byteBuffer = byteBuffer;
+
+        channel.read(byteBuffer, attachment, new HttpReadHandler());
     }
 
     /**
@@ -142,10 +232,7 @@ public class HTTPServerAsynchronous
             // Wait a while for existing tasks to terminate.
             if (!channelGroup.awaitTermination(10, TimeUnit.SECONDS))
             {
-                if (logger.isWarnEnabled())
-                {
-                    logger.warn("Timed out while waiting for AsynchronousChannelGroup");
-                }
+                logger.warn("Timed out while waiting for AsynchronousChannelGroup");
 
                 // Cancel currently executing tasks
                 channelGroup.shutdownNow();
@@ -175,206 +262,51 @@ public class HTTPServerAsynchronous
     }
 
     /**
-     * @author Thomas Freese
+     * @param channel {@link AsynchronousSocketChannel}
      */
-    public static class MyAttachment
+    private static void write(final AsynchronousSocketChannel channel)
     {
-        /**
-         *
-         */
-        ByteBuffer byteBuffer;
+        Charset charset = IoHandler.DEFAULT_CHARSET;
 
-        /**
-         *
-         */
-        AsynchronousSocketChannel channel;
+        CharBuffer charBufferBody = CharBuffer.allocate(256);
+        charBufferBody.put("<html>").put("\r\n");
+        charBufferBody.put("<head>").put("\r\n");
+        charBufferBody.put("<title>NIO Test</title>").put("\r\n");
+        charBufferBody.put("<meta charset=\"UTF-8\">").put("\r\n");
+        charBufferBody.put("</head>").put("\r\n");
+        charBufferBody.put("<body>").put("\r\n");
+        charBufferBody.put("Date: " + LocalDateTime.now() + "<br>").put("\r\n");
+        charBufferBody.put("</body>").put("\r\n");
+        charBufferBody.put("</html>").put("\r\n");
 
-        /**
-         *
-         */
-        StringBuilder httpHeader = new StringBuilder();
+        CharBuffer charBuffer = CharBuffer.allocate(1024);
+        charBuffer.put("HTTP/1.1 200 OK").put("\r\n");
+        charBuffer.put("Server: nio").put("\r\n");
+        charBuffer.put("Content-type: text/html").put("\r\n");
+        charBuffer.put("Content-length: " + (charBufferBody.position() * 2)).put("\r\n");
+        charBuffer.put("\r\n");
+
+        charBufferBody.flip();
+        charBuffer.put(charBufferBody);
+        charBuffer.flip();
+
+        ByteBuffer byteBuffer = charset.encode(charBuffer);
+
+        MyAttachment attachment = new MyAttachment();
+        attachment.channel = channel;
+        attachment.byteBuffer = byteBuffer;
+
+        channel.write(byteBuffer, attachment, new HttpWriteHandler());
     }
 
     /**
-     * @author Thomas Freese
+     *
      */
-    private class HttpReadHandler implements CompletionHandler<Integer, MyAttachment>
-    {
-        /**
-        *
-        */
-        private final Logger logger = LoggerFactory.getLogger(HttpReadHandler.class);
-
-        /**
-         * Erstellt ein neues {@link HttpReadHandler} Object.
-         */
-        public HttpReadHandler()
-        {
-            super();
-        }
-
-        /**
-         * @see java.nio.channels.CompletionHandler#completed(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public void completed(final Integer bytesRead, final MyAttachment attachment)
-        {
-            AsynchronousSocketChannel channel = attachment.channel;
-            ByteBuffer byteBuffer = attachment.byteBuffer;
-            StringBuilder httpHeader = attachment.httpHeader;
-
-            try
-            {
-                getLogger().debug("{}: Read Request", channel.getRemoteAddress());
-            }
-            catch (IOException ioex)
-            {
-                failed(ioex, null);
-            }
-
-            if (bytesRead <= 0)
-            {
-                // Nichts mehr gelesen, Request vollständig.
-                // close(channel);
-                write(channel);
-                return;
-            }
-
-            Charset charset = IoHandler.DEFAULT_CHARSET;
-
-            byteBuffer.flip();
-
-            CharBuffer charBuffer = charset.decode(byteBuffer);
-
-            String request = charBuffer.toString();
-            getLogger().debug("\n{}", request);
-
-            httpHeader.append(request);
-
-            byteBuffer.clear();
-
-            int length = httpHeader.length();
-
-            // if ((httpHeader.charAt(length - 2) == '\r') && (httpHeader.charAt(length - 1) == '\n') && (httpHeader.charAt(length - 4) == '\r')
-            // && (httpHeader.charAt(length - 3) == '\n'))
-
-            char[] endOfHeader = new char[4];
-            httpHeader.getChars(length - 4, length, endOfHeader, 0);
-
-            if ((endOfHeader[0] == '\r') && (endOfHeader[1] == '\n') && (endOfHeader[2] == '\r') && (endOfHeader[3] == '\n'))
-            {
-                // Leerzeile = Ende des HttpHeaders.
-                write(channel);
-            }
-            else
-            {
-                // Nächster Lese Vorgang.
-                channel.read(byteBuffer, attachment, this);
-
-                // Nächster Lese Vorgang im anderen Thread.
-                // read(channel);
-            }
-        }
-
-        /**
-         * @see java.nio.channels.CompletionHandler#failed(java.lang.Throwable, java.lang.Object)
-         */
-        @Override
-        public void failed(final Throwable exc, final MyAttachment attachment)
-        {
-            AsynchronousSocketChannel channel = attachment.channel;
-
-            close(channel);
-            getLogger().error(null, exc);
-        }
-
-        /**
-         * @return {@link Logger}
-         */
-        private Logger getLogger()
-        {
-            return this.logger;
-        }
-    }
-
-    /**
-     * @author Thomas Freese
-     */
-    private class HttpWriteHandler implements CompletionHandler<Integer, MyAttachment>
-    {
-        /**
-        *
-        */
-        private final Logger logger = LoggerFactory.getLogger(HttpWriteHandler.class);
-
-        /**
-         * Erstellt ein neues {@link HttpWriteHandler} Object.
-         */
-        public HttpWriteHandler()
-        {
-            super();
-        }
-
-        /**
-         * @see java.nio.channels.CompletionHandler#completed(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public void completed(final Integer result, final MyAttachment attachment)
-        {
-            AsynchronousSocketChannel channel = attachment.channel;
-            ByteBuffer byteBuffer = attachment.byteBuffer;
-
-            try
-            {
-                getLogger().debug("{}: Write Response", channel.getRemoteAddress());
-            }
-            catch (IOException ioex)
-            {
-                failed(ioex, null);
-            }
-
-            while (byteBuffer.hasRemaining())
-            {
-                channel.write(byteBuffer, null, this);
-            }
-
-            close(channel);
-        }
-
-        /**
-         * @see java.nio.channels.CompletionHandler#failed(java.lang.Throwable, java.lang.Object)
-         */
-        @Override
-        public void failed(final Throwable exc, final MyAttachment attachment)
-        {
-            AsynchronousSocketChannel channel = attachment.channel;
-
-            close(channel);
-            getLogger().error(null, exc);
-        }
-
-        /**
-         * @return {@link Logger}
-         */
-        private Logger getLogger()
-        {
-            return this.logger;
-        }
-    }
-
-    /**
-    *
-    */
     private final AsynchronousChannelGroup channelGroup;
 
     /**
      *
      */
-    private IoHandler ioHandler;
-
-    /**
-    *
-    */
     private final int port;
 
     /**
@@ -390,7 +322,7 @@ public class HTTPServerAsynchronous
      */
     public HTTPServerAsynchronous(final int port) throws IOException
     {
-        this(port, Math.max(1, Runtime.getRuntime().availableProcessors() - 1));
+        this(port, 3);
     }
 
     /**
@@ -421,44 +353,17 @@ public class HTTPServerAsynchronous
     }
 
     /**
-     * @param ioHandler {@link IoHandler}
+     * @return {@link Logger}
      */
-    public void setIoHandler(final IoHandler ioHandler)
+    protected Logger getLogger()
     {
-        this.ioHandler = ioHandler;
-    }
-
-    /**
-     * Stoppen des Servers.
-     *
-     * @throws IOException Falls was schief geht.
-     */
-    public void start() throws IOException
-    {
-        getLogger().info("starting server on port: {}", this.port);
-
-        Objects.requireNonNull(this.ioHandler, "ioHandler requried");
-
-        this.serverSocketChannel = AsynchronousServerSocketChannel.open(this.channelGroup);
-        this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
-
-        accept();
-    }
-
-    /**
-     * Stoppen des Servers.
-     */
-    public void stop()
-    {
-        getLogger().info("stopping server on port: {}", this.port);
-
-        shutdown(this.channelGroup, getLogger());
+        return LOGGER;
     }
 
     /**
      * Wartet auf neue Connections.
      */
-    private void accept()
+    private void listen()
     {
         this.serverSocketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>()
         {
@@ -478,10 +383,10 @@ public class HTTPServerAsynchronous
                 }
 
                 // Nächster Request an anderen Thread übergeben.
-                accept();
+                listen();
 
                 // Lese-Vorgang an anderen Thread übergeben.
-                read(channel);
+                read(channel, ByteBuffer.allocate(256));
             }
 
             /**
@@ -496,88 +401,56 @@ public class HTTPServerAsynchronous
     }
 
     /**
-     * @param channel {@link AsynchronousSocketChannel}
+     * @see java.lang.Runnable#run()
      */
-    @SuppressWarnings("resource")
-    private void close(final AsynchronousSocketChannel channel)
+    @Override
+    public void run()
     {
+        getLogger().info("starting server on port: {}", this.port);
+
         try
         {
-            channel.shutdownInput();
-            channel.shutdownOutput();
-            channel.close();
+            this.serverSocketChannel = AsynchronousServerSocketChannel.open(this.channelGroup);
+            this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
+
+            getLogger().info("server listening on port: {}", this.port);
+            listen();
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             getLogger().error(null, ex);
         }
     }
 
     /**
-     * @param channel {@link AsynchronousSocketChannel}
+     * @param ioHandler {@link IoHandler}
      */
-    private void read(final AsynchronousSocketChannel channel)
+    public void setIoHandler(final IoHandler<?> ioHandler)
     {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
-
-        MyAttachment attachment = new MyAttachment();
-        attachment.channel = channel;
-        attachment.byteBuffer = byteBuffer;
-
-        channel.read(byteBuffer, attachment, new HttpReadHandler());
+        // Empty
     }
 
     /**
-     * @param channel {@link AsynchronousSocketChannel}
+     * Stoppen des Servers.
+     *
+     * @throws IOException Falls was schief geht.
      */
-    private void write(final AsynchronousSocketChannel channel)
+    public void start() throws IOException
     {
-        Charset charset = IoHandler.DEFAULT_CHARSET;
-
-        CharBuffer charBufferBody = CharBuffer.allocate(256);
-        charBufferBody.put("<html>").put("\r\n");
-        charBufferBody.put("<head>").put("\r\n");
-        charBufferBody.put("<title>NIO Test</title>").put("\r\n");
-        charBufferBody.put("<meta charset=\"UTF-8\">").put("\r\n");
-        charBufferBody.put("</head>").put("\r\n");
-        charBufferBody.put("<body>").put("\r\n");
-        charBufferBody.put("Date: " + new Date().toString() + "<br>").put("\r\n");
-        charBufferBody.put("</body>").put("\r\n");
-        charBufferBody.put("</html>").put("\r\n");
-
-        CharBuffer charBuffer = CharBuffer.allocate(1024);
-        charBuffer.put("HTTP/1.1 200 OK").put("\r\n");
-        charBuffer.put("Server: nio").put("\r\n");
-        charBuffer.put("Content-type: text/html").put("\r\n");
-        charBuffer.put("Content-length: " + (charBufferBody.position() * 2)).put("\r\n");
-        charBuffer.put("\r\n");
-
-        charBufferBody.flip();
-        charBuffer.put(charBufferBody);
-        charBuffer.flip();
-
-        ByteBuffer byteBuffer = charset.encode(charBuffer);
-
-        MyAttachment attachment = new MyAttachment();
-        attachment.channel = channel;
-        attachment.byteBuffer = byteBuffer;
-
-        channel.write(byteBuffer, attachment, new HttpWriteHandler());
+        Thread thread = new Thread(this::run, getClass().getSimpleName());
+        thread.setDaemon(false);
+        thread.start();
     }
 
     /**
-     * @return {@link IoHandler}
+     * Stoppen des Servers.
      */
-    protected IoHandler getIoHandler()
+    public void stop()
     {
-        return this.ioHandler;
-    }
+        getLogger().info("stopping server on port: {}", this.port);
 
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return LOGGER;
+        shutdown(this.channelGroup, getLogger());
+
+        getLogger().info("server stopped on port: {}", this.port);
     }
 }
