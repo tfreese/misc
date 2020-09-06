@@ -1,16 +1,12 @@
 // Created: 05.09.2020
 package de.freese.sonstiges.server;
 
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.nio.charset.Charset;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
@@ -29,8 +25,8 @@ public class ServerMain
         final SelectorProvider selectorProvider = SelectorProvider.provider();
 
         // HTTPServerSingleThread server = new HTTPServerSingleThread(8001, selectorProvider);
-        // HTTPServerMultiThread server = new HTTPServerMultiThread(8001, 3, selectorProvider);
-        HTTPServerAsynchronous server = new HTTPServerAsynchronous(8001, AsynchronousChannelGroup.withThreadPool(Executors.newCachedThreadPool()));
+        HTTPServerMultiThread server = new HTTPServerMultiThread(8001, 3, selectorProvider);
+        // HTTPServerAsynchronous server = new HTTPServerAsynchronous(8001, AsynchronousChannelGroup.withThreadPool(Executors.newCachedThreadPool()));
 
         server.setIoHandler(new HttpIoHandler());
         // server.start();
@@ -45,8 +41,8 @@ public class ServerMain
         System.out.println();
 
         // Console für programmatische Eingabe simulieren.
-        PipedOutputStream pos = new PipedOutputStream();
-        PipedInputStream pis = new PipedInputStream(pos);
+        // PipedOutputStream pos = new PipedOutputStream();
+        // PipedInputStream pis = new PipedInputStream(pos);
         // System.setIn(pis);
 
         Thread.sleep(1000);

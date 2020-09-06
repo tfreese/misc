@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -315,6 +316,11 @@ public class HTTPServerAsynchronous implements Runnable
     private AsynchronousServerSocketChannel serverSocketChannel;
 
     /**
+    *
+    */
+    private final Semaphore startLock = new Semaphore(1, true);
+
+    /**
      * Erstellt ein neues {@link HTTPServerAsynchronous} Object.
      *
      * @param port int
@@ -365,6 +371,8 @@ public class HTTPServerAsynchronous implements Runnable
      */
     private void listen()
     {
+        this.startLock.release();
+
         this.serverSocketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>()
         {
             /**
@@ -437,9 +445,14 @@ public class HTTPServerAsynchronous implements Runnable
      */
     public void start() throws IOException
     {
+        this.startLock.acquireUninterruptibly();
+
         Thread thread = new Thread(this::run, getClass().getSimpleName());
         thread.setDaemon(false);
         thread.start();
+
+        // Warten bis die Initialisierung fertig ist.
+        this.startLock.acquireUninterruptibly();
     }
 
     /**

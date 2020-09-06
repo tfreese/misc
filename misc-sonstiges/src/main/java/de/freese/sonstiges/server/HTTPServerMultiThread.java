@@ -322,6 +322,11 @@ public class HTTPServerMultiThread implements Runnable
     private ServerSocketChannel serverSocketChannel;
 
     /**
+    *
+    */
+    private final Semaphore startLock = new Semaphore(1, true);
+
+    /**
      *
      */
     private final Semaphore stopLock = new Semaphore(1, true);
@@ -380,6 +385,7 @@ public class HTTPServerMultiThread implements Runnable
     {
         getLogger().info("server listening on port: {}", this.port);
 
+        this.startLock.release();
         this.stopLock.acquireUninterruptibly();
 
         try
@@ -530,7 +536,6 @@ public class HTTPServerMultiThread implements Runnable
     public void setThreadFactory(final ThreadFactory threadFactory)
     {
         this.threadFactory = Objects.requireNonNull(threadFactory, "threadFactory required");
-        ;
     }
 
     /**
@@ -540,10 +545,15 @@ public class HTTPServerMultiThread implements Runnable
      */
     public void start() throws IOException
     {
+        this.startLock.acquireUninterruptibly();
+
         Thread thread = this.threadFactory.newThread(this::run);
         thread.setName(getClass().getSimpleName());
         thread.setDaemon(false);
         thread.start();
+
+        // Warten bis die Initialisierung fertig ist.
+        this.startLock.acquireUninterruptibly();
     }
 
     /**

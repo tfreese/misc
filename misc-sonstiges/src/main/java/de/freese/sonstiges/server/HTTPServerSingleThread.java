@@ -254,7 +254,6 @@ public class HTTPServerSingleThread implements Runnable
     public void setThreadFactory(final ThreadFactory threadFactory)
     {
         this.threadFactory = Objects.requireNonNull(threadFactory, "threadFactory required");
-        ;
     }
 
     /**
