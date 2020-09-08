@@ -4,12 +4,14 @@ package de.freese.sonstiges.server;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.SelectorProvider;
 import java.nio.charset.Charset;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Executors;
+import de.freese.sonstiges.server.async.ServerAsync;
 import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
+import de.freese.sonstiges.server.singlethread.ServerSingleThread;
 
 /**
  * @author Thomas Freese
@@ -22,15 +24,15 @@ public class ServerMain
      */
     public static void main(final String[] args) throws Exception
     {
-        final SelectorProvider selectorProvider = SelectorProvider.provider();
+        // final SelectorProvider selectorProvider = SelectorProvider.provider();
 
-        // HTTPServerSingleThread server = new HTTPServerSingleThread(8001, selectorProvider);
-        HTTPServerMultiThread server = new HTTPServerMultiThread(8001, 3, selectorProvider);
-        // HTTPServerAsynchronous server = new HTTPServerAsynchronous(8001, AsynchronousChannelGroup.withThreadPool(Executors.newCachedThreadPool()));
+        // ServerSingleThread server = new ServerSingleThread(8001);
+        // ServerMultiThread server = new ServerMultiThread(8001, 3);
+        ServerAsync server = new ServerAsync(8001, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(4)));
 
         server.setIoHandler(new HttpIoHandler());
-        // server.start();
-        ForkJoinPool.commonPool().execute(server);
+        server.start();
+        // ForkJoinPool.commonPool().execute(server);
 
         System.out.println();
         System.out.println();
@@ -50,16 +52,17 @@ public class ServerMain
         InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
         Charset charset = IoHandler.DEFAULT_CHARSET;
 
-        try (SocketChannel client = selectorProvider.openSocketChannel())
+        // try (SocketChannel client = selectorProvider.openSocketChannel())
+        try (SocketChannel client = SocketChannel.open(serverAddress))
         {
-            client.connect(serverAddress);
+            // client.connect(serverAddress);
             client.configureBlocking(true);
 
             // Request
             CharBuffer charBufferHeader = CharBuffer.allocate(256);
             charBufferHeader.put("GET / HTTP/1.1").put("\r\n");
             charBufferHeader.put("Host: localhost:8001").put("\r\n");
-            charBufferHeader.put("User-Agent: " + HTTPServerSingleThread.class.getSimpleName()).put("\r\n");
+            charBufferHeader.put("User-Agent: " + ServerSingleThread.class.getSimpleName()).put("\r\n");
             charBufferHeader.put("Accept: text/html").put("\r\n");
             charBufferHeader.put("Accept-Language: de").put("\r\n");
             charBufferHeader.put("Accept-Encoding: gzip, deflate").put("\r\n");

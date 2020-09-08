@@ -40,7 +40,6 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
         {
             CharsetDecoder charsetDecoder = getCharsetDecoder();
 
-            @SuppressWarnings("resource")
             ReadableByteChannel channel = (ReadableByteChannel) selectionKey.channel();
 
             ByteBuffer inputBuffer = ByteBuffer.allocate(1024);
@@ -51,7 +50,10 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
 
                 CharBuffer charBuffer = charsetDecoder.decode(inputBuffer);
 
-                getLogger().debug("\n{}", charBuffer.toString().trim());
+                if (getLogger().isDebugEnabled())
+                {
+                    getLogger().debug("\n{}", charBuffer.toString().trim());
+                }
 
                 inputBuffer.clear();
             }
@@ -112,6 +114,7 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
             // Bei HTTP ist nach dem Response die Session vorbei.
             channel.close();
             selectionKey.cancel();
+            selectionKey.selector().wakeup();
 
             // Ansonsten wieder READ-Mode: selectionKey.interestOps(SelectionKey.OP_READ);
         }

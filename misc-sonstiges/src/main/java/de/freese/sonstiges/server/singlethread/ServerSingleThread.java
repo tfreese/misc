@@ -2,11 +2,11 @@
  * Created: 31.10.2016
  */
 
-package de.freese.sonstiges.server;
+package de.freese.sonstiges.server.singlethread;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
+import java.net.StandardSocketOptions;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -27,12 +27,12 @@ import de.freese.sonstiges.server.handler.IoHandler;
  *
  * @author Thomas Freese
  */
-public class HTTPServerSingleThread implements Runnable
+public class ServerSingleThread implements Runnable
 {
     /**
      *
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(HTTPServerSingleThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerSingleThread.class);
 
     /**
      * @param selectionKey {@link SelectionKey}
@@ -88,26 +88,31 @@ public class HTTPServerSingleThread implements Runnable
     private ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
     /**
-     * Erstellt ein neues {@link HTTPServerSingleThread} Object.
+     * Erstellt ein neues {@link ServerSingleThread} Object.
      *
      * @param port int
      * @throws IOException Falls was schief geht.
      */
-    public HTTPServerSingleThread(final int port) throws IOException
+    public ServerSingleThread(final int port) throws IOException
     {
         this(port, SelectorProvider.provider());
     }
 
     /**
-     * Erstellt ein neues {@link HTTPServerSingleThread} Object.
+     * Erstellt ein neues {@link ServerSingleThread} Object.
      *
      * @param port int
      * @param selectorProvider {@link SelectorProvider}
      * @throws IOException Falls was schief geht.
      */
-    public HTTPServerSingleThread(final int port, final SelectorProvider selectorProvider) throws IOException
+    public ServerSingleThread(final int port, final SelectorProvider selectorProvider) throws IOException
     {
         super();
+
+        if (port <= 0)
+        {
+            throw new IllegalArgumentException("port <= 0: " + port);
+        }
 
         this.port = port;
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
@@ -153,17 +158,16 @@ public class HTTPServerSingleThread implements Runnable
 
                         if (!selectionKey.isValid())
                         {
-                            getLogger().debug("{}: SelectionKey not valid", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: SelectionKey not valid", getRemoteAddress(selectionKey));
                         }
-
-                        if (selectionKey.isAcceptable())
+                        else if (selectionKey.isAcceptable())
                         {
                             // Verbindung mit Client herstellen.
                             SocketChannel socketChannel = this.serverSocketChannel.accept();
                             socketChannel.configureBlocking(false);
                             socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-                            getLogger().debug("{}: Connection Accepted", socketChannel.getRemoteAddress());
+                            getLogger().info("{}: Connection Accepted", socketChannel.getRemoteAddress());
 
                             // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
                             // sk.attach(obj)
@@ -173,18 +177,18 @@ public class HTTPServerSingleThread implements Runnable
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            getLogger().debug("{}: Client Connected", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Client Connected", getRemoteAddress(selectionKey));
                         }
                         else if (selectionKey.isReadable())
                         {
-                            getLogger().debug("{}: Read Request", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Read Request", getRemoteAddress(selectionKey));
 
                             // Request lesen.
                             this.ioHandler.read(selectionKey);
                         }
                         else if (selectionKey.isWritable())
                         {
-                            getLogger().debug("{}: Write Response", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Write Response", getRemoteAddress(selectionKey));
 
                             // Response schreiben.
                             this.ioHandler.write(selectionKey);
@@ -223,10 +227,13 @@ public class HTTPServerSingleThread implements Runnable
 
             this.serverSocketChannel = this.selectorProvider.openServerSocketChannel();
             this.serverSocketChannel.configureBlocking(false);
+            this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+            this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+            this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
 
-            ServerSocket socket = this.serverSocketChannel.socket();
-            socket.setReuseAddress(true);
-            socket.bind(new InetSocketAddress(this.port), 50);
+            // ServerSocket socket = this.serverSocketChannel.socket();
+            // socket.setReuseAddress(true);
+            // socket.bind(new InetSocketAddress(this.port), 50);
 
             @SuppressWarnings("unused")
             SelectionKey selectionKey = this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
@@ -245,7 +252,7 @@ public class HTTPServerSingleThread implements Runnable
      */
     public void setIoHandler(final IoHandler<SelectionKey> ioHandler)
     {
-        this.ioHandler = ioHandler;
+        this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
     }
 
     /**
