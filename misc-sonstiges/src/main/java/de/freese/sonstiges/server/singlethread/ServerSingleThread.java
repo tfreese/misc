@@ -20,6 +20,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.sonstiges.server.ServerMain;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
@@ -33,19 +34,6 @@ public class ServerSingleThread implements Runnable
      *
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerSingleThread.class);
-
-    /**
-     * @param selectionKey {@link SelectionKey}
-     * @return String
-     * @throws IOException Falls was schief geht.
-     */
-    private static String getRemoteAddress(final SelectionKey selectionKey) throws IOException
-    {
-        SocketChannel channel = (SocketChannel) selectionKey.channel();
-        String remoteAddress = channel.getRemoteAddress().toString();
-
-        return remoteAddress;
-    }
 
     /**
      *
@@ -158,7 +146,7 @@ public class ServerSingleThread implements Runnable
 
                         if (!selectionKey.isValid())
                         {
-                            getLogger().info("{}: SelectionKey not valid", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: SelectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
                         }
                         else if (selectionKey.isAcceptable())
                         {
@@ -177,18 +165,18 @@ public class ServerSingleThread implements Runnable
                         }
                         else if (selectionKey.isConnectable())
                         {
-                            getLogger().info("{}: Client Connected", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Client Connected", ServerMain.getRemoteAddress(selectionKey));
                         }
                         else if (selectionKey.isReadable())
                         {
-                            getLogger().info("{}: Read Request", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Read Request", ServerMain.getRemoteAddress(selectionKey));
 
                             // Request lesen.
                             this.ioHandler.read(selectionKey);
                         }
                         else if (selectionKey.isWritable())
                         {
-                            getLogger().info("{}: Write Response", getRemoteAddress(selectionKey));
+                            getLogger().info("{}: Write Response", ServerMain.getRemoteAddress(selectionKey));
 
                             // Response schreiben.
                             this.ioHandler.write(selectionKey);
@@ -225,10 +213,11 @@ public class ServerSingleThread implements Runnable
         {
             this.selector = this.selectorProvider.openSelector();
 
+            // this.serverSocketChannel = ServerSocketChannel.open();
             this.serverSocketChannel = this.selectorProvider.openServerSocketChannel();
             this.serverSocketChannel.configureBlocking(false);
             this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-            this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+            // this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true); // Wird nicht von jedem OS unterstützt.
             this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
 
             // ServerSocket socket = this.serverSocketChannel.socket();

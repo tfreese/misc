@@ -1,16 +1,17 @@
 // Created: 05.09.2020
 package de.freese.sonstiges.server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.channels.AsynchronousChannelGroup;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import java.util.concurrent.Executors;
-import de.freese.sonstiges.server.async.ServerAsync;
 import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
+import de.freese.sonstiges.server.multithread.ServerMultiThread;
 import de.freese.sonstiges.server.singlethread.ServerSingleThread;
 
 /**
@@ -18,6 +19,35 @@ import de.freese.sonstiges.server.singlethread.ServerSingleThread;
  */
 public class ServerMain
 {
+    /**
+     * @param selectionKey {@link SelectionKey}
+     * @return String
+     * @throws IOException Falls was schief geht.
+     */
+    public static String getRemoteAddress(final SelectionKey selectionKey) throws IOException
+    {
+        SelectableChannel selectableChannel = selectionKey.channel();
+
+        if (selectableChannel instanceof SocketChannel)
+        {
+            return getRemoteAddress((SocketChannel) selectableChannel);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param socketChannel {@link SocketChannel}
+     * @return String
+     * @throws IOException Falls was schief geht.
+     */
+    public static String getRemoteAddress(final SocketChannel socketChannel) throws IOException
+    {
+        String remoteAddress = socketChannel.getRemoteAddress().toString();
+
+        return remoteAddress;
+    }
+
     /**
      * @param args String[]
      * @throws Exception Falls was schief geht.
@@ -27,8 +57,8 @@ public class ServerMain
         // final SelectorProvider selectorProvider = SelectorProvider.provider();
 
         // ServerSingleThread server = new ServerSingleThread(8001);
-        // ServerMultiThread server = new ServerMultiThread(8001, 3);
-        ServerAsync server = new ServerAsync(8001, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(4)));
+        ServerMultiThread server = new ServerMultiThread(8001, 3);
+        // ServerAsync server = new ServerAsync(8001, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(4)));
 
         server.setIoHandler(new HttpIoHandler());
         server.start();

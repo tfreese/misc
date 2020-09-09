@@ -9,7 +9,6 @@ import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -21,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
- * Der Server nimmt nur die neuen Client-Verbindungen entgegen und übergibt sie einem {@link Reactor}.<br>
- * Der {@link Reactor} kümmert dann sich um das restliche Connection-Handling.<br>
+ * Der {@link Acceptor} nimmt die neuen Client-Verbindungen entgegen und übergibt sie einem {@link Reactor}.<br>
+ * Der {@link Reactor} kümmert sich asynchron um das weitere Connection-Handling.<br>
  * Der {@link IoHandler} übernimmt das Lesen und Schreiben von Request und Response.<br>
- * Zur Performance-Optimierung können mehrere {@link Reactor} gestartet werden,<br>
- * die im Wechsel (RoundRobin) mit neuen Verbindungen versorgt werden.
+ * Hier werden die {@link Reactor} im Round-Robin Verfahren wiederverwendet.<br>
+ * Anderfalls müsste ein ThreadPool verwendet werden, wenn ein Reactor nur jeweils einen Client bedienen soll, siehe {@link ReactorSingleClient}.
  *
  * @author Thomas Freese
  */
@@ -35,28 +34,6 @@ public class ServerMultiThread implements Runnable
      *
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerMultiThread.class);
-
-    /**
-     * @param selectionKey {@link SelectionKey}
-     * @return String
-     * @throws IOException Falls was schief geht.
-     */
-    static String getRemoteAddress(final SelectionKey selectionKey) throws IOException
-    {
-        return getRemoteAddress((SocketChannel) selectionKey.channel());
-    }
-
-    /**
-     * @param socketChannel {@link SocketChannel}
-     * @return String
-     * @throws IOException Falls was schief geht.
-     */
-    static String getRemoteAddress(final SocketChannel socketChannel) throws IOException
-    {
-        String remoteAddress = socketChannel.getRemoteAddress().toString();
-
-        return remoteAddress;
-    }
 
     /**
      *
@@ -156,17 +133,12 @@ public class ServerMultiThread implements Runnable
     }
 
     /**
-     * Liefert den nächsten {@link Reactor} im RoundRobin-Verfahren.<br>
+     * Liefert den nächsten {@link Reactor} im Round-Robin Verfahren.<br>
      *
      * @return {@link Reactor}
      */
     private synchronized Reactor nextReactor()
     {
-        if (this.isShutdown)
-        {
-            return null;
-        }
-
         // Ersten Reactor entnehmen.
         Reactor reactor = this.reactors.poll();
 
@@ -188,10 +160,11 @@ public class ServerMultiThread implements Runnable
 
         try
         {
+            // this.serverSocketChannel = ServerSocketChannel.open();
             this.serverSocketChannel = this.selectorProvider.openServerSocketChannel();
             this.serverSocketChannel.configureBlocking(false);
             this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-            this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+            // this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true); // Wird nicht von jedem OS unterstützt.
             this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
 
             // ServerSocket socket = this.serverSocketChannel.socket();

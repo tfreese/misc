@@ -178,9 +178,10 @@ public class ServerAsync implements Runnable
 
         try
         {
+            // this.serverSocketChannel = ServerSocketChannel.open();
             this.serverSocketChannel = AsynchronousServerSocketChannel.open(this.channelGroup);
             this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-            this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true);
+            // this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true); // Wird nicht von jedem OS unterstützt.
             this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
 
             LOGGER.info("server listening on port: {}", this.port);

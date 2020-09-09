@@ -8,44 +8,27 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
- * Ein {@link Reactor} übernimmt für mehrere Clients das Connection-Handlng.
+ * Der {@link Reactor} kümmert sich asynchron um das weitere Connection-Handling für mehrere Clients.<br>
+ * Der {@link IoHandler} übernimmt das Lesen und Schreiben von Request und Response.<br>
+ * Anderfalls müsste ein ThreadPool verwendet werden, wenn ein Reactor nur jeweils einen Client bedienen soll, siehe {@link ReactorSingleClient}.
  *
  * @author Thomas Freese
  */
-class Reactor implements Runnable
+class Reactor extends AbstractNioProcessor
 {
     /**
     *
     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(Reactor.class);
-    /**
-    *
-    */
     private final IoHandler<SelectionKey> ioHandler;
-    /**
-    *
-    */
-    private boolean isShutdown;
+
     /**
      * Queue für die neuen {@link SocketChannel}s.
      */
     private final Queue<SocketChannel> newSessions = new ConcurrentLinkedQueue<>();
-    /**
-    *
-    */
-    private final Selector selector;
-    /**
-    *
-    */
-    private final Semaphore stopLock = new Semaphore(1, true);
 
     /**
      * Erstellt ein neues {@link Reactor} Object.
@@ -55,9 +38,8 @@ class Reactor implements Runnable
      */
     Reactor(final Selector selector, final IoHandler<SelectionKey> ioHandler)
     {
-        super();
+        super(selector);
 
-        this.selector = Objects.requireNonNull(selector, "selector required");
         this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
 
     }
@@ -71,171 +53,118 @@ class Reactor implements Runnable
      */
     void addSession(final SocketChannel socketChannel) throws IOException
     {
+        if (isShutdown())
+        {
+            return;
+        }
+
         Objects.requireNonNull(socketChannel, "socketChannel required");
 
-        this.newSessions.add(socketChannel);
+        getNewSessions().add(socketChannel);
 
-        this.selector.wakeup();
+        getSelector().wakeup();
     }
 
     /**
-     * @return {@link Logger}
+     * @see de.freese.sonstiges.server.multithread.AbstractNioProcessor#afterSelectorLoop()
      */
-    private Logger getLogger()
+    @Override
+    protected void afterSelectorLoop()
     {
-        return LOGGER;
+        // Die neuen Sessions zum Selector hinzufügen.
+        processNewSessions();
+    }
+
+    /**
+     * @see de.freese.sonstiges.server.multithread.AbstractNioProcessor#afterSelectorWhile()
+     */
+    @Override
+    protected void afterSelectorWhile()
+    {
+        // Neue Channels gleich wieder schliessen.
+        for (Iterator<SocketChannel> iterator = getNewSessions().iterator(); iterator.hasNext();)
+        {
+            SocketChannel socketChannel = iterator.next();
+            iterator.remove();
+
+            try
+            {
+
+                socketChannel.close();
+            }
+            catch (Exception ex)
+            {
+                getLogger().error(null, ex);
+            }
+        }
+
+        super.afterSelectorWhile();
+    }
+
+    /**
+     * @return {@link Queue}
+     */
+    protected Queue<SocketChannel> getNewSessions()
+    {
+        return this.newSessions;
+    }
+
+    /**
+     * @see de.freese.sonstiges.server.multithread.AbstractNioProcessor#onReadable(java.nio.channels.SelectionKey)
+     */
+    @Override
+    protected void onReadable(final SelectionKey selectionKey)
+    {
+        // Request lesen.
+        this.ioHandler.read(selectionKey);
+    }
+
+    /**
+     * @see de.freese.sonstiges.server.multithread.AbstractNioProcessor#onWritable(java.nio.channels.SelectionKey)
+     */
+    @Override
+    protected void onWritable(final SelectionKey selectionKey)
+    {
+        // Response schreiben.
+        this.ioHandler.write(selectionKey);
     }
 
     /**
      * Die neuen Sessions zum Selector hinzufügen.
      *
-     * @throws IOException Falls was schief geht.
      * @see #addSession(SocketChannel)
      */
     @SuppressWarnings("unused")
-    private void processNewSessions() throws IOException
+    private void processNewSessions()
     {
-        // for (SocketChannel socketChannel = this.newSessions.poll(); socketChannel != null; socketChannel =
-        // this.newSessions.poll())
-        while (!this.newSessions.isEmpty())
+        if (isShutdown())
         {
-            SocketChannel socketChannel = this.newSessions.poll();
+            return;
+        }
+
+        // for (SocketChannel socketChannel = getNewSessions().poll(); socketChannel != null; socketChannel = this.newSessions.poll())
+        while (!getNewSessions().isEmpty())
+        {
+            SocketChannel socketChannel = getNewSessions().poll();
 
             if (socketChannel == null)
             {
                 continue;
             }
 
-            socketChannel.configureBlocking(false);
-
-            getLogger().info("{}: attach new session", socketChannel.getRemoteAddress());
-
-            SelectionKey selectionKey = socketChannel.register(this.selector, SelectionKey.OP_READ);
-            // selectionKey.attach(obj)
-        }
-    }
-
-    /**
-     * @see java.lang.Runnable#run()
-     */
-    @Override
-    public void run()
-    {
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            while (!Thread.interrupted())
+            try
             {
-                int readyChannels = this.selector.select();
+                socketChannel.configureBlocking(false);
 
-                if (this.isShutdown || !this.selector.isOpen())
-                {
-                    break;
-                }
+                getLogger().info("{}: attach new session", socketChannel.getRemoteAddress());
 
-                if (readyChannels > 0)
-                {
-                    Set<SelectionKey> selected = this.selector.selectedKeys();
-                    Iterator<SelectionKey> iterator = selected.iterator();
-
-                    while (iterator.hasNext())
-                    {
-                        SelectionKey selectionKey = iterator.next();
-                        iterator.remove();
-
-                        if (!selectionKey.isValid())
-                        {
-                            getLogger().info("{}: SelectionKey not valid", ServerMultiThread.getRemoteAddress(selectionKey));
-                        }
-
-                        if (selectionKey.isReadable())
-                        {
-                            getLogger().info("{}: Read Request", ServerMultiThread.getRemoteAddress(selectionKey));
-
-                            // Request lesen.
-                            this.ioHandler.read(selectionKey);
-                        }
-                        else if (selectionKey.isWritable())
-                        {
-                            getLogger().info("{}: Write Response", ServerMultiThread.getRemoteAddress(selectionKey));
-
-                            // Response schreiben.
-                            this.ioHandler.write(selectionKey);
-                        }
-                    }
-
-                    selected.clear();
-                }
-
-                // Die neuen Sessions zum Selector hinzufügen.
-                processNewSessions();
+                SelectionKey selectionKey = socketChannel.register(getSelector(), SelectionKey.OP_READ);
+                // selectionKey.attach(obj)
             }
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
-        }
-
-        getLogger().info("reactor stopped");
-    }
-
-    /**
-     * Stoppen des Reactors.
-     */
-    void stop()
-    {
-        getLogger().info("stopping reactor");
-
-        this.isShutdown = true;
-        this.selector.wakeup();
-
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            // Neue Channels gleich wieder schliessen.
-            for (Iterator<SocketChannel> iterator = this.newSessions.iterator(); iterator.hasNext();)
+            catch (Exception ex)
             {
-                SocketChannel socketChannel = iterator.next();
-
-                socketChannel.close();
-
-                iterator.remove();
+                getLogger().error(null, ex);
             }
-
-            // Die Keys aufräumen.
-            Set<SelectionKey> selected = this.selector.selectedKeys();
-            Iterator<SelectionKey> iterator = selected.iterator();
-
-            while (iterator.hasNext())
-            {
-                SelectionKey selectionKey = iterator.next();
-                iterator.remove();
-
-                if (selectionKey != null)
-                {
-                    selectionKey.cancel();
-                }
-            }
-
-            // Selector schliessen.
-            if (this.selector.isOpen())
-            {
-                this.selector.close();
-            }
-        }
-        catch (IOException ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
         }
     }
 }
