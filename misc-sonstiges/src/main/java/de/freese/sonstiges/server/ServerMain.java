@@ -57,7 +57,7 @@ public class ServerMain
         // final SelectorProvider selectorProvider = SelectorProvider.provider();
 
         // ServerSingleThread server = new ServerSingleThread(8001);
-        ServerMultiThread server = new ServerMultiThread(8001, 3);
+        ServerMultiThread server = new ServerMultiThread(8001, 2, 4);
         // ServerAsync server = new ServerAsync(8001, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(4)));
 
         server.setIoHandler(new HttpIoHandler());

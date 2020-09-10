@@ -6,10 +6,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
-import java.util.function.Supplier;
+import de.freese.sonstiges.server.multithread.dispatcher.Dispatcher;
 
 /**
- * Der {@link Acceptor} nimmt die neuen Client-Verbindungen entgegen und übergibt sie einem {@link Reactor}.<br>
+ * Der {@link Acceptor} nimmt die neuen Client-Verbindungen entgegen und übergibt sie einem {@link Dispatcher}.<br>
  *
  * @author Thomas Freese
  */
@@ -18,7 +18,7 @@ class Acceptor extends AbstractNioProcessor
     /**
      *
      */
-    private final Supplier<Reactor> reactorSupplier;
+    private final Dispatcher dispatcher;
     /**
     *
     */
@@ -29,14 +29,14 @@ class Acceptor extends AbstractNioProcessor
      *
      * @param selector {@link Selector}
      * @param serverSocketChannel {@link ServerSocketChannel}
-     * @param reactorSupplier {@link Supplier}
+     * @param dispatcher {@link Dispatcher}
      */
-    public Acceptor(final Selector selector, final ServerSocketChannel serverSocketChannel, final Supplier<Reactor> reactorSupplier)
+    public Acceptor(final Selector selector, final ServerSocketChannel serverSocketChannel, final Dispatcher dispatcher)
     {
         super(selector);
 
         this.serverSocketChannel = Objects.requireNonNull(serverSocketChannel, "serverSocketChannel required");
-        this.reactorSupplier = Objects.requireNonNull(reactorSupplier, "reactorSupplier required");
+        this.dispatcher = Objects.requireNonNull(dispatcher, "dispatcher required");
     }
 
     /**
@@ -66,10 +66,10 @@ class Acceptor extends AbstractNioProcessor
                 return;
             }
 
-            getLogger().info("{}: Connection Accepted", socketChannel.getRemoteAddress());
+            getLogger().info("{}: connection accepted", socketChannel.getRemoteAddress());
 
-            // Socket dem Reactor übergeben.
-            this.reactorSupplier.get().addSession(socketChannel);
+            // Socket dem Dispatcher übergeben.
+            this.dispatcher.register(socketChannel);
         }
         catch (Exception ex)
         {

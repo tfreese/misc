@@ -12,6 +12,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.time.LocalDateTime;
+import de.freese.sonstiges.server.ServerMain;
 
 /**
  * Verarbeitet den Request und Response.<br>
@@ -38,6 +39,8 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
     {
         try
         {
+            getLogger().info("{}: read request", ServerMain.getRemoteAddress(selectionKey));
+
             CharsetDecoder charsetDecoder = getCharsetDecoder();
 
             ReadableByteChannel channel = (ReadableByteChannel) selectionKey.channel();
@@ -75,6 +78,8 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
     {
         try
         {
+            getLogger().info("{}: write response", ServerMain.getRemoteAddress(selectionKey));
+
             CharsetEncoder charsetEncoder = getCharsetEncoder();
 
             @SuppressWarnings("resource")
@@ -114,9 +119,9 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
             // Bei HTTP ist nach dem Response die Session vorbei.
             channel.close();
             selectionKey.cancel();
-            selectionKey.selector().wakeup();
 
-            // Ansonsten wieder READ-Mode: selectionKey.interestOps(SelectionKey.OP_READ);
+            // Ansonsten wieder READ-Mode:
+            // selectionKey.interestOps(SelectionKey.OP_READ);
         }
         catch (Exception ex)
         {

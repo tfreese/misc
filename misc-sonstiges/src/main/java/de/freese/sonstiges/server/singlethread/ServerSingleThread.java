@@ -15,12 +15,11 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.freese.sonstiges.server.ServerMain;
+import de.freese.sonstiges.server.ServerThreadFactory;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
@@ -69,11 +68,6 @@ public class ServerSingleThread implements Runnable
      *
      */
     private final Semaphore stopLock = new Semaphore(1, true);
-
-    /**
-     *
-     */
-    private ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
     /**
      * Erstellt ein neues {@link ServerSingleThread} Object.
@@ -245,23 +239,13 @@ public class ServerSingleThread implements Runnable
     }
 
     /**
-     * @param threadFactory {@link ThreadFactory}
-     */
-    public void setThreadFactory(final ThreadFactory threadFactory)
-    {
-        this.threadFactory = Objects.requireNonNull(threadFactory, "threadFactory required");
-    }
-
-    /**
      * Stoppen des Servers.
      *
      * @throws IOException Falls was schief geht.
      */
     public void start() throws IOException
     {
-        Thread thread = this.threadFactory.newThread(this::run);
-        thread.setName(getClass().getSimpleName());
-        thread.setDaemon(false);
+        Thread thread = new ServerThreadFactory(getClass().getSimpleName() + "-").newThread(this::run);
         thread.start();
     }
 

@@ -1,7 +1,6 @@
 // Created: 08.09.2020
-package de.freese.sonstiges.server.multithread;
+package de.freese.sonstiges.server.multithread.dispatcher;
 
-import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -9,60 +8,44 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 import de.freese.sonstiges.server.handler.IoHandler;
+import de.freese.sonstiges.server.multithread.AbstractNioProcessor;
 
 /**
- * Der {@link Reactor} kümmert sich asynchron um das weitere Connection-Handling für mehrere Clients.<br>
- * Der {@link IoHandler} übernimmt das Lesen und Schreiben von Request und Response.<br>
- * Anderfalls müsste ein ThreadPool verwendet werden, wenn ein Reactor nur jeweils einen Client bedienen soll, siehe {@link ReactorSingleClient}.
+ * Der {@link Dispatcher} kümmert sich um das Connection-Handling der Clients nach dem 'accept'.<br>
+ * Der {@link IoHandler} übernimmt das Lesen und Schreiben von Request und Response in einem separatem Thread.<br>
  *
  * @author Thomas Freese
  */
-class Reactor extends AbstractNioProcessor
+class DefaultDispatcher extends AbstractNioProcessor implements Dispatcher
 {
     /**
     *
     */
-    private final IoHandler<SelectionKey> ioHandler;
-
+    private final Executor executor;
     /**
-     * Queue für die neuen {@link SocketChannel}s.
+    *
+    */
+    private final IoHandler<SelectionKey> ioHandler;
+    /**
+     *
      */
     private final Queue<SocketChannel> newSessions = new ConcurrentLinkedQueue<>();
 
     /**
-     * Erstellt ein neues {@link Reactor} Object.
+     * Erstellt ein neues {@link DefaultDispatcher} Object.
      *
      * @param selector {@link Selector}
      * @param ioHandler {@link IoHandler}
+     * @param executor {@link Executor}
      */
-    Reactor(final Selector selector, final IoHandler<SelectionKey> ioHandler)
+    DefaultDispatcher(final Selector selector, final IoHandler<SelectionKey> ioHandler, final Executor executor)
     {
         super(selector);
 
         this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
-
-    }
-
-    /**
-     * Neue Session zum Worker hinzufügen.
-     *
-     * @param socketChannel {@link SocketChannel}
-     * @throws IOException Falls was schief geht.
-     * @see #processNewSessions()
-     */
-    void addSession(final SocketChannel socketChannel) throws IOException
-    {
-        if (isShutdown())
-        {
-            return;
-        }
-
-        Objects.requireNonNull(socketChannel, "socketChannel required");
-
-        getNewSessions().add(socketChannel);
-
-        getSelector().wakeup();
+        this.executor = Objects.requireNonNull(executor, "executor required");
     }
 
     /**
@@ -71,8 +54,8 @@ class Reactor extends AbstractNioProcessor
     @Override
     protected void afterSelectorLoop()
     {
-        // Die neuen Sessions zum Selector hinzufügen.
-        processNewSessions();
+        // Die neuen Channels zum Selector hinzufügen.
+        processNewChannels();
     }
 
     /**
@@ -104,7 +87,7 @@ class Reactor extends AbstractNioProcessor
     /**
      * @return {@link Queue}
      */
-    protected Queue<SocketChannel> getNewSessions()
+    private Queue<SocketChannel> getNewSessions()
     {
         return this.newSessions;
     }
@@ -116,7 +99,14 @@ class Reactor extends AbstractNioProcessor
     protected void onReadable(final SelectionKey selectionKey)
     {
         // Request lesen.
-        this.ioHandler.read(selectionKey);
+        // this.ioHandler.read(selectionKey);
+
+        selectionKey.interestOps(0); // Selector-Selektion deaktivieren.
+
+        this.executor.execute(() -> {
+            this.ioHandler.read(selectionKey);
+            selectionKey.selector().wakeup();
+        });
     }
 
     /**
@@ -126,16 +116,23 @@ class Reactor extends AbstractNioProcessor
     protected void onWritable(final SelectionKey selectionKey)
     {
         // Response schreiben.
-        this.ioHandler.write(selectionKey);
+        // this.ioHandler.write(selectionKey);
+
+        selectionKey.interestOps(0); // Selector-Selektion deaktivieren.
+
+        this.executor.execute(() -> {
+            this.ioHandler.write(selectionKey);
+            selectionKey.selector().wakeup();
+        });
     }
 
     /**
-     * Die neuen Sessions zum Selector hinzufügen.
+     * Die neuen Channels zum Selector hinzufügen.
      *
-     * @see #addSession(SocketChannel)
+     * @see #register(SocketChannel)
      */
     @SuppressWarnings("unused")
-    private void processNewSessions()
+    private void processNewChannels()
     {
         if (isShutdown())
         {
@@ -156,7 +153,7 @@ class Reactor extends AbstractNioProcessor
             {
                 socketChannel.configureBlocking(false);
 
-                getLogger().info("{}: attach new session", socketChannel.getRemoteAddress());
+                getLogger().info("{}: register channel on selector", socketChannel.getRemoteAddress());
 
                 SelectionKey selectionKey = socketChannel.register(getSelector(), SelectionKey.OP_READ);
                 // selectionKey.attach(obj)
@@ -165,6 +162,33 @@ class Reactor extends AbstractNioProcessor
             {
                 getLogger().error(null, ex);
             }
+        }
+    }
+
+    /**
+     * @see de.freese.sonstiges.server.multithread.dispatcher.Dispatcher#register(java.nio.channels.SocketChannel)
+     */
+    @Override
+    public void register(final SocketChannel socketChannel)
+    {
+        if (isShutdown())
+        {
+            return;
+        }
+
+        Objects.requireNonNull(socketChannel, "socketChannel required");
+
+        try
+        {
+            getLogger().info("{}: register new channel", socketChannel.getRemoteAddress());
+
+            getNewSessions().add(socketChannel);
+
+            getSelector().wakeup();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
         }
     }
 }

@@ -199,6 +199,7 @@ public class ServerAsync implements Runnable
     public void setIoHandler(final IoHandler<?> ioHandler)
     {
         // Empty
+        // Es gibt kein gemeinsames Interface von Socketchannel und AsynchronousSocketChannel.
     }
 
     /**
