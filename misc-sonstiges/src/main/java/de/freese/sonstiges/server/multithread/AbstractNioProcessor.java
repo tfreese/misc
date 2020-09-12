@@ -228,44 +228,49 @@ public abstract class AbstractNioProcessor implements Runnable
                     Set<SelectionKey> selected = getSelector().selectedKeys();
                     Iterator<SelectionKey> iterator = selected.iterator();
 
-                    while (iterator.hasNext())
+                    try
                     {
-                        SelectionKey selectionKey = iterator.next();
-                        iterator.remove();
-
-                        if (!selectionKey.isValid())
+                        while (iterator.hasNext())
                         {
-                            getLogger().info("{}: selectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
+                            SelectionKey selectionKey = iterator.next();
+                            iterator.remove();
 
-                            onInValid(selectionKey);
-                        }
-                        else if (selectionKey.isAcceptable())
-                        {
-                            getLogger().info("new client accepted");
+                            if (!selectionKey.isValid())
+                            {
+                                getLogger().info("{}: selectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
 
-                            onAcceptable(selectionKey);
-                        }
-                        else if (selectionKey.isReadable())
-                        {
-                            getLogger().info("{}: read request", ServerMain.getRemoteAddress(selectionKey));
+                                onInValid(selectionKey);
+                            }
+                            else if (selectionKey.isAcceptable())
+                            {
+                                getLogger().info("new client accepted");
 
-                            onReadable(selectionKey);
-                        }
-                        else if (selectionKey.isWritable())
-                        {
-                            getLogger().info("{}: write response", ServerMain.getRemoteAddress(selectionKey));
+                                onAcceptable(selectionKey);
+                            }
+                            else if (selectionKey.isReadable())
+                            {
+                                getLogger().info("{}: read request", ServerMain.getRemoteAddress(selectionKey));
 
-                            onWritable(selectionKey);
-                        }
-                        else if (selectionKey.isConnectable())
-                        {
-                            getLogger().info("{}: client connected", ServerMain.getRemoteAddress(selectionKey));
+                                onReadable(selectionKey);
+                            }
+                            else if (selectionKey.isWritable())
+                            {
+                                getLogger().info("{}: write response", ServerMain.getRemoteAddress(selectionKey));
 
-                            onConnectable(selectionKey);
+                                onWritable(selectionKey);
+                            }
+                            else if (selectionKey.isConnectable())
+                            {
+                                getLogger().info("{}: client connected", ServerMain.getRemoteAddress(selectionKey));
+
+                                onConnectable(selectionKey);
+                            }
                         }
                     }
-
-                    selected.clear();
+                    finally
+                    {
+                        selected.clear();
+                    }
                 }
 
                 afterSelectorLoop();

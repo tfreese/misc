@@ -65,7 +65,11 @@ public class ServerSingleThread implements Runnable
     private ServerSocketChannel serverSocketChannel;
 
     /**
-     *
+     * ReentrantLock nicht möglich, da dort die Locks auf Thread-Ebene verwaltet werden.
+     */
+    private final Semaphore startLock = new Semaphore(1, true);
+    /**
+     * ReentrantLock nicht möglich, da dort die Locks auf Thread-Ebene verwaltet werden.
      */
     private final Semaphore stopLock = new Semaphore(1, true);
 
@@ -98,6 +102,8 @@ public class ServerSingleThread implements Runnable
 
         this.port = port;
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
+
+        this.startLock.acquireUninterruptibly();
     }
 
     /**
@@ -109,88 +115,11 @@ public class ServerSingleThread implements Runnable
     }
 
     /**
-     * Wartet auf neue Connections.
+     * @return boolean
      */
-    private void listen()
+    public boolean isStarted()
     {
-        getLogger().info("server listening on port: {}", this.port);
-
-        this.stopLock.acquireUninterruptibly();
-
-        try
-        {
-            while (!Thread.interrupted())
-            {
-                int readyChannels = this.selector.select();
-
-                if (this.isShutdown || !this.selector.isOpen())
-                {
-                    break;
-                }
-
-                if (readyChannels > 0)
-                {
-                    Set<SelectionKey> selected = this.selector.selectedKeys();
-                    Iterator<SelectionKey> iterator = selected.iterator();
-
-                    while (iterator.hasNext())
-                    {
-                        SelectionKey selectionKey = iterator.next();
-                        iterator.remove();
-
-                        if (!selectionKey.isValid())
-                        {
-                            getLogger().info("{}: SelectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
-                        }
-                        else if (selectionKey.isAcceptable())
-                        {
-                            // Verbindung mit Client herstellen.
-                            SocketChannel socketChannel = this.serverSocketChannel.accept();
-                            socketChannel.configureBlocking(false);
-                            socketChannel.register(this.selector, SelectionKey.OP_READ);
-
-                            getLogger().info("{}: Connection Accepted", socketChannel.getRemoteAddress());
-
-                            // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
-                            // sk.attach(obj)
-
-                            // Selector aufwecken.
-                            this.selector.wakeup();
-                        }
-                        else if (selectionKey.isConnectable())
-                        {
-                            getLogger().info("{}: Client Connected", ServerMain.getRemoteAddress(selectionKey));
-                        }
-                        else if (selectionKey.isReadable())
-                        {
-                            getLogger().info("{}: Read Request", ServerMain.getRemoteAddress(selectionKey));
-
-                            // Request lesen.
-                            this.ioHandler.read(selectionKey);
-                        }
-                        else if (selectionKey.isWritable())
-                        {
-                            getLogger().info("{}: Write Response", ServerMain.getRemoteAddress(selectionKey));
-
-                            // Response schreiben.
-                            this.ioHandler.write(selectionKey);
-                        }
-                    }
-
-                    selected.clear();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.stopLock.release();
-        }
-
-        getLogger().info("server stopped on port: {}", this.port);
+        return this.startLock.availablePermits() > 0;
     }
 
     /**
@@ -218,16 +147,92 @@ public class ServerSingleThread implements Runnable
             // socket.setReuseAddress(true);
             // socket.bind(new InetSocketAddress(this.port), 50);
 
-            @SuppressWarnings("unused")
-            SelectionKey selectionKey = this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
+            // SelectionKey selectionKey =
+            this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
             // selectionKey.attach(this);
 
-            listen();
+            getLogger().info("server listening on port: {}", this.port);
+
+            this.stopLock.acquireUninterruptibly();
+            this.startLock.release();
+
+            while (!Thread.interrupted())
+            {
+                int readyChannels = this.selector.select();
+
+                if (this.isShutdown || !this.selector.isOpen())
+                {
+                    break;
+                }
+
+                if (readyChannels > 0)
+                {
+                    Set<SelectionKey> selected = this.selector.selectedKeys();
+                    Iterator<SelectionKey> iterator = selected.iterator();
+
+                    try
+                    {
+                        while (iterator.hasNext())
+                        {
+                            SelectionKey selectionKey = iterator.next();
+                            iterator.remove();
+
+                            if (!selectionKey.isValid())
+                            {
+                                getLogger().info("{}: SelectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
+                            }
+                            else if (selectionKey.isAcceptable())
+                            {
+                                // Verbindung mit Client herstellen.
+                                SocketChannel socketChannel = this.serverSocketChannel.accept();
+                                socketChannel.configureBlocking(false);
+                                socketChannel.register(this.selector, SelectionKey.OP_READ);
+
+                                getLogger().info("{}: Connection Accepted", socketChannel.getRemoteAddress());
+
+                                // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
+                                // sk.attach(obj)
+
+                                // Selector aufwecken.
+                                this.selector.wakeup();
+                            }
+                            else if (selectionKey.isConnectable())
+                            {
+                                getLogger().info("{}: Client Connected", ServerMain.getRemoteAddress(selectionKey));
+                            }
+                            else if (selectionKey.isReadable())
+                            {
+                                getLogger().info("{}: Read Request", ServerMain.getRemoteAddress(selectionKey));
+
+                                // Request lesen.
+                                this.ioHandler.read(selectionKey);
+                            }
+                            else if (selectionKey.isWritable())
+                            {
+                                getLogger().info("{}: Write Response", ServerMain.getRemoteAddress(selectionKey));
+
+                                // Response schreiben.
+                                this.ioHandler.write(selectionKey);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        selected.clear();
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
             getLogger().error(null, ex);
         }
+        finally
+        {
+            this.stopLock.release();
+        }
+
+        getLogger().info("server stopped on port: {}", this.port);
     }
 
     /**
@@ -247,6 +252,10 @@ public class ServerSingleThread implements Runnable
     {
         Thread thread = new ServerThreadFactory(getClass().getSimpleName() + "-").newThread(this::run);
         thread.start();
+
+        // Warten bis fertich.
+        // this.startLock.acquireUninterruptibly();
+        // this.startLock.release();
     }
 
     /**
@@ -259,6 +268,7 @@ public class ServerSingleThread implements Runnable
         this.isShutdown = true;
         this.selector.wakeup();
 
+        // Warten bis Thread beendet.
         this.stopLock.acquireUninterruptibly();
 
         try

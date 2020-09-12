@@ -58,8 +58,8 @@ public class ServerMultiThread implements Runnable
      */
     private ServerSocketChannel serverSocketChannel;
     /**
-    *
-    */
+     * ReentrantLock nicht möglich, da dort die Locks auf Thread-Ebene verwaltet werden.
+     */
     private final Semaphore startLock = new Semaphore(1, true);
 
     /**
@@ -96,6 +96,8 @@ public class ServerMultiThread implements Runnable
         this.port = port;
         this.dispatcherPool = new DispatcherPool(numOfDispatcher, numOfWorker);
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
+
+        this.startLock.acquireUninterruptibly();
     }
 
     /**
@@ -104,6 +106,14 @@ public class ServerMultiThread implements Runnable
     private Logger getLogger()
     {
         return LOGGER;
+    }
+
+    /**
+     * @return boolean
+     */
+    public boolean isStarted()
+    {
+        return this.startLock.availablePermits() > 0;
     }
 
     /**
@@ -140,14 +150,11 @@ public class ServerMultiThread implements Runnable
             thread.start();
 
             getLogger().info("server listening on port: {}", this.port);
+            this.startLock.release();
         }
         catch (Exception ex)
         {
             getLogger().error(null, ex);
-        }
-        finally
-        {
-            this.startLock.release();
         }
     }
 
@@ -164,12 +171,11 @@ public class ServerMultiThread implements Runnable
      */
     public void start()
     {
-        this.startLock.acquireUninterruptibly();
-
         run();
 
-        // Warten bis die Initialisierung fertig ist.
-        this.startLock.acquireUninterruptibly();
+        // Warten bis fertich.
+        // this.startLock.acquireUninterruptibly();
+        // this.startLock.release();
     }
 
     /**

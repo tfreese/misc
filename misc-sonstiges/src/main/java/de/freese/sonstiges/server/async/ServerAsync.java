@@ -18,6 +18,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.sonstiges.server.ServerThreadFactory;
 import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
@@ -110,16 +111,14 @@ public class ServerAsync implements Runnable
      */
     public ServerAsync(final int port, final int poolSize) throws IOException
     {
-        this(port, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(poolSize)));
+        this(port, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(poolSize, new ServerThreadFactory("worker-"))));
     }
 
     /**
      * Wartet auf neue Connections.
      */
-    private void listen()
+    private void accept()
     {
-        this.startLock.release();
-
         this.serverSocketChannel.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>()
         {
             /**
@@ -138,7 +137,7 @@ public class ServerAsync implements Runnable
                 }
 
                 // Nächster Request an anderen Thread übergeben.
-                listen();
+                accept();
 
                 // Lese-Vorgang an anderen Thread übergeben.
                 read(channel, ByteBuffer.allocate(256));
@@ -153,6 +152,14 @@ public class ServerAsync implements Runnable
                 LOGGER.error(null, ex);
             }
         });
+    }
+
+    /**
+     * @return boolean
+     */
+    public boolean isStarted()
+    {
+        return this.startLock.availablePermits() > 0;
     }
 
     /**
@@ -185,7 +192,9 @@ public class ServerAsync implements Runnable
             this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
 
             LOGGER.info("server listening on port: {}", this.port);
-            listen();
+            this.startLock.release();
+
+            accept();
         }
         catch (Exception ex)
         {
@@ -254,14 +263,13 @@ public class ServerAsync implements Runnable
      */
     public void start() throws IOException
     {
-        this.startLock.acquireUninterruptibly();
-
         Thread thread = new Thread(this::run, getClass().getSimpleName());
         thread.setDaemon(false);
         thread.start();
 
-        // Warten bis die Initialisierung fertig ist.
-        this.startLock.acquireUninterruptibly();
+        // Warten bis fertich.
+        // this.startLock.acquireUninterruptibly();
+        // this.startLock.release();
     }
 
     /**

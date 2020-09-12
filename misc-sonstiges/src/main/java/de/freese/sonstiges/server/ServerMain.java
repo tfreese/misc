@@ -9,9 +9,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import de.freese.sonstiges.server.async.ServerAsync;
 import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
-import de.freese.sonstiges.server.multithread.ServerMultiThread;
 import de.freese.sonstiges.server.singlethread.ServerSingleThread;
 
 /**
@@ -57,8 +57,8 @@ public class ServerMain
         // final SelectorProvider selectorProvider = SelectorProvider.provider();
 
         // ServerSingleThread server = new ServerSingleThread(8001);
-        ServerMultiThread server = new ServerMultiThread(8001, 2, 4);
-        // ServerAsync server = new ServerAsync(8001, AsynchronousChannelGroup.withThreadPool(Executors.newFixedThreadPool(4)));
+        // ServerMultiThread server = new ServerMultiThread(8001, 2, 4);
+        ServerAsync server = new ServerAsync(8001, 4);
 
         server.setIoHandler(new HttpIoHandler());
         server.start();
@@ -77,7 +77,11 @@ public class ServerMain
         // PipedInputStream pis = new PipedInputStream(pos);
         // System.setIn(pis);
 
-        Thread.sleep(1000);
+        while (!server.isStarted())
+        {
+            System.out.println("check started");
+            Thread.sleep(100);
+        }
 
         InetSocketAddress serverAddress = new InetSocketAddress("localhost", 8001);
         Charset charset = IoHandler.DEFAULT_CHARSET;
