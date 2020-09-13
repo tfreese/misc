@@ -16,38 +16,21 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.freese.sonstiges.server.AbstractServer;
 import de.freese.sonstiges.server.ServerMain;
 import de.freese.sonstiges.server.ServerThreadFactory;
-import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
  * Der Server kümmert sich um alle Verbindungen in einem einzelnen Thread.
  *
  * @author Thomas Freese
  */
-public class ServerSingleThread implements Runnable
+public class ServerSingleThread extends AbstractServer
 {
     /**
      *
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerSingleThread.class);
-
-    /**
-     *
-     */
-    private IoHandler<SelectionKey> ioHandler;
-
-    /**
-     *
-     */
     private boolean isShutdown;
-
-    /**
-     *
-     */
-    private final int port;
 
     /**
      *
@@ -64,10 +47,6 @@ public class ServerSingleThread implements Runnable
      */
     private ServerSocketChannel serverSocketChannel;
 
-    /**
-     * ReentrantLock nicht möglich, da dort die Locks auf Thread-Ebene verwaltet werden.
-     */
-    private final Semaphore startLock = new Semaphore(1, true);
     /**
      * ReentrantLock nicht möglich, da dort die Locks auf Thread-Ebene verwaltet werden.
      */
@@ -93,33 +72,9 @@ public class ServerSingleThread implements Runnable
      */
     public ServerSingleThread(final int port, final SelectorProvider selectorProvider) throws IOException
     {
-        super();
+        super(port);
 
-        if (port <= 0)
-        {
-            throw new IllegalArgumentException("port <= 0: " + port);
-        }
-
-        this.port = port;
         this.selectorProvider = Objects.requireNonNull(selectorProvider, "selectorProvider required");
-
-        this.startLock.acquireUninterruptibly();
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return LOGGER;
-    }
-
-    /**
-     * @return boolean
-     */
-    public boolean isStarted()
-    {
-        return this.startLock.availablePermits() > 0;
     }
 
     /**
@@ -128,9 +83,9 @@ public class ServerSingleThread implements Runnable
     @Override
     public void run()
     {
-        getLogger().info("starting server on port: {}", this.port);
+        getLogger().info("starting '{}' on port: {}", getName(), getPort());
 
-        Objects.requireNonNull(this.ioHandler, "ioHandler requried");
+        Objects.requireNonNull(getIoHandler(), "ioHandler requried");
 
         try
         {
@@ -141,20 +96,20 @@ public class ServerSingleThread implements Runnable
             this.serverSocketChannel.configureBlocking(false);
             this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
             // this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true); // Wird nicht von jedem OS unterstützt.
-            this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
+            this.serverSocketChannel.bind(new InetSocketAddress(getPort()), 50);
 
             // ServerSocket socket = this.serverSocketChannel.socket();
             // socket.setReuseAddress(true);
-            // socket.bind(new InetSocketAddress(this.port), 50);
+            // socket.bind(new InetSocketAddress(getPort()), 50);
 
             // SelectionKey selectionKey =
             this.serverSocketChannel.register(this.selector, SelectionKey.OP_ACCEPT);
             // selectionKey.attach(this);
 
-            getLogger().info("server listening on port: {}", this.port);
+            getLogger().info("'{}' listening on port: {}", getName(), getPort());
 
             this.stopLock.acquireUninterruptibly();
-            this.startLock.release();
+            getStartLock().release();
 
             while (!Thread.interrupted())
             {
@@ -179,7 +134,7 @@ public class ServerSingleThread implements Runnable
 
                             if (!selectionKey.isValid())
                             {
-                                getLogger().info("{}: SelectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: SelectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
                             }
                             else if (selectionKey.isAcceptable())
                             {
@@ -188,7 +143,7 @@ public class ServerSingleThread implements Runnable
                                 socketChannel.configureBlocking(false);
                                 socketChannel.register(this.selector, SelectionKey.OP_READ);
 
-                                getLogger().info("{}: Connection Accepted", socketChannel.getRemoteAddress());
+                                getLogger().debug("{}: Connection Accepted", socketChannel.getRemoteAddress());
 
                                 // SelectionKey sk = socketChannel.register(this.selector, SelectionKey.OP_READ);
                                 // sk.attach(obj)
@@ -198,21 +153,21 @@ public class ServerSingleThread implements Runnable
                             }
                             else if (selectionKey.isConnectable())
                             {
-                                getLogger().info("{}: Client Connected", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: Client Connected", ServerMain.getRemoteAddress(selectionKey));
                             }
                             else if (selectionKey.isReadable())
                             {
-                                getLogger().info("{}: Read Request", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: Read Request", ServerMain.getRemoteAddress(selectionKey));
 
                                 // Request lesen.
-                                this.ioHandler.read(selectionKey);
+                                getIoHandler().read(selectionKey);
                             }
                             else if (selectionKey.isWritable())
                             {
-                                getLogger().info("{}: Write Response", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: Write Response", ServerMain.getRemoteAddress(selectionKey));
 
                                 // Response schreiben.
-                                this.ioHandler.write(selectionKey);
+                                getIoHandler().write(selectionKey);
                             }
                         }
                     }
@@ -232,25 +187,16 @@ public class ServerSingleThread implements Runnable
             this.stopLock.release();
         }
 
-        getLogger().info("server stopped on port: {}", this.port);
+        getLogger().info("'{}' stopped on port: {}", getName(), getPort());
     }
 
     /**
-     * @param ioHandler {@link IoHandler}
+     * @see de.freese.sonstiges.server.AbstractServer#start()
      */
-    public void setIoHandler(final IoHandler<SelectionKey> ioHandler)
+    @Override
+    public void start()
     {
-        this.ioHandler = Objects.requireNonNull(ioHandler, "ioHandler required");
-    }
-
-    /**
-     * Stoppen des Servers.
-     *
-     * @throws IOException Falls was schief geht.
-     */
-    public void start() throws IOException
-    {
-        Thread thread = new ServerThreadFactory(getClass().getSimpleName() + "-").newThread(this::run);
+        Thread thread = new ServerThreadFactory(getName() + "-").newThread(this::run);
         thread.start();
 
         // Warten bis fertich.
@@ -259,11 +205,12 @@ public class ServerSingleThread implements Runnable
     }
 
     /**
-     * Stoppen des Servers.
+     * @see de.freese.sonstiges.server.AbstractServer#stop()
      */
+    @Override
     public void stop()
     {
-        getLogger().info("stopping server on port: {}", this.port);
+        getLogger().info("stopping '{}' on port: {}", getName(), getPort());
 
         this.isShutdown = true;
         this.selector.wakeup();

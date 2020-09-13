@@ -61,6 +61,12 @@ public class DispatcherPool implements Dispatcher
             throw new IllegalArgumentException("numOfWorker < 1: " + numOfWorker);
         }
 
+        if (numOfDispatcher > numOfWorker)
+        {
+            String message = String.format("numOfDispatcher > numOfWorker: %d < %d", numOfDispatcher, numOfWorker);
+            throw new IllegalArgumentException(message);
+        }
+
         this.numOfDispatcher = numOfDispatcher;
         this.numOfWorker = numOfWorker;
     }
@@ -101,12 +107,13 @@ public class DispatcherPool implements Dispatcher
     /**
      * @param ioHandler {@link IoHandler}
      * @param selectorProvider {@link SelectorProvider}
+     * @param serverName String
      * @throws Exception Falls was schief geht.
      */
-    public void start(final IoHandler<SelectionKey> ioHandler, final SelectorProvider selectorProvider) throws Exception
+    public void start(final IoHandler<SelectionKey> ioHandler, final SelectorProvider selectorProvider, final String serverName) throws Exception
     {
-        ThreadFactory threadFactoryDispatcher = new ServerThreadFactory("dispatcher-");
-        ThreadFactory threadFactoryWorker = new ServerThreadFactory("worker-");
+        ThreadFactory threadFactoryDispatcher = new ServerThreadFactory(serverName + "-dispatcher-");
+        ThreadFactory threadFactoryWorker = new ServerThreadFactory(serverName + "-worker-");
 
         // this.executorServiceWorker = new ThreadPoolExecutor(1, this.numOfWorker, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), threadFactoryWorker);
         this.executorServiceWorker = Executors.newFixedThreadPool(this.numOfWorker, threadFactoryWorker);
@@ -118,7 +125,7 @@ public class DispatcherPool implements Dispatcher
 
             Thread thread = threadFactoryDispatcher.newThread(dispatcher);
 
-            getLogger().info("start dispatcher: {}", thread.getName());
+            getLogger().debug("start dispatcher: {}", thread.getName());
             thread.start();
         }
     }

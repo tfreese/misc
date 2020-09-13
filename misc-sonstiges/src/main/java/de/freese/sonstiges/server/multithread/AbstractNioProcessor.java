@@ -216,7 +216,7 @@ public abstract class AbstractNioProcessor implements Runnable
             {
                 int readyChannels = getSelector().select();
 
-                getLogger().info("readyChannels = {}", readyChannels);
+                getLogger().debug("readyChannels = {}", readyChannels);
 
                 if (exitCondition(readyChannels))
                 {
@@ -237,31 +237,31 @@ public abstract class AbstractNioProcessor implements Runnable
 
                             if (!selectionKey.isValid())
                             {
-                                getLogger().info("{}: selectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: selectionKey not valid", ServerMain.getRemoteAddress(selectionKey));
 
                                 onInValid(selectionKey);
                             }
                             else if (selectionKey.isAcceptable())
                             {
-                                getLogger().info("new client accepted");
+                                getLogger().debug("new client accepted");
 
                                 onAcceptable(selectionKey);
                             }
                             else if (selectionKey.isReadable())
                             {
-                                getLogger().info("{}: read request", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: read request", ServerMain.getRemoteAddress(selectionKey));
 
                                 onReadable(selectionKey);
                             }
                             else if (selectionKey.isWritable())
                             {
-                                getLogger().info("{}: write response", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: write response", ServerMain.getRemoteAddress(selectionKey));
 
                                 onWritable(selectionKey);
                             }
                             else if (selectionKey.isConnectable())
                             {
-                                getLogger().info("{}: client connected", ServerMain.getRemoteAddress(selectionKey));
+                                getLogger().debug("{}: client connected", ServerMain.getRemoteAddress(selectionKey));
 
                                 onConnectable(selectionKey);
                             }
@@ -287,7 +287,7 @@ public abstract class AbstractNioProcessor implements Runnable
             getStopLock().release();
         }
 
-        getLogger().info("{} stopped", getClass().getSimpleName().toLowerCase());
+        getLogger().debug("{} stopped", getClass().getSimpleName().toLowerCase());
     }
 
     /**
@@ -303,7 +303,7 @@ public abstract class AbstractNioProcessor implements Runnable
      */
     public void stop()
     {
-        getLogger().info("stopping {}", getClass().getSimpleName().toLowerCase());
+        getLogger().debug("stopping {}", getClass().getSimpleName().toLowerCase());
 
         setShutdown();
         getSelector().wakeup();

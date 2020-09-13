@@ -66,7 +66,7 @@ class Acceptor extends AbstractNioProcessor
                 return;
             }
 
-            getLogger().info("{}: connection accepted", socketChannel.getRemoteAddress());
+            getLogger().debug("{}: connection accepted", socketChannel.getRemoteAddress());
 
             // Socket dem Dispatcher übergeben.
             this.dispatcher.register(socketChannel);

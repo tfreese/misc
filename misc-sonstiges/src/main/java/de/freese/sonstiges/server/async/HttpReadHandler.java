@@ -34,7 +34,7 @@ class HttpReadHandler implements CompletionHandler<Integer, MyAttachment>
 
         try
         {
-            LOGGER.info("{}: Read Request", channel.getRemoteAddress());
+            LOGGER.debug("{}: Read Request", channel.getRemoteAddress());
         }
         catch (IOException ioex)
         {
@@ -55,7 +55,7 @@ class HttpReadHandler implements CompletionHandler<Integer, MyAttachment>
         CharBuffer charBuffer = charset.decode(byteBuffer);
 
         String request = charBuffer.toString();
-        LOGGER.info("\n{}", request);
+        LOGGER.debug("\n{}", request);
 
         httpHeader.append(request);
 

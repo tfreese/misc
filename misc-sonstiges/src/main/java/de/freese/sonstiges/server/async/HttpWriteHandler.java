@@ -29,7 +29,7 @@ class HttpWriteHandler implements CompletionHandler<Integer, MyAttachment>
 
         try
         {
-            LOGGER.info("{}: Write Response", channel.getRemoteAddress());
+            LOGGER.debug("{}: Write Response", channel.getRemoteAddress());
         }
         catch (IOException ioex)
         {

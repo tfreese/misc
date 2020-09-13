@@ -4,7 +4,6 @@
 
 package de.freese.sonstiges.server.handler;
 
-import java.nio.channels.SelectionKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -32,14 +31,14 @@ public interface IoHandler<T>
     /**
      * Verarbeitet den Request.
      *
-     * @param input {@link SelectionKey}
+     * @param input Object
      */
     public void read(final T input);
 
     /**
      * Verarbeitet den Response.
      *
-     * @param outpuT {@link SelectionKey}
+     * @param outpuT Object
      */
     public void write(final T outpuT);
 }

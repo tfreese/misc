@@ -39,7 +39,7 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
     {
         try
         {
-            getLogger().info("{}: read request", ServerMain.getRemoteAddress(selectionKey));
+            getLogger().debug("{}: read request", ServerMain.getRemoteAddress(selectionKey));
 
             CharsetDecoder charsetDecoder = getCharsetDecoder();
 
@@ -78,7 +78,7 @@ public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
     {
         try
         {
-            getLogger().info("{}: write response", ServerMain.getRemoteAddress(selectionKey));
+            getLogger().debug("{}: write response", ServerMain.getRemoteAddress(selectionKey));
 
             CharsetEncoder charsetEncoder = getCharsetEncoder();
 

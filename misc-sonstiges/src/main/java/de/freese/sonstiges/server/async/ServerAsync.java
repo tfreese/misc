@@ -14,25 +14,18 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.Objects;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.freese.sonstiges.server.AbstractServer;
 import de.freese.sonstiges.server.ServerThreadFactory;
-import de.freese.sonstiges.server.handler.IoHandler;
 
 /**
  * Der Server kümmert sich um alle Verbindungen in separaten Threads.
  *
  * @author Thomas Freese
  */
-public class ServerAsync implements Runnable
+public class ServerAsync extends AbstractServer
 {
-    /**
-     *
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerAsync.class);
-
     /**
      * @param channel {@link AsynchronousSocketChannel}
      * @param logger {@link Logger}
@@ -59,17 +52,7 @@ public class ServerAsync implements Runnable
     /**
      *
      */
-    private final int port;
-
-    /**
-     *
-     */
     private AsynchronousServerSocketChannel serverSocketChannel;
-
-    /**
-    *
-    */
-    private final Semaphore startLock = new Semaphore(1, true);
 
     /**
      * Erstellt ein neues {@link ServerAsync} Object.
@@ -91,14 +74,8 @@ public class ServerAsync implements Runnable
      */
     public ServerAsync(final int port, final AsynchronousChannelGroup channelGroup) throws IOException
     {
-        super();
+        super(port);
 
-        if (port <= 0)
-        {
-            throw new IllegalArgumentException("port <= 0: " + port);
-        }
-
-        this.port = port;
         this.channelGroup = Objects.requireNonNull(channelGroup, "channelGroup required");
     }
 
@@ -129,7 +106,7 @@ public class ServerAsync implements Runnable
             {
                 try
                 {
-                    LOGGER.info("{}: Connection Accepted", channel.getRemoteAddress());
+                    getLogger().debug("{}: Connection Accepted", channel.getRemoteAddress());
                 }
                 catch (IOException ioex)
                 {
@@ -149,17 +126,9 @@ public class ServerAsync implements Runnable
             @Override
             public void failed(final Throwable ex, final Void attachment)
             {
-                LOGGER.error(null, ex);
+                getLogger().error(null, ex);
             }
         });
-    }
-
-    /**
-     * @return boolean
-     */
-    public boolean isStarted()
-    {
-        return this.startLock.availablePermits() > 0;
     }
 
     /**
@@ -181,7 +150,7 @@ public class ServerAsync implements Runnable
     @Override
     public void run()
     {
-        LOGGER.info("starting server on port: {}", this.port);
+        getLogger().info("starting '{}' on port: {}", getName(), getPort());
 
         try
         {
@@ -189,26 +158,17 @@ public class ServerAsync implements Runnable
             this.serverSocketChannel = AsynchronousServerSocketChannel.open(this.channelGroup);
             this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEADDR, true);
             // this.serverSocketChannel.setOption(StandardSocketOptions.SO_REUSEPORT, true); // Wird nicht von jedem OS unterstützt.
-            this.serverSocketChannel.bind(new InetSocketAddress(this.port), 50);
+            this.serverSocketChannel.bind(new InetSocketAddress(getPort()), 50);
 
-            LOGGER.info("server listening on port: {}", this.port);
-            this.startLock.release();
+            getLogger().info("'{}' listening on port: {}", getName(), getPort());
+            getStartLock().release();
 
             accept();
         }
         catch (Exception ex)
         {
-            LOGGER.error(null, ex);
+            getLogger().error(null, ex);
         }
-    }
-
-    /**
-     * @param ioHandler {@link IoHandler}
-     */
-    public void setIoHandler(final IoHandler<?> ioHandler)
-    {
-        // Empty
-        // Es gibt kein gemeinsames Interface von Socketchannel und AsynchronousSocketChannel.
     }
 
     /**
@@ -219,7 +179,7 @@ public class ServerAsync implements Runnable
      */
     private void shutdown(final AsynchronousChannelGroup channelGroup, final Logger logger)
     {
-        logger.info("shutdown AsynchronousChannelGroup");
+        logger.debug("shutdown AsynchronousChannelGroup");
         channelGroup.shutdown();
 
         try
@@ -257,15 +217,12 @@ public class ServerAsync implements Runnable
     }
 
     /**
-     * Stoppen des Servers.
-     *
-     * @throws IOException Falls was schief geht.
+     * @see de.freese.sonstiges.server.AbstractServer#start()
      */
-    public void start() throws IOException
+    @Override
+    public void start()
     {
-        Thread thread = new Thread(this::run, getClass().getSimpleName());
-        thread.setDaemon(false);
-        thread.start();
+        run();
 
         // Warten bis fertich.
         // this.startLock.acquireUninterruptibly();
@@ -273,14 +230,15 @@ public class ServerAsync implements Runnable
     }
 
     /**
-     * Stoppen des Servers.
+     * @see de.freese.sonstiges.server.AbstractServer#stop()
      */
+    @Override
     public void stop()
     {
-        LOGGER.info("stopping server on port: {}", this.port);
+        getLogger().info("stopping '{}' on port: {}", getName(), getPort());
 
-        shutdown(this.channelGroup, LOGGER);
+        shutdown(this.channelGroup, getLogger());
 
-        LOGGER.info("server stopped on port: {}", this.port);
+        getLogger().info("'{}' stopped on port: {}", getName(), getPort());
     }
 }

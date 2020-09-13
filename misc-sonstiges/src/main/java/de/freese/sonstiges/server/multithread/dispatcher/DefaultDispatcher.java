@@ -153,7 +153,7 @@ class DefaultDispatcher extends AbstractNioProcessor implements Dispatcher
             {
                 socketChannel.configureBlocking(false);
 
-                getLogger().info("{}: register channel on selector", socketChannel.getRemoteAddress());
+                getLogger().debug("{}: register channel on selector", socketChannel.getRemoteAddress());
 
                 SelectionKey selectionKey = socketChannel.register(getSelector(), SelectionKey.OP_READ);
                 // selectionKey.attach(obj)
@@ -180,7 +180,7 @@ class DefaultDispatcher extends AbstractNioProcessor implements Dispatcher
 
         try
         {
-            getLogger().info("{}: register new channel", socketChannel.getRemoteAddress());
+            getLogger().debug("{}: register new channel", socketChannel.getRemoteAddress());
 
             getNewSessions().add(socketChannel);
 
