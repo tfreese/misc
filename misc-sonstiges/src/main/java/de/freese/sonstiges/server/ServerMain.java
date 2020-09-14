@@ -9,9 +9,9 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
-import de.freese.sonstiges.server.async.ServerAsync;
 import de.freese.sonstiges.server.handler.HttpIoHandler;
 import de.freese.sonstiges.server.handler.IoHandler;
+import de.freese.sonstiges.server.multithread.ServerMultiThread;
 import de.freese.sonstiges.server.singlethread.ServerSingleThread;
 
 /**
@@ -57,8 +57,8 @@ public class ServerMain
         // final SelectorProvider selectorProvider = SelectorProvider.provider();
 
         // AbstractServer server = new ServerSingleThread(8001);
-        // AbstractServer server = new ServerMultiThread(8001, 2, 4);
-        AbstractServer server = new ServerAsync(8001, 4);
+        AbstractServer server = new ServerMultiThread(8001, 2, 4);
+        // AbstractServer server = new ServerAsync(8001, 4);
 
         server.setIoHandler(new HttpIoHandler());
         server.start();
@@ -90,6 +90,12 @@ public class ServerMain
         try (SocketChannel client = SocketChannel.open(serverAddress))
         {
             // client.connect(serverAddress);
+
+            while (!client.finishConnect())
+            {
+                // can do something here...
+            }
+
             client.configureBlocking(true);
 
             // Request
