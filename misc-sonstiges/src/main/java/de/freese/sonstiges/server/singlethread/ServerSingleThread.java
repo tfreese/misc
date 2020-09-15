@@ -227,12 +227,12 @@ public class ServerSingleThread extends AbstractServer
                 selectionKey.cancel();
             }
 
-            this.serverSocketChannel.close();
-
             if (this.selector.isOpen())
             {
                 this.selector.close();
             }
+
+            this.serverSocketChannel.close();
         }
         catch (IOException ex)
         {
