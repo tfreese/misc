@@ -69,6 +69,8 @@ import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+// import java.util.concurrent.ExecutorService;
+// import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
@@ -76,11 +78,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
 import javax.swing.filechooser.FileSystemView;
-
-import de.freese.sonstiges.xml.jaxb.model.DJ;
 import org.apache.commons.lang3.StringUtils;
+import de.freese.sonstiges.xml.jaxb.model.DJ;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -92,6 +92,11 @@ import reactor.test.StepVerifier;
  */
 public final class Misc
 {
+    /**
+     *
+     */
+    private static ExecutorService executorService = Executors.newCachedThreadPool();
+
     /**
      * @throws Exception Falls was schief geht.
      */
@@ -188,47 +193,43 @@ public final class Misc
     }
 
     /**
-     * @param source     {@link InputStream}
-     * @param sink       {@link OutputStream}
+     * @param source {@link InputStream}
+     * @param sink {@link OutputStream}
      * @param bufferSize int
-     *
      * @return long
-     *
      * @throws IOException Falls was schief geht.
      */
     static long copy(final InputStream source, final OutputStream sink, final int bufferSize) throws IOException
     {
         byte[] buffer = new byte[bufferSize];
-        long read = 0;
+        long readTotal = 0;
 
-        // int n = 0;
-        //
-        // while ((n = source.read(buffer)) > 0)
-        // {
-        // sink.write(buffer, 0, n);
-        // read += n;
-        // }
+        int read = 0;
 
-        for (int n = 0; n >= 0; n = source.read(buffer))
+        while ((read = source.read(buffer)) > 0)
         {
-            sink.write(buffer, 0, n);
-            read += n;
+            sink.write(buffer, 0, read);
+            readTotal += read;
         }
 
-        return read;
+        // for (int read = 0; read >= 0; read = source.read(buffer))
+        // {
+        // sink.write(buffer, 0, read);
+        // readTotal += read;
+        // }
+
+        return readTotal;
     }
 
     /**
      * @throws Throwable Falls was schief geht.
      */
-    static void copyPipedStreams() throws Throwable
+    static void copyPipedStreamsInToOut() throws Throwable
     {
-        ExecutorService executorService = ForkJoinPool.commonPool();
-
         // 1 MB
         int chunk = 1024 * 1024;
 
-        String fileName = "archlinux-2019.07.01-x86_64.iso";
+        String fileName = "archlinux-2019.11.01-x86_64.iso";
         Path pathSource = Paths.get(System.getProperty("user.home"), "downloads", "iso", fileName);
         Path pathTarget = Paths.get(System.getProperty("user.dir"), "target", fileName);
 
@@ -241,42 +242,42 @@ public final class Misc
             return;
         }
 
-        try (PipedInputStream pipeIn = new PipedInputStream();
+        try (PipedInputStream pipeIn = new PipedInputStream(chunk);
              PipedOutputStream pipeOut = new PipedOutputStream(pipeIn))
         {
             AtomicReference<Throwable> referenceThrowable = new AtomicReference<>(null);
 
-            Runnable runnable = () ->
-            {
-                System.out.println("Start Source copy: " + Thread.currentThread().getName());
+            Runnable writeTask = () -> {
+                System.out.println("start target copy: " + Thread.currentThread().getName());
 
-                try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
+                try (OutputStream fileOutput = new BufferedOutputStream(Files.newOutputStream(pathTarget), chunk))
                 {
-                    copy(fileInput, pipeOut, chunk);
-
-                    pipeOut.flush();
-
-                    // Ohne dieses close würde der PipedOutputStream nicht beendet werden.
-                    pipeOut.close();
+                    copy(pipeIn, fileOutput, chunk);
                 }
                 catch (Throwable th)
                 {
                     referenceThrowable.set(th);
                 }
 
-                System.out.println("Source copy finished: " + Thread.currentThread().getName());
+                System.out.println("target copy finished: " + Thread.currentThread().getName());
             };
 
-            executorService.execute(runnable);
+            executorService.execute(writeTask);
 
-            System.out.println("Start Target copy: " + Thread.currentThread().getName());
+            // readTask
+            System.out.println("start source copy: " + Thread.currentThread().getName());
 
-            try (OutputStream fileOutput = new BufferedOutputStream(Files.newOutputStream(pathTarget), chunk))
+            try (InputStream fileInput = new BufferedInputStream(Files.newInputStream(pathSource), chunk))
             {
-                copy(pipeIn, fileOutput, chunk);
+                copy(fileInput, pipeOut, chunk);
+
+                pipeOut.flush();
+
+                // Ohne dieses close würde der PipedOutputStream nicht beendet werden.
+                pipeOut.close();
             }
 
-            System.out.println("Target copy finished: " + Thread.currentThread().getName());
+            System.out.println("source copy finished: " + Thread.currentThread().getName());
 
             Throwable th = referenceThrowable.get();
 
@@ -309,6 +310,45 @@ public final class Misc
             // }
 
             System.out.println("copy ... finished: " + Thread.currentThread().getName());
+        }
+    }
+
+    /**
+     * @throws Throwable Falls was schief geht.
+     */
+    static void copyPipedStreamsOutToIn() throws Throwable
+    {
+        // 1 MB
+        int chunk = 1024 * 1024;
+
+        try (PipedOutputStream pipeOut = new PipedOutputStream();
+             PipedInputStream pipeIn = new PipedInputStream(pipeOut, chunk))
+        {
+            Runnable readTask = () -> {
+                System.out.printf("start readTask: %s%n", Thread.currentThread().getName());
+
+                try
+                {
+                    byte[] bytes = pipeIn.readAllBytes();
+
+                    System.out.printf("readTask finished with: %s; %s%n", new String(bytes, StandardCharsets.UTF_8), Thread.currentThread().getName());
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+            };
+
+            executorService.execute(readTask);
+
+            // writeTask
+            System.out.printf("start writeTask: %s%n", Thread.currentThread().getName());
+
+            pipeOut.write("Hello World!".getBytes(StandardCharsets.UTF_8));
+            pipeOut.flush();
+
+            System.out.printf("writeTask finished: %s%n", Thread.currentThread().getName());
+            System.out.printf("copy ... finished: %s%n", Thread.currentThread().getName());
         }
     }
 
@@ -526,9 +566,8 @@ public final class Misc
      * Pattern "lllll_UUUUU_dddddd." returns "vrifa_EMFCQ_399671."<br>
      * <br>
      *
-     * @param random  {@link Random}
+     * @param random {@link Random}
      * @param pattern String
-     *
      * @return String
      */
     static String generatePW(final Random random, final String pattern)
@@ -691,8 +730,7 @@ public final class Misc
 
         // Liefert alles im Verzeichnis, nicht rekursiv.
         System.out.println();
-        DirectoryStream.Filter<Path> filter = path ->
-        {
+        DirectoryStream.Filter<Path> filter = path -> {
             return Files.isDirectory(path) && !path.getFileName().toString().startsWith(".");
         };
 
@@ -721,7 +759,6 @@ public final class Misc
 
     /**
      * @param args String[]
-     *
      * @throws Throwable Falls was schief geht.
      */
     public static void main(final String[] args) throws Throwable
@@ -730,7 +767,8 @@ public final class Misc
         // System.out.printf("%s: %s.%s%n", Thread.currentThread().getName(), "de.freese.sonstiges.Misc", "main");
 
         // byteBuffer();
-        // copyPipedStreams();
+        // copyPipedStreamsInToOut();
+        copyPipedStreamsOutToIn();
         // dateTime();
         // fileSystems();
         // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
@@ -738,13 +776,15 @@ public final class Misc
         // introspector();
         // javaVersion();
         // listDirectories();
-//        nioPipe();
+        // nioPipe();
         // reactor();
         // securityProviders();
-        shift();
+        // shift();
         // splitList();
         // systemMXBean();
-//        textBlocks();
+        // textBlocks();
+
+        executorService.shutdown();
     }
 
     /**
@@ -754,8 +794,7 @@ public final class Misc
     {
         Pipe pipe = Pipe.open();
 
-        Callable<Void> writeCallable = () ->
-        {
+        Callable<Void> writeCallable = () -> {
             // Schreiben
             Pipe.SinkChannel sinkChannel = pipe.sink();
 
@@ -777,8 +816,7 @@ public final class Misc
             return null;
         };
 
-        Callable<Void> readCallable = () ->
-        {
+        Callable<Void> readCallable = () -> {
             // Lesen
             Pipe.SourceChannel sourceChannel = pipe.source();
 
@@ -922,7 +960,7 @@ public final class Misc
 
         System.out.println();
 
-        Scheduler scheduler = Schedulers.fromExecutor(Executors.newFixedThreadPool(Schedulers.DEFAULT_POOL_SIZE));
+        Scheduler scheduler = Schedulers.fromExecutor(executorService);
         // subscribeOn(Scheduler scheduler)
 
         // @formatter:off
@@ -1151,7 +1189,7 @@ public final class Misc
 
             for (int i = 0; i < 3; i++)
             {
-                // << 1: Bit-Shift nach links,  vergrößert  um power of 2; 1,2,4,8,16,32,...
+                // << 1: Bit-Shift nach links, vergrößert um power of 2; 1,2,4,8,16,32,...
                 // >> 1: Bit-Shift nach rechts, verkleinert um power of 2; ...,32,16,8,4,2,1
                 System.out.printf("%d << %d = %d;   %d >> %d = %d%n", nn, i, nn << i, nn, i, nn >> i);
             }
@@ -1191,8 +1229,7 @@ public final class Misc
         Map<Integer, List<Integer>> groups = intList.stream().collect(Collectors.groupingBy(s -> (s - 1) / 3));
         List<List<Integer>> subSets = new ArrayList<>(groups.values());
 
-        subSets.forEach(list ->
-        {
+        subSets.forEach(list -> {
             System.out.println("\nSub-List:");
             list.forEach(System.out::println);
         });
@@ -1252,16 +1289,16 @@ public final class Misc
         // '%s' String.format Platzhalter
 
         String sql = """
-                select
-                *
-                from \
-                "table"
+            select
+            *
+            from \
+            "table"
 
-                where
+            where
 
-                \t1 = 1
-                    order by %s asc;
-                """.formatted("column");
+            \t1 = 1
+                order by %s asc;
+            """.formatted("column");
 
         System.out.println(sql);
     }
