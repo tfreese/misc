@@ -89,6 +89,12 @@ public class ServerMultiThread extends AbstractServer
             this.serverSocketChannel = this.selectorProvider.openServerSocketChannel();
             this.serverSocketChannel.configureBlocking(false);
 
+            if (this.serverSocketChannel.supportedOptions().contains(StandardSocketOptions.TCP_NODELAY))
+            {
+                // this.serverSocketChannel.getOption(StandardSocketOptions.TCP_NODELAY);
+                this.serverSocketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
+            }
+
             if (this.serverSocketChannel.supportedOptions().contains(StandardSocketOptions.SO_REUSEADDR))
             {
                 // this.serverSocketChannel.getOption(StandardSocketOptions.SO_REUSEADDR);
