@@ -13,10 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.RandomStringUtils;
-import com.lmax.disruptor.BusySpinWaitStrategy;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
-import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 
 /**
@@ -27,6 +25,11 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
 public class HttpEventMain
 {
     /**
+     * -2 damit noch Platz für den CleaningEventHandler und sonstige Resourcen bleibt.
+     */
+    public static final int THREAD_COUNT = Math.max(2, Runtime.getRuntime().availableProcessors() - 2);
+
+    /**
      * @param args String[]
      * @throws Exception Falls was schief geht.
      */
@@ -36,15 +39,11 @@ public class HttpEventMain
 
         HttpEventMain server = new HttpEventMain(null, 4333);
 
-        HttpEventFactory factory = new HttpEventFactory();
+        int bufferSize = 32;
 
-        int bufferSize = 1024;
+        Disruptor<HttpEvent> disruptor = new Disruptor<>(HttpEvent::new, bufferSize, DaemonThreadFactory.INSTANCE);
 
-        // Disruptor<HttpEvent> disruptor = new Disruptor(factory, bufferSize, DaemonThreadFactory.INSTANCE);
-        Disruptor<HttpEvent> disruptor = new Disruptor<>(factory, bufferSize, DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BusySpinWaitStrategy());
-
-        // -1 damit noch Platz für den CleaningEventHandler bleibt.
-        HttpEventHandler[] handlers = new HttpEventHandler[Runtime.getRuntime().availableProcessors() - 1];
+        HttpEventHandler[] handlers = new HttpEventHandler[THREAD_COUNT];
 
         for (int i = 0; i < handlers.length; i++)
         {
@@ -59,9 +58,8 @@ public class HttpEventMain
 
         server.setProducer(new HttpEventProducer(ringBuffer, server.getMapResponseReady()));
 
-        System.out.println("\n====================Server Details====================");
-        System.out.println("Server Machine: " + InetAddress.getLocalHost().getCanonicalHostName());
-        System.out.println("Port number: " + server.getPort());
+        System.out.println("\n==================== Details ====================");
+        System.out.println("Server: " + InetAddress.getLocalHost().getCanonicalHostName() + ":" + server.getPort());
 
         try
         {

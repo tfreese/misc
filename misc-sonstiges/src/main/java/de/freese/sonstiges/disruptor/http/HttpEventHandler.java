@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.lmax.disruptor.EventHandler;
 
 /**
@@ -12,6 +14,11 @@ import com.lmax.disruptor.EventHandler;
  */
 public class HttpEventHandler implements EventHandler<HttpEvent>
 {
+    /**
+    *
+    */
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpEventHandler.class);
+
     /**
      *
      */
@@ -71,9 +78,10 @@ public class HttpEventHandler implements EventHandler<HttpEvent>
     @Override
     public void onEvent(final HttpEvent event, final long sequence, final boolean endOfBatch) throws Exception
     {
-        if ((sequence % Runtime.getRuntime().availableProcessors()) == this.id)
+        // Load-Balancing auf die Handler über die Sequence.
+        if ((this.id == -1) || (this.id == (sequence % HttpEventMain.THREAD_COUNT)))
         {
-            System.out.printf("%s_HttpEventHandler.onEvent: RequestId=%s, Sequence=%d%n", Thread.currentThread().getName(), event.getRequestId(), sequence);
+            LOGGER.info("{}: HttpEventHandler.onEvent: RequestId={}, Sequence={}", Thread.currentThread().getName(), event.getRequestId(), sequence);
 
             String requestId = event.getRequestId();
             ByteBuffer buffer = event.getBuffer();

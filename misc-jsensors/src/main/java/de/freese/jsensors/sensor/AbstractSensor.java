@@ -1,68 +1,57 @@
 // Created: 31.05.2017
 package de.freese.jsensors.sensor;
 
-import java.util.List;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanNameAware;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
+import de.freese.jsensors.lifecycle.AbstractLifeCycle;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * Basis-implementierung eines Sensors.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractSensor implements Sensor, BeanNameAware
+public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
 {
     /**
      *
      */
-    private List<Backend> backends = null;
+    private Backend backend;
 
     /**
-    *
-    */
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    /**
-    *
-    */
-    private String name = null;
-
-    /**
-     * Erzeugt eine neue Instanz von {@link AbstractSensor}.
-     */
-    public AbstractSensor()
-    {
-        super();
-    }
-
-    /**
-     * @return {@link List}
-     */
-    protected List<Backend> getBackends()
-    {
-        return this.backends;
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return this.logger;
-    }
-
-    /**
-     * Liefert den Namen des Sensors.
      *
-     * @return String
      */
-    protected String getName()
+    private boolean exclusive;
+
+    /**
+    *
+    */
+    private String name;
+
+    /**
+     * @return {@link Backend}
+     */
+    protected Backend getBackend()
+    {
+        return this.backend;
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.Sensor#getName()
+     */
+    @Override
+    public String getName()
     {
         return this.name;
+    }
+
+    /**
+     * @return boolean
+     */
+    protected boolean isExclusive()
+    {
+        return this.exclusive;
     }
 
     /**
@@ -76,20 +65,17 @@ public abstract class AbstractSensor implements Sensor, BeanNameAware
     }
 
     /**
-     * Speichert den Sensorwert in den Backends.
+     * Speichert den Sensorwert im {@link Backend}.
      *
      * @param value String
      * @param timestamp long
-     * @param sensor String
+     * @param sensorName String
      */
-    protected void save(final String value, final long timestamp, final String sensor)
+    protected void save(final String value, final long timestamp, final String sensorName)
     {
-        final SensorValue sensorValue = new SensorValue(sensor, value, timestamp);
+        final SensorValue sensorValue = new SensorValue(sensorName, value, timestamp, isExclusive());
 
-        for (Backend backend : getBackends())
-        {
-            backend.save(sensorValue);
-        }
+        this.backend.save(sensorValue);
     }
 
     /**
@@ -116,52 +102,40 @@ public abstract class AbstractSensor implements Sensor, BeanNameAware
     protected abstract void scanValue() throws Exception;
 
     /**
-     * @see de.freese.jsensors.sensor.Sensor#setBackends(java.util.List)
+     * @see de.freese.jsensors.sensor.Sensor#setBackend(de.freese.jsensors.backend.Backend)
      */
     @Override
-    public void setBackends(final List<Backend> backends)
+    public void setBackend(final Backend backend)
     {
-        this.backends = Objects.requireNonNull(backends, "backends required");
+        this.backend = Objects.requireNonNull(backend, "backend required");
     }
 
     /**
-     * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
+     * @see de.freese.jsensors.sensor.Sensor#setExclusive(boolean)
      */
     @Override
-    public final void setBeanName(final String name)
+    public void setExclusive(final boolean exclusive)
     {
-        // Defaultname = Beanname
-        setName(name);
+        this.exclusive = exclusive;
     }
 
     /**
-     * Setzt den Namen des Sensors.
-     *
-     * @param name String; optional; Default = BeanID
+     * @see de.freese.jsensors.sensor.Sensor#setName(java.lang.String)
      */
     @Override
     public void setName(final String name)
     {
         Objects.requireNonNull(name, "name required");
 
-        this.name = name;
-    }
+        String formattedName = Utils.sensorNameToTableName(name);
 
-    /**
-     * @see de.freese.jsensors.LifeCycle#start()
-     */
-    @Override
-    public void start()
-    {
-        // NOOP
-    }
+        if (!name.equals(formattedName))
+        {
+            getLogger().info("change sensor name from '{}' to '{}'", name, formattedName);
+        }
 
-    /**
-     * @see de.freese.jsensors.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        // NOOP
+        this.name = formattedName;
+
+        SensorRegistry.getInstance().register(this);
     }
 }

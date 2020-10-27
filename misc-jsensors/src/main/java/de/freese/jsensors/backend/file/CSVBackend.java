@@ -17,17 +17,8 @@ import de.freese.jsensors.sensor.Sensor;
 public class CSVBackend extends AbstractFileBackend
 {
     /**
-     * Erzeugt eine neue Instanz von {@link CSVBackend}.
-     */
-    public CSVBackend()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
-    @SuppressWarnings("resource")
     @Override
     protected void saveValue(final SensorValue sensorValue)
     {

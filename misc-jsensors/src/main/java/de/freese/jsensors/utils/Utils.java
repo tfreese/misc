@@ -1,5 +1,5 @@
 // Created: 01.06.2017
-package de.freese.jsensors;
+package de.freese.jsensors.utils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Freese
  */
-public class Utils
+public final class Utils
 {
     /**
      *
@@ -136,7 +136,7 @@ public class Utils
      * Format:<br>
      * <ul>
      * <li>Großbuchstaben
-     * <li>' ', '-' werden durch '_' ersetzt
+     * <li>' ', '-', '/', '\' werden durch '_' ersetzt
      * </ul>
      *
      * @param sensorName String
@@ -147,6 +147,8 @@ public class Utils
         String tableName = sensorName.toUpperCase();
         tableName = tableName.replace("-", "_");
         tableName = tableName.replace(" ", "_");
+        tableName = tableName.replace("/", "_");
+        tableName = tableName.replace("\\", "_");
 
         return tableName;
     }

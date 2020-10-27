@@ -46,6 +46,7 @@ public class HttpEventProducer
         try
         {
             HttpEvent event = this.ringBuffer.get(sequence);
+
             event.setBuffer(buffer);
             event.setRequestId(requestId);
             event.setNumRead(numRead);

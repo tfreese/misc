@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * Sensor für die Netzwerk Auslastung.<br>
@@ -29,11 +29,19 @@ public class NetworkUsage extends AbstractSensor
     private final List<String> interfaces = new ArrayList<>();
 
     /**
-     * Erzeugt eine neue Instanz von {@link NetworkUsage}.
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
      */
-    public NetworkUsage()
+    @Override
+    protected void doStart() throws Exception
     {
-        super();
+        if (Utils.isLinux() && this.interfaces.isEmpty())
+        {
+            // Kein Interface angegeben -> alle ermitteln ausser "lo".
+            // Beispiel: em1 lo wlp6so
+            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
+
+            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+        }
     }
 
     /**
@@ -63,7 +71,7 @@ public class NetworkUsage extends AbstractSensor
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
-                long value = Long.valueOf(matcher.group(1));
+                long value = Long.parseLong(matcher.group(1));
                 return value;
             }).findFirst().orElse(0L);
 
@@ -71,7 +79,7 @@ public class NetworkUsage extends AbstractSensor
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
-                long value = Long.valueOf(matcher.group(1));
+                long value = Long.parseLong(matcher.group(1));
                 return value;
             }).findFirst().orElse(0L);
 
@@ -149,23 +157,5 @@ public class NetworkUsage extends AbstractSensor
     public void setInterface(final String iFace)
     {
         this.interfaces.add(iFace);
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if (Utils.isLinux() && this.interfaces.isEmpty())
-        {
-            // Kein Interface angegeben -> alle ermitteln ausser "lo".
-            // Beispiel: em1 lo wlp6so
-            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
-
-            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
-        }
     }
 }

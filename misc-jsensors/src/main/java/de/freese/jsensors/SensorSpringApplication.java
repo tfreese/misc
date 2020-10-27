@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 @EnableAsync
 @EnableScheduling
 @ComponentScan(basePackages = "de.freese.jsensors")
-public class SensorApplication
+public class SensorSpringApplication
 {
     /**
      * @param args String[]
@@ -42,7 +42,7 @@ public class SensorApplication
 
         SwingUtilities.invokeLater(() -> {
             // @formatter:off
-            new SpringApplicationBuilder(SensorApplication.class) // , "classpath:sensors.xml"
+            new SpringApplicationBuilder(SensorSpringApplication.class) // , "classpath:sensors.xml"
                     .headless(true) // Default true
                     .web(WebApplicationType.NONE) // Wird eigentlich automatisch ermittelt.
                     .registerShutdownHook(true) // Default true

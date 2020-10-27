@@ -11,14 +11,6 @@ import java.io.File;
 public class DiskFreeSpace extends AbstractDiskSensor
 {
     /**
-     * Erzeugt eine neue Instanz von {@link DiskFreeSpace}.
-     */
-    public DiskFreeSpace()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
      */
     @Override

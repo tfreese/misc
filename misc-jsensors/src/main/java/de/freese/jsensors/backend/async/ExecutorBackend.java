@@ -20,19 +20,39 @@ public class ExecutorBackend extends AbstractBackend
     /**
      *
      */
-    private Backend delegate = null;
+    private Backend delegate;
 
     /**
      *
      */
-    private ExecutorService executorService = null;
+    private ExecutorService executorService;
 
     /**
-     * Erstellt ein neues {@link ExecutorBackend} Object.
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
      */
-    public ExecutorBackend()
+    @Override
+    protected void doStart() throws Exception
     {
-        super();
+        if (getDelegate() == null)
+        {
+            throw new NullPointerException("delegate backend required");
+        }
+
+        if (getExecutorService() == null)
+        {
+            throw new NullPointerException("executorService required");
+        }
+
+        getDelegate().start();
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     */
+    @Override
+    protected void doStop() throws Exception
+    {
+        getDelegate().stop();
     }
 
     /**
@@ -92,37 +112,5 @@ public class ExecutorBackend extends AbstractBackend
     public void setExecutorService(final ExecutorService executorService)
     {
         this.executorService = Objects.requireNonNull(executorService, "executorService required");
-    }
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if (getDelegate() == null)
-        {
-            throw new NullPointerException("delegate Backend required");
-        }
-
-        if (getExecutorService() == null)
-        {
-            throw new NullPointerException("executorService required");
-        }
-
-        getDelegate().start();
-    }
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        super.stop();
-
-        getDelegate().stop();
     }
 }

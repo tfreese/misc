@@ -24,7 +24,7 @@ public abstract class AbstractFileBackend extends AbstractBackend
     /**
     *
     */
-    private Path directory = null;
+    private Path directory;
 
     /**
      *
@@ -37,11 +37,44 @@ public abstract class AbstractFileBackend extends AbstractBackend
     private final Map<Path, PrintStream> printStreams = new HashMap<>();
 
     /**
-     * Erzeugt eine neue Instanz von {@link AbstractFileBackend}.
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
      */
-    public AbstractFileBackend()
+    @Override
+    protected void doStart() throws Exception
     {
-        super();
+        if (getDirectory() == null)
+        {
+            throw new NullPointerException("directory required");
+        }
+
+        Files.createDirectories(getDirectory());
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     */
+    @Override
+    protected void doStop() throws Exception
+    {
+        this.printStreams.values().forEach(ps -> {
+            ps.flush();
+            ps.close();
+        });
+
+        this.printStreams.clear();
+
+        this.outputStreams.values().forEach(os -> {
+            try
+            {
+                os.flush();
+                os.close();
+            }
+            catch (IOException ioex)
+            {
+                getLogger().error(null, ioex);
+            }
+        });
+        this.outputStreams.clear();
     }
 
     /**
@@ -58,7 +91,6 @@ public abstract class AbstractFileBackend extends AbstractBackend
      * @return {@link OutputStream}
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     protected OutputStream getOutputStream(final Path file, final boolean buffered) throws IOException
     {
         // OutputStream os = outputStreams.computeIfAbsent(path, key -> Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND));
@@ -99,7 +131,6 @@ public abstract class AbstractFileBackend extends AbstractBackend
      * @return {@link PrintStream}
      * @throws IOException Falls was schief geht.
      */
-    @SuppressWarnings("resource")
     protected PrintStream getPrintStream(final Path file, final boolean buffered) throws IOException
     {
         PrintStream ps = this.printStreams.get(file);
@@ -147,56 +178,5 @@ public abstract class AbstractFileBackend extends AbstractBackend
         }
 
         setDirectory(Paths.get(directory));
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if (getDirectory() == null)
-        {
-            throw new NullPointerException("directory required");
-        }
-
-        try
-        {
-            Files.createDirectories(getDirectory());
-        }
-        catch (IOException ioex)
-        {
-            getLogger().error(null, ioex);
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#stop()
-     */
-    @Override
-    public void stop()
-    {
-        super.stop();
-
-        this.printStreams.values().forEach(ps -> {
-            ps.flush();
-            ps.close();
-        });
-        this.printStreams.clear();
-
-        this.outputStreams.values().forEach(os -> {
-            try
-            {
-                os.flush();
-                os.close();
-            }
-            catch (IOException ioex)
-            {
-                getLogger().error(null, ioex);
-            }
-        });
-        this.outputStreams.clear();
     }
 }

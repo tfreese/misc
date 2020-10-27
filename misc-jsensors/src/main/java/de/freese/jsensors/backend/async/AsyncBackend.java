@@ -25,14 +25,6 @@ public class AsyncBackend extends AbstractBackend
     private class QueueWorker extends Thread
     {
         /**
-         * Erzeugt eine neue Instanz von {@link QueueWorker}.
-         */
-        private QueueWorker()
-        {
-            super();
-        }
-
-        /**
          * @see java.lang.Runnable#run()
          */
         @Override
@@ -69,7 +61,7 @@ public class AsyncBackend extends AbstractBackend
     /**
      *
      */
-    private Backend delegate = null;
+    private Backend delegate;
 
     /**
      *
@@ -87,11 +79,53 @@ public class AsyncBackend extends AbstractBackend
     private final List<QueueWorker> workers = new ArrayList<>();
 
     /**
-     * Erstellt ein neues {@link AsyncBackend} Object.
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
      */
-    public AsyncBackend()
+    @Override
+    protected void doStart() throws Exception
     {
-        super();
+        if (getDelegate() == null)
+        {
+            throw new NullPointerException("delegate backend required");
+        }
+
+        getDelegate().start();
+
+        for (int i = 1; i <= getNumberOfWorkers(); i++)
+        {
+            QueueWorker worker = new QueueWorker();
+            worker.setName(getDelegate().getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
+            worker.setDaemon(true);
+
+            this.workers.add(worker);
+            worker.start();
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     */
+    @Override
+    protected void doStop() throws Exception
+    {
+        this.workers.forEach(QueueWorker::interrupt);
+
+        // Save last SensorValues.
+        if (!getQueue().isEmpty())
+        {
+            getLogger().info("save last sensorvalues");
+
+            SensorValue sv = null;
+
+            while ((sv = getQueue().poll()) != null)
+            {
+                getDelegate().save(sv);
+            }
+        }
+
+        this.workers.clear();
+
+        getDelegate().stop();
     }
 
     /**
@@ -155,59 +189,5 @@ public class AsyncBackend extends AbstractBackend
         }
 
         this.numberOfWorkers = numberOfWorkers;
-    }
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if (getDelegate() == null)
-        {
-            throw new NullPointerException("delegate Backend required");
-        }
-
-        getDelegate().start();
-
-        for (int i = 1; i <= getNumberOfWorkers(); i++)
-        {
-            QueueWorker worker = new QueueWorker();
-            worker.setName(getDelegate().getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
-            worker.setDaemon(true);
-
-            this.workers.add(worker);
-            worker.start();
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        super.stop();
-
-        this.workers.forEach(w -> w.interrupt());
-
-        // Save last SensorValues.
-        if (!getQueue().isEmpty())
-        {
-            getLogger().info("save last sensorvalues");
-
-            SensorValue sv = null;
-
-            while ((sv = getQueue().poll()) != null)
-            {
-                getDelegate().save(sv);
-            }
-        }
-
-        this.workers.clear();
-
-        getDelegate().stop();
     }
 }

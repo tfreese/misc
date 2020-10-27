@@ -11,9 +11,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.Utils;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * {@link Backend} für die Ausgabe der Sensorwerte in einer RRDTool-Datei.<br>
@@ -27,14 +27,6 @@ public class RRDToolBackend extends AbstractFileBackend
      *
      */
     private final Set<String> existingFiles = Collections.synchronizedSet(new TreeSet<>());
-
-    /**
-     * Erzeugt eine neue Instanz von {@link RRDToolBackend}.
-     */
-    public RRDToolBackend()
-    {
-        super();
-    }
 
     /**
      * Erzeugt die RRD-Datei, falls diese noch nicht existiert.

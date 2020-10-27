@@ -15,37 +15,39 @@ public class SensorValue
     /**
     *
     */
-    private Date date = null;
+    private Date date;
 
     /**
     *
     */
-    private LocalDateTime localDateTime = null;
+    private boolean exclusive;
+
+    /**
+    *
+    */
+    private LocalDateTime localDateTime;
 
     /**
      *
      */
-    private final String name;
+    private String name;
 
     /**
      *
      */
-    private final long timestamp;
+    private long timestamp = -1;
 
     /**
      *
      */
-    private final String value;
+    private String value;
 
     /**
-     * Erzeugt eine neue Instanz von {@link SensorValue}.
-     *
-     * @param name String
-     * @param value String
+     * Erstellt ein neues {@link SensorValue} Object.
      */
-    public SensorValue(final String name, final String value)
+    public SensorValue()
     {
-        this(name, value, System.currentTimeMillis());
+        super();
     }
 
     /**
@@ -54,14 +56,68 @@ public class SensorValue
      * @param name String
      * @param value String
      * @param timestamp long
+     * @param exclusive boolean
      */
-    public SensorValue(final String name, final String value, final long timestamp)
+    public SensorValue(final String name, final String value, final long timestamp, final boolean exclusive)
     {
         super();
 
         this.name = Objects.requireNonNull(name, "name required");
         this.value = Objects.requireNonNull(value, "value required");
         this.timestamp = timestamp;
+        this.exclusive = exclusive;
+    }
+
+    /**
+     * Leeren aller Attribute.
+     */
+    public void clear()
+    {
+        this.name = null;
+        this.value = null;
+        this.timestamp = -1;
+        this.exclusive = false;
+
+        this.date = null;
+        this.localDateTime = null;
+    }
+
+    /**
+     * Kopiert alle Daten von der Quelle.
+     *
+     * @param src {@link SensorValue}
+     */
+    public void copyFrom(final SensorValue src)
+    {
+        this.name = src.getName();
+        this.value = src.getValue();
+        this.timestamp = src.getTimestamp();
+        this.exclusive = src.isExclusive();
+
+        this.date = null;
+        this.localDateTime = null;
+    }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof SensorValue))
+        {
+            return false;
+        }
+
+        SensorValue other = (SensorValue) obj;
+
+        return (this.exclusive == other.exclusive) && Objects.equals(this.name, other.name) && (this.timestamp == other.timestamp)
+                && Objects.equals(this.value, other.value);
     }
 
     /**
@@ -115,6 +171,23 @@ public class SensorValue
     }
 
     /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(this.exclusive, this.name, this.timestamp, this.value);
+    }
+
+    /**
+     * @return boolean
+     */
+    public boolean isExclusive()
+    {
+        return this.exclusive;
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -125,6 +198,7 @@ public class SensorValue
         builder.append("name=").append(this.name);
         builder.append(", value=").append(this.value);
         builder.append(", timestamp=").append(getLocalDateTime());
+        builder.append(", exclusive=").append(isExclusive());
         builder.append("]");
 
         return builder.toString();

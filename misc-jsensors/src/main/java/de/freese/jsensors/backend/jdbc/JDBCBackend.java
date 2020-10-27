@@ -13,10 +13,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.sql.DataSource;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.Utils;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * {@link Backend} für die Ausgabe der Sensorwerte in einer Datenbank.<br>
@@ -30,20 +30,12 @@ public class JDBCBackend extends AbstractBackend
     /**
      *
      */
-    private DataSource dataSource = null;
+    private DataSource dataSource;
 
     /**
     *
     */
     private final Set<String> existingTables = Collections.synchronizedSet(new TreeSet<>());
-
-    /**
-     * Erzeugt eine neue Instanz von {@link JDBCBackend}.
-     */
-    public JDBCBackend()
-    {
-        super();
-    }
 
     /**
      * Erzeugt die Tabelle, falls diese noch nicht existiert.
@@ -91,11 +83,31 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     */
+    @Override
+    protected void doStart() throws Exception
+    {
+        Objects.requireNonNull(getDataSource(), "dataSource required");
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     */
+    @Override
+    protected void doStop() throws Exception
+    {
+        // Empty
+        // getDataSource().close()
+        this.dataSource = null;
+    }
+
+    /**
      * Liefert die {@link DataSource}.
      *
      * @return {@link DataSource}
      */
-    public DataSource getDataSource()
+    private DataSource getDataSource()
     {
         return this.dataSource;
     }
@@ -155,16 +167,5 @@ public class JDBCBackend extends AbstractBackend
     public void setDataSource(final DataSource dataSource)
     {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        Objects.requireNonNull(getDataSource(), "dataSource required");
     }
 }

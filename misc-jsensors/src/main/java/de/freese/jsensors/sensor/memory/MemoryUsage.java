@@ -3,8 +3,8 @@ package de.freese.jsensors.sensor.memory;
 
 import com.jezhumble.javasysmon.JavaSysMon;
 import com.jezhumble.javasysmon.MemoryStats;
-import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * Sensor für die Speicher Auslastung.

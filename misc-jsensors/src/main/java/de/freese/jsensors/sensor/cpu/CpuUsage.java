@@ -3,8 +3,8 @@ package de.freese.jsensors.sensor.cpu;
 
 import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
-import de.freese.jsensors.Utils;
 import de.freese.jsensors.sensor.AbstractSensor;
+import de.freese.jsensors.utils.Utils;
 
 /**
  * Sensor für die CPU Auslastung.
@@ -16,7 +16,7 @@ public class CpuUsage extends AbstractSensor
     /**
      *
      */
-    private CpuTimes cpuTimesPrevious = null;
+    private CpuTimes cpuTimesPrevious;
 
     /**
      *

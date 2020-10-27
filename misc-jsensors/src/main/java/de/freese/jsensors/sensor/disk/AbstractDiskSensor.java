@@ -16,24 +16,32 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     /**
      *
      */
-    private String disk = null;
+    private String disk;
 
     /**
     *
     */
-    private File file = null;
+    private File file;
 
     /**
      *
      */
-    private FileSystemView fileSystemView = null;
+    private FileSystemView fileSystemView;
 
     /**
-     * Erzeugt eine neue Instanz von {@link AbstractDiskSensor}.
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
      */
-    public AbstractDiskSensor()
+    @Override
+    protected void doStart() throws Exception
     {
-        super();
+        if ((this.disk == null) || this.disk.isEmpty())
+        {
+            throw new IllegalStateException("disk required");
+        }
+
+        this.fileSystemView = FileSystemView.getFileSystemView();
+
+        this.file = new File(this.disk);
     }
 
     /**
@@ -58,23 +66,5 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     public void setDisk(final String disk)
     {
         this.disk = Objects.requireNonNull(disk, "disk required");
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if ((this.disk == null) || this.disk.isEmpty())
-        {
-            throw new IllegalStateException("disk required");
-        }
-
-        this.fileSystemView = FileSystemView.getFileSystemView();
-
-        this.file = new File(this.disk);
     }
 }

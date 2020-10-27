@@ -1,69 +1,21 @@
 // Created: 31.05.2017
 package de.freese.jsensors.backend;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.lifecycle.AbstractLifeCycle;
 
 /**
  * Basis-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractBackend implements Backend
+public abstract class AbstractBackend extends AbstractLifeCycle implements Backend
 {
-    /**
-    *
-    */
-    private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    /**
-     *
-     */
-    private boolean started = false;
-
-    /**
-     *
-     */
-    private boolean stopped = false;
-
-    /**
-     * Erzeugt eine neue Instanz von {@link AbstractBackend}.
-     */
-    public AbstractBackend()
-    {
-        super();
-    }
-
-    /**
-     * @return {@link Logger}
-     */
-    protected Logger getLogger()
-    {
-        return this.logger;
-    }
-
-    /**
-     * @return boolean
-     */
-    protected boolean isStarted()
-    {
-        return this.started;
-    }
-
-    /**
-     * @return boolean
-     */
-    protected boolean isStopped()
-    {
-        return this.stopped;
-    }
-
     /**
      * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.SensorValue)
      */
     @Override
-    public void save(final SensorValue sensorValue)
+    public final void save(final SensorValue sensorValue)
     {
         if (sensorValue == null)
         {
@@ -80,14 +32,11 @@ public abstract class AbstractBackend implements Backend
 
         if (!isStarted())
         {
-            getLogger().error("backend not started started, sensorvalue discarted");
+            getLogger().error("backend not started, sensorvalue discarted");
             return;
         }
 
-        if (getLogger().isDebugEnabled())
-        {
-            getLogger().debug("{}", sensorValue);
-        }
+        getLogger().debug("{}", sensorValue);
 
         saveValue(sensorValue);
     }
@@ -98,45 +47,4 @@ public abstract class AbstractBackend implements Backend
      * @param sensorValue {@link SensorValue}
      */
     protected abstract void saveValue(SensorValue sensorValue);
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#start()
-     */
-    @Override
-    public void start()
-    {
-        getLogger().info("starting backend");
-
-        if (isStarted())
-        {
-            // throw new IllegalStateException("backend already started");
-            getLogger().error("backend already started");
-            return;
-        }
-
-        if (isStopped())
-        {
-            getLogger().error("backend already stopped");
-            return;
-        }
-
-        this.started = true;
-    }
-
-    /**
-     * @see de.freese.jsensors.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        getLogger().info("stopping backend");
-
-        if (isStopped())
-        {
-            getLogger().error("backend already stopped");
-            return;
-        }
-
-        this.stopped = true;
-    }
 }

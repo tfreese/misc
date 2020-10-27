@@ -1,6 +1,8 @@
 // Created: 26.08.2020
 package de.freese.sonstiges.disruptor.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.lmax.disruptor.EventHandler;
 
 /**
@@ -9,17 +11,14 @@ import com.lmax.disruptor.EventHandler;
 public class LongEventHandler implements EventHandler<LongEvent>
 {
     /**
-     *
-     */
-    private final int id;
+    *
+    */
+    private static final Logger LOGGER = LoggerFactory.getLogger(LongEventHandler.class);
 
     /**
      *
      */
-    public LongEventHandler()
-    {
-        this(-1);
-    }
+    private final int id;
 
     /**
      * @param id int
@@ -32,23 +31,26 @@ public class LongEventHandler implements EventHandler<LongEvent>
     }
 
     /**
+     * @param event {@link LongEvent}
+     */
+    private void handleEvent(final LongEvent event)
+    {
+        LOGGER.info("{}: LongEventHandler.onEvent: Event = {}", Thread.currentThread().getName(), event);
+
+        // Kann auch vom CleaningEventHandler erledigt werden, wenn es mehrere EventHandler sind.
+        // event.clear();
+    }
+
+    /**
      * @see EventHandler#onEvent(Object, long, boolean)
      */
     @Override
     public void onEvent(final LongEvent event, final long sequence, final boolean endOfBatch)
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.id == -1) || (this.id == (sequence % Runtime.getRuntime().availableProcessors())))
+        if ((this.id == -1) || (this.id == (sequence % LongEventMain.THREAD_COUNT)))
         {
             handleEvent(event);
         }
-    }
-
-    /**
-     * @param event {@link LongEvent}
-     */
-    private void handleEvent(final LongEvent event)
-    {
-        System.out.printf("%s_LongEventHandler.onEvent: Event = %s%n", Thread.currentThread().getName(), event);
     }
 }
