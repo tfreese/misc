@@ -37,10 +37,10 @@ public abstract class AbstractFileBackend extends AbstractBackend
     private final Map<Path, PrintStream> printStreams = new HashMap<>();
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
      */
     @Override
-    protected void doStart() throws Exception
+    protected void onStart() throws Exception
     {
         if (getDirectory() == null)
         {
@@ -51,10 +51,10 @@ public abstract class AbstractFileBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
      */
     @Override
-    protected void doStop() throws Exception
+    protected void onStop() throws Exception
     {
         this.printStreams.values().forEach(ps -> {
             ps.flush();

@@ -1,5 +1,5 @@
 // Created: 27.10.2020
-package de.freese.jsensors;
+package de.freese.jsensors.registry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
@@ -63,17 +64,6 @@ public final class SensorBackendRegistry extends AbstractBackend
     private SensorBackendRegistry()
     {
         super();
-
-        start();
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
-     */
-    @Override
-    protected void doStop() throws Exception
-    {
-        this.registry.clear();
     }
 
     /**
@@ -83,6 +73,15 @@ public final class SensorBackendRegistry extends AbstractBackend
     protected Logger getLogger()
     {
         return LOGGER;
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
+     */
+    @Override
+    protected void onStop() throws Exception
+    {
+        this.registry.clear();
     }
 
     /**

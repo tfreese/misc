@@ -29,10 +29,10 @@ public class DisruptorBackEnd extends AbstractBackend
     private int ringBufferSize = 128;
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
      */
     @Override
-    protected void doStart() throws Exception
+    protected void onStart() throws Exception
     {
         this.disruptor = new Disruptor<>(SensorValue::new, this.ringBufferSize, new JSensorThreadFactory("jsensor-disruptor-"));
 
@@ -50,10 +50,10 @@ public class DisruptorBackEnd extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
      */
     @Override
-    protected void doStop() throws Exception
+    protected void onStop() throws Exception
     {
         this.disruptor.halt();
         this.disruptor.shutdown(3, TimeUnit.SECONDS);

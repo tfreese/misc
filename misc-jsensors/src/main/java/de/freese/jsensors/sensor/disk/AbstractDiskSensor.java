@@ -29,10 +29,10 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     private FileSystemView fileSystemView;
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
      */
     @Override
-    protected void doStart() throws Exception
+    protected void onStart() throws Exception
     {
         if ((this.disk == null) || this.disk.isEmpty())
         {

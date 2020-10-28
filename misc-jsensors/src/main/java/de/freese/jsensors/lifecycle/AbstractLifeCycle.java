@@ -3,6 +3,7 @@ package de.freese.jsensors.lifecycle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jsensors.sensor.Sensor;
 
 /**
  * @author Thomas Freese
@@ -25,17 +26,25 @@ public abstract class AbstractLifeCycle implements LifeCycle
     private boolean stopped;
 
     /**
-     * @throws Exception Falls was schief geht.
+     * Erstellt ein neues {@link AbstractLifeCycle} Object.
      */
-    protected void doStart() throws Exception
+    public AbstractLifeCycle()
+    {
+        super();
+    }
+
+    /**
+     *
+     */
+    protected void beforeStart()
     {
         // Empty
     }
 
     /**
-     * @throws Exception Falls was schief geht.
+     *
      */
-    protected void doStop() throws Exception
+    protected void beforeStop()
     {
         // Empty
     }
@@ -67,12 +76,40 @@ public abstract class AbstractLifeCycle implements LifeCycle
     }
 
     /**
+     * @throws Exception Falls was schief geht.
+     */
+    protected void onStart() throws Exception
+    {
+        // Empty
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    protected void onStop() throws Exception
+    {
+        // Empty
+    }
+
+    /**
      * @see de.freese.jsensors.lifecycle.LifeCycle#start()
      */
     @Override
     public final void start()
     {
-        getLogger().info("starting");
+        beforeStart();
+
+        getLogger().debug("starting");
+
+        if (this instanceof Sensor)
+        {
+            String sensorName = ((Sensor) this).getName();
+
+            if ((sensorName == null) || sensorName.isBlank())
+            {
+                throw new IllegalArgumentException("sensor name is null or empty");
+            }
+        }
 
         if (isStarted())
         {
@@ -88,7 +125,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
         try
         {
-            doStart();
+            onStart();
 
             this.started = true;
         }
@@ -104,7 +141,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
     @Override
     public final void stop()
     {
-        getLogger().info("stopping");
+        getLogger().debug("stopping");
 
         if (isStopped())
         {
@@ -114,7 +151,7 @@ public abstract class AbstractLifeCycle implements LifeCycle
 
         try
         {
-            doStop();
+            onStop();
 
             this.stopped = true;
         }

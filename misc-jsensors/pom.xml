@@ -68,7 +68,13 @@
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
-        </dependency>        
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.rsocket</groupId>
+            <artifactId>rsocket-transport-netty</artifactId>
+            <optional>true</optional>
+        </dependency>               
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -96,6 +102,11 @@
 			<artifactId>jfreechart</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>        
 	</dependencies>
 
 </project>

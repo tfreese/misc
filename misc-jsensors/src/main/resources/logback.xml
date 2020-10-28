@@ -67,8 +67,7 @@
         <appender-ref ref="FILE" />
     </appender-->     
 
-    <logger name="de.freese.jsensors.backend" level="DEBUG"/>
-    <logger name="de.freese.jsensors.sensor" level="DEBUG"/>
+    <logger name="de.freese.jsensors" level="DEBUG"/>
     <logger name="hsqldb.db" level="WARN"/>
 
     <root level="INFO">

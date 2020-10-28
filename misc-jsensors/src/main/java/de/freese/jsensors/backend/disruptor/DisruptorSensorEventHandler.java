@@ -2,8 +2,8 @@
 package de.freese.jsensors.backend.disruptor;
 
 import com.lmax.disruptor.EventHandler;
-import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.registry.SensorBackendRegistry;
 
 /**
  * @author Thomas Freese
@@ -34,11 +34,12 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorValue>
         // Load-Balancing auf die Handler über die Sequence.
         if ((this.id == -1) || (this.id == (sequence % DisruptorBackEnd.THREAD_COUNT)))
         {
-            SensorValue sensorValue = event;
+            SensorValue sensorValue = new SensorValue();
+            sensorValue.copyFrom(event);
 
             SensorBackendRegistry.getInstance().save(sensorValue);
 
-            sensorValue.clear();
+            event.clear();
         }
     }
 }

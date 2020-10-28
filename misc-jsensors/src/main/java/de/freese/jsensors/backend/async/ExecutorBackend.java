@@ -28,10 +28,10 @@ public class ExecutorBackend extends AbstractBackend
     private ExecutorService executorService;
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
      */
     @Override
-    protected void doStart() throws Exception
+    protected void onStart() throws Exception
     {
         if (getDelegate() == null)
         {
@@ -47,10 +47,10 @@ public class ExecutorBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStop()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
      */
     @Override
-    protected void doStop() throws Exception
+    protected void onStop() throws Exception
     {
         getDelegate().stop();
     }

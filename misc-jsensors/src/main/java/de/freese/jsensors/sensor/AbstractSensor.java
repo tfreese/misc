@@ -5,6 +5,7 @@ import java.util.Objects;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.lifecycle.AbstractLifeCycle;
+import de.freese.jsensors.registry.LifeCycleManager;
 import de.freese.jsensors.utils.Utils;
 
 /**
@@ -28,6 +29,30 @@ public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
     *
     */
     private String name;
+
+    /**
+     * Erstellt ein neues {@link AbstractSensor} Object.
+     */
+    public AbstractSensor()
+    {
+        super();
+
+        LifeCycleManager.getInstance().register(this);
+    }
+
+    /**
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#beforeStart()
+     */
+    @Override
+    protected void beforeStart()
+    {
+        String sensorName = getName();
+
+        if ((sensorName == null) || sensorName.isBlank())
+        {
+            throw new IllegalArgumentException("sensor name is null or empty");
+        }
+    }
 
     /**
      * @return {@link Backend}
@@ -135,7 +160,5 @@ public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
         }
 
         this.name = formattedName;
-
-        SensorRegistry.getInstance().register(this);
     }
 }

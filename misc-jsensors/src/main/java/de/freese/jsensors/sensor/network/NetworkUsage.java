@@ -29,10 +29,10 @@ public class NetworkUsage extends AbstractSensor
     private final List<String> interfaces = new ArrayList<>();
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#doStart()
+     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
      */
     @Override
-    protected void doStart() throws Exception
+    protected void onStart() throws Exception
     {
         if (Utils.isLinux() && this.interfaces.isEmpty())
         {

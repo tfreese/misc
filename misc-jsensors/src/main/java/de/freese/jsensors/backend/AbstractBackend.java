@@ -3,6 +3,7 @@ package de.freese.jsensors.backend;
 
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.lifecycle.AbstractLifeCycle;
+import de.freese.jsensors.registry.LifeCycleManager;
 
 /**
  * Basis-implementierung eines {@link Backend}s.
@@ -11,6 +12,16 @@ import de.freese.jsensors.lifecycle.AbstractLifeCycle;
  */
 public abstract class AbstractBackend extends AbstractLifeCycle implements Backend
 {
+    /**
+     * Erstellt ein neues {@link AbstractBackend} Object.
+     */
+    public AbstractBackend()
+    {
+        super();
+
+        LifeCycleManager.getInstance().register(this);
+    }
+
     /**
      * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.SensorValue)
      */
