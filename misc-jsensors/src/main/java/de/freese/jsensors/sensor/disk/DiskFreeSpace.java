@@ -11,6 +11,16 @@ import java.io.File;
 public class DiskFreeSpace extends AbstractDiskSensor
 {
     /**
+     * Erstellt ein neues {@link DiskFreeSpace} Object.
+     *
+     * @param name String
+     */
+    public DiskFreeSpace(final String name)
+    {
+        super(name);
+    }
+
+    /**
      * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
      */
     @Override

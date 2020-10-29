@@ -20,7 +20,7 @@ public class SensorValue
     /**
     *
     */
-    private boolean exclusive;
+    private final boolean exclusive;
 
     /**
     *
@@ -30,25 +30,17 @@ public class SensorValue
     /**
      *
      */
-    private String name;
+    private final String name;
 
     /**
      *
      */
-    private long timestamp = -1;
+    private final long timestamp;
 
     /**
      *
      */
-    private String value;
-
-    /**
-     * Erstellt ein neues {@link SensorValue} Object.
-     */
-    public SensorValue()
-    {
-        super();
-    }
+    private final String value;
 
     /**
      * Erzeugt eine neue Instanz von {@link SensorValue}.
@@ -66,36 +58,6 @@ public class SensorValue
         this.value = Objects.requireNonNull(value, "value required");
         this.timestamp = timestamp;
         this.exclusive = exclusive;
-    }
-
-    /**
-     * Leeren aller Attribute.
-     */
-    public void clear()
-    {
-        this.name = null;
-        this.value = null;
-        this.timestamp = -1;
-        this.exclusive = false;
-
-        this.date = null;
-        this.localDateTime = null;
-    }
-
-    /**
-     * Kopiert alle Daten von der Quelle.
-     *
-     * @param src {@link SensorValue}
-     */
-    public void copyFrom(final SensorValue src)
-    {
-        this.name = src.getName();
-        this.value = src.getValue();
-        this.timestamp = src.getTimestamp();
-        this.exclusive = src.isExclusive();
-
-        this.date = null;
-        this.localDateTime = null;
     }
 
     /**

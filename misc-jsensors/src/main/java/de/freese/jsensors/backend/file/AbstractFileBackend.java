@@ -5,6 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,13 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import de.freese.jsensors.backend.AbstractBackend;
+import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * Basis-implementierung eines Backends für Dateien.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractFileBackend extends AbstractBackend
+public abstract class AbstractFileBackend extends AbstractBackend implements LifeCycle
 {
     /**
     *
@@ -37,44 +39,35 @@ public abstract class AbstractFileBackend extends AbstractBackend
     private final Map<Path, PrintStream> printStreams = new HashMap<>();
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
+     * @param os {@link PrintStream}
      */
-    @Override
-    protected void onStart() throws Exception
+    protected void closeOutputStream(final OutputStream os)
     {
-        if (getDirectory() == null)
+        try
         {
-            throw new NullPointerException("directory required");
+            os.flush();
+            os.close();
         }
-
-        Files.createDirectories(getDirectory());
+        catch (IOException ioex)
+        {
+            getLogger().error(null, ioex);
+        }
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
+     * @param ps {@link PrintStream}
      */
-    @Override
-    protected void onStop() throws Exception
+    protected void closePrintStream(final PrintStream ps)
     {
-        this.printStreams.values().forEach(ps -> {
+        try
+        {
             ps.flush();
             ps.close();
-        });
-
-        this.printStreams.clear();
-
-        this.outputStreams.values().forEach(os -> {
-            try
-            {
-                os.flush();
-                os.close();
-            }
-            catch (IOException ioex)
-            {
-                getLogger().error(null, ioex);
-            }
-        });
-        this.outputStreams.clear();
+        }
+        catch (Exception ioex)
+        {
+            getLogger().error(null, ioex);
+        }
     }
 
     /**
@@ -178,5 +171,39 @@ public abstract class AbstractFileBackend extends AbstractBackend
         }
 
         setDirectory(Paths.get(directory));
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        if (getDirectory() == null)
+        {
+            throw new NullPointerException("directory required");
+        }
+
+        try
+        {
+            Files.createDirectories(getDirectory());
+        }
+        catch (IOException ex)
+        {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        this.printStreams.values().forEach(this::closePrintStream);
+        this.printStreams.clear();
+
+        this.outputStreams.values().forEach(this::closeOutputStream);
+        this.outputStreams.clear();
     }
 }

@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Objects;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
+import de.freese.jsensors.utils.LifeCycle;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.RSocket;
@@ -20,7 +21,7 @@ import reactor.util.retry.Retry;
 /**
  * @author Thomas Freese
  */
-public class RSocketBackend extends AbstractBackend
+public class RSocketBackend extends AbstractBackend implements LifeCycle
 {
     /**
      *
@@ -41,45 +42,10 @@ public class RSocketBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
-     */
-    @Override
-    protected void onStart() throws Exception
-    {
-        Objects.requireNonNull(this.uri, "uri required");
-
-        // @formatter:off
-        TcpClient tcpClient = TcpClient.create()
-                .host(this.uri.getHost())
-                .port(this.uri.getPort())
-                .runOn(LoopResources.create("rsocket-" + this.uri.getPort(), 2, true))
-                ;
-        // @formatter:on
-
-        // @formatter:off
-        this.client = RSocketConnector
-            .create()
-            .reconnect(Retry.fixedDelay(3, Duration.ofSeconds(1)))
-            .connect(TcpClientTransport.create(tcpClient))
-            .block()
-            ;
-        // @formatter:on
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
-     */
-    @Override
-    protected void onStop() throws Exception
-    {
-        this.client.dispose();
-    }
-
-    /**
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
         ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
 
@@ -112,5 +78,40 @@ public class RSocketBackend extends AbstractBackend
     public void setUri(final URI uri)
     {
         this.uri = Objects.requireNonNull(uri, "uri required");
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        Objects.requireNonNull(this.uri, "uri required");
+
+        // @formatter:off
+        TcpClient tcpClient = TcpClient.create()
+                .host(this.uri.getHost())
+                .port(this.uri.getPort())
+                .runOn(LoopResources.create("rsocket-" + this.uri.getPort(), 2, true))
+                ;
+        // @formatter:on
+
+        // @formatter:off
+        this.client = RSocketConnector
+            .create()
+            .reconnect(Retry.fixedDelay(3, Duration.ofSeconds(1)))
+            .connect(TcpClientTransport.create(tcpClient))
+            .block()
+            ;
+        // @formatter:on
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        this.client.dispose();
     }
 }

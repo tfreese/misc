@@ -72,46 +72,39 @@ public class RRDToolBackend extends AbstractFileBackend
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
         Path path = getDirectory().resolve(sensorValue.getName() + ".rrd");
         String pathString = path.toString();
 
-        try
+        if (!this.existingFiles.contains(pathString))
         {
-            if (!this.existingFiles.contains(pathString))
+            synchronized (this.existingFiles)
             {
-                synchronized (this.existingFiles)
+                // DoubleCheckLock
+                if (!this.existingFiles.contains(pathString))
                 {
-                    // DoubleCheckLock
-                    if (!this.existingFiles.contains(pathString))
-                    {
-                        createFileIfNotExist(path);
+                    createFileIfNotExist(path);
 
-                        this.existingFiles.add(pathString);
-                    }
+                    this.existingFiles.add(pathString);
                 }
             }
-
-            // Update RRD.
-            List<String> command = new ArrayList<>();
-            command.add("rrdtool");
-            command.add("update");
-            command.add(pathString);
-            command.add(String.format("%s:%s:%s", sensorValue.getTimestamp(), sensorValue.getValue(), sensorValue.getValue()));
-
-            // System.out.println(command.stream().collect(Collectors.joining(" ")));
-
-            List<String> lines = Utils.executeCommand(command.toArray(Utils.EMPTY_STRING_ARRAY));
-
-            if (!lines.isEmpty())
-            {
-                throw new IOException(lines.stream().collect(Collectors.joining(System.getProperty("line.separator"))));
-            }
         }
-        catch (Exception ex)
+
+        // Update RRD.
+        List<String> command = new ArrayList<>();
+        command.add("rrdtool");
+        command.add("update");
+        command.add(pathString);
+        command.add(String.format("%s:%s:%s", sensorValue.getTimestamp(), sensorValue.getValue(), sensorValue.getValue()));
+
+        // System.out.println(command.stream().collect(Collectors.joining(" ")));
+
+        List<String> lines = Utils.executeCommand(command.toArray(Utils.EMPTY_STRING_ARRAY));
+
+        if (!lines.isEmpty())
         {
-            getLogger().error(null, ex);
+            throw new IOException(lines.stream().collect(Collectors.joining(System.getProperty("line.separator"))));
         }
     }
 }

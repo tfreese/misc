@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import de.freese.jsensors.registry.LifeCycleManager;
+import de.freese.jsensors.backend.disruptor.DisruptorBackEnd;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
 import de.freese.jsensors.utils.SyncFuture;
@@ -24,11 +24,9 @@ class TestScheduler
     @Test
     void testScheduler() throws Exception
     {
-        Sensor sensor = new ConstantSensor("123.456");
-        sensor.setName("test/Sensor");
+        // Direktes Speichern des SensorWertes im gleichen Thread.
+        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
         sensor.setBackend(new ConsoleBackend());
-
-        LifeCycleManager.getInstance().start();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
@@ -36,7 +34,35 @@ class TestScheduler
 
         scheduledExecutorService.schedule(() -> {
             scheduledExecutorService.shutdownNow();
-            LifeCycleManager.getInstance().stop();
+            future.setResponse(new Object());
+        }, 5, TimeUnit.SECONDS);
+
+        scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 1, 1, TimeUnit.SECONDS);
+
+        future.get();
+    }
+
+    /**
+     * @throws Exception Falls was schief geht.
+     */
+    @Test
+    void testSchedulerMitDisruptor() throws Exception
+    {
+        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
+        DisruptorBackEnd backendDisruptor = new DisruptorBackEnd();
+        backendDisruptor.start();
+
+        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
+        sensor.setBackend(backendDisruptor);
+
+        backendDisruptor.register(sensor, new ConsoleBackend());
+
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+
+        SyncFuture<Object> future = new SyncFuture<>();
+
+        scheduledExecutorService.schedule(() -> {
+            scheduledExecutorService.shutdownNow();
             future.setResponse(new Object());
         }, 5, TimeUnit.SECONDS);
 

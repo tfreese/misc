@@ -9,13 +9,14 @@ import java.util.concurrent.ExecutorService;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
+import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * Asynchrone-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public class ExecutorBackend extends AbstractBackend
+public class ExecutorBackend extends AbstractBackend implements LifeCycle
 {
     /**
      *
@@ -28,56 +29,12 @@ public class ExecutorBackend extends AbstractBackend
     private ExecutorService executorService;
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
-     */
-    @Override
-    protected void onStart() throws Exception
-    {
-        if (getDelegate() == null)
-        {
-            throw new NullPointerException("delegate backend required");
-        }
-
-        if (getExecutorService() == null)
-        {
-            throw new NullPointerException("executorService required");
-        }
-
-        getDelegate().start();
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
-     */
-    @Override
-    protected void onStop() throws Exception
-    {
-        getDelegate().stop();
-    }
-
-    /**
-     * @return {@link Backend}
-     */
-    public Backend getDelegate()
-    {
-        return this.delegate;
-    }
-
-    /**
-     * @return {@link ExecutorService}
-     */
-    public ExecutorService getExecutorService()
-    {
-        return this.executorService;
-    }
-
-    /**
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
-        getExecutorService().execute(() -> {
+        this.executorService.execute(() -> {
             if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
             {
                 return;
@@ -89,7 +46,7 @@ public class ExecutorBackend extends AbstractBackend
 
             try
             {
-                getDelegate().save(sensorValue);
+                this.delegate.save(sensorValue);
             }
             finally
             {
@@ -112,5 +69,39 @@ public class ExecutorBackend extends AbstractBackend
     public void setExecutorService(final ExecutorService executorService)
     {
         this.executorService = Objects.requireNonNull(executorService, "executorService required");
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        if (this.delegate == null)
+        {
+            throw new NullPointerException("delegate backend required");
+        }
+
+        if (this.delegate == null)
+        {
+            throw new NullPointerException("executorService required");
+        }
+
+        if (this.delegate instanceof LifeCycle)
+        {
+            ((LifeCycle) this.delegate).start();
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        if (this.delegate instanceof LifeCycle)
+        {
+            ((LifeCycle) this.delegate).stop();
+        }
     }
 }

@@ -2,18 +2,16 @@
 package de.freese.jsensors.sensor;
 
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.lifecycle.LifeCycle;
 
 /**
  * {@link Sensor} der einen zu messenden Wert liefert.<br>
  *
  * @author Thomas Freese
  */
-public interface Sensor extends LifeCycle
+public interface Sensor
 {
     /**
      * Liefert den Namen des Sensors.<br>
-     * Dieser würde ggf. umgewandelt, siehe {@link #setName(String)}.
      *
      * @return String
      */
@@ -37,12 +35,4 @@ public interface Sensor extends LifeCycle
      * @param exclusive boolean
      */
     public void setExclusive(boolean exclusive);
-
-    /**
-     * Setzt den Namen des Sensors.<br>
-     * Der Name wird in ein Datei- und Datenbankverträgliches Format umgewandelt.
-     *
-     * @param name String
-     */
-    public void setName(final String name);
 }

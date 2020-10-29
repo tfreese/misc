@@ -16,11 +16,12 @@ public class ConstantSensor extends AbstractSensor
     /**
      * Erstellt ein neues {@link ConstantSensor} Object.
      *
+     * @param name String
      * @param value String
      */
-    public ConstantSensor(final String value)
+    public ConstantSensor(final String name, final String value)
     {
-        super();
+        super(name);
 
         this.value = Objects.requireNonNull(value, "value required");
     }

@@ -12,7 +12,7 @@ public class ConsoleBackend extends AbstractBackend
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
         System.out.println(sensorValue);
     }

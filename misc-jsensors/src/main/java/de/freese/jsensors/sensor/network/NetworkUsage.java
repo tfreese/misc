@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import de.freese.jsensors.sensor.AbstractSensor;
+import de.freese.jsensors.utils.LifeCycle;
 import de.freese.jsensors.utils.Utils;
 
 /**
@@ -16,7 +17,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class NetworkUsage extends AbstractSensor
+public class NetworkUsage extends AbstractSensor implements LifeCycle
 {
     /**
      *
@@ -29,19 +30,13 @@ public class NetworkUsage extends AbstractSensor
     private final List<String> interfaces = new ArrayList<>();
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
+     * Erstellt ein neues {@link NetworkUsage} Object.
+     *
+     * @param name String
      */
-    @Override
-    protected void onStart() throws Exception
+    public NetworkUsage(final String name)
     {
-        if (Utils.isLinux() && this.interfaces.isEmpty())
-        {
-            // Kein Interface angegeben -> alle ermitteln ausser "lo".
-            // Beispiel: em1 lo wlp6so
-            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
-
-            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
-        }
+        super(name);
     }
 
     /**
@@ -157,5 +152,30 @@ public class NetworkUsage extends AbstractSensor
     public void setInterface(final String iFace)
     {
         this.interfaces.add(iFace);
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        if (Utils.isLinux() && this.interfaces.isEmpty())
+        {
+            // Kein Interface angegeben -> alle ermitteln ausser "lo".
+            // Beispiel: em1 lo wlp6so
+            List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
+
+            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        // Empty
     }
 }

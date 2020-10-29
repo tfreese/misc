@@ -11,13 +11,14 @@ import java.util.concurrent.LinkedBlockingQueue;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
+import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * Asynchrone-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public class AsyncBackend extends AbstractBackend
+public class AsyncBackend extends AbstractBackend implements LifeCycle
 {
     /**
      * @author Thomas Freese
@@ -30,8 +31,8 @@ public class AsyncBackend extends AbstractBackend
         @Override
         public void run()
         {
-            // while (!Thread.interrupted())
-            while (!isStopped())
+            while (!Thread.interrupted())
+            // while (!isStopped())
             {
                 try
                 {
@@ -42,7 +43,7 @@ public class AsyncBackend extends AbstractBackend
                         continue;
                     }
 
-                    getDelegate().save(sensorValue);
+                    AsyncBackend.this.delegate.save(sensorValue);
                 }
                 catch (InterruptedException iex)
                 {
@@ -79,74 +80,6 @@ public class AsyncBackend extends AbstractBackend
     private final List<QueueWorker> workers = new ArrayList<>();
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
-     */
-    @Override
-    protected void onStart() throws Exception
-    {
-        if (getDelegate() == null)
-        {
-            throw new NullPointerException("delegate backend required");
-        }
-
-        getDelegate().start();
-
-        for (int i = 1; i <= getNumberOfWorkers(); i++)
-        {
-            QueueWorker worker = new QueueWorker();
-            worker.setName(getDelegate().getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
-            worker.setDaemon(true);
-
-            this.workers.add(worker);
-            worker.start();
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
-     */
-    @Override
-    protected void onStop() throws Exception
-    {
-        this.workers.forEach(QueueWorker::interrupt);
-
-        // Save last SensorValues.
-        if (!getQueue().isEmpty())
-        {
-            getLogger().info("save last sensorvalues");
-
-            SensorValue sv = null;
-
-            while ((sv = getQueue().poll()) != null)
-            {
-                getDelegate().save(sv);
-            }
-        }
-
-        this.workers.clear();
-
-        getDelegate().stop();
-    }
-
-    /**
-     * @return {@link Backend}
-     */
-    public Backend getDelegate()
-    {
-        return this.delegate;
-    }
-
-    /**
-     * Liefert die Anzahl der Worker-Threads.
-     *
-     * @return int
-     */
-    public int getNumberOfWorkers()
-    {
-        return this.numberOfWorkers;
-    }
-
-    /**
      * @return {@link BlockingQueue}
      */
     private BlockingQueue<SensorValue> getQueue()
@@ -158,7 +91,7 @@ public class AsyncBackend extends AbstractBackend
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
         getQueue().add(sensorValue);
     }
@@ -183,11 +116,62 @@ public class AsyncBackend extends AbstractBackend
             throw new IllegalArgumentException("numberOfWorkers <= 0: " + numberOfWorkers);
         }
 
-        if (isStarted())
+        this.numberOfWorkers = numberOfWorkers;
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        if (this.delegate == null)
         {
-            throw new IllegalStateException("AsyncBackend already started");
+            throw new NullPointerException("delegate backend required");
         }
 
-        this.numberOfWorkers = numberOfWorkers;
+        if (this.delegate instanceof LifeCycle)
+        {
+            ((LifeCycle) this.delegate).start();
+        }
+
+        for (int i = 1; i <= this.numberOfWorkers; i++)
+        {
+            QueueWorker worker = new QueueWorker();
+            worker.setName(this.delegate.getClass().getSimpleName().replace("Backend", "Worker") + "-" + i);
+            worker.setDaemon(true);
+
+            this.workers.add(worker);
+            worker.start();
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        this.workers.forEach(QueueWorker::interrupt);
+
+        // Save last SensorValues.
+        if (!getQueue().isEmpty())
+        {
+            getLogger().info("save last sensorvalues");
+
+            SensorValue sv = null;
+
+            while ((sv = getQueue().poll()) != null)
+            {
+                this.delegate.save(sv);
+            }
+        }
+
+        this.workers.clear();
+
+        if (this.delegate instanceof LifeCycle)
+        {
+            ((LifeCycle) this.delegate).stop();
+        }
     }
 }

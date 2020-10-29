@@ -20,10 +20,12 @@ public class SwapUsage extends AbstractSensor
 
     /**
      * Erzeugt eine neue Instanz von {@link SwapUsage}.
+     *
+     * @param name String
      */
-    public SwapUsage()
+    public SwapUsage(final String name)
     {
-        super();
+        super(name);
 
         this.monitor = new JavaSysMon();
     }

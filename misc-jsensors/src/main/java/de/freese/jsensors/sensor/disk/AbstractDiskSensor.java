@@ -5,13 +5,14 @@ import java.io.File;
 import java.util.Objects;
 import javax.swing.filechooser.FileSystemView;
 import de.freese.jsensors.sensor.AbstractSensor;
+import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * Basis-implementierung eines Festplatten-Sensors.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractDiskSensor extends AbstractSensor
+public abstract class AbstractDiskSensor extends AbstractSensor implements LifeCycle
 {
     /**
      *
@@ -29,19 +30,13 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     private FileSystemView fileSystemView;
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
+     * Erstellt ein neues {@link AbstractDiskSensor} Object.
+     *
+     * @param name String
      */
-    @Override
-    protected void onStart() throws Exception
+    public AbstractDiskSensor(final String name)
     {
-        if ((this.disk == null) || this.disk.isEmpty())
-        {
-            throw new IllegalStateException("disk required");
-        }
-
-        this.fileSystemView = FileSystemView.getFileSystemView();
-
-        this.file = new File(this.disk);
+        super(name);
     }
 
     /**
@@ -66,5 +61,30 @@ public abstract class AbstractDiskSensor extends AbstractSensor
     public void setDisk(final String disk)
     {
         this.disk = Objects.requireNonNull(disk, "disk required");
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        if ((this.disk == null) || this.disk.isEmpty())
+        {
+            throw new IllegalStateException("disk required");
+        }
+
+        this.fileSystemView = FileSystemView.getFileSystemView();
+
+        this.file = new File(this.disk);
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        // Empty
     }
 }

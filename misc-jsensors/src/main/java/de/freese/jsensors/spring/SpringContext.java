@@ -35,33 +35,32 @@ import org.springframework.util.Assert;
  * @author Thomas Freese
  */
 @Component
-public class SpringContext implements ApplicationContextAware, ResourceLoaderAware, EnvironmentAware, BeanFactoryAware, InitializingBean
+public final class SpringContext implements ApplicationContextAware, ResourceLoaderAware, EnvironmentAware, BeanFactoryAware, InitializingBean
 {
     /**
      *
      */
-    private static ApplicationContext applicationContext = null;
+    private static ApplicationContext applicationContext;
 
     /**
      *
      */
-    private static BeanFactory beanFactory = null;
+    private static BeanFactory beanFactory;
 
     /**
      *
      */
-    private static Environment environment = null;
+    private static Environment environment;
 
     /**
      *
      */
-    private static ResourceLoader resourceLoader = null;
+    private static ResourceLoader resourceLoader;
 
     /**
      * Liefert true, wenn die BeanID bereits registriert ist.
      *
      * @param beanID String
-     *
      * @return boolean
      */
     public static boolean containsBean(final String beanID)
@@ -90,9 +89,8 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     /**
      * Liefert die Bean mit der betreffenden BeanID.
      *
-     * @param <T>    Konkreter Typ des empfangenen Objects
+     * @param <T> Konkreter Typ des empfangenen Objects
      * @param beanID String
-     *
      * @return Object
      */
     @SuppressWarnings("unchecked")
@@ -104,10 +102,9 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     /**
      * Liefert die Bean mit der betreffenden BeanID und erwartetem Typ.
      *
-     * @param <T>          Konkreter Typ des empfangenen Objects
-     * @param beanID       String
+     * @param <T> Konkreter Typ des empfangenen Objects
+     * @param beanID String
      * @param requiredType {@link Class}
-     *
      * @return Object
      */
     public static <T> T getBean(final String beanID, final Class<T> requiredType)
@@ -118,10 +115,9 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     /**
      * Liefert die erste gefundene Bean eines bestimmten Types mit einer bestimmten Annotation.
      *
-     * @param <T>            Konkreter Return-Typ
-     * @param clazz          Class
+     * @param <T> Konkreter Return-Typ
+     * @param clazz Class
      * @param annotationType Class
-     *
      * @return {@link Optional}
      */
     public static <T> Optional<T> getBeanByTypeAndAnnotation(final Class<T> clazz, final Class<? extends Annotation> annotationType)
@@ -135,18 +131,16 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
      * Liefert die erste gefundene Bean eines bestimmten Types mit einem bestimmten {@link Qualifier}.<br>
      * Die Bean muss die Spring-Annotation {@link Qualifier} mit einem Value verwenden.
      *
-     * @param <T>       Konkreter Return-Typ
-     * @param clazz     Class
+     * @param <T> Konkreter Return-Typ
+     * @param clazz Class
      * @param qualifier String
-     *
      * @return {@link Optional}
      */
     public static <T> Optional<T> getBeanByTypeAndQualifier(final Class<T> clazz, final String qualifier)
     {
         Collection<T> beans = getBeansByTypeAndAnnotation(clazz, Qualifier.class);
 
-        return beans.stream().filter(bean ->
-        {
+        return beans.stream().filter(bean -> {
             Qualifier q = bean.getClass().getAnnotation(Qualifier.class);
 
             return qualifier.equals(q.value());
@@ -164,10 +158,9 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     /**
      * Liefert alle Beans eines bestimmten Types mit einer bestimmten Annotation.
      *
-     * @param <T>            Konkreter Return-Typ
-     * @param clazz          Class
+     * @param <T> Konkreter Return-Typ
+     * @param clazz Class
      * @param annotationType Class
-     *
      * @return {@link Collection}
      */
     public static <T> Collection<T> getBeansByTypeAndAnnotation(final Class<T> clazz, final Class<? extends Annotation> annotationType)
@@ -203,9 +196,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
      * Liefert die Resource.
      *
      * @param location String
-     *
      * @return {@link Resource}
-     *
      * @see ResourceLoader#getResource(String)
      */
     public static Resource getResource(final String location)
@@ -244,7 +235,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     /**
      * Liefert die BeanDefinition mit der BeanID.
      *
-     * @param beanID         String
+     * @param beanID String
      * @param beanDefinition {@link AbstractBeanDefinition}
      */
     public static void registerBeanDefinition(final String beanID, final AbstractBeanDefinition beanDefinition)
@@ -257,7 +248,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
      * Liefert die Bean mit der BeanID.
      *
      * @param beanID String
-     * @param bean   Object
+     * @param bean Object
      */
     public static void registerSingleton(final String beanID, final Object bean)
     {
@@ -293,15 +284,12 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     {
         Assert.notNull(applicationContext,
                 "An ApplicationContext is required. Use setApplicationContext(org.springframework.context.ApplicationContext) to provide one.");
-        Assert.notNull(resourceLoader,
-                "A ResourceLoader is required. Use setResourceLoader(org.springframework.core.io.ResourceLoader) to provide one.");
-        Assert.notNull(environment,
-                "An Environment is required. Use setEnvironment(org.springframework.core.env.Environment) to provide one.");
+        Assert.notNull(resourceLoader, "A ResourceLoader is required. Use setResourceLoader(org.springframework.core.io.ResourceLoader) to provide one.");
+        Assert.notNull(environment, "An Environment is required. Use setEnvironment(org.springframework.core.env.Environment) to provide one.");
     }
 
     /**
-     * @see
-     * org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
+     * @see org.springframework.context.ApplicationContextAware#setApplicationContext(org.springframework.context.ApplicationContext)
      */
     @Override
     public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException
@@ -311,7 +299,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
             throw new IllegalStateException("ApplicationContext already set !");
         }
 
-        SpringContext.applicationContext = Objects.requireNonNull(applicationContext, "applicationContext required");;
+        SpringContext.applicationContext = Objects.requireNonNull(applicationContext, "applicationContext required");
 
         if (SpringContext.applicationContext instanceof AbstractApplicationContext)
         {
@@ -320,8 +308,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     }
 
     /**
-     * @see
-     * org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+     * @see org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
      */
     @Override
     public void setBeanFactory(final BeanFactory beanFactory) throws BeansException
@@ -349,8 +336,7 @@ public class SpringContext implements ApplicationContextAware, ResourceLoaderAwa
     }
 
     /**
-     * @see
-     * org.springframework.context.ResourceLoaderAware#setResourceLoader(org.springframework.core.io.ResourceLoader)
+     * @see org.springframework.context.ResourceLoaderAware#setResourceLoader(org.springframework.core.io.ResourceLoader)
      */
     @Override
     public void setResourceLoader(final ResourceLoader resourceLoader)

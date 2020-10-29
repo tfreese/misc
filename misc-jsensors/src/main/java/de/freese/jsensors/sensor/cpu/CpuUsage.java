@@ -25,10 +25,12 @@ public class CpuUsage extends AbstractSensor
 
     /**
      * Erzeugt eine neue Instanz von {@link CpuUsage}.
+     *
+     * @param name String
      */
-    public CpuUsage()
+    public CpuUsage(final String name)
     {
-        super();
+        super(name);
 
         this.monitor = new JavaSysMon();
 

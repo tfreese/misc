@@ -11,8 +11,8 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.backend.disruptor.DisruptorBackEnd;
 import de.freese.jsensors.backend.rsocket.RSocketBackend;
-import de.freese.jsensors.registry.LifeCycleManager;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
 import de.freese.jsensors.utils.SyncFuture;
@@ -100,18 +100,25 @@ class TestRSocketBackend
     @Test
     void testRSocketBackEnd() throws Exception
     {
+        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
+        // In diesem Fall wird der SensorWert an das RSocketBackend durchgereicht.
+        DisruptorBackEnd backendDisruptor = new DisruptorBackEnd();
+        backendDisruptor.start();
+
+        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
+        sensor.setBackend(backendDisruptor);
+
         RSocketBackend backendRSocket = new RSocketBackend();
         backendRSocket.setUri(URI.create("rsocket://localhost:" + PORT));
+        backendRSocket.start();
 
-        Sensor sensor = new ConstantSensor("123.456");
-        sensor.setName("test/Sensor");
-        sensor.setBackend(backendRSocket);
+        backendDisruptor.register(sensor, backendRSocket);
 
-        LifeCycleManager.getInstance().start();
         sensor.scan();
 
         SensorValue sensorValue = future.get();
-        LifeCycleManager.getInstance().stop();
+        backendDisruptor.stop();
+        backendRSocket.stop();
 
         assertNotNull(sensorValue);
         assertEquals("123.456", sensorValue.getValue());

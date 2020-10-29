@@ -1,25 +1,36 @@
 // Created: 31.05.2017
 package de.freese.jsensors.backend;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.lifecycle.AbstractLifeCycle;
-import de.freese.jsensors.registry.LifeCycleManager;
 
 /**
  * Basis-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public abstract class AbstractBackend extends AbstractLifeCycle implements Backend
+public abstract class AbstractBackend implements Backend
 {
+    /**
+    *
+    */
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
      * Erstellt ein neues {@link AbstractBackend} Object.
      */
     public AbstractBackend()
     {
         super();
+    }
 
-        LifeCycleManager.getInstance().register(this);
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return this.logger;
     }
 
     /**
@@ -34,28 +45,36 @@ public abstract class AbstractBackend extends AbstractLifeCycle implements Backe
             return;
         }
 
-        if (isStopped())
-        {
-            // throw new IllegalStateException("backend already stopped, sensorvalue discarted");
-            getLogger().error("backend already stopped, sensorvalue discarted");
-            return;
-        }
-
-        if (!isStarted())
-        {
-            getLogger().error("backend not started, sensorvalue discarted");
-            return;
-        }
+        // if (isStopped())
+        // {
+        // // throw new IllegalStateException("backend already stopped, sensorvalue discarted");
+        // getLogger().error("backend already stopped, sensorvalue discarted");
+        // return;
+        // }
+        //
+        // if (!isStarted())
+        // {
+        // getLogger().error("backend not started, sensorvalue discarted");
+        // return;
+        // }
 
         getLogger().debug("{}", sensorValue);
 
-        saveValue(sensorValue);
+        try
+        {
+            saveValue(sensorValue);
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
     }
 
     /**
      * Speichert den Sensorwert.
      *
      * @param sensorValue {@link SensorValue}
+     * @throws Exception Falls was schief geht.
      */
-    protected abstract void saveValue(SensorValue sensorValue);
+    protected abstract void saveValue(SensorValue sensorValue) throws Exception;
 }

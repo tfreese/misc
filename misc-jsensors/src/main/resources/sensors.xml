@@ -11,113 +11,124 @@
 	<!--bean class="de.freese.jsensors.spring.SpringContext" / -->
 
 	<!-- Backends konfigurieren -->
-	<bean id="csvSyncBackend" class="de.freese.jsensors.backend.file.CSVBackend">
-		<property name="directory" value="${jsensors.home}/backend/csv" />
+    <bean id="disruptorBackend" class="de.freese.jsensors.backend.disruptor.DisruptorBackEnd" init-method="start" destroy-method="stop">
+        <property name="ringBufferSize" value="32" />
+        <property name="registry">
+            <map>
+                <entry>
+                    <key>
+                        <value>DISKFREE_ROOT</value>
+                    </key>
+                    <list>
+                        <ref bean="csvBackend" />
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>DISKUSAGE_ROOT</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>CPU_USAGE</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>MEMORY_USAGE</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>SWAP_USAGE</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>NETWORK-in</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+                <entry>
+                    <key>
+                        <value>NETWORK-out</value>
+                    </key>
+                    <list>
+                        <bean class="de.freese.jsensors.backend.ConsoleBackend" />
+                    </list>
+                </entry>
+            </map>
+	   </property>
+    </bean>
+        
+	<bean id="csvBackend" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
+		<property name="directory" value="${jsensors.home}/csv" />
 	</bean>
-	<!--bean id="csvBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
+	<!--bean id="csvAsyncBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="csvSyncBackend" />
-	</bean-->		
-	<bean id="csvBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
+	</bean>		
+	<bean id="csvAsyncBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
 		<property name="delegate" ref="csvSyncBackend" />
 		<property name="executorService" ref="executorService" />
-	</bean>	
-
-	<bean id="jdbcSyncBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
-	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
-		<property name="delegate" ref="jdbcSyncBackend" />
-		<property name="numberOfWorkers" value="3" />
 	</bean-->	
-	<bean id="jdbcBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
-		<property name="delegate" ref="jdbcSyncBackend" />
-		<property name="executorService" ref="executorService" />
-	</bean>			
+
+	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend" init-method="start" destroy-method="stop">
+		<property name="dataSource" ref="dataSource" />
+	</bean-->
 
 	<!-- Sensoren konfigurieren -->
 	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
-	<!--constructor-arg index="0" value="test4" / -->
-	<bean id="diskFreeC" class="de.freese.jsensors.sensor.disk.DiskFreeSpace" init-method="start" destroy-method="stop">
-		<property name="disk" value="C:\" />
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
-	</bean>
-	<bean id="diskUsageC" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
-		<property name="disk" value="C:\" />
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
-	</bean>
 	<bean id="diskFreeRoot" class="de.freese.jsensors.sensor.disk.DiskFreeSpace" init-method="start" destroy-method="stop">
+        <constructor-arg value="DISKFREE_ROOT" />
 		<property name="disk" value="/" />
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
+        <constructor-arg value="DISKusage_ROOT" />
 		<property name="disk" value="/" />
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage" init-method="start" destroy-method="stop">
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
+	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage">
+        <constructor-arg index="0" value="cpu_usage" />
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage" init-method="start" destroy-method="stop">
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
+	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage">
+        <constructor-arg index="0" value="memory_Usage" />
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage" init-method="start" destroy-method="stop">
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-			</list>
-		</property>
+	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage">
+        <constructor-arg index="0" value="swap_usage" />
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage" init-method="start" destroy-method="stop">
-		<property name="backends">
-			<list>
-				<ref bean="csvBackend" />
-				<ref bean="jdbcBackend" />
-				<!--ref bean="rrdBackend"/ -->
-			</list>
-		</property>
+        <constructor-arg index="0" value="network" /> 
+		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<!--ref bean="csvBackend"/>
-		<ref bean="rrdBackend"/ -->
 
 	<!-- Sensormessung planen -->
 	<task:scheduled-tasks scheduler="taskScheduler">
 		<!-- Alle 10 Sekunden ausführen -->
 		<!--task:scheduled ref="testSensor" method="measure" cron="*/10 * * * * MON-FRI"/ -->
 
-		<task:scheduled ref="diskFreeC" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="diskUsageC" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<!--task:scheduled ref="diskFreeRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
-			<task:scheduled ref="diskUsageRoot" method="scan" initial-delay="1000" fixed-delay="5000" / -->
+		<!--task:scheduled ref="diskFreeC" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="diskUsageC" method="scan" initial-delay="1000" fixed-delay="5000" /-->
+		<task:scheduled ref="diskFreeRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="diskUsageRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
 		<task:scheduled ref="cpuUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
 		<task:scheduled ref="memoryUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
 		<task:scheduled ref="swapUsage" method="scan" initial-delay="1000" fixed-delay="5000" />

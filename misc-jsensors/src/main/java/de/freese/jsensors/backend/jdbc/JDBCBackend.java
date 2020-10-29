@@ -16,6 +16,7 @@ import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.sensor.Sensor;
+import de.freese.jsensors.utils.LifeCycle;
 import de.freese.jsensors.utils.Utils;
 
 /**
@@ -25,7 +26,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class JDBCBackend extends AbstractBackend
+public class JDBCBackend extends AbstractBackend implements LifeCycle
 {
     /**
      *
@@ -83,26 +84,6 @@ public class JDBCBackend extends AbstractBackend
     }
 
     /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStart()
-     */
-    @Override
-    protected void onStart() throws Exception
-    {
-        Objects.requireNonNull(getDataSource(), "dataSource required");
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#onStop()
-     */
-    @Override
-    protected void onStop() throws Exception
-    {
-        // Empty
-        // getDataSource().close()
-        this.dataSource = null;
-    }
-
-    /**
      * Liefert die {@link DataSource}.
      *
      * @return {@link DataSource}
@@ -116,46 +97,39 @@ public class JDBCBackend extends AbstractBackend
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
         String tableName = Utils.sensorNameToTableName(sensorValue.getName());
 
-        try
+        if (!this.existingTables.contains(tableName))
         {
-            if (!this.existingTables.contains(tableName))
+            synchronized (this.existingTables)
             {
-                synchronized (this.existingTables)
+                // DoubleCheckLock
+                if (!this.existingTables.contains(tableName))
                 {
-                    // DoubleCheckLock
-                    if (!this.existingTables.contains(tableName))
-                    {
-                        createTableIfNotExist(tableName);
+                    createTableIfNotExist(tableName);
 
-                        this.existingTables.add(tableName);
-                    }
+                    this.existingTables.add(tableName);
                 }
             }
-
-            StringBuilder sql = new StringBuilder();
-            sql.append("INSERT INTO ").append(tableName);
-            sql.append(" (TIMESTAMP, VALUE)");
-            sql.append(" VALUES (?, ?)");
-
-            try (Connection con = getDataSource().getConnection();
-                 PreparedStatement pstmt = con.prepareStatement(sql.toString()))
-            {
-                con.setAutoCommit(false);
-
-                pstmt.setLong(1, sensorValue.getTimestamp());
-                pstmt.setString(2, sensorValue.getValue());
-                pstmt.executeUpdate();
-
-                con.commit();
-            }
         }
-        catch (SQLException sex)
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ").append(tableName);
+        sql.append(" (TIMESTAMP, VALUE)");
+        sql.append(" VALUES (?, ?)");
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql.toString()))
         {
-            getLogger().error(null, sex);
+            con.setAutoCommit(false);
+
+            pstmt.setLong(1, sensorValue.getTimestamp());
+            pstmt.setString(2, sensorValue.getValue());
+            pstmt.executeUpdate();
+
+            con.commit();
         }
     }
 
@@ -167,5 +141,24 @@ public class JDBCBackend extends AbstractBackend
     public void setDataSource(final DataSource dataSource)
     {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#start()
+     */
+    @Override
+    public void start()
+    {
+        Objects.requireNonNull(getDataSource(), "dataSource required");
+    }
+
+    /**
+     * @see de.freese.jsensors.utils.LifeCycle#stop()
+     */
+    @Override
+    public void stop()
+    {
+        // getDataSource().close()
+        this.dataSource = null;
     }
 }

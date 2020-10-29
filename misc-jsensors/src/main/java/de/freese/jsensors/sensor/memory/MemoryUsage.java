@@ -20,10 +20,12 @@ public class MemoryUsage extends AbstractSensor
 
     /**
      * Erzeugt eine neue Instanz von {@link MemoryUsage}.
+     *
+     * @param name String
      */
-    public MemoryUsage()
+    public MemoryUsage(final String name)
     {
-        super();
+        super(name);
 
         this.monitor = new JavaSysMon();
     }

@@ -4,7 +4,6 @@ package de.freese.jsensors.spring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -19,7 +18,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Thomas Freese
  */
-@Configuration
+// @Configuration
 @Profile("HsqldbEmbeddedServer")
 @PropertySources(@PropertySource("classpath:hikari-pool.properties"))
 public class HsqldbEmbeddedServerConfig implements ApplicationListener<ApplicationContextEvent>

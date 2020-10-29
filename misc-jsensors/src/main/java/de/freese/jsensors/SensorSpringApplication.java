@@ -26,7 +26,7 @@ public class SensorSpringApplication
     {
         if (!StringUtils.hasText(System.getProperty("spring.profiles.active")))
         {
-            System.setProperty("spring.profiles.active", "HsqldbEmbeddedServer");
+            // System.setProperty("spring.profiles.active", "HsqldbEmbeddedServer");
             // System.setProperty("spring.profiles.active", "mariadb");
         }
 

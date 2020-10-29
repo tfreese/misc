@@ -1,7 +1,6 @@
 // Created: 31.05.2017
 package de.freese.jsensors.backend.file;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
@@ -20,17 +19,10 @@ public class CSVBackend extends AbstractFileBackend
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue)
+    protected void saveValue(final SensorValue sensorValue) throws Exception
     {
-        try
-        {
-            PrintStream ps = getPrintStream(sensorValue.getName() + ".csv", true);
+        PrintStream ps = getPrintStream(sensorValue.getName() + ".csv", true);
 
-            ps.format("%d;%s%n", sensorValue.getTimestamp(), sensorValue.getValue());
-        }
-        catch (IOException ioex)
-        {
-            getLogger().error(null, ioex);
-        }
+        ps.format("%d;%s%n", sensorValue.getTimestamp(), sensorValue.getValue());
     }
 }

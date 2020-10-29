@@ -2,14 +2,13 @@
 package de.freese.jsensors.backend;
 
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.lifecycle.LifeCycle;
 
 /**
  * Ein {@link Backend} speichert die gemessenen Sensorwerte.
  *
  * @author Thomas Freese
  */
-public interface Backend extends LifeCycle
+public interface Backend
 {
     /**
      * Speichert den Sensorwert.

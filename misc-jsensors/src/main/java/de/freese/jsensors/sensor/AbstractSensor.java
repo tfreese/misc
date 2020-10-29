@@ -1,11 +1,13 @@
 // Created: 31.05.2017
 package de.freese.jsensors.sensor;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.lifecycle.AbstractLifeCycle;
-import de.freese.jsensors.registry.LifeCycleManager;
 import de.freese.jsensors.utils.Utils;
 
 /**
@@ -13,8 +15,13 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
+public abstract class AbstractSensor implements Sensor
 {
+    /**
+     *
+     */
+    private static final Set<String> NAMES = new HashSet<>();
+
     /**
      *
      */
@@ -28,30 +35,42 @@ public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
     /**
     *
     */
-    private String name;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    /**
+    *
+    */
+    private final String name;
 
     /**
      * Erstellt ein neues {@link AbstractSensor} Object.
+     *
+     * @param name String; Der Name wird in ein Datei- und Datenbankverträgliches Format umgewandelt.
      */
-    public AbstractSensor()
+    public AbstractSensor(final String name)
     {
         super();
 
-        LifeCycleManager.getInstance().register(this);
-    }
-
-    /**
-     * @see de.freese.jsensors.lifecycle.AbstractLifeCycle#beforeStart()
-     */
-    @Override
-    protected void beforeStart()
-    {
-        String sensorName = getName();
-
-        if ((sensorName == null) || sensorName.isBlank())
+        if ((name == null) || name.isBlank())
         {
-            throw new IllegalArgumentException("sensor name is null or empty");
+            throw new IllegalArgumentException("name must not null or blank");
         }
+
+        String formattedName = Utils.sensorNameToTableName(name);
+
+        if (!name.equals(formattedName))
+        {
+            getLogger().info("change sensor name from '{}' to '{}'", name, formattedName);
+        }
+
+        if (NAMES.contains(formattedName))
+        {
+            String message = String.format("sensor '%s' already exist", formattedName);
+
+            throw new IllegalArgumentException(message);
+        }
+
+        this.name = formattedName;
     }
 
     /**
@@ -60,6 +79,14 @@ public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
     protected Backend getBackend()
     {
         return this.backend;
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return this.logger;
     }
 
     /**
@@ -142,23 +169,5 @@ public abstract class AbstractSensor extends AbstractLifeCycle implements Sensor
     public void setExclusive(final boolean exclusive)
     {
         this.exclusive = exclusive;
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#setName(java.lang.String)
-     */
-    @Override
-    public void setName(final String name)
-    {
-        Objects.requireNonNull(name, "name required");
-
-        String formattedName = Utils.sensorNameToTableName(name);
-
-        if (!name.equals(formattedName))
-        {
-            getLogger().info("change sensor name from '{}' to '{}'", name, formattedName);
-        }
-
-        this.name = formattedName;
     }
 }

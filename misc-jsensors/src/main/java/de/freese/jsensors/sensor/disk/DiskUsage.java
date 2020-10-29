@@ -12,6 +12,16 @@ import de.freese.jsensors.utils.Utils;
 public class DiskUsage extends AbstractDiskSensor
 {
     /**
+     * Erstellt ein neues {@link DiskUsage} Object.
+     *
+     * @param name String
+     */
+    public DiskUsage(final String name)
+    {
+        super(name);
+    }
+
+    /**
      * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
      */
     @Override
