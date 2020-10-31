@@ -67,12 +67,12 @@
         <appender-ref ref="FILE" />
     </appender-->     
 
-    <logger name="de.freese.jsensors" level="DEBUG"/>
+    <logger name="de.freese.jsensors" level="INFO"/>
     <logger name="hsqldb.db" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="STDERR" />
-        <!--appender-ref ref="FILE_ASYNC" /--> <!-- sonst könnte nur eine Instanz starten -->
+        <!--appender-ref ref="FILE_ASYNC" /-->
     </root>
 </configuration>

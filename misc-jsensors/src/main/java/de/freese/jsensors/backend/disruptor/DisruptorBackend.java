@@ -19,7 +19,7 @@ import de.freese.jsensors.utils.LifeCycle;
 /**
  * @author Thomas Freese
  */
-public class DisruptorBackEnd extends AbstractBackend implements LifeCycle
+public class DisruptorBackend extends AbstractBackend implements LifeCycle
 {
     /**
      *
@@ -57,11 +57,14 @@ public class DisruptorBackEnd extends AbstractBackend implements LifeCycle
      * Diese Verknüpfung wird von den {@link DisruptorSensorEventHandler} benötigt um die {@link SensorValue}s weiter zu leiten.
      *
      * @param sensor {@link Sensor}
-     * @param backend {@link Backend}
+     * @param backends {@link Backend}[]
      */
-    public void register(final Sensor sensor, final Backend backend)
+    public void register(final Sensor sensor, final Backend...backends)
     {
-        register(sensor.getName(), backend);
+        for (Backend backend : backends)
+        {
+            register(sensor.getName(), backend);
+        }
     }
 
     /**
@@ -108,16 +111,6 @@ public class DisruptorBackEnd extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * Wird eigentlich nur für Spring XML-Config benötigt.
-     *
-     * @param map {@link Map}
-     */
-    public void setRegistry(final Map<String, List<Backend>> map)
-    {
-        this.registry.putAll(map);
-    }
-
-    /**
      * Default: 128
      *
      * @param ringBufferSize int
@@ -133,6 +126,11 @@ public class DisruptorBackEnd extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
+        if (this.ringBufferSize < 1)
+        {
+            throw new IllegalArgumentException("ringBufferSize must be >= 1");
+        }
+
         this.disruptor = new Disruptor<>(SensorEvent::new, this.ringBufferSize, new JSensorThreadFactory("jsensor-disruptor-"));
 
         DisruptorSensorEventHandler[] handlers = new DisruptorSensorEventHandler[THREAD_COUNT];

@@ -31,7 +31,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 /**
  * @author Thomas Freese
  */
-public class JFreeChartTest
+public class JFreeChartDemo
 {
     /**
     *

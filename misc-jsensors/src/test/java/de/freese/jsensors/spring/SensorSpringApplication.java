@@ -1,4 +1,4 @@
-package de.freese.jsensors;
+package de.freese.jsensors.spring;
 
 import java.util.concurrent.TimeUnit;
 import org.springframework.boot.WebApplicationType;
@@ -9,7 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.StringUtils;
-import de.freese.jsensors.spring.SpringContext;
 
 /**
  * @author Thomas Freese
@@ -17,7 +16,7 @@ import de.freese.jsensors.spring.SpringContext;
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling
-@ComponentScan(basePackages = "de.freese.jsensors")
+@ComponentScan(basePackages = "de.freese.jsensors.spring")
 public class SensorSpringApplication
 {
     /**

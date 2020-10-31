@@ -11,7 +11,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class MemoryUsage extends AbstractSensor
+public class MemoryUsageSensor extends AbstractSensor
 {
     /**
      *
@@ -19,11 +19,11 @@ public class MemoryUsage extends AbstractSensor
     private final JavaSysMon monitor;
 
     /**
-     * Erzeugt eine neue Instanz von {@link MemoryUsage}.
+     * Erzeugt eine neue Instanz von {@link MemoryUsageSensor}.
      *
      * @param name String
      */
-    public MemoryUsage(final String name)
+    public MemoryUsageSensor(final String name)
     {
         super(name);
 

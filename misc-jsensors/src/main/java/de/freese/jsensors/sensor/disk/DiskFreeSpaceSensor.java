@@ -8,14 +8,14 @@ import java.io.File;
  *
  * @author Thomas Freese
  */
-public class DiskFreeSpace extends AbstractDiskSensor
+public class DiskFreeSpaceSensor extends AbstractDiskSensor
 {
     /**
-     * Erstellt ein neues {@link DiskFreeSpace} Object.
+     * Erstellt ein neues {@link DiskFreeSpaceSensor} Object.
      *
      * @param name String
      */
-    public DiskFreeSpace(final String name)
+    public DiskFreeSpaceSensor(final String name)
     {
         super(name);
     }

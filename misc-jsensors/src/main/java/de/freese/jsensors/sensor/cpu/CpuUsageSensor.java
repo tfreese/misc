@@ -11,7 +11,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class CpuUsage extends AbstractSensor
+public class CpuUsageSensor extends AbstractSensor
 {
     /**
      *
@@ -24,11 +24,11 @@ public class CpuUsage extends AbstractSensor
     private final JavaSysMon monitor;
 
     /**
-     * Erzeugt eine neue Instanz von {@link CpuUsage}.
+     * Erzeugt eine neue Instanz von {@link CpuUsageSensor}.
      *
      * @param name String
      */
-    public CpuUsage(final String name)
+    public CpuUsageSensor(final String name)
     {
         super(name);
 

@@ -1,5 +1,5 @@
 // Created: 12.05.2017
-package de.freese.jsensors;
+package de.freese.jsensors.spring;
 
 import java.util.ArrayList;
 import java.util.List;

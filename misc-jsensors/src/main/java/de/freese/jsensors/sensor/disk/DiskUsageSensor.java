@@ -9,14 +9,14 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class DiskUsage extends AbstractDiskSensor
+public class DiskUsageSensor extends AbstractDiskSensor
 {
     /**
-     * Erstellt ein neues {@link DiskUsage} Object.
+     * Erstellt ein neues {@link DiskUsageSensor} Object.
      *
      * @param name String
      */
-    public DiskUsage(final String name)
+    public DiskUsageSensor(final String name)
     {
         super(name);
     }

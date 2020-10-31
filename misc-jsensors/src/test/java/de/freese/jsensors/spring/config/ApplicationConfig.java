@@ -1,5 +1,5 @@
 // Created: 10.02.2017
-package de.freese.jsensors.spring;
+package de.freese.jsensors.spring.config;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,7 +53,7 @@ public class ApplicationConfig
     {
         LOGGER.info("no ExecutorService exist, create a ExecutorService");
 
-        int coreSize = Runtime.getRuntime().availableProcessors();
+        int coreSize = 4;
         int maxSize = coreSize * 2;
         int queueSize = maxSize;
 
@@ -80,7 +80,7 @@ public class ApplicationConfig
     {
         LOGGER.info("no ScheduledExecutorService exist, create a ScheduledExecutorService");
 
-        int poolSize = Runtime.getRuntime().availableProcessors();
+        int poolSize = 4;
 
         ScheduledExecutorFactoryBean bean = new ScheduledExecutorFactoryBean();
         bean.setPoolSize(poolSize);

@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import de.freese.jsensors.backend.disruptor.DisruptorBackEnd;
+import de.freese.jsensors.backend.disruptor.DisruptorBackend;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
 import de.freese.jsensors.utils.SyncFuture;
@@ -49,7 +49,7 @@ class TestScheduler
     void testSchedulerMitDisruptor() throws Exception
     {
         // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
-        DisruptorBackEnd backendDisruptor = new DisruptorBackEnd();
+        DisruptorBackend backendDisruptor = new DisruptorBackend();
         backendDisruptor.start();
 
         Sensor sensor = new ConstantSensor("test/Sensor", "123.456");

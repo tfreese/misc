@@ -56,7 +56,7 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     public void onEvent(final SensorEvent event, final long sequence, final boolean endOfBatch) throws Exception
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.id == -1) || (this.id == (sequence % DisruptorBackEnd.THREAD_COUNT)))
+        if ((this.id == -1) || (this.id == (sequence % DisruptorBackend.THREAD_COUNT)))
         {
             SensorValue sensorValue = event.getSensorValue();
             event.setSensorValue(null);

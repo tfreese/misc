@@ -11,7 +11,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class SwapUsage extends AbstractSensor
+public class SwapUsageSensor extends AbstractSensor
 {
     /**
      *
@@ -19,11 +19,11 @@ public class SwapUsage extends AbstractSensor
     private final JavaSysMon monitor;
 
     /**
-     * Erzeugt eine neue Instanz von {@link SwapUsage}.
+     * Erzeugt eine neue Instanz von {@link SwapUsageSensor}.
      *
      * @param name String
      */
-    public SwapUsage(final String name)
+    public SwapUsageSensor(final String name)
     {
         super(name);
 

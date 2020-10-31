@@ -17,7 +17,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class NetworkUsage extends AbstractSensor implements LifeCycle
+public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
 {
     /**
      *
@@ -30,11 +30,11 @@ public class NetworkUsage extends AbstractSensor implements LifeCycle
     private final List<String> interfaces = new ArrayList<>();
 
     /**
-     * Erstellt ein neues {@link NetworkUsage} Object.
+     * Erstellt ein neues {@link NetworkUsageSensor} Object.
      *
      * @param name String
      */
-    public NetworkUsage(final String name)
+    public NetworkUsageSensor(final String name)
     {
         super(name);
     }

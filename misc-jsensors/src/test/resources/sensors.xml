@@ -42,13 +42,13 @@
 	</bean>        
 
 	<!-- Backends konfigurieren -->
-    <bean id="disruptorBackend" class="de.freese.jsensors.backend.disruptor.DisruptorBackEnd" init-method="start" destroy-method="stop">
+    <bean id="disruptorBackend" class="de.freese.jsensors.spring.config.DisruptorBackendFactoryBean">
         <property name="ringBufferSize" value="32" />
         <property name="registry">
             <map>
                 <entry>
                     <key>
-                        <value>DISKFREE_ROOT</value>
+                        <value>diskFreeRootSensor</value>
                     </key>
                     <list>
                         <ref bean="csvBackendDiskFreeRoot" />
@@ -143,29 +143,40 @@
 
 	<!-- Sensoren konfigurieren -->
 	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
-	<bean id="diskFreeRoot" class="de.freese.jsensors.sensor.disk.DiskFreeSpace" init-method="start" destroy-method="stop">
+	<!--bean id="diskFreeRootSensor" class="de.freese.jsensors.sensor.disk.DiskFreeSpaceSensor" init-method="start" destroy-method="stop">
         <constructor-arg value="DISKFREE_ROOT" />
 		<property name="disk" value="/" />
 		<property name="backend" ref="disruptorBackend" />
-	</bean>
-	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
+	</bean-->
+    <bean id="diskFreeRootSensor" class="de.freese.jsensors.spring.config.SensorFactoryBean">
+        <property name="sensorClazz" value="de.freese.jsensors.sensor.disk.DiskFreeSpaceSensor" />
+        <!--property name="name" ref="DISKFREE_ROOT" /-->
+        <property name="backend" ref="disruptorBackend" />
+        <property name="propertyMap">
+            <map>
+                <entry key="disk" value="/"/>
+	       </map>        
+        </property>
+    </bean>
+        
+	<bean id="diskUsageRootSensor" class="de.freese.jsensors.sensor.disk.DiskUsageSensor" init-method="start" destroy-method="stop">
         <constructor-arg value="DISKUSAGE_ROOT" />
 		<property name="disk" value="/" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage">
+	<bean id="cpuUsageSensor" class="de.freese.jsensors.sensor.cpu.CpuUsageSensor">
         <constructor-arg index="0" value="CPU_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage">
+	<bean id="memoryUsageSensor" class="de.freese.jsensors.sensor.memory.MemoryUsageSensor">
         <constructor-arg index="0" value="MEMORY_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage">
+	<bean id="swapUsageSensor" class="de.freese.jsensors.sensor.swap.SwapUsageSensor">
         <constructor-arg index="0" value="SWAP_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
-	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage" init-method="start" destroy-method="stop">
+	<bean id="netUsageSensor" class="de.freese.jsensors.sensor.network.NetworkUsageSensor" init-method="start" destroy-method="stop">
         <constructor-arg index="0" value="NETWORK" /> 
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
@@ -177,12 +188,12 @@
 
 		<!--task:scheduled ref="diskFreeC" method="scan" initial-delay="1000" fixed-delay="5000" />
 		<task:scheduled ref="diskUsageC" method="scan" initial-delay="1000" fixed-delay="5000" /-->
-		<task:scheduled ref="diskFreeRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="diskUsageRoot" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="cpuUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="memoryUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="swapUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
-		<task:scheduled ref="netUsage" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="diskFreeRootSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="diskUsageRootSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="cpuUsageSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="memoryUsageSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="swapUsageSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
+		<task:scheduled ref="netUsageSensor" method="scan" initial-delay="1000" fixed-delay="5000" />
 	</task:scheduled-tasks>
 
 </beans>
