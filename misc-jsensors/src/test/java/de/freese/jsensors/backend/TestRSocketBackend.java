@@ -77,9 +77,8 @@ class TestRSocketBackend
             String value = byteBuf.readCharSequence(length, StandardCharsets.UTF_8).toString();
 
             long timeStamp = byteBuf.readLong();
-            boolean exclusive = byteBuf.readBoolean();
 
-            SensorValue sensorValue = new SensorValue(name, value, timeStamp, exclusive);
+            SensorValue sensorValue = new SensorValue(name, value, timeStamp);
             future.setResponse(sensorValue);
 
             return Mono.empty();

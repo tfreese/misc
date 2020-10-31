@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.utils.Utils;
 
 /**
  * Basis-implementierung eines Sensors.
@@ -26,11 +25,6 @@ public abstract class AbstractSensor implements Sensor
      *
      */
     private Backend backend;
-
-    /**
-     *
-     */
-    private boolean exclusive;
 
     /**
     *
@@ -56,12 +50,7 @@ public abstract class AbstractSensor implements Sensor
             throw new IllegalArgumentException("name must not null or blank");
         }
 
-        String formattedName = Utils.sensorNameToTableName(name);
-
-        if (!name.equals(formattedName))
-        {
-            getLogger().info("change sensor name from '{}' to '{}'", name, formattedName);
-        }
+        String formattedName = name.trim().toUpperCase();
 
         if (NAMES.contains(formattedName))
         {
@@ -70,7 +59,9 @@ public abstract class AbstractSensor implements Sensor
             throw new IllegalArgumentException(message);
         }
 
-        this.name = formattedName;
+        NAMES.add(formattedName);
+
+        this.name = name;
     }
 
     /**
@@ -99,14 +90,6 @@ public abstract class AbstractSensor implements Sensor
     }
 
     /**
-     * @return boolean
-     */
-    protected boolean isExclusive()
-    {
-        return this.exclusive;
-    }
-
-    /**
      * Speichert den Sensorwert in den Backends.
      *
      * @param value String
@@ -125,7 +108,7 @@ public abstract class AbstractSensor implements Sensor
      */
     protected void save(final String value, final long timestamp, final String sensorName)
     {
-        final SensorValue sensorValue = new SensorValue(sensorName, value, timestamp, isExclusive());
+        final SensorValue sensorValue = new SensorValue(sensorName, value, timestamp);
 
         this.backend.save(sensorValue);
     }
@@ -160,14 +143,5 @@ public abstract class AbstractSensor implements Sensor
     public void setBackend(final Backend backend)
     {
         this.backend = Objects.requireNonNull(backend, "backend required");
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#setExclusive(boolean)
-     */
-    @Override
-    public void setExclusive(final boolean exclusive)
-    {
-        this.exclusive = exclusive;
     }
 }

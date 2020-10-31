@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
 	xmlns:task="http://www.springframework.org/schema/task"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-        http://www.springframework.org/schema/task  http://www.springframework.org/schema/task/spring-task.xsd">
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+        ">
 
 	<!--context:annotation-config/ -->
 
 	<!-- Zugriff auf ApplicationContext -->
 	<!--bean class="de.freese.jsensors.spring.SpringContext" / -->
+    
+    <!--jdbc:embedded-database id="dataSource" type="HSQL">
+        <jdbc:script  location="classpath:schema.sql"/>
+        <jdbc:script location="classpath:test-data.sql"/>
+    </jdbc:embedded-database-->
+    
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource" destroy-method="close">
+	   <constructor-arg>
+	       <bean class="com.zaxxer.hikari.HikariConfig">
+	           <constructor-arg>
+	               <props>
+	                   <prop key="driverClassName">org.hsqldb.jdbc.JDBCDriver</prop>
+	                   <prop key="jdbcUrl">jdbc:hsqldb:file:${jsensors.home}/hsqldb/sensordb;create=true;shutdown=true</prop>
+	                   <prop key="username">sa</prop>
+	                   <prop key="password">""</prop>
+                       <prop key="maximumPoolSize">3</prop>
+                       <prop key="minimumIdle">1</prop>
+                       <prop key="autoCommit">false</prop>
+	               </props>
+	           </constructor-arg>
+	       </bean>
+	   </constructor-arg>
+	</bean>        
 
 	<!-- Backends konfigurieren -->
     <bean id="disruptorBackend" class="de.freese.jsensors.backend.disruptor.DisruptorBackEnd" init-method="start" destroy-method="stop">
@@ -20,7 +51,8 @@
                         <value>DISKFREE_ROOT</value>
                     </key>
                     <list>
-                        <ref bean="csvBackend" />
+                        <ref bean="csvBackendDiskFreeRoot" />
+                        <ref bean="jdbcBackendDiskFreeRoot" />
                         <bean class="de.freese.jsensors.backend.ConsoleBackend" />
                     </list>
                 </entry>
@@ -29,6 +61,8 @@
                         <value>DISKUSAGE_ROOT</value>
                     </key>
                     <list>
+                        <ref bean="csvBackendOneFileForAll" />
+                        <ref bean="jdbcBackendOneTableForAll" />
                         <bean class="de.freese.jsensors.backend.ConsoleBackend" />
                     </list>
                 </entry>
@@ -37,6 +71,8 @@
                         <value>CPU_USAGE</value>
                     </key>
                     <list>
+                        <ref bean="csvBackendOneFileForAll" />
+                        <ref bean="jdbcBackendOneTableForAll" />
                         <bean class="de.freese.jsensors.backend.ConsoleBackend" />
                     </list>
                 </entry>
@@ -58,7 +94,7 @@
                 </entry>
                 <entry>
                     <key>
-                        <value>NETWORK-in</value>
+                        <value>NETWORK-IN</value>
                     </key>
                     <list>
                         <bean class="de.freese.jsensors.backend.ConsoleBackend" />
@@ -66,7 +102,7 @@
                 </entry>
                 <entry>
                     <key>
-                        <value>NETWORK-out</value>
+                        <value>NETWORK-OUT</value>
                     </key>
                     <list>
                         <bean class="de.freese.jsensors.backend.ConsoleBackend" />
@@ -76,20 +112,34 @@
 	   </property>
     </bean>
         
-	<bean id="csvBackend" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
-		<property name="directory" value="${jsensors.home}/csv" />
+	<bean id="csvBackendDiskFreeRoot" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
+		<property name="path" value="${jsensors.home}/diskFreeRoot.csv" />
+        <property name="batchSize" value="5" />
+        <property name="exclusive" value="true" />
 	</bean>
+    <bean id="csvBackendOneFileForAll" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
+        <property name="path" value="${jsensors.home}/sensors.csv" />
+        <property name="batchSize" value="10" />
+    </bean>    
 	<!--bean id="csvAsyncBackend" class="de.freese.jsensors.backend.async.AsyncBackend" init-method="start" destroy-method="stop">
-		<property name="delegate" ref="csvSyncBackend" />
+		<property name="delegate" ref="csvBackendOneFileForAll" />
 	</bean>		
 	<bean id="csvAsyncBackend" class="de.freese.jsensors.backend.async.ExecutorBackend" init-method="start" destroy-method="stop">
-		<property name="delegate" ref="csvSyncBackend" />
+		<property name="delegate" ref="csvBackendOneFileForAll" />
 		<property name="executorService" ref="executorService" />
 	</bean-->	
 
-	<!--bean id="jdbcBackend" class="de.freese.jsensors.backend.jdbc.JDBCBackend" init-method="start" destroy-method="stop">
+	<bean id="jdbcBackendDiskFreeRoot" class="de.freese.jsensors.backend.jdbc.JDBCBackend" init-method="start" destroy-method="stop">
 		<property name="dataSource" ref="dataSource" />
-	</bean-->
+        <property name="tableName" value="DISKFREE_ROOT" />
+        <property name="batchSize" value="5" />
+        <property name="exclusive" value="true" />    
+	</bean>
+    <bean id="jdbcBackendOneTableForAll" class="de.freese.jsensors.backend.jdbc.JDBCBackend" init-method="start" destroy-method="stop">
+        <property name="dataSource" ref="dataSource" />
+        <property name="tableName" value="SENSORS" />
+        <property name="batchSize" value="5" />        
+    </bean>    
 
 	<!-- Sensoren konfigurieren -->
 	<!-- http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#beans-factory-ctor-arguments-resolution -->
@@ -99,24 +149,24 @@
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="diskUsageRoot" class="de.freese.jsensors.sensor.disk.DiskUsage" init-method="start" destroy-method="stop">
-        <constructor-arg value="DISKusage_ROOT" />
+        <constructor-arg value="DISKUSAGE_ROOT" />
 		<property name="disk" value="/" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="cpuUsage" class="de.freese.jsensors.sensor.cpu.CpuUsage">
-        <constructor-arg index="0" value="cpu_usage" />
+        <constructor-arg index="0" value="CPU_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="memoryUsage" class="de.freese.jsensors.sensor.memory.MemoryUsage">
-        <constructor-arg index="0" value="memory_Usage" />
+        <constructor-arg index="0" value="MEMORY_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="swapUsage" class="de.freese.jsensors.sensor.swap.SwapUsage">
-        <constructor-arg index="0" value="swap_usage" />
+        <constructor-arg index="0" value="SWAP_USAGE" />
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 	<bean id="netUsage" class="de.freese.jsensors.sensor.network.NetworkUsage" init-method="start" destroy-method="stop">
-        <constructor-arg index="0" value="network" /> 
+        <constructor-arg index="0" value="NETWORK" /> 
 		<property name="backend" ref="disruptorBackend" />
 	</bean>
 

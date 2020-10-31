@@ -60,7 +60,6 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
         byteBuf.writeBytes(bytes);
 
         byteBuf.writeLong(sensorValue.getTimestamp());
-        byteBuf.writeBoolean(sensorValue.isExclusive());
 
         // @formatter:off
         this.client

@@ -62,7 +62,7 @@ public class NetworkUsage extends AbstractSensor implements LifeCycle
             // ArchLinux:
             // RX packets 32997 bytes 46685918 (44.5 MiB)
             // TX packets 15894 bytes 1288395 (1.2 MiB)
-            input += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("RX packets")).mapToLong(l -> {
+            input += lines.stream().map(String::trim).filter(l -> l.startsWith("RX packets")).mapToLong(l -> {
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
@@ -70,7 +70,7 @@ public class NetworkUsage extends AbstractSensor implements LifeCycle
                 return value;
             }).findFirst().orElse(0L);
 
-            output += lines.stream().map(l -> l.trim()).filter(l -> l.startsWith("TX packets")).mapToLong(l -> {
+            output += lines.stream().map(String::trim).filter(l -> l.startsWith("TX packets")).mapToLong(l -> {
                 Matcher matcher = PATTERN_BYTES.matcher(l);
 
                 matcher.find();
@@ -139,8 +139,8 @@ public class NetworkUsage extends AbstractSensor implements LifeCycle
 
         long timeStamp = System.currentTimeMillis();
 
-        save(bytesInput, timeStamp, getName() + "-in");
-        save(bytesOutput, timeStamp, getName() + "-out");
+        save(bytesInput, timeStamp, getName() + "-IN");
+        save(bytesOutput, timeStamp, getName() + "-OUT");
     }
 
     /**
@@ -166,7 +166,7 @@ public class NetworkUsage extends AbstractSensor implements LifeCycle
             // Beispiel: em1 lo wlp6so
             List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
 
-            lines.stream().limit(1).map(l -> l.trim()).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
         }
     }
 

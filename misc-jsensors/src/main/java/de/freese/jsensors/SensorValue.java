@@ -20,11 +20,6 @@ public class SensorValue
     /**
     *
     */
-    private final boolean exclusive;
-
-    /**
-    *
-    */
     private LocalDateTime localDateTime;
 
     /**
@@ -48,16 +43,14 @@ public class SensorValue
      * @param name String
      * @param value String
      * @param timestamp long
-     * @param exclusive boolean
      */
-    public SensorValue(final String name, final String value, final long timestamp, final boolean exclusive)
+    public SensorValue(final String name, final String value, final long timestamp)
     {
         super();
 
         this.name = Objects.requireNonNull(name, "name required");
         this.value = Objects.requireNonNull(value, "value required");
         this.timestamp = timestamp;
-        this.exclusive = exclusive;
     }
 
     /**
@@ -78,8 +71,7 @@ public class SensorValue
 
         SensorValue other = (SensorValue) obj;
 
-        return (this.exclusive == other.exclusive) && Objects.equals(this.name, other.name) && (this.timestamp == other.timestamp)
-                && Objects.equals(this.value, other.value);
+        return Objects.equals(this.name, other.name) && (this.timestamp == other.timestamp) && Objects.equals(this.value, other.value);
     }
 
     /**
@@ -138,15 +130,7 @@ public class SensorValue
     @Override
     public int hashCode()
     {
-        return Objects.hash(this.exclusive, this.name, this.timestamp, this.value);
-    }
-
-    /**
-     * @return boolean
-     */
-    public boolean isExclusive()
-    {
-        return this.exclusive;
+        return Objects.hash(this.name, this.timestamp, this.value);
     }
 
     /**
@@ -160,7 +144,6 @@ public class SensorValue
         builder.append("name=").append(this.name);
         builder.append(", value=").append(this.value);
         builder.append(", timestamp=").append(getLocalDateTime());
-        builder.append(", exclusive=").append(isExclusive());
         builder.append("]");
 
         return builder.toString();

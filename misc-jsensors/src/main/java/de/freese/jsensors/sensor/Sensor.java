@@ -28,11 +28,4 @@ public interface Sensor
      * @param backend {@link Backend}
      */
     public void setBackend(Backend backend);
-
-    /**
-     * Dieser Sensor soll eine eigene Datei oder Datenbank-Tabelle bekommen.
-     *
-     * @param exclusive boolean
-     */
-    public void setExclusive(boolean exclusive);
 }

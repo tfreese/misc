@@ -1,18 +1,16 @@
 // Created: 02.06.2017
 package de.freese.jsensors.backend.file;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.utils.LifeCycle;
 
@@ -24,153 +22,165 @@ import de.freese.jsensors.utils.LifeCycle;
 public abstract class AbstractFileBackend extends AbstractBackend implements LifeCycle
 {
     /**
-    *
-    */
-    private Path directory;
+     *
+     */
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     /**
      *
      */
-    private final Map<Path, OutputStream> outputStreams = new HashMap<>();
+    private int batchSize = 5;
+
+    /**
+     *
+     */
+    private List<SensorValue> buffer;
+
+    /**
+     *
+     */
+    private boolean exclusive;
+
+    /**
+     *
+     */
+    private OutputStream outputStream;
 
     /**
     *
     */
-    private final Map<Path, PrintStream> printStreams = new HashMap<>();
+    private Path path;
 
     /**
-     * @param os {@link PrintStream}
+     * @param path {@link Path}
+     * @return {@link OutputStream}
+     * @throws IOException Falls was schief geht.
      */
-    protected void closeOutputStream(final OutputStream os)
+    protected OutputStream createOutputStream(final Path path) throws IOException
     {
-        try
-        {
-            os.flush();
-            os.close();
-        }
-        catch (IOException ioex)
-        {
-            getLogger().error(null, ioex);
-        }
+        return Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
 
     /**
-     * @param ps {@link PrintStream}
+     * @param sensorValue {@link SensorValue}
+     * @return byte[]
      */
-    protected void closePrintStream(final PrintStream ps)
+    protected abstract byte[] encode(SensorValue sensorValue);
+
+    /**
+     * @return {@link List}
+     */
+    private synchronized List<SensorValue> flush()
     {
-        try
-        {
-            ps.flush();
-            ps.close();
-        }
-        catch (Exception ioex)
-        {
-            getLogger().error(null, ioex);
-        }
+        List<SensorValue> list = this.buffer;
+        this.buffer = null;
+
+        return list;
+    }
+
+    /**
+     * @return int
+     */
+    private int getBatchSize()
+    {
+        return this.batchSize;
+    }
+
+    /**
+     * @return String
+     */
+    protected String getLineSeparator()
+    {
+        return LINE_SEPARATOR;
     }
 
     /**
      * @return {@link Path}
      */
-    protected Path getDirectory()
+    private Path getPath()
     {
-        return this.directory;
+        return this.path;
     }
 
     /**
-     * @param file {@link Path}
-     * @param buffered boolean
-     * @return {@link OutputStream}
-     * @throws IOException Falls was schief geht.
-     */
-    protected OutputStream getOutputStream(final Path file, final boolean buffered) throws IOException
-    {
-        // OutputStream os = outputStreams.computeIfAbsent(path, key -> Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND));
-
-        OutputStream os = this.outputStreams.get(file);
-
-        if (os == null)
-        {
-            os = Files.newOutputStream(file, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-
-            if (buffered)
-            {
-                os = new BufferedOutputStream(os, 256);
-            }
-
-            this.outputStreams.put(file, os);
-        }
-
-        return os;
-    }
-
-    /**
-     * @param fileName String
-     * @param buffered boolean
-     * @return {@link OutputStream}
-     * @throws IOException Falls was schief geht.
-     */
-    protected OutputStream getOutputStream(final String fileName, final boolean buffered) throws IOException
-    {
-        Path file = getDirectory().resolve(fileName);
-
-        return getOutputStream(file, buffered);
-    }
-
-    /**
-     * @param file {@link Path}
-     * @param buffered boolean
-     * @return {@link PrintStream}
-     * @throws IOException Falls was schief geht.
-     */
-    protected PrintStream getPrintStream(final Path file, final boolean buffered) throws IOException
-    {
-        PrintStream ps = this.printStreams.get(file);
-
-        if (ps == null)
-        {
-            ps = new PrintStream(getOutputStream(file, buffered));
-            this.outputStreams.put(file, ps);
-        }
-
-        return ps;
-    }
-
-    /**
-     * @param fileName String
-     * @param buffered boolean
-     * @return {@link PrintStream}
-     * @throws IOException Falls was schief geht.
-     */
-    protected PrintStream getPrintStream(final String fileName, final boolean buffered) throws IOException
-    {
-        Path file = getDirectory().resolve(fileName);
-
-        return getPrintStream(file, buffered);
-    }
-
-    /**
-     * @param directory {@link Path}
-     */
-    public void setDirectory(final Path directory)
-    {
-        this.directory = Objects.requireNonNull(directory, "directory required");
-    }
-
-    /**
-     * Setzt das Basis-Verzeichnis.
+     * Die Datei ist exklusiv nur für einen Sensor.
      *
-     * @param directory String
+     * @return boolean
      */
-    public void setDirectory(final String directory)
+    protected boolean isExclusive()
     {
-        if ((directory == null) || directory.isEmpty())
+        return this.exclusive;
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void saveValue(final SensorValue sensorValue) throws Exception
+    {
+        if (sensorValue == null)
         {
-            throw new IllegalArgumentException("directory is null or empty");
+            return;
         }
 
-        setDirectory(Paths.get(directory));
+        if (this.buffer == null)
+        {
+            this.buffer = new ArrayList<>();
+        }
+
+        this.buffer.add(sensorValue);
+
+        if (this.buffer.size() >= getBatchSize())
+        {
+            saveValues(flush());
+        }
+    }
+
+    /**
+     * @param values {@link List}
+     * @throws Exception Falls was schief geht.
+     */
+    private void saveValues(final List<SensorValue> values) throws Exception
+    {
+        if (values == null)
+        {
+            return;
+        }
+
+        for (SensorValue sensorValue : values)
+        {
+            byte[] bytes = encode(sensorValue);
+
+            this.outputStream.write(bytes);
+        }
+
+        this.outputStream.flush();
+    }
+
+    /**
+     * @param batchSize int
+     */
+    public void setBatchSize(final int batchSize)
+    {
+        this.batchSize = batchSize;
+    }
+
+    /**
+     * Die Datei ist exklusiv nur für einen Sensor.
+     *
+     * @param exclusive boolean
+     */
+    public void setExclusive(final boolean exclusive)
+    {
+        this.exclusive = exclusive;
+    }
+
+    /**
+     * @param path {@link Path}
+     */
+    public void setPath(final Path path)
+    {
+        this.path = Objects.requireNonNull(path, "path required");
     }
 
     /**
@@ -179,14 +189,22 @@ public abstract class AbstractFileBackend extends AbstractBackend implements Lif
     @Override
     public void start()
     {
-        if (getDirectory() == null)
+        if (getPath() == null)
         {
-            throw new NullPointerException("directory required");
+            throw new NullPointerException("path required");
+        }
+
+        if (getBatchSize() < 1)
+        {
+            throw new IllegalArgumentException("batchSize must be >= 1");
         }
 
         try
         {
-            Files.createDirectories(getDirectory());
+            Path parent = getPath().getParent();
+            Files.createDirectories(parent);
+
+            this.outputStream = createOutputStream(getPath());
         }
         catch (IOException ex)
         {
@@ -200,10 +218,23 @@ public abstract class AbstractFileBackend extends AbstractBackend implements Lif
     @Override
     public void stop()
     {
-        this.printStreams.values().forEach(this::closePrintStream);
-        this.printStreams.clear();
+        try
+        {
+            saveValues(flush());
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
 
-        this.outputStreams.values().forEach(this::closeOutputStream);
-        this.outputStreams.clear();
+        try
+        {
+            this.outputStream.flush();
+            this.outputStream.close();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
     }
 }
