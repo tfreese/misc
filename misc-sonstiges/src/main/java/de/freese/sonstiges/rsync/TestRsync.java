@@ -6,6 +6,8 @@ package de.freese.sonstiges.rsync;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Thomas Freese
@@ -54,12 +56,14 @@ public class TestRsync
 
         System.out.println(command.toString());
 
+        Charset charset = StandardCharsets.UTF_8;
+
         try
         {
             Process process = Runtime.getRuntime().exec(command.toString());
 
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream(), charset));
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream(), charset));
             // BufferedWriter outputWriter =
             // new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 

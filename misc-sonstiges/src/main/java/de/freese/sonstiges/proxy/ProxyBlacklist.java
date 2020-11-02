@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -232,8 +233,10 @@ public class ProxyBlacklist
         Set<String> whiteListImages = new TreeSet<>();
         load(blackListElements, new URL("/tmp/privoxy-whitelist-images.txt"));
 
+        Charset charset = StandardCharsets.UTF_8;
+
         // Privoxy Filter
-        try (PrintWriter writer = new PrintWriter("/tmp/generated.filter"))
+        try (PrintWriter writer = new PrintWriter("/tmp/generated.filter", charset))
         {
             writer.println("FILTER: generated Tag Filter for HTML Elements");
 
@@ -244,7 +247,7 @@ public class ProxyBlacklist
         }
 
         // Privoxy Action
-        try (PrintWriter writer = new PrintWriter("/tmp/generated.action"))
+        try (PrintWriter writer = new PrintWriter("/tmp/generated.action", charset))
         {
             writer.println("{ +block{generated} }");
 
@@ -384,7 +387,7 @@ public class ProxyBlacklist
         Set<String> bl = new TreeSet<>(new HostComparator());
         bl.addAll(set1);
 
-        set2.clear();
+        set1.clear();
         set1 = null;
         set2.clear();
         set2 = null;
@@ -549,7 +552,7 @@ public class ProxyBlacklist
     {
         System.out.printf("Write %s%n", file.getAbsoluteFile());
 
-        try (PrintWriter writer = new PrintWriter(file))
+        try (PrintWriter writer = new PrintWriter(file, StandardCharsets.UTF_8))
         {
             for (String host : blackList)
             {

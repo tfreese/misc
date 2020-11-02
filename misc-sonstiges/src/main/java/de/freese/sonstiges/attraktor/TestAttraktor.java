@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import org.apache.commons.math3.util.FastMath;
 
 /**
  * @author Thomas Freese
@@ -64,7 +63,7 @@ public class TestAttraktor extends JComponent implements Runnable
         frame.setVisible(true);
 
         // canvas.run();
-        scheduledExecutorService.scheduleWithFixedDelay(canvas, 0, 500, TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(canvas, 1000, 500, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -155,8 +154,8 @@ public class TestAttraktor extends JComponent implements Runnable
 
         for (int i = 0; i < 10; i++)
         {
-            // double xx = y - (Math.signum(x) * Math.sqrt(Math.abs((b * x) - c)));
-            double xx = this.y - (FastMath.signum(this.x) * FastMath.pow(Math.abs((b * this.x) - c), 0.5D));
+            double xx = this.y - (Math.signum(this.x) * Math.sqrt(Math.abs((b * this.x) - c)));
+            // double xx = this.y - (FastMath.signum(this.x) * FastMath.pow(Math.abs((b * this.x) - c), 0.5D));
             double yy = a - this.x;
             this.x = xx;
             this.y = yy;

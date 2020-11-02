@@ -19,11 +19,6 @@ import org.slf4j.LoggerFactory;
 public class PortScanner
 {
     /**
-     * 
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(PortScanner.class);
-
-    /**
      *
      */
     public static final int FIRT_PORT = 1;
@@ -32,6 +27,11 @@ public class PortScanner
      *
      */
     public static final int LAST_PORT = 65535;
+
+    /**
+     *
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortScanner.class);
 
     /**
      * @param param String
@@ -44,14 +44,14 @@ public class PortScanner
 
     /**
      * Argumente initialisieren die PortFactory und starten die Threads
-     * 
+     *
      * @param args -host ip -threads num -ports firstPort lastPort
      */
     public static void main(final String[] args)
     {
         int firstPort = FIRT_PORT;
         int lastPort = LAST_PORT;
-        int threads = 20;
+        int threads = 8;
         InetAddress host = null;
 
         int nextArg = 0;
@@ -85,15 +85,15 @@ public class PortScanner
                     badArg("Unknown command-line argument: " + arg);
                 }
             }
-            catch (ArrayIndexOutOfBoundsException e)
+            catch (ArrayIndexOutOfBoundsException ex)
             {
                 badArg("missing item after " + arg);
             }
-            catch (NumberFormatException e)
+            catch (NumberFormatException ex)
             {
                 badArg("bad number format for " + arg + ": " + args[nextArg - 1]);
             }
-            catch (UnknownHostException e)
+            catch (UnknownHostException ex)
             {
                 badArg(args[nextArg - 1] + " is not a valid host name.");
             }

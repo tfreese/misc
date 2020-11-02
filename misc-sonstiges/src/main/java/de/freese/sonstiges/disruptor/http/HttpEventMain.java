@@ -52,9 +52,7 @@ public class HttpEventMain
 
         disruptor.handleEventsWith(handlers).then(new CleaningEventHandler());
 
-        disruptor.start();
-
-        RingBuffer<HttpEvent> ringBuffer = disruptor.getRingBuffer();
+        RingBuffer<HttpEvent> ringBuffer = disruptor.start();
 
         server.setProducer(new HttpEventProducer(ringBuffer, server.getMapResponseReady()));
 
