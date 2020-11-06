@@ -17,7 +17,7 @@ import org.apache.commons.configuration2.SystemConfiguration;
 /**
  * @author Thomas Freese
  */
-public class ConfigurationDemo
+public final class ConfigurationDemo
 {
     /**
      * @param args String[]
@@ -66,7 +66,7 @@ public class ConfigurationDemo
     /**
      * Erstellt ein neues {@link ConfigurationDemo} Object.
      */
-    public ConfigurationDemo()
+    private ConfigurationDemo()
     {
         super();
     }

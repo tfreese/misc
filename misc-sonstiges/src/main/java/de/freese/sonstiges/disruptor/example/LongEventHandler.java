@@ -18,16 +18,16 @@ public class LongEventHandler implements EventHandler<LongEvent>
     /**
      *
      */
-    private final int id;
+    private final int ordinal;
 
     /**
-     * @param id int
+     * @param ordinal int
      */
-    public LongEventHandler(final int id)
+    public LongEventHandler(final int ordinal)
     {
         super();
 
-        this.id = id;
+        this.ordinal = ordinal;
     }
 
     /**
@@ -48,7 +48,7 @@ public class LongEventHandler implements EventHandler<LongEvent>
     public void onEvent(final LongEvent event, final long sequence, final boolean endOfBatch)
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.id == -1) || (this.id == (sequence % LongEventMain.THREAD_COUNT)))
+        if ((this.ordinal == -1) || (this.ordinal == (sequence % LongEventMain.THREAD_COUNT)))
         {
             handleEvent(event);
         }

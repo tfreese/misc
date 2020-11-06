@@ -5,137 +5,139 @@ package de.freese.openstreetmap;
  * Basis ist der "Elliptical Mercator".<br>
  * Quelle: http://wiki.openstreetmap.org/wiki/Mercator<br>
  * Quelle: http://de.wikipedia.org/wiki/Mercator-Projektion
- * 
+ *
  * @author Thomas Freese
  */
 public class Mercator
 {
-	/**
-	 * Minimaler Erdradius in m.
-	 */
-	private final static double POLAR_RADIUS = 6356752.3142D;
+    // @formatter:off
+    /**
+     * Maximaler Erdradius in m.
+     */
+    private static final double AEQUATOR_RADIUS = 6378137.0D;
+    
+    /**
+     * Minimaler Erdradius in m.
+     */
+    private static final double MITTLERER_RADIUS = 6371000.8D;  
+    
+    /**
+     * Math.PI / 2.0D
+     */
+    @SuppressWarnings("unused")
+    private static final double PI_HALBE = Math.PI / 2.0D;
 
-	/**
-	 * Maximaler Erdradius in m.
-	 */
-	private final static double AEQUATOR_RADIUS = 6378137.0D;
+    /**
+     * Math.PI / 4.0D
+     */
+    private static final double PI_VIERTEL = Math.PI / 4.0D;
+    
+    /**
+     * Minimaler Erdradius in m.
+     */
+    private static final double POLAR_RADIUS = 6356752.3142D;
+    
+    /**
+     * Rad = Winkel * (Math.PI / 180.0D) = Math.toRadians(Winkel)
+     */
+    private static final double RAD = Math.PI / 180.0D;    
+            
+    /**
+     * POLAR_RADIUS / AEQUATOR_RADIUS
+     */
+    private static final double FORMFAKTOR = POLAR_RADIUS / AEQUATOR_RADIUS;
+    
+    /**
+     * 1.0D - (FORMFAKTOR * FORMFAKTOR)
+     */
+    private static final double ABPLATTUNG = 1.0D - (FORMFAKTOR * FORMFAKTOR);
 
-	/**
-	 * Minimaler Erdradius in m.
-	 */
-	private final static double MITTLERER_RADIUS = 6371000.8D;
+    /**
+     * Erdumfang in Meter.
+     */
+    private static final double ERD_UMFANG = 2.0D * MITTLERER_RADIUS * Math.PI;
 
-	/**
-	 * POLAR_RADIUS / AEQUATOR_RADIUS
-	 */
-	private static final double FORMFAKTOR = POLAR_RADIUS / AEQUATOR_RADIUS;
+    /**
+     * Math.sqrt(ABPLATTUNG)
+     */
+    private static final double EXZENTRIZITAET = Math.sqrt(ABPLATTUNG);
 
-	/**
-	 * 1.0D - (FORMFAKTOR * FORMFAKTOR)
-	 */
-	private static final double ABPLATTUNG = 1.0D - (FORMFAKTOR * FORMFAKTOR);
+    /**
+     * EXZENTRIZITAET / 2.0D
+     */
+    @SuppressWarnings("unused")
+    private static final double EXZENTRIZITAET_HALBE = EXZENTRIZITAET / 2.0D;
 
-	/**
-	 * Erdumfang in Meter.
-	 */
-	private static final double ERD_UMFANG = 2.0D * MITTLERER_RADIUS * Math.PI;
+    /**
+     * RAD * ERD_UMFANG
+     */
+    @SuppressWarnings("unused")
+    private static final double RAD_AEQUATOR_RADIUS = RAD * AEQUATOR_RADIUS;
 
-	/**
-	 * Math.sqrt(ABPLATTUNG)
-	 */
-	private static final double EXZENTRIZITAET = Math.sqrt(ABPLATTUNG);
+    /**
+     * RAD * ERD_UMFANG
+     */
+    private static final double RAD_ERD_UMFANG = RAD * ERD_UMFANG;
 
-	/**
-	 * EXZENTRIZITAET / 2.0D
-	 */
-	@SuppressWarnings("unused")
-	private static final double EXZENTRIZITAET_HALBE = EXZENTRIZITAET / 2.0D;
+    /**
+     * RAD / 2.0D
+     */
+    private static final double RAD_HALBE = RAD / 2.0D;
+    // @formatter:on
+    
+    /**
+     * Breitengrad.<br>
+     * Quelle: http://wiki.openstreetmap.org/wiki/Mercator
+     *
+     * @param longitude double
+     * @return double
+     */
+    public static double mercX(final double longitude)
+    {
+        double x = 0;
 
-	/**
-	 * Math.PI / 2.0D
-	 */
-	@SuppressWarnings("unused")
-	private static final double PI_HALBE = Math.PI / 2.0D;
+        // Formel nach OpenStreetMap.
+        // x = longitude * RAD_AEQUATOR_RADIUS;
 
-	/**
-	 * Math.PI / 4.0D
-	 */
-	private static final double PI_VIERTEL = Math.PI / 4.0D;
+        // Formel nach Wiki.
+        x = longitude * RAD_ERD_UMFANG;
 
-	/**
-	 * Rad = Winkel * (Math.PI / 180.0D) = Math.toRadians(Winkel)
-	 */
-	private static final double RAD = Math.PI / 180.0D;
+        return x;
+    }
 
-	/**
-	 * RAD * ERD_UMFANG
-	 */
-	@SuppressWarnings("unused")
-	private static final double RAD_AEQUATOR_RADIUS = RAD * AEQUATOR_RADIUS;
+    /**
+     * Längengrad.<br>
+     * Quelle: http://wiki.openstreetmap.org/wiki/Mercator
+     *
+     * @param latitude double
+     * @return double
+     */
+    public static double mercY(final double latitude)
+    {
+        double lat = latitude;
 
-	/**
-	 * RAD * ERD_UMFANG
-	 */
-	private static final double RAD_ERD_UMFANG = RAD * ERD_UMFANG;
+        if (lat > 89.5D)
+        {
+            lat = 89.5D;
+        }
+        if (lat < -89.5D)
+        {
+            lat = -89.5D;
+        }
 
-	/**
-	 * RAD / 2.0D
-	 */
-	private static final double RAD_HALBE = RAD / 2.0D;
+        double y = 0;
 
-	/**
-	 * Breitengrad.<br>
-	 * Quelle: http://wiki.openstreetmap.org/wiki/Mercator
-	 * 
-	 * @param longitude double
-	 * @return double
-	 */
-	public static double mercX(final double longitude)
-	{
-		double x = 0;
+        // Formel nach OpenStreetMap.
+        // double phi = m_lat * RAD;
+        // double sinphi = Math.sin(phi);
+        // double con = EXZENTRIZITAET * sinphi;
+        // con = Math.pow(((1.0D - con) / (1.0D + con)), EXZENTRIZITAET_HALBE);
+        // double ts = Math.tan(0.5D * (PI_HALBE - phi)) / con;
+        // y = 0 - (AEQUATOR_RADIUS * Math.log(ts));
 
-		// Formel nach OpenStreetMap.
-		// x = longitude * RAD_AEQUATOR_RADIUS;
+        // Formel nach Wiki.
+        y = Math.log(Math.tan(PI_VIERTEL + (lat * RAD_HALBE))) * ERD_UMFANG;
 
-		// Formel nach Wiki.
-		x = longitude * RAD_ERD_UMFANG;
-
-		return x;
-	}
-
-	/**
-	 * Längengrad.<br>
-	 * Quelle: http://wiki.openstreetmap.org/wiki/Mercator
-	 * 
-	 * @param latitude double
-	 * @return double
-	 */
-	public static double mercY(final double latitude)
-	{
-		double m_lat = latitude;
-
-		if (m_lat > 89.5D)
-		{
-			m_lat = 89.5D;
-		}
-		if (m_lat < -89.5D)
-		{
-			m_lat = -89.5D;
-		}
-
-		double y = 0;
-
-		// Formel nach OpenStreetMap.
-		// double phi = m_lat * RAD;
-		// double sinphi = Math.sin(phi);
-		// double con = EXZENTRIZITAET * sinphi;
-		// con = Math.pow(((1.0D - con) / (1.0D + con)), EXZENTRIZITAET_HALBE);
-		// double ts = Math.tan(0.5D * (PI_HALBE - phi)) / con;
-		// y = 0 - (AEQUATOR_RADIUS * Math.log(ts));
-
-		// Formel nach Wiki.
-		y = Math.log(Math.tan(PI_VIERTEL + (m_lat * RAD_HALBE))) * ERD_UMFANG;
-
-		return y;
-	}
+        return y;
+    }
 }

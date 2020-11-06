@@ -52,7 +52,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
             }
             catch (Exception ex)
             {
-                getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                getLogger().warn("{}: {}", ex.getClass().getSimpleName(), ex.getMessage());
             }
 
             if (exist)
@@ -80,7 +80,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
             }
             catch (Exception ex)
             {
-                getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                getLogger().warn("{}: {}", ex.getClass().getSimpleName(), ex.getMessage());
             }
 
             if (inputStream != null)

@@ -24,10 +24,12 @@ class DefaultDispatcher extends AbstractNioProcessor implements Dispatcher
     *
     */
     private final Executor executor;
+
     /**
     *
     */
     private final IoHandler<SelectionKey> ioHandler;
+
     /**
      *
      */

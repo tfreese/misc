@@ -62,12 +62,12 @@ public class SortThread extends Thread
     /**
      *
      */
-    private BufferedReader in = null;
+    private BufferedReader in;
 
     /**
      *
      */
-    private PrintWriter out = null;
+    private PrintWriter out;
 
     /**
      * Creates a new {@link SortThread} object.
@@ -115,9 +115,9 @@ public class SortThread extends Thread
 
                 this.out.close();
             }
-            catch (IOException e)
+            catch (IOException ex)
             {
-                System.err.println("SortThread run: " + e);
+                System.err.println("SortThread run: " + ex);
             }
         }
     }

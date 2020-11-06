@@ -27,11 +27,11 @@ public class ArrayListTransferHandler extends TransferHandler
         /**
          *
          */
-        private List<?> data = null;
+        private final List<?> data;
 
         /**
          * Creates a new ArrayListTransferable object.
-         * 
+         *
          * @param alist {@link List}
          */
         public ArrayListTransferable(final List<?> alist)
@@ -105,12 +105,12 @@ public class ArrayListTransferHandler extends TransferHandler
     /**
      *
      */
-    private int[] indices = null;
+    private int[] indices;
 
     /**
      *
      */
-    private DataFlavor localArrayListFlavor = null;
+    private DataFlavor localArrayListFlavor;
 
     /**
      *
@@ -120,16 +120,16 @@ public class ArrayListTransferHandler extends TransferHandler
     /**
      *
      */
-    private DataFlavor serialArrayListFlavor = null;
+    private DataFlavor serialArrayListFlavor;
 
     /**
      *
      */
-    private JList<?> source = null;
+    private JList<?> source;
 
     /**
      * Creates a new ArrayListTransferHandler object.
-     * 
+     *
      * @throws ClassNotFoundException Falls was schief geht.
      */
     public ArrayListTransferHandler() throws ClassNotFoundException
@@ -172,7 +172,7 @@ public class ArrayListTransferHandler extends TransferHandler
 
             List<?> values = this.source.getSelectedValuesList();
 
-            if ((values == null) || (values.size() == 0))
+            if ((values == null) || (values.isEmpty()))
             {
                 return null;
             }
@@ -374,9 +374,9 @@ public class ArrayListTransferHandler extends TransferHandler
         this.addIndex = index;
         this.addCount = alist.size();
 
-        for (int i = 0; i < alist.size(); i++)
+        for (Object element : alist)
         {
-            listModel.add(index++, alist.get(i));
+            listModel.add(index++, element);
         }
 
         return true;

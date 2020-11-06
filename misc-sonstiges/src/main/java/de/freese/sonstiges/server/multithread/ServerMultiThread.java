@@ -30,14 +30,17 @@ public class ServerMultiThread extends AbstractServer
      *
      */
     private Acceptor acceptor;
+
     /**
      *
      */
     private final DispatcherPool dispatcherPool;
+
     /**
      *
      */
     private final SelectorProvider selectorProvider;
+
     /**
      *
      */

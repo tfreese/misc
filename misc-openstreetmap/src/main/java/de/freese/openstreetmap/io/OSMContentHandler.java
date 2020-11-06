@@ -88,7 +88,7 @@ public class OSMContentHandler extends DefaultHandler
     /**
      *
      */
-    private OSMNode node = null;
+    private OSMNode node;
 
     /**
      *
@@ -98,12 +98,12 @@ public class OSMContentHandler extends DefaultHandler
     /**
      *
      */
-    private OSMRelation relation = null;
+    private OSMRelation relation;
 
     /**
      *
      */
-    private OSMWay way = null;
+    private OSMWay way;
 
     /**
      * Erstellt ein neues {@link OSMContentHandler} Object.

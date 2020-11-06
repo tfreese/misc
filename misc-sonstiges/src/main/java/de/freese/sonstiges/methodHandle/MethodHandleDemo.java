@@ -9,7 +9,7 @@ import java.lang.reflect.Field;
 /**
  * @author Thomas Freese
  */
-public class MethodHandleDemo
+public final class MethodHandleDemo
 {
     /**
      * @author Thomas Freese

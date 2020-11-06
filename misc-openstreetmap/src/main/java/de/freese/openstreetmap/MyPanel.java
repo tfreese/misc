@@ -1,12 +1,12 @@
 package de.freese.openstreetmap;
 
-import de.freese.openstreetmap.model.OSMModel;
-import de.freese.openstreetmap.model.OSMWay;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import javax.swing.JPanel;
+import de.freese.openstreetmap.model.OSMModel;
+import de.freese.openstreetmap.model.OSMWay;
 
 /**
  * @author Thomas Freese
@@ -22,17 +22,17 @@ public class MyPanel extends JPanel
     /**
      *
      */
+    private Rectangle mapBounds;
+
+    /**
+     *
+     */
     private final OSMModel model;
 
     /**
      *
      */
-    private Matrix myZTFMatrix = null;
-
-    /**
-     *
-     */
-    private Rectangle mapBounds = null;
+    private Matrix myZTFMatrix;
 
     /**
      * Erstellt ein neues {@link MyPanel} Object.
@@ -131,8 +131,7 @@ public class MyPanel extends JPanel
     }
 
     /**
-     * Veraendert die interne Transformationsmatrix so, dass in das Zentrum des Anzeigebereiches herein- bzw.
-     * herausgezoomt wird
+     * Veraendert die interne Transformationsmatrix so, dass in das Zentrum des Anzeigebereiches herein- bzw. herausgezoomt wird
      *
      * @param factor Der Faktor um den herein- bzw. herausgezoomt wird
      */
@@ -146,8 +145,7 @@ public class MyPanel extends JPanel
     }
 
     /**
-     * Stellt intern eine Transformationsmatrix zur Verfuegung, die so skaliert, verschiebt und spiegelt, dass die zu
-     * zeichnenden Polygone komplett in den
+     * Stellt intern eine Transformationsmatrix zur Verfuegung, die so skaliert, verschiebt und spiegelt, dass die zu zeichnenden Polygone komplett in den
      * Anzeigebereich passen
      */
     public void zoomToFit()

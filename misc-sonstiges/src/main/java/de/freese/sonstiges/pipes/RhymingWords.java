@@ -8,6 +8,7 @@ import java.io.PipedReader;
 import java.io.PipedWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Thomas Freese
@@ -27,7 +28,7 @@ public class RhymingWords
         // do the reversing and sorting
 
         // write new list to standard out
-        try (FileReader words = new FileReader(file);
+        try (FileReader words = new FileReader(file, StandardCharsets.UTF_8);
              BufferedReader in = new BufferedReader(reverse(sort(reverse(words)))))
         {
             String input;

@@ -4,7 +4,6 @@ package de.freese.sonstiges.xml.jaxb;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -17,7 +16,7 @@ public class OpeningDateAdapter extends XmlAdapter<String, Date>
     /**
      *
      */
-    private final static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * Erstellt ein neues {@link OpeningDateAdapter} Object.

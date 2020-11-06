@@ -6,6 +6,7 @@ package de.freese.sonstiges.javascript;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptContext;
@@ -62,7 +63,7 @@ public class JavaScript
         Object result = engine.eval(script.toString(), bindings);
         Double summe = (Double) result;
 
-        System.out.printf("%d + %d = %f\n", bindings.get("a"), bindings.get("a"), summe);
+        System.out.printf("%d + %d = %f%n", bindings.get("a"), bindings.get("a"), summe);
         System.out.println();
     }
 
@@ -78,13 +79,13 @@ public class JavaScript
         Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("conf", conf);
 
-        try (Reader reader = new InputStreamReader(ClassLoader.getSystemResourceAsStream("configuration.js")))
+        try (Reader reader = new InputStreamReader(ClassLoader.getSystemResourceAsStream("configuration.js"), StandardCharsets.UTF_8))
         {
             engine.eval(reader, bindings);
         }
 
-        System.out.printf("Threads = %d\n", Integer.valueOf(conf.getThreads()));
-        System.out.printf("BlockSize = %d\n", Integer.valueOf(conf.getBlocksize()));
+        System.out.printf("Threads = %d%n", Integer.valueOf(conf.getThreads()));
+        System.out.printf("BlockSize = %d%n", Integer.valueOf(conf.getBlocksize()));
         System.out.println();
     }
 
@@ -109,7 +110,7 @@ public class JavaScript
             Object result = invocable.invokeFunction("addiere", Integer.valueOf(5), Integer.valueOf(6));
             Double summe = (Double) result;
 
-            System.out.printf("Summe = %f\n", summe);
+            System.out.printf("Summe = %f%n", summe);
         }
         catch (Exception ex)
         {
@@ -135,7 +136,7 @@ public class JavaScript
         Object result = engine.eval(script.toString());
         Double summe = (Double) result;
 
-        System.out.printf("Summe = %f\n", summe);
+        System.out.printf("Summe = %f%n", summe);
         System.out.println();
     }
 
@@ -151,8 +152,8 @@ public class JavaScript
         Invocable invocable = (Invocable) engine;
         IRechner rechner = invocable.getInterface(IRechner.class);
 
-        System.out.printf("Plus = %f\n", Double.valueOf(rechner.plus(5, 4)));
-        System.out.printf("Minus = %f\n", Double.valueOf(rechner.minus(5, 4)));
+        System.out.printf("Plus = %f%n", Double.valueOf(rechner.plus(5, 4)));
+        System.out.printf("Minus = %f%n", Double.valueOf(rechner.minus(5, 4)));
         System.out.println();
     }
 }

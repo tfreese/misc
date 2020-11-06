@@ -14,13 +14,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Preferences implementation that stores to a user-defined file. See FilePreferencesFactory.
@@ -33,7 +34,7 @@ final class FilePreferences extends AbstractPreferences
     /**
      *
      */
-    private static final Logger log = Logger.getLogger(FilePreferences.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilePreferences.class);
 
     /**
      *
@@ -43,7 +44,7 @@ final class FilePreferences extends AbstractPreferences
     /**
      *
      */
-    private boolean isRemoved = false;
+    private boolean isRemoved;
 
     /**
      *
@@ -60,7 +61,7 @@ final class FilePreferences extends AbstractPreferences
     {
         super(parent, name);
 
-        log.finest("Instantiating node " + name);
+        LOGGER.debug("Instantiating node {}", name);
 
         this.root = new TreeMap<>();
         this.children = new TreeMap<>();
@@ -71,7 +72,7 @@ final class FilePreferences extends AbstractPreferences
         }
         catch (BackingStoreException ex)
         {
-            log.log(Level.SEVERE, "Unable to sync on creation of node " + name, ex);
+            LOGGER.error("Unable to sync on creation of node " + name, ex);
         }
     }
 
@@ -161,9 +162,9 @@ final class FilePreferences extends AbstractPreferences
             // If this node hasn't been removed, add back in any values
             if (!this.isRemoved)
             {
-                for (String s : this.root.keySet())
+                for (Entry<String, String> entry : this.root.entrySet())
                 {
-                    p.setProperty(path + s, this.root.get(s));
+                    p.setProperty(path + entry.getKey(), entry.getValue());
                 }
             }
 
@@ -226,7 +227,7 @@ final class FilePreferences extends AbstractPreferences
         }
         catch (BackingStoreException e)
         {
-            log.log(Level.SEVERE, "Unable to flush after putting " + key, e);
+            LOGGER.error("Unable to flush after putting " + key, e);
         }
     }
 
@@ -254,7 +255,7 @@ final class FilePreferences extends AbstractPreferences
         }
         catch (BackingStoreException ex)
         {
-            log.log(Level.SEVERE, "Unable to flush after removing " + key, ex);
+            LOGGER.error("Unable to flush after removing " + key, ex);
         }
     }
 

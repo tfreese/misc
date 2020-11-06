@@ -8,7 +8,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
 
@@ -17,184 +16,181 @@ import javax.swing.TransferHandler;
  */
 class PictureTransferHandler extends TransferHandler
 {
-	/**
-	 * @author Thomas Freese
-	 */
-	class PictureTransferable implements Transferable
-	{
-		/**
-		 * 
-		 */
-		private Image image;
+    /**
+     * @author Thomas Freese
+     */
+    class PictureTransferable implements Transferable
+    {
+        /**
+         *
+         */
+        private Image image;
 
-		/**
-		 * Creates a new PictureTransferable object.
-		 * 
-		 * @param pic {@link DTPicture}
-		 */
-		PictureTransferable(final DTPicture pic)
-		{
-			this.image = pic.image;
-		}
+        /**
+         * Creates a new PictureTransferable object.
+         *
+         * @param pic {@link DTPicture}
+         */
+        PictureTransferable(final DTPicture pic)
+        {
+            this.image = pic.getImage();
+        }
 
-		/**
-		 * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
-		 */
-		@Override
-		public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException
-		{
-			if (!isDataFlavorSupported(flavor))
-			{
-				throw new UnsupportedFlavorException(flavor);
-			}
+        /**
+         * @see java.awt.datatransfer.Transferable#getTransferData(java.awt.datatransfer.DataFlavor)
+         */
+        @Override
+        public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException
+        {
+            if (!isDataFlavorSupported(flavor))
+            {
+                throw new UnsupportedFlavorException(flavor);
+            }
 
-			return this.image;
-		}
+            return this.image;
+        }
 
-		/**
-		 * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
-		 */
-		@Override
-		public DataFlavor[] getTransferDataFlavors()
-		{
-			return new DataFlavor[]
-			{
-				PictureTransferHandler.this.pictureFlavor
-			};
-		}
+        /**
+         * @see java.awt.datatransfer.Transferable#getTransferDataFlavors()
+         */
+        @Override
+        public DataFlavor[] getTransferDataFlavors()
+        {
+            return new DataFlavor[]
+            {
+                    PICTURE_FLAVOR
+            };
+        }
 
-		/**
-		 * @see java.awt.datatransfer.Transferable#isDataFlavorSupported(java.awt.datatransfer.DataFlavor)
-		 */
-		@Override
-		public boolean isDataFlavorSupported(final DataFlavor flavor)
-		{
-			return PictureTransferHandler.this.pictureFlavor.equals(flavor);
-		}
-	}
+        /**
+         * @see java.awt.datatransfer.Transferable#isDataFlavorSupported(java.awt.datatransfer.DataFlavor)
+         */
+        @Override
+        public boolean isDataFlavorSupported(final DataFlavor flavor)
+        {
+            return PICTURE_FLAVOR.equals(flavor);
+        }
+    }
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 7183662667049793445L;
+    /**
+     *
+     */
+    private static final DataFlavor PICTURE_FLAVOR = DataFlavor.imageFlavor;
 
-	/**
-	 * 
-	 */
-	DataFlavor pictureFlavor = DataFlavor.imageFlavor;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7183662667049793445L;
 
-	/**
-	 * 
-	 */
-	boolean shouldRemove;
+    /**
+     *
+     */
+    private boolean shouldRemove;
 
-	/**
-	 * 
-	 */
-	DTPicture sourcePic;
+    /**
+     *
+     */
+    private DTPicture sourcePic;
 
-	/**
-	 * Erstellt ein neues {@link PictureTransferHandler} Object.
-	 */
-	public PictureTransferHandler()
-	{
-		super();
-	}
+    /**
+     * Erstellt ein neues {@link PictureTransferHandler} Object.
+     */
+    public PictureTransferHandler()
+    {
+        super();
+    }
 
-	/**
-	 * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent,
-	 *      java.awt.datatransfer.DataFlavor[])
-	 */
-	@Override
-	public boolean canImport(final JComponent c, final DataFlavor[] flavors)
-	{
-		for (DataFlavor flavor : flavors)
-		{
-			if (this.pictureFlavor.equals(flavor))
-			{
-				return true;
-			}
-		}
+    /**
+     * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent, java.awt.datatransfer.DataFlavor[])
+     */
+    @Override
+    public boolean canImport(final JComponent c, final DataFlavor[] flavors)
+    {
+        for (DataFlavor flavor : flavors)
+        {
+            if (PICTURE_FLAVOR.equals(flavor))
+            {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
-	 */
-	@Override
-	protected Transferable createTransferable(final JComponent c)
-	{
-		this.sourcePic = (DTPicture) c;
-		this.shouldRemove = true;
+    /**
+     * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
+     */
+    @Override
+    protected Transferable createTransferable(final JComponent c)
+    {
+        this.sourcePic = (DTPicture) c;
+        this.shouldRemove = true;
 
-		return new PictureTransferable(this.sourcePic);
-	}
+        return new PictureTransferable(this.sourcePic);
+    }
 
-	/**
-	 * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable, int)
-	 */
-	@Override
-	protected void exportDone(final JComponent c, final Transferable data, final int action)
-	{
-		if (this.shouldRemove && (action == MOVE))
-		{
-			this.sourcePic.setImage(null);
-		}
+    /**
+     * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent, java.awt.datatransfer.Transferable, int)
+     */
+    @Override
+    protected void exportDone(final JComponent c, final Transferable data, final int action)
+    {
+        if (this.shouldRemove && (action == MOVE))
+        {
+            this.sourcePic.setImage(null);
+        }
 
-		this.sourcePic = null;
-	}
+        this.sourcePic = null;
+    }
 
-	/**
-	 * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
-	 */
-	@Override
-	public int getSourceActions(final JComponent c)
-	{
-		return COPY_OR_MOVE;
-	}
+    /**
+     * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+     */
+    @Override
+    public int getSourceActions(final JComponent c)
+    {
+        return COPY_OR_MOVE;
+    }
 
-	/**
-	 * @see javax.swing.TransferHandler#importData(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable)
-	 */
-	@Override
-	public boolean importData(final JComponent c, final Transferable t)
-	{
-		Image image;
+    /**
+     * @see javax.swing.TransferHandler#importData(javax.swing.JComponent, java.awt.datatransfer.Transferable)
+     */
+    @Override
+    public boolean importData(final JComponent c, final Transferable t)
+    {
+        Image image;
 
-		if (canImport(c, t.getTransferDataFlavors()))
-		{
-			DTPicture pic = (DTPicture) c;
+        if (canImport(c, t.getTransferDataFlavors()))
+        {
+            DTPicture pic = (DTPicture) c;
 
-			// Don't drop on myself.
-			if (this.sourcePic == pic)
-			{
-				this.shouldRemove = false;
+            // Don't drop on myself.
+            if (this.sourcePic == pic)
+            {
+                this.shouldRemove = false;
 
-				return true;
-			}
+                return true;
+            }
 
-			try
-			{
-				image = (Image) t.getTransferData(this.pictureFlavor);
+            try
+            {
+                image = (Image) t.getTransferData(PICTURE_FLAVOR);
 
-				// Set the component to the new picture.
-				pic.setImage(image);
+                // Set the component to the new picture.
+                pic.setImage(image);
 
-				return true;
-			}
-			catch (UnsupportedFlavorException ufe)
-			{
-				System.out.println("importData: unsupported data flavor");
-			}
-			catch (IOException ioe)
-			{
-				System.out.println("importData: I/O exception");
-			}
-		}
+                return true;
+            }
+            catch (UnsupportedFlavorException ufe)
+            {
+                System.out.println("importData: unsupported data flavor");
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("importData: I/O exception");
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 }

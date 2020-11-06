@@ -111,7 +111,8 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * Default: 128
+     * Default: 128<br>
+     * int ringBufferSize = Integer.highestOneBit(31) << 1;
      *
      * @param ringBufferSize int
      */

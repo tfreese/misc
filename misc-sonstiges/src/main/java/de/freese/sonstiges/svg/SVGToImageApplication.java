@@ -63,7 +63,6 @@ public class SVGToImageApplication extends JFrame
     private static BufferedImage loadImage(final InputStream inputStream, final float width, final float height) throws Exception
     {
         BufferedImageTranscoder transcoder = new BufferedImageTranscoder();
-
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, width);
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, height);
 

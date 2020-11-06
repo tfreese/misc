@@ -13,91 +13,91 @@ import de.freese.openstreetmap.Mercator;
 
 /**
  * Gruppiert {@link OSMNode} zu einem zusammenhängenden Weg.
- * 
+ *
  * @author Thomas Freese
  */
 public class OSMWay extends AbstractOSMEntity
 {
-	/**
-	 * 
-	 */
-	private Rectangle bounds = null;
+    /**
+     * 
+     */
+    private Rectangle bounds;
 
-	/**
-	 * 
-	 */
-	public List<OSMNode> nodes = null;
+    /**
+     * 
+     */
+    public List<OSMNode> nodes;
 
-	/**
-	 * 
-	 */
-	private Polygon polygon = null;
+    /**
+     * 
+     */
+    private Polygon polygon;
 
-	/**
-	 * Erstellt ein neues {@link OSMWay} Object.
-	 */
-	public OSMWay()
-	{
-		super();
-	}
+    /**
+     * Erstellt ein neues {@link OSMWay} Object.
+     */
+    public OSMWay()
+    {
+        super();
+    }
 
-	/**
-	 * @return {@link Rectangle}
-	 */
-	public Rectangle getBounds()
-	{
-		if (this.bounds == null)
-		{
-			for (OSMNode osmNode : getNodes())
-			{
-				double x = Mercator.mercX(osmNode.getLongitude());
-				double y = Mercator.mercY(osmNode.getLatitude());
+    /**
+     * @return {@link Rectangle}
+     */
+    public Rectangle getBounds()
+    {
+        if (this.bounds == null)
+        {
+            for (OSMNode osmNode : getNodes())
+            {
+                double x = Mercator.mercX(osmNode.getLongitude());
+                double y = Mercator.mercY(osmNode.getLatitude());
 
-				if (this.bounds == null)
-				{
-					this.bounds = new Rectangle();
-					this.bounds.x = (int) x;
-					this.bounds.y = (int) y;
-				}
+                if (this.bounds == null)
+                {
+                    this.bounds = new Rectangle();
+                    this.bounds.x = (int) x;
+                    this.bounds.y = (int) y;
+                }
 
-				this.bounds.add(x, y);
-			}
-		}
+                this.bounds.add(x, y);
+            }
+        }
 
-		return this.bounds;
-	}
+        return this.bounds;
+    }
 
-	/**
-	 * @param myZTFMatrix {@link Matrix}
-	 * @return {@link Polygon}
-	 */
-	public Polygon getDrawablePolygon(final Matrix myZTFMatrix)
-	{
-		if (this.polygon == null)
-		{
-			this.polygon = new Polygon();
+    /**
+     * @param myZTFMatrix {@link Matrix}
+     * @return {@link Polygon}
+     */
+    public Polygon getDrawablePolygon(final Matrix myZTFMatrix)
+    {
+        if (this.polygon == null)
+        {
+            this.polygon = new Polygon();
 
-			for (OSMNode osmNode : getNodes())
-			{
-				double x = Mercator.mercX(osmNode.getLongitude());
-				double y = Mercator.mercY(osmNode.getLatitude());
-				this.polygon.addPoint((int) x, (int) y);
-			}
-		}
+            for (OSMNode osmNode : getNodes())
+            {
+                double x = Mercator.mercX(osmNode.getLongitude());
+                double y = Mercator.mercY(osmNode.getLatitude());
+                this.polygon.addPoint((int) x, (int) y);
+            }
+        }
 
-		return myZTFMatrix.multiply(this.polygon);
-	}
+        return myZTFMatrix.multiply(this.polygon);
+    }
 
-	/**
-	 * @return {@link List}<OSMNode>
-	 */
-	public List<OSMNode> getNodes()
-	{
-		if (this.nodes == null)
-		{
-			this.nodes = new ArrayList<>();
-		}
+    /**
+     * @return {@link List}<OSMNode>
+     */
+    public List<OSMNode> getNodes()
+    {
+        if (this.nodes == null)
+        {
+            this.nodes = new ArrayList<>();
+        }
 
-		return this.nodes;
-	}
+        return this.nodes;
+    }
 }

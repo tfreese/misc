@@ -7,13 +7,13 @@ import hello.JavaHello;
 /**
  * @author Thomas Freese
  */
-public class HelloTest
+class HelloTest
 {
     /**
      *
      */
     @Test
-    public void testAssert()
+    void testAssert()
     {
         Assertions.assertEquals("Hello from Kotlin!", JavaHello.getHelloStringFromKotlin());
         Assertions.assertEquals("Hello from Java!", hello.KotlinHelloKt.getHelloStringFromJava());

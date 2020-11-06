@@ -1,4 +1,4 @@
-//Created: 14.06.2012
+// Created: 14.06.2012
 package de.freese.sonstiges.dsl.tools;
 
 import java.util.Calendar;
@@ -10,10 +10,9 @@ import java.util.Date;
 public final class DateUtils
 {
     /**
-     * @param year  int
+     * @param year int
      * @param month int
-     * @param day   int
-     *
+     * @param day int
      * @return {@link Date}
      */
     private static Date createDate(final int year, final int month, final int day)
@@ -49,5 +48,13 @@ public final class DateUtils
         calendar.add(Calendar.DAY_OF_YEAR, 1);
 
         return calendar.getTime();
+    }
+
+    /**
+     * Erstellt ein neues {@link DateUtils} Object.
+     */
+    private DateUtils()
+    {
+        super();
     }
 }

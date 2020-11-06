@@ -22,22 +22,24 @@ public class HttpEventHandler implements EventHandler<HttpEvent>
     /**
      *
      */
-    private int id;
+    private Map<String, Boolean> mapResponseReady;
 
     /**
      *
      */
-    private Map<String, Boolean> mapResponseReady;
+    private int ordinal;
 
     /**
      * Erstellt ein neues {@link HttpEventHandler} Object.
      *
-     * @param id int
+     * @param ordinal int
      * @param mapResponseReady {@link Map}
      */
-    public HttpEventHandler(final int id, final Map<String, Boolean> mapResponseReady)
+    public HttpEventHandler(final int ordinal, final Map<String, Boolean> mapResponseReady)
     {
-        this.id = id;
+        super();
+
+        this.ordinal = ordinal;
         this.mapResponseReady = mapResponseReady;
     }
 
@@ -79,7 +81,7 @@ public class HttpEventHandler implements EventHandler<HttpEvent>
     public void onEvent(final HttpEvent event, final long sequence, final boolean endOfBatch) throws Exception
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.id == -1) || (this.id == (sequence % HttpEventMain.THREAD_COUNT)))
+        if ((this.ordinal == -1) || (this.ordinal == (sequence % HttpEventMain.THREAD_COUNT)))
         {
             LOGGER.info("{}: HttpEventHandler.onEvent: RequestId={}, Sequence={}", Thread.currentThread().getName(), event.getRequestId(), sequence);
 

@@ -16,7 +16,7 @@ public class HTML2Text extends HTMLEditorKit.ParserCallback
     /**
      *
      */
-    private StringBuilder sb = null;
+    private StringBuilder sb;
 
     /**
      * Erstellt ein neues {@link HTML2Text} Object.

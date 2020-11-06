@@ -7,7 +7,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
@@ -18,176 +17,168 @@ import javax.swing.tree.TreePath;
 
 /**
  * TransferHandler fuer DnD von JTree-JTree
- * 
+ *
  * @author Thomas Freese
  */
 public class TreeTransferHandler extends TransferHandler
 {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -3761501619688863055L;
-
-	/**
-	 * Wird in der Methode exportDone benoetigt, damit ein Knoten, der auf sich selbst kopiert wird
-	 * nicht geloescht wird.
-	 */
-	private TreePath _targetPath = null;
-
-	/**
+    /**
      *
      */
-	public TreeTransferHandler()
-	{
-		super();
-	}
+    private static final long serialVersionUID = -3761501619688863055L;
 
-	/**
-	 * Ist DnD erlaubt ?
-	 * 
-	 * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent,
-	 *      java.awt.datatransfer.DataFlavor[])
-	 */
-	@Override
-	public boolean canImport(final JComponent comp, final DataFlavor[] transferFlavors)
-	{
-		for (DataFlavor transferFlavor : transferFlavors)
-		{
-			if (TransferableTreeNode.TREE_PATH_FLAVOR.equals(transferFlavor))
-			{
-				return true;
-			}
-		}
+    /**
+     * Wird in der Methode exportDone benoetigt, damit ein Knoten, der auf sich selbst kopiert wird nicht geloescht wird.
+     */
+    private TreePath targetPath;
 
-		return false;
-	}
+    /**
+     *
+     */
+    public TreeTransferHandler()
+    {
+        super();
+    }
 
-	/**
-	 * Erzeugen der Transferdaten.
-	 * 
-	 * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
-	 */
-	@Override
-	protected Transferable createTransferable(final JComponent c)
-	{
-		if (!(c instanceof JTree))
-		{
-			return null;
+    /**
+     * Ist DnD erlaubt ?
+     *
+     * @see javax.swing.TransferHandler#canImport(javax.swing.JComponent, java.awt.datatransfer.DataFlavor[])
+     */
+    @Override
+    public boolean canImport(final JComponent comp, final DataFlavor[] transferFlavors)
+    {
+        for (DataFlavor transferFlavor : transferFlavors)
+        {
+            if (TransferableTreeNode.TREE_PATH_FLAVOR.equals(transferFlavor))
+            {
+                return true;
+            }
+        }
 
-			// oder ???
-			// return new TransferableTreeNode(null);
-		}
+        return false;
+    }
 
-		JTree sourceTree = (JTree) c;
+    /**
+     * Erzeugen der Transferdaten.
+     *
+     * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
+     */
+    @Override
+    protected Transferable createTransferable(final JComponent c)
+    {
+        if (!(c instanceof JTree))
+        {
+            return null;
 
-		return new TransferableTreeNode(sourceTree.getSelectionPath());
-	}
+            // oder ???
+            // return new TransferableTreeNode(null);
+        }
 
-	/**
-	 * Abschluss des Kopiervorgangs.
-	 * 
-	 * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable, int)
-	 */
-	@Override
-	protected void exportDone(final JComponent source, final Transferable data, final int action)
-	{
-		TreePath sourcepath = getSourcePath(data);
+        JTree sourceTree = (JTree) c;
 
-		if ((action == MOVE) && (source instanceof JTree) && (sourcepath != null))
-		{
-			JTree sourceTree = (JTree) source;
-			DefaultTreeModel sourceModell = (DefaultTreeModel) sourceTree.getModel();
+        return new TransferableTreeNode(sourceTree.getSelectionPath());
+    }
 
-			// Nur Loeschen wenn Source != Target ist.
-			// Kopien auf sich selbst sind erlaubt
-			if (this._targetPath != sourcepath)
-			{
-				sourceModell.removeNodeFromParent((MutableTreeNode) sourcepath
-						.getLastPathComponent());
-			}
-		}
-	}
+    /**
+     * Abschluss des Kopiervorgangs.
+     *
+     * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent, java.awt.datatransfer.Transferable, int)
+     */
+    @Override
+    protected void exportDone(final JComponent source, final Transferable data, final int action)
+    {
+        TreePath sourcepath = getSourcePath(data);
 
-	/**
-	 * Was darf DnD ?
-	 * 
-	 * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
-	 */
-	@Override
-	public int getSourceActions(final JComponent c)
-	{
-		return COPY_OR_MOVE;
-	}
+        if ((action == MOVE) && (source instanceof JTree) && (sourcepath != null))
+        {
+            JTree sourceTree = (JTree) source;
+            DefaultTreeModel sourceModell = (DefaultTreeModel) sourceTree.getModel();
 
-	/**
-	 * ServiceMethode, liefert den SourcePath aus dem Transferable-Daten.
-	 * 
-	 * @param t Transferable
-	 * @return SourcePath
-	 */
-	private TreePath getSourcePath(final Transferable t)
-	{
-		TreePath sourcePath = null;
+            // Nur Loeschen wenn Source != Target ist.
+            // Kopien auf sich selbst sind erlaubt
+            if (this.targetPath != sourcepath)
+            {
+                sourceModell.removeNodeFromParent((MutableTreeNode) sourcepath.getLastPathComponent());
+            }
+        }
+    }
 
-		try
-		{
-			if ((t == null)
-					|| !(t.getTransferData(TransferableTreeNode.TREE_PATH_FLAVOR) instanceof TreePath))
-			{
-				return null;
-			}
+    /**
+     * Was darf DnD ?
+     *
+     * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+     */
+    @Override
+    public int getSourceActions(final JComponent c)
+    {
+        return COPY_OR_MOVE;
+    }
 
-			sourcePath = (TreePath) t.getTransferData(TransferableTreeNode.TREE_PATH_FLAVOR);
-		}
-		catch (UnsupportedFlavorException ex)
-		{
-			// Ignore
-		}
-		catch (IOException ex)
-		{
-			// Ignore
-		}
+    /**
+     * ServiceMethode, liefert den SourcePath aus dem Transferable-Daten.
+     *
+     * @param t Transferable
+     * @return SourcePath
+     */
+    private TreePath getSourcePath(final Transferable t)
+    {
+        TreePath sourcePath = null;
 
-		return sourcePath;
-	}
+        try
+        {
+            if ((t == null) || !(t.getTransferData(TransferableTreeNode.TREE_PATH_FLAVOR) instanceof TreePath))
+            {
+                return null;
+            }
 
-	/**
-	 * Kopieren der Transferdaten.
-	 * 
-	 * @see javax.swing.TransferHandler#importData(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable)
-	 */
-	@Override
-	public boolean importData(final JComponent comp, final Transferable t)
-	{
-		if (canImport(comp, t.getTransferDataFlavors()) && (comp instanceof JTree))
-		{
-			// Target bestimmen
-			JTree targetTree = (JTree) comp;
+            sourcePath = (TreePath) t.getTransferData(TransferableTreeNode.TREE_PATH_FLAVOR);
+        }
+        catch (UnsupportedFlavorException ex)
+        {
+            // Ignore
+        }
+        catch (IOException ex)
+        {
+            // Ignore
+        }
 
-			// Wird in exportDone gegen den sourcepath geprueft
-			this._targetPath = targetTree.getSelectionPath();
+        return sourcePath;
+    }
 
-			TreePath sourcePath = getSourcePath(t);
+    /**
+     * Kopieren der Transferdaten.
+     *
+     * @see javax.swing.TransferHandler#importData(javax.swing.JComponent, java.awt.datatransfer.Transferable)
+     */
+    @Override
+    public boolean importData(final JComponent comp, final Transferable t)
+    {
+        if (canImport(comp, t.getTransferDataFlavors()) && (comp instanceof JTree))
+        {
+            // Target bestimmen
+            JTree targetTree = (JTree) comp;
 
-			if (sourcePath == null)
-			{
-				return false;
-			}
+            // Wird in exportDone gegen den sourcepath geprueft
+            this.targetPath = targetTree.getSelectionPath();
 
-			DefaultTreeModel targetModell = (DefaultTreeModel) targetTree.getModel();
-			DefaultMutableTreeNode targetParent =
-					(DefaultMutableTreeNode) this._targetPath.getLastPathComponent();
+            TreePath sourcePath = getSourcePath(t);
 
-			// sourcePath in das Target einfuegen, bei Move wird in der Methode exportDone geloescht
-			// wenn sourcePath != _targetPath ist.
-			targetModell.insertNodeInto((MutableTreeNode) sourcePath.getLastPathComponent(),
-					targetParent, targetParent.getChildCount());
+            if (sourcePath == null)
+            {
+                return false;
+            }
 
-			return true;
-		}
+            DefaultTreeModel targetModell = (DefaultTreeModel) targetTree.getModel();
+            DefaultMutableTreeNode targetParent = (DefaultMutableTreeNode) this.targetPath.getLastPathComponent();
 
-		return false;
-	}
+            // sourcePath in das Target einfuegen, bei Move wird in der Methode exportDone geloescht
+            // wenn sourcePath != _targetPath ist.
+            targetModell.insertNodeInto((MutableTreeNode) sourcePath.getLastPathComponent(), targetParent, targetParent.getChildCount());
+
+            return true;
+        }
+
+        return false;
+    }
 }

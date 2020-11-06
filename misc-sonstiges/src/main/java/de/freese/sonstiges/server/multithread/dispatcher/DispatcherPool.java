@@ -24,18 +24,22 @@ public class DispatcherPool implements Dispatcher
      *
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherPool.class);
+
     /**
      *
      */
     private final LinkedList<DefaultDispatcher> dispatchers = new LinkedList<>();
+
     /**
      *
      */
     private ExecutorService executorServiceWorker;
+
     /**
      *
      */
     private final int numOfDispatcher;
+
     /**
      *
      */

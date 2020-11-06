@@ -1,7 +1,6 @@
 package de.freese.sonstiges.particle;
 
 import java.applet.Applet;
-import java.awt.HeadlessException;
 
 /**
  * @author Thomas Freese
@@ -21,10 +20,8 @@ public class ParticleApplet extends Applet
 
     /**
      * Erstellt ein neues {@link ParticleApplet} Object.
-     *
-     * @throws HeadlessException Falls was schief geht.
      */
-    public ParticleApplet() throws HeadlessException
+    public ParticleApplet()
     {
         super();
     }

@@ -5,6 +5,7 @@ package de.freese.sonstiges.configuration;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
@@ -34,22 +35,22 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
     /**
      *
      */
-    private CompositeConfiguration configuration = null;
+    private CompositeConfiguration configuration;
 
     /**
      *
      */
-    private Configuration[] configurations = null;
+    private Configuration[] configurations;
 
     /**
      *
      */
-    private Resource[] locations = null;
+    private Resource[] locations;
 
     /**
      *
      */
-    private Properties properties = null;
+    private Properties properties;
 
     /**
      *
@@ -110,7 +111,7 @@ public class CommonsConfigurationFactoryBean implements InitializingBean, Factor
             {
                 PropertiesConfiguration config = new PropertiesConfiguration();
 
-                try (Reader reader = new InputStreamReader(resource.getInputStream()))
+                try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
                 {
                     config.read(reader);
                 }

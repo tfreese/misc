@@ -241,7 +241,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             public void operationComplete(final ChannelProgressiveFuture future)
             {
                 // getLogger().debug(future.channel() + " Transfer complete: " + request.uri());
-                getLogger().debug("Transfer complete: " + request.uri());
+                getLogger().debug("Transfer complete: {}", request.uri());
             }
 
             /**
@@ -253,11 +253,11 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
                 if (total < 0)
                 {
                     // total unknown
-                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " : " + request.uri());
+                    getLogger().debug("{}: Transfer progress: {} : {}", future.channel(), progress, request.uri());
                 }
                 else
                 {
-                    getLogger().debug(future.channel() + " Transfer progress: " + progress + " / " + total + " : " + request.uri());
+                    getLogger().debug("{}: Transfer progress: {} / {} : {}", future.channel(), progress, total, request.uri());
                 }
             }
         });
@@ -292,7 +292,7 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             }
             catch (Exception ex)
             {
-                getLogger().warn(ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                getLogger().warn("{}: {}", ex.getClass().getSimpleName(), ex.getMessage());
             }
         }
 

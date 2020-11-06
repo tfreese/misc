@@ -20,14 +20,17 @@ public abstract class AbstractNioProcessor implements Runnable
     *
     */
     private boolean isShutdown;
+
     /**
      *
      */
     private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
     *
     */
     private final Selector selector;
+
     /**
     *
     */

@@ -27,17 +27,17 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     /**
     *
     */
-    private final int id;
+    private final int ordinal;
 
     /**
-     * @param id int
+     * @param ordinal int
      * @param backendResolver {@link List}
      */
-    public DisruptorSensorEventHandler(final int id, final Function<String, List<Backend>> backendResolver)
+    public DisruptorSensorEventHandler(final int ordinal, final Function<String, List<Backend>> backendResolver)
     {
         super();
 
-        this.id = id;
+        this.ordinal = ordinal;
         this.backendResolver = Objects.requireNonNull(backendResolver, "backendResolver required");
     }
 
@@ -56,7 +56,7 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     public void onEvent(final SensorEvent event, final long sequence, final boolean endOfBatch) throws Exception
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.id == -1) || (this.id == (sequence % DisruptorBackend.THREAD_COUNT)))
+        if ((this.ordinal == -1) || (this.ordinal == (sequence % DisruptorBackend.THREAD_COUNT)))
         {
             SensorValue sensorValue = event.getSensorValue();
             event.setSensorValue(null);

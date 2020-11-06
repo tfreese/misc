@@ -3,7 +3,6 @@ package de.freese.sonstiges.xml;
 
 import java.io.File;
 import java.net.URL;
-
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -14,7 +13,6 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
 import org.xml.sax.SAXParseException;
 
 /**
@@ -24,7 +22,6 @@ public class NavigationTreeReader
 {
     /**
      * @param args String[]
-     *
      * @throws Exception Fehler
      */
     public static void main(final String[] args) throws Exception
@@ -39,6 +36,9 @@ public class NavigationTreeReader
 
             // Validate gegen Schema.
             SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+
             Schema schema = schemaFactory.newSchema(schemaFile);
             Validator validator = schema.newValidator();
             validator.validate(xmlFile);
@@ -47,26 +47,27 @@ public class NavigationTreeReader
 
             // Stax Parsing.
             XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+            inputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            inputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
             XMLStreamReader reader = inputFactory.createXMLStreamReader(xmlFile);
 
             parseDocument(reader);
 
             reader.close();
         }
+        catch (SAXParseException ex)
+        {
+            System.err.println("SAXParseException at Line: " + ex.getLineNumber());
+        }
         catch (Exception ex)
         {
             ex.printStackTrace();
-
-            if (ex instanceof SAXParseException)
-            {
-                System.err.println("" + ((SAXParseException) ex).getLineNumber());
-            }
         }
     }
 
     /**
      * @param reader {@link XMLStreamReader}
-     *
      * @throws XMLStreamException Falls was schief geht.
      */
     private static void parseDocument(final XMLStreamReader reader) throws XMLStreamException
@@ -83,7 +84,6 @@ public class NavigationTreeReader
 
     /**
      * @param reader {@link XMLStreamReader}
-     *
      * @throws XMLStreamException Falls was schief geht.
      */
     private static void parseRestOfDocument(final XMLStreamReader reader) throws XMLStreamException
@@ -103,7 +103,7 @@ public class NavigationTreeReader
 
                     for (int i = 0; i < reader.getAttributeCount(); i++)
                     {
-                        System.out.printf("%d: AttributeLocalName=%s, AttributeValue=%s, AttributePrefix=%s\n", Integer.valueOf(i),
+                        System.out.printf("%d: AttributeLocalName=%s, AttributeValue=%s, AttributePrefix=%s%n", Integer.valueOf(i),
                                 reader.getAttributeLocalName(i), reader.getAttributeValue(i), reader.getAttributePrefix(i));
                     }
 

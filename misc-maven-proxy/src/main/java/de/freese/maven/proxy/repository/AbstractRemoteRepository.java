@@ -34,5 +34,4 @@ public abstract class AbstractRemoteRepository implements RemoteRepository
     {
         return this.logger;
     }
-
 }

@@ -2,6 +2,7 @@
 package de.freese.sonstiges.preferences.property;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
@@ -45,8 +46,8 @@ public final class PropertyPreferencesFactory implements PreferencesFactory
         p = p.node("test");
         System.out.println(p.get("user", null));
         p.put("user", "freese");
-        System.out.println(new String(p.getByteArray("test", "null".getBytes())));
-        p.putByteArray("test", new String("Thomas Freese").getBytes());
+        System.out.println(new String(p.getByteArray("test", "null".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        p.putByteArray("test", "Thomas Freese".getBytes(StandardCharsets.UTF_8));
 
         System.out.println("UserRoot = " + p.isUserNode());
 

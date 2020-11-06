@@ -6,10 +6,12 @@ package de.freese.sonstiges.preferences.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.prefs.PreferencesFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PreferencesFactory implementation that stores the preferences in a user-defined file. To use it, set the system property
@@ -25,7 +27,7 @@ public class FilePreferencesFactory implements PreferencesFactory
     /**
      *
      */
-    private static final Logger log = Logger.getLogger(FilePreferencesFactory.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilePreferencesFactory.class);
 
     /**
      *
@@ -52,7 +54,7 @@ public class FilePreferencesFactory implements PreferencesFactory
             }
 
             preferencesFile = new File(prefsFile).getAbsoluteFile();
-            log.finer("Preferences file is " + preferencesFile);
+            LOGGER.debug("Preferences file is {}", preferencesFile);
         }
 
         return preferencesFile;
@@ -81,8 +83,8 @@ public class FilePreferencesFactory implements PreferencesFactory
         p = p.node("test");
         System.out.println(p.get("user", null));
         p.put("user", "freese");
-        System.out.println(new String(p.getByteArray("test", "null".getBytes())));
-        p.putByteArray("test", new String("Thomas Freese").getBytes());
+        System.out.println(new String(p.getByteArray("test", "null".getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
+        p.putByteArray("test", "Thomas Freese".getBytes(StandardCharsets.UTF_8));
 
         Preferences.userRoot().exportSubtree(System.out);
     }
@@ -109,7 +111,7 @@ public class FilePreferencesFactory implements PreferencesFactory
     {
         if (this.rootPreferences == null)
         {
-            log.finer("Instantiating root preferences");
+            LOGGER.debug("Instantiating root preferences");
 
             this.rootPreferences = new FilePreferences(null, "");
         }

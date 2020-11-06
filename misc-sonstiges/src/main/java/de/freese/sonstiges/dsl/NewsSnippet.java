@@ -1,4 +1,4 @@
-//Created: 14.06.2012
+// Created: 14.06.2012
 package de.freese.sonstiges.dsl;
 
 import java.util.ArrayList;
@@ -13,27 +13,22 @@ public class NewsSnippet
     /**
      *
      */
-    private final String title;
+    private String content;
 
     /**
      *
      */
-    private String content = null;
-
-    /**
-     *
-     */
-    private String description = null;
+    private String description;
 
     /**
      * Vorgänger
      */
-    private NewsSnippet predecessor = null;
+    private NewsSnippet predecessor;
 
     /**
      * Nachfolger
      */
-    private NewsSnippet successor = null;
+    private NewsSnippet successor;
 
     /**
      *
@@ -43,17 +38,22 @@ public class NewsSnippet
     /**
      *
      */
-    private Topic topic = null;
+    private final String title;
 
     /**
      *
      */
-    private Date validFrom = null;
+    private Topic topic;
 
     /**
      *
      */
-    private Date validTo = null;
+    private Date validFrom;
+
+    /**
+     *
+     */
+    private Date validTo;
 
     /**
      * Erstellt ein neues {@link NewsSnippet} Object.
@@ -76,27 +76,11 @@ public class NewsSnippet
     }
 
     /**
-     * @param content String
-     */
-    void setContent(final String content)
-    {
-        this.content = content;
-    }
-
-    /**
      * @return String
      */
     public String getDescription()
     {
         return this.description;
-    }
-
-    /**
-     * @param description String
-     */
-    void setDescription(final String description)
-    {
-        this.description = description;
     }
 
     /**
@@ -108,16 +92,6 @@ public class NewsSnippet
     }
 
     /**
-     * Vorgänger
-     *
-     * @param predecessor {@link NewsSnippet}
-     */
-    void setPredecessor(final NewsSnippet predecessor)
-    {
-        this.predecessor = predecessor;
-    }
-
-    /**
      * Nachfolger
      *
      * @return {@link NewsSnippet}
@@ -125,16 +99,6 @@ public class NewsSnippet
     public NewsSnippet getSuccessor()
     {
         return this.successor;
-    }
-
-    /**
-     * Nachfolger
-     *
-     * @param successor {@link NewsSnippet}
-     */
-    void setSuccessor(final NewsSnippet successor)
-    {
-        this.successor = successor;
     }
 
     /**
@@ -162,14 +126,6 @@ public class NewsSnippet
     }
 
     /**
-     * @param topic {@link Topic}
-     */
-    void setTopic(final Topic topic)
-    {
-        this.topic = topic;
-    }
-
-    /**
      * @return {@link Date}
      */
     public Date getValidFrom()
@@ -178,19 +134,63 @@ public class NewsSnippet
     }
 
     /**
-     * @param validFrom {@link Date}
-     */
-    void setValidFrom(final Date validFrom)
-    {
-        this.validFrom = validFrom;
-    }
-
-    /**
      * @return {@link Date}
      */
     public Date getValidTo()
     {
         return this.validTo;
+    }
+
+    /**
+     * @param content String
+     */
+    void setContent(final String content)
+    {
+        this.content = content;
+    }
+
+    /**
+     * @param description String
+     */
+    void setDescription(final String description)
+    {
+        this.description = description;
+    }
+
+    /**
+     * Vorgänger
+     *
+     * @param predecessor {@link NewsSnippet}
+     */
+    void setPredecessor(final NewsSnippet predecessor)
+    {
+        this.predecessor = predecessor;
+    }
+
+    /**
+     * Nachfolger
+     *
+     * @param successor {@link NewsSnippet}
+     */
+    void setSuccessor(final NewsSnippet successor)
+    {
+        this.successor = successor;
+    }
+
+    /**
+     * @param topic {@link Topic}
+     */
+    void setTopic(final Topic topic)
+    {
+        this.topic = topic;
+    }
+
+    /**
+     * @param validFrom {@link Date}
+     */
+    void setValidFrom(final Date validFrom)
+    {
+        this.validFrom = validFrom;
     }
 
     /**

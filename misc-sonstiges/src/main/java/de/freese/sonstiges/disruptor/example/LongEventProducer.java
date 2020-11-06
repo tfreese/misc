@@ -29,7 +29,7 @@ public class LongEventProducer
      */
     public void onData(final ByteBuffer bb)
     {
-        // Grab the next sequenc
+        // Grab the next sequence
         long sequence = this.ringBuffer.next();
 
         try

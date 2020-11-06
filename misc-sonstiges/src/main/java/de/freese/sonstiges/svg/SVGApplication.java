@@ -81,7 +81,6 @@ public class SVGApplication extends JFrame
         // transcoder.addTranscodingHint(JPEGTranscoder.KEY_QUALITY, 0.8F);
 
         PNGTranscoder transcoder = new PNGTranscoder();
-
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, width);
         transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, height);
         // transcoder.addTranscodingHint(ImageTranscoder.KEY_FORCE_TRANSPARENT_WHITE, true);
@@ -182,7 +181,6 @@ public class SVGApplication extends JFrame
         SwingUtilities.invokeLater(() -> {
             try
             {
-                getClass().getClassLoader();
                 URL url = ClassLoader.getSystemResource("image.svg");
                 svgCanvas.setURI(url.toURI().toString());
             }

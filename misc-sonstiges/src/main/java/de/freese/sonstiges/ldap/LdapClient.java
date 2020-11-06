@@ -4,6 +4,7 @@
 package de.freese.sonstiges.ldap;
 
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,10 +26,8 @@ public class LdapClient
      * Liefert nur den Wert des Keys.
      *
      * @param searchResult {@link SearchResult}
-     * @param key          String
-     *
+     * @param key String
      * @return String
-     *
      * @throws Exception Falls was schief geht.
      */
     private static String getValue(final SearchResult searchResult, final String key) throws Exception
@@ -45,7 +44,6 @@ public class LdapClient
 
     /**
      * @param args String[]
-     *
      * @throws Exception Falls was schief geht.
      */
     public static void main(final String[] args) throws Exception
@@ -63,7 +61,7 @@ public class LdapClient
         // Specify the attributes to return
         String returnedAtts[] =
         {
-            "*"
+                "*"
         };
 
         SearchControls searchCtls = new SearchControls();
@@ -88,7 +86,7 @@ public class LdapClient
 
         Collections.sort(results, new SearchResultComparator());
 
-        try (PrintWriter pw = new PrintWriter("/tmp/ldap-backup.ldif"))
+        try (PrintWriter pw = new PrintWriter("/tmp/ldap-backup.ldif", StandardCharsets.UTF_8))
         {
             for (SearchResult searchResult : results)
             {
@@ -171,10 +169,9 @@ public class LdapClient
     }
 
     /**
-     * @param pw           {@link PrintWriter}
+     * @param pw {@link PrintWriter}
      * @param searchResult {@link SearchResult}
-     * @param key          String
-     *
+     * @param key String
      * @throws Exception Falls was schief geht.
      */
     private static void writeMultiValue(final PrintWriter pw, final SearchResult searchResult, final String key) throws Exception
@@ -200,10 +197,9 @@ public class LdapClient
     }
 
     /**
-     * @param pw           {@link PrintWriter}
+     * @param pw {@link PrintWriter}
      * @param searchResult {@link SearchResult}
-     * @param key          String
-     *
+     * @param key String
      * @throws Exception Falls was schief geht.
      */
     private static void writeSingleValue(final PrintWriter pw, final SearchResult searchResult, final String key) throws Exception

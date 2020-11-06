@@ -34,12 +34,12 @@ public class TreeDragDemo extends JFrame
     /**
      *
      */
-    private JTree treeLeft = null;
+    private JTree treeLeft;
 
     /**
      *
      */
-    private JTree treeRight = null;
+    private JTree treeRight;
 
     /**
      * Creates a new {@link TreeDragDemo} object.

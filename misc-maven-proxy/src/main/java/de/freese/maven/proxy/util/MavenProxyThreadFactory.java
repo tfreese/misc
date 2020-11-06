@@ -4,6 +4,8 @@
 
 package de.freese.maven.proxy.util;
 
+import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,15 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MavenProxyThreadFactory implements ThreadFactory
 {
-    // /**
-    // *
-    // */
-    // private static final AtomicInteger poolNumber = new AtomicInteger(1);
-
     /**
-     *
-     */
-    private final ThreadGroup group;
+    *
+    */
+    private final ThreadFactory defaultThreadFactory = Executors.defaultThreadFactory();
 
     /**
      *
@@ -36,16 +33,14 @@ public class MavenProxyThreadFactory implements ThreadFactory
 
     /**
      * Erstellt ein neues {@link MavenProxyThreadFactory} Object.
+     *
+     * @param namePrefix String
      */
-    public MavenProxyThreadFactory()
+    public MavenProxyThreadFactory(final String namePrefix)
     {
         super();
 
-        SecurityManager securityManager = System.getSecurityManager();
-        this.group = (securityManager != null) ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
-
-        // this.namePrefix = "pool-" + poolNumber.getAndIncrement() + "-thread-";
-        this.namePrefix = "worker-";
+        this.namePrefix = Objects.requireNonNull(namePrefix, "namePrefix required");
     }
 
     /**
@@ -54,17 +49,10 @@ public class MavenProxyThreadFactory implements ThreadFactory
     @Override
     public Thread newThread(final Runnable r)
     {
-        Thread thread = new Thread(this.group, r, this.namePrefix + this.threadNumber.getAndIncrement(), 0);
+        Thread thread = this.defaultThreadFactory.newThread(r);
 
-        if (thread.isDaemon())
-        {
-            thread.setDaemon(false);
-        }
-
-        if (thread.getPriority() != Thread.NORM_PRIORITY)
-        {
-            thread.setPriority(Thread.NORM_PRIORITY);
-        }
+        thread.setName(this.namePrefix + this.threadNumber.getAndIncrement());
+        thread.setDaemon(false);
 
         return thread;
     }

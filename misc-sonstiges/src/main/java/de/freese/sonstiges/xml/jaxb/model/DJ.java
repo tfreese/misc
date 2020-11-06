@@ -11,20 +11,20 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "dj")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder =
-        {
-                "firstName", "lastName"
-        })
+{
+        "firstName", "lastName"
+})
 public class DJ
 {
     /**
      *
      */
-    private String firstName = null;
+    private String firstName;
 
     /**
      *
      */
-    private String lastName = null;
+    private String lastName;
 
     /**
      * Erstellt ein neues {@link DJ} Object.
@@ -37,25 +37,17 @@ public class DJ
     /**
      * @return String
      */
-    public String getLastName()
+    public String getFirstName()
     {
-        return this.lastName;
-    }
-
-    /**
-     * @param lastName String
-     */
-    public void setLastName(final String lastName)
-    {
-        this.lastName = lastName;
+        return this.firstName;
     }
 
     /**
      * @return String
      */
-    public String getFirstName()
+    public String getLastName()
     {
-        return this.firstName;
+        return this.lastName;
     }
 
     /**
@@ -64,5 +56,13 @@ public class DJ
     public void setFirstName(final String name)
     {
         this.firstName = name;
+    }
+
+    /**
+     * @param lastName String
+     */
+    public void setLastName(final String lastName)
+    {
+        this.lastName = lastName;
     }
 }

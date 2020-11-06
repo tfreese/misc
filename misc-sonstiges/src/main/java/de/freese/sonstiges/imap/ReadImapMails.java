@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.PasswordAuthentication;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -114,7 +115,7 @@ public class ReadImapMails
     /**
      * @author Thomas Freese
      */
-    private class HTMLTextPart extends AbstractTextPart
+    private final class HTMLTextPart extends AbstractTextPart
     {
         /**
          * Erstellt ein neues {@link HTMLTextPart} Object.
@@ -130,7 +131,7 @@ public class ReadImapMails
     /**
      * @author Thomas Freese
      */
-    private class PlainTextPart extends AbstractTextPart
+    private final class PlainTextPart extends AbstractTextPart
     {
         /**
          * Erstellt ein neues {@link PlainTextPart} Object.
@@ -293,7 +294,8 @@ public class ReadImapMails
 
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("schema_hsqldb.sql"))))
+             BufferedReader reader =
+                     new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("schema_hsqldb.sql"), StandardCharsets.UTF_8)))
         {
             // @formatter:off
                String sql = reader.lines()

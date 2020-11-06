@@ -35,7 +35,7 @@ public class DateServer extends Thread
         /**
          *
          */
-        private ObjectOutputStream oos = null;
+        private ObjectOutputStream oos;
 
         /**
          * Creates a new Connect object.
@@ -61,8 +61,6 @@ public class DateServer extends Thread
                 {
                     System.out.println(ex1.getMessage());
                 }
-
-                return;
             }
         }
 

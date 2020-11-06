@@ -12,12 +12,12 @@ public class ReverseThread extends Thread
     /**
      *
      */
-    private BufferedReader in = null;
+    private BufferedReader in;
 
     /**
      *
      */
-    private PrintWriter out = null;
+    private PrintWriter out;
 
     /**
      * Creates a new {@link ReverseThread} object.
@@ -41,14 +41,14 @@ public class ReverseThread extends Thread
     {
         int i = 0;
         int len = source.length();
-        StringBuffer dest = new StringBuffer(len);
+        StringBuffer sb = new StringBuffer(len);
 
         for (i = (len - 1); i >= 0; i--)
         {
-            dest.append(source.charAt(i));
+            sb.append(source.charAt(i));
         }
 
-        return dest.toString();
+        return sb.toString();
     }
 
     /**

@@ -49,7 +49,7 @@ public class ParticleCanvas extends Canvas
     /**
      *
      */
-    private boolean stop = false;
+    private boolean stop;
 
     /**
      * Creates a new {@link ParticleCanvas} object.

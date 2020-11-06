@@ -21,6 +21,7 @@ public class FunctionStemmer implements Function<String, String>
      *
      * @author Thomas Freese
      */
+    @FunctionalInterface
     private static interface IStemmer
     {
         /**

@@ -23,7 +23,7 @@ public class BufferedImageTranscoder extends ImageTranscoder
     /**
      *
      */
-    private BufferedImage image = null;
+    private BufferedImage image;
 
     /**
      * Erstellt ein neues {@link BufferedImageTranscoder} Object.

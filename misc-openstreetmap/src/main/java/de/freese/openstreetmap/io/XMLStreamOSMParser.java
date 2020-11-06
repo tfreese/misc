@@ -7,6 +7,7 @@ package de.freese.openstreetmap.io;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -25,83 +26,84 @@ import de.freese.openstreetmap.model.OSMWay;
 public class XMLStreamOSMParser implements IOSMParser
 {
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_ID = "id";
 
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_KEY = "k";
 
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_LAT = "lat";
+
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_LON = "lon";
 
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_REF = "ref";
 
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_TYPE = "type";
 
     /**
-     * 
+     *
      */
     private static final String ATTR_NAME_VALUE = "v";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_NODE = "node";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_RELATION = "relation";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_RELATIONMEMBER = "member";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_TAG = "tag";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_WAY = "way";
 
     /**
-     * 
+     *
      */
     private static final String NODE_NAME_WAYNODE = "nd";
 
     /**
-     * 
+     *
      */
-    private OSMNode node = null;
+    private OSMNode node;
 
     /**
-     * 
+     *
      */
-    private OSMRelation relation = null;
+    private OSMRelation relation;
 
     /**
-     * 
+     *
      */
-    private OSMWay way = null;
+    private OSMWay way;
 
     /**
      * Erstellt ein neues {@link XMLStreamOSMParser} Object.
@@ -124,6 +126,9 @@ public class XMLStreamOSMParser implements IOSMParser
         // validator.validate(xmlFile);
 
         XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+        inputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        inputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
         XMLStreamReader reader = inputFactory.createXMLStreamReader(inputStream);
 
         return parseDocument(reader);

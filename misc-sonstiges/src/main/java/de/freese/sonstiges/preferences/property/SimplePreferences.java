@@ -60,7 +60,7 @@ public final class SimplePreferences extends Preferences
     /**
      *
      */
-    private boolean removed = false;
+    private boolean removed;
 
     /**
      * Relativ zu diesem Knoten
