@@ -14,35 +14,35 @@ class CTransferableTreePath implements Transferable
     // The type of DnD object being dragged...
 
     /**
-     * 
+     *
      */
-    public static final DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "TreePath");
+    public static final DataFlavor FLAVOR_TREE_PATH = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "TreePath");
 
     // public static final DataFlavor TREEPATH_FLAVOR = new DataFlavor(TreePath.class, "TreePath");
 
     /**
-     * 
+     *
      */
-    private DataFlavor[] _flavors =
+    private static final DataFlavor[] FLAVORS =
     {
-            TREEPATH_FLAVOR
+            FLAVOR_TREE_PATH
     };
 
     /**
-     * 
+     *
      */
-    private TreePath _path;
+    private TreePath path;
 
     /**
      * Constructs a transferrable tree path object for the specified path.
-     * 
+     *
      * @param path {@link TreePath}
      */
     public CTransferableTreePath(final TreePath path)
     {
         super();
 
-        this._path = path;
+        this.path = path;
     }
 
     /**
@@ -51,9 +51,9 @@ class CTransferableTreePath implements Transferable
     @Override
     public synchronized Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException
     {
-        if (flavor.isMimeTypeEqual(TREEPATH_FLAVOR.getMimeType())) // DataFlavor.javaJVMLocalObjectMimeType))
+        if (flavor.isMimeTypeEqual(FLAVOR_TREE_PATH.getMimeType())) // DataFlavor.javaJVMLocalObjectMimeType))
         {
-            return this._path;
+            return this.path;
         }
 
         throw new UnsupportedFlavorException(flavor);
@@ -65,7 +65,7 @@ class CTransferableTreePath implements Transferable
     @Override
     public DataFlavor[] getTransferDataFlavors()
     {
-        return this._flavors;
+        return FLAVORS;
     }
 
     /**
@@ -74,6 +74,6 @@ class CTransferableTreePath implements Transferable
     @Override
     public boolean isDataFlavorSupported(final DataFlavor flavor)
     {
-        return List.of(this._flavors).contains(flavor);
+        return List.of(FLAVORS).contains(flavor);
     }
 }

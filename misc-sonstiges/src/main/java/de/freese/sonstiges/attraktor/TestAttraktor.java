@@ -69,12 +69,12 @@ public class TestAttraktor extends JComponent implements Runnable
     /**
      *
      */
-    private final Image image;
+    private final transient Image image;
 
     /**
      *
      */
-    private final MemoryImageSource imageSource;
+    private final transient MemoryImageSource imageSource;
 
     /**
      *
@@ -84,17 +84,17 @@ public class TestAttraktor extends JComponent implements Runnable
     /**
      *
      */
-    private final Random random;
+    private final transient Random random;
 
     /**
      *
      */
-    private double x = 200;
+    private double x = 200D;
 
     /**
      *
      */
-    private double y = 200;
+    private double y = 200D;
 
     /**
      * Erstellt ein neues {@link TestAttraktor} Object.
@@ -145,9 +145,9 @@ public class TestAttraktor extends JComponent implements Runnable
     {
         Set<Point2D> points = new HashSet<>();
 
-        double a = -14d;
-        double b = 0.9f;
-        double c = 0.1d;
+        double a = -14D;
+        double b = 0.9F;
+        double c = 0.1D;
 
         Point2D min = new Point2D.Double(0, 0);
         Point2D max = new Point2D.Double(0, 0);

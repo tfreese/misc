@@ -31,17 +31,17 @@ public class TreeDragTest extends JFrame
     /**
      *
      */
-    TreeDragSource ds;
+    private final TreeDragSource ds;
 
     /**
      *
      */
-    TreeDropTarget dt;
+    private final TreeDropTarget dt;
 
     /**
      *
      */
-    JTree tree;
+    private final JTree tree;
 
     /**
      * Creates a new {@link TreeDragTest} object.

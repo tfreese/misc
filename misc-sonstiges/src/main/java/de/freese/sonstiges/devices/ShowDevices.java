@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileSystemView;
 /**
  * @author Thomas Freese
  */
-public class ShowDevices
+public final class ShowDevices
 {
     /**
      * @param args String[]
@@ -117,7 +117,7 @@ public class ShowDevices
     /**
      * Erstellt ein neues {@link ShowDevices} Object.
      */
-    public ShowDevices()
+    private ShowDevices()
     {
         super();
     }
