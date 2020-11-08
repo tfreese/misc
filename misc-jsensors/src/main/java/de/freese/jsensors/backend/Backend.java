@@ -8,6 +8,7 @@ import de.freese.jsensors.SensorValue;
  *
  * @author Thomas Freese
  */
+@FunctionalInterface
 public interface Backend
 {
     /**

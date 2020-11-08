@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.backend.disruptor.DisruptorBackend;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
@@ -25,7 +26,7 @@ class TestScheduler
     void testScheduler() throws Exception
     {
         // Direktes Speichern des SensorWertes im gleichen Thread.
-        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
+        Sensor sensor = new ConstantSensor("TEST_SENSOR_SCHEDULER", "123.456");
         sensor.setBackend(new ConsoleBackend());
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
@@ -35,9 +36,9 @@ class TestScheduler
         scheduledExecutorService.schedule(() -> {
             scheduledExecutorService.shutdownNow();
             future.setResponse(new Object());
-        }, 5, TimeUnit.SECONDS);
+        }, 2, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 0, 1, TimeUnit.SECONDS);
 
         future.get();
     }
@@ -48,14 +49,19 @@ class TestScheduler
     @Test
     void testSchedulerMitDisruptor() throws Exception
     {
-        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
-        DisruptorBackend backendDisruptor = new DisruptorBackend();
-        backendDisruptor.start();
+        Sensor sensor = new ConstantSensor("TEST_SENSOR_SCHEDULER_MIT_DISRUPTOR", "123.456");
 
-        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
+        SensorBackendRegistry registry = new SensorBackendRegistry();
+        registry.register(sensor, new ConsoleBackend());
+
+        DisruptorBackend backendDisruptor = new DisruptorBackend();
+        backendDisruptor.setParallelism(2);
+        backendDisruptor.setRingBufferSize(8);
+        backendDisruptor.setSensorBackendRegistry(registry);
+
         sensor.setBackend(backendDisruptor);
 
-        backendDisruptor.register(sensor, new ConsoleBackend());
+        backendDisruptor.start();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
 
@@ -63,10 +69,11 @@ class TestScheduler
 
         scheduledExecutorService.schedule(() -> {
             scheduledExecutorService.shutdownNow();
+            backendDisruptor.stop();
             future.setResponse(new Object());
-        }, 5, TimeUnit.SECONDS);
+        }, 2, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 1, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 0, 1, TimeUnit.SECONDS);
 
         future.get();
     }

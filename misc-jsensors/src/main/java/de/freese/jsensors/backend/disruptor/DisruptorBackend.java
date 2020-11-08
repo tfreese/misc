@@ -1,18 +1,14 @@
 // Created: 27.10.2020
 package de.freese.jsensors.backend.disruptor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.TimeoutException;
 import com.lmax.disruptor.dsl.Disruptor;
+import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
-import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.sensor.Sensor;
 import de.freese.jsensors.utils.JSensorThreadFactory;
 import de.freese.jsensors.utils.LifeCycle;
 
@@ -24,17 +20,12 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    public static final int THREAD_COUNT = 3;
+    private Disruptor<SensorEvent> disruptor;
 
     /**
      *
      */
-    private Disruptor<SensorEvent> disruptor;
-
-    /**
-    *
-    */
-    private final Map<String, List<Backend>> registry = new HashMap<>();
+    private int parallelism = 3;
 
     /**
      * int ringBufferSize = Integer.highestOneBit(31) << 1;
@@ -42,51 +33,9 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     private int ringBufferSize = 128;
 
     /**
-     * @param sensorName String
-     * @return {@link List}
-     */
-    private List<Backend> getBackends(final String sensorName)
-    {
-        List<Backend> backends = this.registry.computeIfAbsent(sensorName, key -> new ArrayList<>());
-
-        return backends;
-    }
-
-    /**
-     * Hier wird ein SensorName mit seinen Backends verknüft.<br>
-     * Diese Verknüpfung wird von den {@link DisruptorSensorEventHandler} benötigt um die {@link SensorValue}s weiter zu leiten.
      *
-     * @param sensor {@link Sensor}
-     * @param backends {@link Backend}[]
      */
-    public void register(final Sensor sensor, final Backend...backends)
-    {
-        for (Backend backend : backends)
-        {
-            register(sensor.getName(), backend);
-        }
-    }
-
-    /**
-     * Hier wird ein SensorName mit seinen Backends verknüft.<br>
-     * Diese Verknüpfung wird von den {@link DisruptorSensorEventHandler} benötigt um die {@link SensorValue}s weiter zu leiten.
-     *
-     * @param sensorName String
-     * @param backend {@link Backend}
-     */
-    public void register(final String sensorName, final Backend backend)
-    {
-        List<Backend> backends = this.registry.computeIfAbsent(sensorName, key -> new ArrayList<>());
-
-        if (backends.contains(backend))
-        {
-            getLogger().warn("backend '{}' already bound to sensor '{}'", backend.getClass().getSimpleName(), sensorName);
-
-            return;
-        }
-
-        backends.add(backend);
-    }
+    private SensorBackendRegistry sensorBackendRegistry;
 
     /**
      * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
@@ -111,6 +60,16 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
+     * Default: 3
+     *
+     * @param parallelism int
+     */
+    public void setParallelism(final int parallelism)
+    {
+        this.parallelism = parallelism;
+    }
+
+    /**
      * Default: 128<br>
      * int ringBufferSize = Integer.highestOneBit(31) << 1;
      *
@@ -122,11 +81,21 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
+     * @param sensorBackendRegistry {@link SensorBackendRegistry}
+     */
+    public void setSensorBackendRegistry(final SensorBackendRegistry sensorBackendRegistry)
+    {
+        this.sensorBackendRegistry = sensorBackendRegistry;
+    }
+
+    /**
      * @see de.freese.jsensors.utils.LifeCycle#start()
      */
     @Override
     public void start()
     {
+        Objects.requireNonNull(this.sensorBackendRegistry, "sensorBackendRegistry required");
+
         if (this.ringBufferSize < 1)
         {
             throw new IllegalArgumentException("ringBufferSize must be >= 1");
@@ -134,11 +103,11 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
 
         this.disruptor = new Disruptor<>(SensorEvent::new, this.ringBufferSize, new JSensorThreadFactory("jsensor-disruptor-"));
 
-        DisruptorSensorEventHandler[] handlers = new DisruptorSensorEventHandler[THREAD_COUNT];
+        DisruptorSensorEventHandler[] handlers = new DisruptorSensorEventHandler[this.parallelism];
 
         for (int i = 0; i < handlers.length; i++)
         {
-            handlers[i] = new DisruptorSensorEventHandler(i, this::getBackends);
+            handlers[i] = new DisruptorSensorEventHandler(i, this.parallelism, this.sensorBackendRegistry);
         }
 
         // disruptor.handleEventsWith(handlers).then(new CleaningEventHandler());

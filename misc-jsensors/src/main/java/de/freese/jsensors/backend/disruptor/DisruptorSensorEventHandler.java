@@ -3,10 +3,10 @@ package de.freese.jsensors.backend.disruptor;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.lmax.disruptor.EventHandler;
+import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -23,22 +23,30 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     /**
      *
      */
-    private final Function<String, List<Backend>> backendResolver;
-    /**
-    *
-    */
     private final int ordinal;
 
     /**
-     * @param ordinal int
-     * @param backendResolver {@link List}
+     *
      */
-    public DisruptorSensorEventHandler(final int ordinal, final Function<String, List<Backend>> backendResolver)
+    private final int parallelism;
+
+    /**
+     *
+     */
+    private final SensorBackendRegistry sensorBackendRegistry;
+
+    /**
+     * @param ordinal int
+     * @param parallelism int
+     * @param sensorBackendRegistry {@link SensorBackendRegistry}
+     */
+    public DisruptorSensorEventHandler(final int ordinal, final int parallelism, final SensorBackendRegistry sensorBackendRegistry)
     {
         super();
 
         this.ordinal = ordinal;
-        this.backendResolver = Objects.requireNonNull(backendResolver, "backendResolver required");
+        this.parallelism = parallelism;
+        this.sensorBackendRegistry = Objects.requireNonNull(sensorBackendRegistry, "sensorBackendRegistry required");
     }
 
     /**
@@ -56,7 +64,7 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     public void onEvent(final SensorEvent event, final long sequence, final boolean endOfBatch) throws Exception
     {
         // Load-Balancing auf die Handler über die Sequence.
-        if ((this.ordinal == -1) || (this.ordinal == (sequence % DisruptorBackend.THREAD_COUNT)))
+        if (this.ordinal == (sequence % this.parallelism))
         {
             SensorValue sensorValue = event.getSensorValue();
             event.setSensorValue(null);
@@ -71,7 +79,7 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     @Override
     public void save(final SensorValue sensorValue)
     {
-        List<Backend> backends = this.backendResolver.apply(sensorValue.getName());
+        List<Backend> backends = this.sensorBackendRegistry.getBackends(sensorValue.getName());
 
         if ((backends == null) || backends.isEmpty())
         {

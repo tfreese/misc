@@ -28,45 +28,27 @@ public class SimpleClientDemo
      */
     public static void main(final String[] args)
     {
-        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
-        DisruptorBackend backendDisruptor = new DisruptorBackend();
-        backendDisruptor.start();
-
-        // Sensoren
+        // Sensoren definieren
         DiskFreeSpaceSensor sensorDiskFreeSpace = new DiskFreeSpaceSensor("DISKFREE_ROOT");
         sensorDiskFreeSpace.setDisk("/");
-        sensorDiskFreeSpace.start();
-        sensorDiskFreeSpace.setBackend(backendDisruptor);
 
         DiskUsageSensor sensorDiskUsage = new DiskUsageSensor("DISKUSAGE_ROOT");
         sensorDiskUsage.setDisk("/");
-        sensorDiskUsage.start();
-        sensorDiskUsage.setBackend(backendDisruptor);
 
         Sensor sensorCpuUsage = new CpuUsageSensor("CPU_USAGE");
-        sensorCpuUsage.setBackend(backendDisruptor);
-
         Sensor sensorMemoryUsage = new MemoryUsageSensor("MEMORY_USAGE");
-        sensorMemoryUsage.setBackend(backendDisruptor);
-
         Sensor sensorSwapUsage = new MemoryUsageSensor("SWAP_USAGE");
-        sensorSwapUsage.setBackend(backendDisruptor);
-
         NetworkUsageSensor sensorNetworkUsage = new NetworkUsageSensor("NETWORK");
-        sensorNetworkUsage.start();
-        sensorNetworkUsage.setBackend(backendDisruptor);
 
-        // Backends
+        // Backends definieren
         CSVBackend csvBackendDiskFreeRoot = new CSVBackend();
         csvBackendDiskFreeRoot.setPath(Paths.get("logs", "diskFreeRoot.csv"));
         csvBackendDiskFreeRoot.setBatchSize(5);
         csvBackendDiskFreeRoot.setExclusive(true);
-        csvBackendDiskFreeRoot.start();
 
         CSVBackend csvBackendOneFileForAll = new CSVBackend();
         csvBackendOneFileForAll.setPath(Paths.get("logs", "sensors.csv"));
         csvBackendOneFileForAll.setBatchSize(5);
-        csvBackendOneFileForAll.start();
 
         JDBCPool dataSource = new JDBCPool();
         dataSource.setUrl("jdbc:hsqldb:file:logs/hsqldb/sensordb;create=true;shutdown=true");
@@ -78,35 +60,60 @@ public class SimpleClientDemo
         jdbcBackendDiskFreeRoot.setTableName("DISKFREE_ROOT");
         jdbcBackendDiskFreeRoot.setBatchSize(5);
         jdbcBackendDiskFreeRoot.setExclusive(true);
-        jdbcBackendDiskFreeRoot.start();
 
         JDBCBackend jdbcBackendOneTableForAll = new JDBCBackend();
         jdbcBackendOneTableForAll.setDataSource(dataSource);
         jdbcBackendOneTableForAll.setTableName("SENSORS");
         jdbcBackendOneTableForAll.setBatchSize(5);
-        jdbcBackendOneTableForAll.start();
 
         Backend backendConsole = new ConsoleBackend();
 
-        // Backends den Sensoren zuordnen.
-        backendDisruptor.register(sensorDiskFreeSpace, csvBackendDiskFreeRoot, jdbcBackendDiskFreeRoot);
-        backendDisruptor.register(sensorDiskUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
-        backendDisruptor.register(sensorCpuUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
-        backendDisruptor.register(sensorMemoryUsage, backendConsole);
-        backendDisruptor.register(sensorSwapUsage, backendConsole);
-        backendDisruptor.register("NETWORK-IN", backendConsole);
-        backendDisruptor.register("NETWORK-OUT", backendConsole);
+        // Sensoren mit den Backends verknüpfen.
+        SensorBackendRegistry registry = new SensorBackendRegistry();
+        registry.register(sensorDiskFreeSpace, csvBackendDiskFreeRoot, jdbcBackendDiskFreeRoot);
+        registry.register(sensorDiskUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
+        registry.register(sensorCpuUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
+        registry.register(sensorMemoryUsage, backendConsole);
+        registry.register(sensorSwapUsage, backendConsole);
+        registry.register("NETWORK-IN", backendConsole);
+        registry.register("NETWORK-OUT", backendConsole);
+
+        // Registry in den Disruptor setzen.
+        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
+        DisruptorBackend backendDisruptor = new DisruptorBackend();
+        backendDisruptor.setParallelism(2);
+        backendDisruptor.setRingBufferSize(16);
+        backendDisruptor.setSensorBackendRegistry(registry);
+
+        sensorDiskFreeSpace.setBackend(backendDisruptor);
+        sensorDiskUsage.setBackend(backendDisruptor);
+        sensorCpuUsage.setBackend(backendDisruptor);
+        sensorMemoryUsage.setBackend(backendDisruptor);
+        sensorSwapUsage.setBackend(backendDisruptor);
+        sensorNetworkUsage.setBackend(backendDisruptor);
+
+        // Backends starten
+        csvBackendDiskFreeRoot.start();
+        csvBackendOneFileForAll.start();
+        jdbcBackendDiskFreeRoot.start();
+        jdbcBackendOneTableForAll.start();
+        backendDisruptor.start();
+
+        // Sensoren starten.
+        sensorDiskFreeSpace.start();
+        sensorDiskUsage.start();
+        sensorNetworkUsage.start();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
         scheduledExecutorService.schedule(() -> {
             scheduledExecutorService.shutdownNow();
 
-            backendDisruptor.stop();
             sensorDiskFreeSpace.stop();
             sensorDiskUsage.stop();
             sensorNetworkUsage.stop();
 
+            backendDisruptor.stop();
             csvBackendDiskFreeRoot.stop();
             csvBackendOneFileForAll.stop();
             jdbcBackendDiskFreeRoot.stop();

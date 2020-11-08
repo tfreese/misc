@@ -42,8 +42,7 @@
 	</bean>        
 
 	<!-- Backends konfigurieren -->
-    <bean id="disruptorBackend" class="de.freese.jsensors.spring.config.DisruptorBackendFactoryBean">
-        <property name="ringBufferSize" value="32" />
+    <bean id="sensorBackendRegistry" class="de.freese.jsensors.spring.config.SensorBackendRegistryFactoryBean">
         <property name="registry">
             <map>
                 <entry>
@@ -111,7 +110,13 @@
             </map>
 	   </property>
     </bean>
-        
+
+    <bean id="disruptorBackend" class="de.freese.jsensors.backend.disruptor.DisruptorBackend" init-method="start" destroy-method="stop">
+        <property name="sensorBackendRegistry" ref="sensorBackendRegistry" />
+        <property name="parallelism" value="3" />
+        <property name="ringBufferSize" value="16" />
+    </bean> 
+    
 	<bean id="csvBackendDiskFreeRoot" class="de.freese.jsensors.backend.file.CSVBackend" init-method="start" destroy-method="stop">
 		<property name="path" value="${jsensors.home}/diskFreeRoot.csv" />
         <property name="batchSize" value="5" />

@@ -34,6 +34,11 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     private URI uri;
 
     /**
+     *
+     */
+    private int workerCount = 3;
+
+    /**
      * Erstellt ein neues {@link RSocketBackend} Object.
      */
     public RSocketBackend()
@@ -42,10 +47,10 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
+     * @param sensorValue {@link SensorValue}
+     * @return {@link ByteBuf}
      */
-    @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
+    protected ByteBuf encode(final SensorValue sensorValue)
     {
         ByteBuf byteBuf = ByteBufAllocator.DEFAULT.buffer();
 
@@ -60,6 +65,17 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
         byteBuf.writeBytes(bytes);
 
         byteBuf.writeLong(sensorValue.getTimestamp());
+
+        return byteBuf;
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void saveValue(final SensorValue sensorValue) throws Exception
+    {
+        ByteBuf byteBuf = encode(sensorValue);
 
         // @formatter:off
         this.client
@@ -80,18 +96,33 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
+     * Default: 3
+     *
+     * @param workerCount int
+     */
+    public void setWorkerCount(final int workerCount)
+    {
+        this.workerCount = workerCount;
+    }
+
+    /**
      * @see de.freese.jsensors.utils.LifeCycle#start()
      */
     @Override
     public void start()
     {
+        if (this.workerCount < 1)
+        {
+            throw new IllegalArgumentException("workerCount must be >= 1");
+        }
+
         Objects.requireNonNull(this.uri, "uri required");
 
         // @formatter:off
         TcpClient tcpClient = TcpClient.create()
                 .host(this.uri.getHost())
                 .port(this.uri.getPort())
-                .runOn(LoopResources.create("rsocket-" + this.uri.getPort(), 2, true))
+                .runOn(LoopResources.create("sensor-client-" + this.uri.getPort(), this.workerCount, true))
                 ;
         // @formatter:on
 

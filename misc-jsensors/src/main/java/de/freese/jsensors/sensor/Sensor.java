@@ -18,7 +18,7 @@ public interface Sensor
     public String getName();
 
     /**
-     * Messen des Wertes.
+     * Messen des Wertes und schreiben in das Backend.
      */
     public void scan();
 

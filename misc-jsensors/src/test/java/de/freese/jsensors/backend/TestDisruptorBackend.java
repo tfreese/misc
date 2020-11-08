@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.disruptor.DisruptorBackend;
 import de.freese.jsensors.sensor.ConstantSensor;
@@ -29,15 +30,19 @@ class TestDisruptorBackend
     @Test
     void testDisruptorBackEnd() throws Exception
     {
+        Sensor sensor = new ConstantSensor("TEST_SENSOR_DISRUPTOR", "123.456");
+
+        SensorBackendRegistry registry = new SensorBackendRegistry();
+        registry.register(sensor, new ConsumerBackend(future::setResponse));
+
         // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
         DisruptorBackend backendDisruptor = new DisruptorBackend();
+        backendDisruptor.setParallelism(2);
+        backendDisruptor.setRingBufferSize(16);
+        backendDisruptor.setSensorBackendRegistry(registry);
         backendDisruptor.start();
 
-        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
         sensor.setBackend(backendDisruptor);
-
-        backendDisruptor.register(sensor, new ConsumerBackend(future::setResponse));
-
         sensor.scan();
 
         SensorValue sensorValue = future.get();
@@ -45,6 +50,6 @@ class TestDisruptorBackend
 
         assertNotNull(sensorValue);
         assertEquals("123.456", sensorValue.getValue());
-        assertEquals("TEST_SENSOR", sensorValue.getName());
+        assertEquals("TEST_SENSOR_DISRUPTOR", sensorValue.getName());
     }
 }

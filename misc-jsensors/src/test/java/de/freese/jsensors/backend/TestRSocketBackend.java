@@ -4,25 +4,19 @@ package de.freese.jsensors.backend;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import de.freese.jsensors.SensorBackendRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.disruptor.DisruptorBackend;
 import de.freese.jsensors.backend.rsocket.RSocketBackend;
+import de.freese.jsensors.backend.rsocket.SensorRSocketServer;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
 import de.freese.jsensors.utils.SyncFuture;
-import io.netty.buffer.ByteBuf;
-import io.rsocket.SocketAcceptor;
-import io.rsocket.core.RSocketServer;
-import io.rsocket.transport.netty.server.CloseableChannel;
-import io.rsocket.transport.netty.server.TcpServerTransport;
-import reactor.core.publisher.Mono;
-import reactor.netty.tcp.TcpServer;
 
 /**
  * @author Thomas Freese
@@ -41,9 +35,9 @@ class TestRSocketBackend
     private static final int PORT = 7000;
 
     /**
-    *
-    */
-    private static CloseableChannel server;
+     *
+     */
+    private static SensorRSocketServer rSocketServer;
 
     /**
      * @throws Exception Falls was schief geht.
@@ -51,7 +45,7 @@ class TestRSocketBackend
     @AfterAll
     static void afterAll() throws Exception
     {
-        server.dispose();
+        rSocketServer.stop();
     }
 
     /**
@@ -60,37 +54,15 @@ class TestRSocketBackend
     @BeforeAll
     static void beforeAll() throws Exception
     {
-        // @formatter:off
-        TcpServer tcpServer = TcpServer.create()
-                .host("localhost")
-                .port(7000)
-                ;
-        // @formatter:on
+        rSocketServer = new SensorRSocketServer();
+        rSocketServer.setPort(PORT);
 
-        SocketAcceptor socketAcceptor = SocketAcceptor.forFireAndForget(payload -> {
-            ByteBuf byteBuf = payload.data();
+        SensorBackendRegistry registryServer = new SensorBackendRegistry();
+        registryServer.register("TEST_SENSOR_RSOCKET", (Backend) future::setResponse);
 
-            int length = byteBuf.readInt();
-            String name = byteBuf.readCharSequence(length, StandardCharsets.UTF_8).toString();
+        rSocketServer.setSensorBackendRegistry(registryServer);
 
-            length = byteBuf.readInt();
-            String value = byteBuf.readCharSequence(length, StandardCharsets.UTF_8).toString();
-
-            long timeStamp = byteBuf.readLong();
-
-            SensorValue sensorValue = new SensorValue(name, value, timeStamp);
-            future.setResponse(sensorValue);
-
-            return Mono.empty();
-        });
-
-        // @formatter:off
-        server = RSocketServer
-            .create()
-            .acceptor(socketAcceptor)
-            .bindNow(TcpServerTransport.create(tcpServer))
-            ;
-        // @formatter:on
+        rSocketServer.start();
     }
 
     /**
@@ -99,19 +71,26 @@ class TestRSocketBackend
     @Test
     void testRSocketBackEnd() throws Exception
     {
-        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
-        // In diesem Fall wird der SensorWert an das RSocketBackend durchgereicht.
-        DisruptorBackend backendDisruptor = new DisruptorBackend();
-        backendDisruptor.start();
-
-        Sensor sensor = new ConstantSensor("test/Sensor", "123.456");
-        sensor.setBackend(backendDisruptor);
+        Sensor sensor = new ConstantSensor("TEST_SENSOR_RSOCKET", "123.456");
 
         RSocketBackend backendRSocket = new RSocketBackend();
         backendRSocket.setUri(URI.create("rsocket://localhost:" + PORT));
-        backendRSocket.start();
 
-        backendDisruptor.register(sensor, backendRSocket);
+        SensorBackendRegistry registryClient = new SensorBackendRegistry();
+
+        // SensorWert mit dem RSocketBackend verknüpfen.
+        registryClient.register(sensor, backendRSocket);
+
+        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
+        DisruptorBackend backendDisruptor = new DisruptorBackend();
+        backendDisruptor.setParallelism(2);
+        backendDisruptor.setRingBufferSize(8);
+        backendDisruptor.setSensorBackendRegistry(registryClient);
+
+        sensor.setBackend(backendDisruptor);
+
+        backendRSocket.start();
+        backendDisruptor.start();
 
         sensor.scan();
 
@@ -121,6 +100,6 @@ class TestRSocketBackend
 
         assertNotNull(sensorValue);
         assertEquals("123.456", sensorValue.getValue());
-        assertEquals("TEST_SENSOR", sensorValue.getName());
+        assertEquals("TEST_SENSOR_RSOCKET", sensorValue.getName());
     }
 }
