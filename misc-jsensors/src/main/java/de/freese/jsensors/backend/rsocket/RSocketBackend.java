@@ -127,8 +127,7 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
         // @formatter:on
 
         // @formatter:off
-        this.client = RSocketConnector
-            .create()
+        this.client = RSocketConnector.create()
             .reconnect(Retry.fixedDelay(3, Duration.ofSeconds(1)))
             .connect(TcpClientTransport.create(tcpClient))
             .block()

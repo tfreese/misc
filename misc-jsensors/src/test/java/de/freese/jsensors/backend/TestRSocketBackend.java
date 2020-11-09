@@ -69,7 +69,7 @@ class TestRSocketBackend
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void testRSocketBackEnd() throws Exception
+    void testRSocketBackend() throws Exception
     {
         Sensor sensor = new ConstantSensor("TEST_SENSOR_RSOCKET", "123.456");
 

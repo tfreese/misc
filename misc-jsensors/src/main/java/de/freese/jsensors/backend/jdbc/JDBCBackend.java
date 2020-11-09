@@ -7,16 +7,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 import javax.sql.DataSource;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
+import de.freese.jsensors.backend.batch.AbstractBatchBackend;
 import de.freese.jsensors.sensor.Sensor;
-import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * {@link Backend} für die Ausgabe der Sensorwerte in einer Datenbank.<br>
@@ -25,27 +23,12 @@ import de.freese.jsensors.utils.LifeCycle;
  *
  * @author Thomas Freese
  */
-public class JDBCBackend extends AbstractBackend implements LifeCycle
+public class JDBCBackend extends AbstractBatchBackend
 {
-    /**
-    *
-    */
-    private int batchSize = 5;
-
-    /**
-    *
-    */
-    private List<SensorValue> buffer;
-
     /**
      *
      */
     private DataSource dataSource;
-
-    /**
-    *
-    */
-    private boolean exclusive;
 
     /**
     *
@@ -118,25 +101,6 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @return {@link List}
-     */
-    private synchronized List<SensorValue> flush()
-    {
-        List<SensorValue> list = this.buffer;
-        this.buffer = null;
-
-        return list;
-    }
-
-    /**
-     * @return int
-     */
-    private int getBatchSize()
-    {
-        return this.batchSize;
-    }
-
-    /**
      * Liefert die {@link DataSource}.
      *
      * @return {@link DataSource}
@@ -155,46 +119,12 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * Die Datei ist exklusiv nur für einen Sensor.
-     *
-     * @return boolean
-     */
-    protected boolean isExclusive()
-    {
-        return this.exclusive;
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.batch.AbstractBatchBackend#saveValues(java.util.List)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
+    protected void saveValues(final List<SensorValue> values) throws Exception
     {
-        if (sensorValue == null)
-        {
-            return;
-        }
-
-        if (this.buffer == null)
-        {
-            this.buffer = new ArrayList<>();
-        }
-
-        this.buffer.add(sensorValue);
-
-        if (this.buffer.size() >= getBatchSize())
-        {
-            saveValues(flush());
-        }
-    }
-
-    /**
-     * @param values {@link List}
-     * @throws Exception Falls was schief geht.
-     */
-    private void saveValues(final List<SensorValue> values) throws Exception
-    {
-        if (values == null)
+        if ((values == null) || values.isEmpty())
         {
             return;
         }
@@ -243,14 +173,6 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @param batchSize int
-     */
-    public void setBatchSize(final int batchSize)
-    {
-        this.batchSize = batchSize;
-    }
-
-    /**
      * Setzt die {@link DataSource}.
      *
      * @param dataSource {@link DataSource}
@@ -258,16 +180,6 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     public void setDataSource(final DataSource dataSource)
     {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
-    }
-
-    /**
-     * Die Tabelle ist exklusiv nur für einen Sensor.
-     *
-     * @param exclusive boolean
-     */
-    public void setExclusive(final boolean exclusive)
-    {
-        this.exclusive = exclusive;
     }
 
     /**
@@ -284,12 +196,9 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
-        Objects.requireNonNull(getDataSource(), "dataSource required");
+        super.start();
 
-        if (getBatchSize() < 1)
-        {
-            throw new IllegalArgumentException("batchSize must be >= 1");
-        }
+        Objects.requireNonNull(getDataSource(), "dataSource required");
 
         if ((getTableName() == null) || getTableName().isBlank())
         {
@@ -312,14 +221,7 @@ public class JDBCBackend extends AbstractBackend implements LifeCycle
     @Override
     public void stop()
     {
-        try
-        {
-            saveValues(flush());
-        }
-        catch (Exception ex)
-        {
-            getLogger().error(null, ex);
-        }
+        super.stop();
 
         this.dataSource = null;
     }

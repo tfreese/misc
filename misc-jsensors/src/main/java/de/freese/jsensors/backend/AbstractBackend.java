@@ -15,6 +15,11 @@ public abstract class AbstractBackend implements Backend
     /**
     *
     */
+    private boolean exclusive;
+
+    /**
+    *
+    */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
@@ -31,6 +36,16 @@ public abstract class AbstractBackend implements Backend
     protected Logger getLogger()
     {
         return this.logger;
+    }
+
+    /**
+     * Das Backend ist exklusiv nur für einen Sensor.
+     *
+     * @return boolean
+     */
+    protected boolean isExclusive()
+    {
+        return this.exclusive;
     }
 
     /**
@@ -77,4 +92,14 @@ public abstract class AbstractBackend implements Backend
      * @throws Exception Falls was schief geht.
      */
     protected abstract void saveValue(SensorValue sensorValue) throws Exception;
+
+    /**
+     * Das Backend ist exklusiv nur für einen Sensor.
+     *
+     * @param exclusive boolean
+     */
+    public void setExclusive(final boolean exclusive)
+    {
+        this.exclusive = exclusive;
+    }
 }

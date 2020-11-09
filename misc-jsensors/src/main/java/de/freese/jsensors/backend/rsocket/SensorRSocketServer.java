@@ -204,8 +204,8 @@ public class SensorRSocketServer implements LifeCycle
         // @formatter:on
 
         // Globale Default-Resourcen.
-        // TcpResources.set(LoopResources.create("jsync-server", 2, 4, true));
-        // TcpResources.set(ConnectionProvider.create("demo-connectionPool", 16));
+        // TcpResources.set(LoopResources.create("sensor-server", 1, 3, true));
+        // TcpResources.set(ConnectionProvider.create("connectionPool", 16));
 
         // @formatter:off
         TcpServer tcpServer = TcpServer.create()
@@ -216,8 +216,7 @@ public class SensorRSocketServer implements LifeCycle
         // @formatter:on
 
         // @formatter:off
-         this.server = RSocketServer
-                .create()
+         this.server = RSocketServer.create()
                 .acceptor(SocketAcceptor.forFireAndForget(this::forFireAndForget))
                 .resume(resume)
                 .payloadDecoder(PayloadDecoder.DEFAULT)

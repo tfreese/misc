@@ -28,7 +28,7 @@ class TestDisruptorBackend
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void testDisruptorBackEnd() throws Exception
+    void testDisruptorBackend() throws Exception
     {
         Sensor sensor = new ConstantSensor("TEST_SENSOR_DISRUPTOR", "123.456");
 

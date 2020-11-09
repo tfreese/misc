@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -26,7 +25,7 @@ public class CSVBackend extends AbstractFileBackend
     {
         boolean createHeader = !Files.exists(path);
 
-        OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        OutputStream outputStream = super.createOutputStream(path);
 
         if (createHeader)
         {
