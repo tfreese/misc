@@ -32,7 +32,7 @@ import de.freese.sonstiges.imap.analyze.FunctionStripStopWords;
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class TestMail
 {
     /**

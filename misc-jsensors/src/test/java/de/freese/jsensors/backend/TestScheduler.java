@@ -16,7 +16,7 @@ import de.freese.jsensors.utils.SyncFuture;
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class TestScheduler
 {
     /**

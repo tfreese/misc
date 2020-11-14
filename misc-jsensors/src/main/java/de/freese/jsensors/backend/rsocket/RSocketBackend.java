@@ -11,9 +11,13 @@ import de.freese.jsensors.utils.LifeCycle;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.rsocket.RSocket;
+import io.rsocket.core.RSocketClient;
 import io.rsocket.core.RSocketConnector;
+import io.rsocket.frame.decoder.PayloadDecoder;
+import io.rsocket.transport.ClientTransport;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.util.ByteBufPayload;
+import reactor.core.publisher.Mono;
 import reactor.netty.resources.LoopResources;
 import reactor.netty.tcp.TcpClient;
 import reactor.util.retry.Retry;
@@ -26,7 +30,7 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    private RSocket client;
+    private RSocketClient client;
 
     /**
      *
@@ -79,7 +83,7 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
 
         // @formatter:off
         this.client
-            .fireAndForget(ByteBufPayload.create(byteBuf))
+            .fireAndForget(Mono.just(ByteBufPayload.create(byteBuf)))
             .block()
             ;
         // @formatter:on
@@ -126,13 +130,20 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
                 ;
         // @formatter:on
 
+        ClientTransport clientTransport = TcpClientTransport.create(tcpClient);
+        // ClientTransport clientTransport = LocalClientTransport.create("test-local-" + port);
+
         // @formatter:off
-        this.client = RSocketConnector.create()
-            .reconnect(Retry.fixedDelay(3, Duration.ofSeconds(1)))
-            .connect(TcpClientTransport.create(tcpClient))
-            .block()
-            ;
+        RSocketConnector connector = RSocketConnector.create()
+                .payloadDecoder(PayloadDecoder.DEFAULT)
+                .reconnect(Retry.fixedDelay(3, Duration.ofSeconds(1)))
+                // .reconnect(Retry.backoff(50, Duration.ofMillis(500)))
+                ;
         // @formatter:on
+
+        Mono<RSocket> rSocket = connector.connect(clientTransport);
+
+        this.client = RSocketClient.from(rSocket);
     }
 
     /**

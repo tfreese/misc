@@ -30,10 +30,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * The type Test misc.
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @DisplayName("Test Junit5")
-public class TestDemo
+class TestDemo
 {
     /**
      * The type My object.
@@ -140,18 +140,10 @@ public class TestDemo
     }
 
     /**
-     * Instantiates a new Test misc.
-     */
-    public TestDemo()
-    {
-        super();
-    }
-
-    /**
      * @return {@link Stream}
      */
     @TestFactory
-    public Stream<DynamicTest> testDynamic()
+    Stream<DynamicTest> testDynamic()
     {
         // @formatter:off
         return Stream.of(MY_OBJECTS)
@@ -165,7 +157,7 @@ public class TestDemo
      * @return {@link Stream}
      */
     @TestFactory
-    public Stream<DynamicTest> testDynamic2()
+    Stream<DynamicTest> testDynamic2()
     {
         // @formatter:off
         return Stream.of(MY_OBJECTS)
@@ -183,7 +175,7 @@ public class TestDemo
      * @return {@link Stream}
      */
     @TestFactory
-    public Stream<DynamicNode> testDynamic3()
+    Stream<DynamicNode> testDynamic3()
     {
         // @formatter:off
         return Stream.of(MY_OBJECTS)
@@ -218,7 +210,7 @@ public class TestDemo
     // @DisabledOnJre(JRE.JAVA_8)
     // @EnabledIfSystemProperty(named = "os.arch", matches = ".*64.*")
     // @EnabledIfEnvironmentVariable(named = "ENV", matches = "staging-server")
-    public void testMethodSource(final MyObject obj)
+    void testMethodSource(final MyObject obj)
     {
         assertNotNull(obj);
         assertTrue(obj.getX() < 2);
@@ -227,14 +219,14 @@ public class TestDemo
 
     /**
      * Test method source.
-     * 
+     *
      * @param name String
      * @param obj {@link MyObject}
      */
     @ParameterizedTest(name = "{index} -> {0}")
     @MethodSource("createObjectsArgumented")
     @DisplayName("Test @MethodSource Argumented")
-    public void testMethodSourceArgumented(final String name, final MyObject obj)
+    void testMethodSourceArgumented(final String name, final MyObject obj)
     {
         assertNotNull(obj);
         assertTrue(obj.getX() < 2);
@@ -249,7 +241,7 @@ public class TestDemo
     @RepeatedTest(value = 4, name = "{displayName}: {currentRepetition}/{totalRepetitions}")
     @ExtendWith(TestDemo.MyParameterResolver.class)
     @DisplayName("Test @ExtendWith")
-    public void testParameterResolver(final MyObject obj)
+    void testParameterResolver(final MyObject obj)
     {
         assertNotNull(obj);
         assertTrue(obj.getX() < 2);

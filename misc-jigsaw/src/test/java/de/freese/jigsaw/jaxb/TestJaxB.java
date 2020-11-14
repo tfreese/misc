@@ -21,8 +21,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestJaxB
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TestJaxB
 {
     /**
     *
@@ -38,24 +38,16 @@ public class TestJaxB
      * @throws Exception Falls was schief geht.
      */
     @BeforeAll
-    public static void beforeAll() throws Exception
+    static void beforeAll() throws Exception
     {
         TestJaxB.jaxbContext = JAXBContext.newInstance(Club.class, DJ.class);
-    }
-
-    /**
-     * Erstellt ein neues {@link TestJaxB} Object.
-     */
-    public TestJaxB()
-    {
-        super();
     }
 
     /**
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test1ToXML() throws Exception
+    void test1ToXML() throws Exception
     {
         Club club = ClubFactory.createClub();
 
@@ -79,7 +71,7 @@ public class TestJaxB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    public void test2FromXML() throws Exception
+    void test2FromXML() throws Exception
     {
         // System.out.println(new String(TestJaxB.bytes, StandardCharsets.UTF_8));
 

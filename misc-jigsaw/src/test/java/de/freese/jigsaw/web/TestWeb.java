@@ -14,22 +14,14 @@ import org.junit.jupiter.api.TestMethodOrder;
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
-public class TestWeb
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TestWeb
 {
-    /**
-     * Erstellt ein neues {@link TestWeb} Object.
-     */
-    public TestWeb()
-    {
-        super();
-    }
-
     /**
      *
      */
     @Test
-    public void testWeb()
+    void testWeb()
     {
         Supplier<String> supplier = new HttpQuery();
 

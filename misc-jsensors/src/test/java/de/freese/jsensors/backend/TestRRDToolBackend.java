@@ -13,7 +13,7 @@ import de.freese.jsensors.sensor.Sensor;
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @Disabled("RRDTool ist nicht immer vorhanden")
 class TestRRDToolBackend
 {

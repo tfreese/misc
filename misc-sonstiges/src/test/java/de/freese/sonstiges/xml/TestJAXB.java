@@ -1,29 +1,26 @@
 package de.freese.sonstiges.xml;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import de.freese.sonstiges.xml.jaxb.model.Club;
-import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
-import de.freese.sonstiges.xml.jaxb.model.DJ;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import de.freese.sonstiges.xml.jaxb.model.Club;
+import de.freese.sonstiges.xml.jaxb.model.ClubFactory;
+import de.freese.sonstiges.xml.jaxb.model.DJ;
 
 /**
  * @author Thomas Freese
  */
-@TestMethodOrder(MethodOrderer.Alphanumeric.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class TestJAXB
 {
     /**
