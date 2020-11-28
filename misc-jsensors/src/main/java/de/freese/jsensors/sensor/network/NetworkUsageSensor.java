@@ -41,6 +41,9 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
 
     /**
      * Ausgabe von "ifconfig".<br>
+     * /proc/net/dev<br>
+     * /sys/class/net/$1/statistics/rx_bytes<br>
+     * ifstat<br>
      *
      * @return String[]; Index 0=Input, 1=Output
      * @throws Exception Falls was schief geht.

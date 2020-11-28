@@ -8,6 +8,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -349,6 +350,124 @@ public final class Misc
 
             System.out.printf("writeTask finished: %s%n", Thread.currentThread().getName());
             System.out.printf("copy ... finished: %s%n", Thread.currentThread().getName());
+        }
+    }
+
+    /**
+    *
+    */
+    static void cpuLoad()
+    {
+        // CPU-Load: cat /proc/stat
+        // cpu 35421 0 4092 158570 3325 408 6 0
+        // cpu0 35421 0 4092 158570 3325 408 6 0
+        // [...]
+        // Relevant sind jeweils die ersten vier Zahlen, die für User, Nice, System und Idle stehen.
+        // Zusammengerechnet geben sie im Beispiel 198.083, wovon der Idle-Wert 158.570 ausmacht, was etwa 80 % des Gesamtwerts entspricht.
+        // Die effektive CPU-Auslastung seit Systemstart liegt also bei gerade 20 %.
+        //
+        // Effektive Auslastung: user nice system idle iowait irq softirq steal guest guest_nice
+        //
+        // PrevIdle = previdle + previowait
+        // Idle = idle + iowait
+        //
+        // PrevNonIdle = prevuser + prevnice + prevsystem + previrq + prevsoftirq + prevsteal
+        // NonIdle = user + nice + system + irq + softirq + steal
+        //
+        // PrevTotal = PrevIdle + PrevNonIdle
+        // Total = Idle + NonIdle
+        //
+        // # differentiate: actual value minus the previous one
+        // totald = Total - PrevTotal
+        // idled = Idle - PrevIdle
+        //
+        // CPU_Percentage = (totald - idled)/totald
+
+        // Index 0 = Previous
+        // Index 1 = Current
+        int[] user = new int[2];
+        int[] nice = new int[2];
+        int[] system = new int[2];
+        int[] idle = new int[2];
+        int[] ioWait = new int[2];
+        int[] irq = new int[2];
+        int[] softIrq = new int[2];
+        int[] steal = new int[2];
+        int[] guest = new int[2];
+        int[] guestNice = new int[2];
+
+        try
+        {
+            for (int i = 0; i < 50; i++)
+            {
+                try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(new FileInputStream("/proc/stat"), StandardCharsets.UTF_8)))
+                {
+                    String line = stdInput.readLine();
+                    line = line.replace("  ", " ");
+
+                    String[] splits = line.split("[ ]");
+
+                    user[1] = Integer.parseInt(splits[1]);
+                    nice[1] = Integer.parseInt(splits[2]);
+                    system[1] = Integer.parseInt(splits[3]);
+                    idle[1] = Integer.parseInt(splits[4]);
+                    ioWait[1] = Integer.parseInt(splits[5]);
+                    irq[1] = Integer.parseInt(splits[6]);
+                    softIrq[1] = Integer.parseInt(splits[7]);
+                    steal[1] = Integer.parseInt(splits[8]);
+                    guest[1] = Integer.parseInt(splits[9]);
+                    guestNice[1] = Integer.parseInt(splits[10]);
+
+                    // Einfache Rechnung
+                    double sum = user[1] + nice[1] + system[1] + idle[1];
+                    double percent = 1D - (idle[1] / sum);
+                    System.out.println("Einfache Rechnung: CPU-Load in % = " + (percent * 100D));
+
+                    // Vorgänger-Rechnung
+                    int prevIdle = idle[0] + ioWait[0];
+                    int currentIdle = idle[1] + ioWait[1];
+
+                    int prevNonIdle = user[0] + nice[0] + system[0] + irq[0] + softIrq[0] + steal[0];
+                    int currentNonIdle = user[1] + nice[1] + system[1] + irq[1] + softIrq[1] + steal[1];
+
+                    int prevTotal = prevIdle + prevNonIdle;
+                    int currentTotal = currentIdle + currentNonIdle;
+
+                    // differentiate: actual value minus the previous one
+                    double totalDiff = currentTotal - prevTotal;
+                    double idleDiff = currentIdle - prevIdle;
+
+                    percent = 1D - ((totalDiff - idleDiff) / totalDiff);
+                    System.out.println("Vorgänger-Rechnung: CPU-Load in % = " + (percent * 100D));
+
+                    // Aktuelle Werte merken.
+                    user[0] = user[1];
+                    nice[0] = nice[1];
+                    system[0] = system[1];
+                    idle[0] = idle[1];
+                    ioWait[0] = ioWait[1];
+                    irq[0] = irq[0];
+                    softIrq[0] = softIrq[1];
+                    steal[0] = steal[1];
+                    guest[0] = guest[1];
+                    guestNice[0] = guestNice[1];
+
+                    Thread.sleep(1000);
+
+                    // // read any errors from the attempted command
+                    // System.out.println("Here is the standard error of the command (if any):");
+                    // stdError.lines().forEach(System.out::println);
+                }
+
+                System.out.println();
+            }
+
+            System.exit(0);
+        }
+        catch (final Exception ex)
+        {
+            ex.printStackTrace();
+            System.exit(-1);
         }
     }
 
@@ -768,7 +887,8 @@ public final class Misc
 
         // byteBuffer();
         // copyPipedStreamsInToOut();
-        copyPipedStreamsOutToIn();
+        // copyPipedStreamsOutToIn();
+        cpuLoad();
         // dateTime();
         // fileSystems();
         // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));
@@ -777,6 +897,7 @@ public final class Misc
         // javaVersion();
         // listDirectories();
         // nioPipe();
+        // processBuilder();
         // reactor();
         // securityProviders();
         // shift();
@@ -889,65 +1010,38 @@ public final class Misc
             // Process process = Runtime.getRuntime().exec("ps -ef");
             // Process process = Runtime.getRuntime().exec("ping -c5 weg.de");
             // Process process = new ProcessBuilder().command("df -hT").start();
-            final Process process = new ProcessBuilder().command("/bin/sh", "-c", "df | grep lvroot | awk '{print $4}'").start();
+            ProcessBuilder processBuilder = new ProcessBuilder().command("/bin/sh", "-c", "df | grep vgdesktop-root | awk '{print $4}'");
             // .directory(directory);
-            // .redirectErrorStream(true);
+            // .redirectErrorStream(true); // Gibt Fehler auf dem InputStream aus.
 
-            // p.waitFor();
-            final BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            final BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            for (int i = 0; i < 10; i++)
+            {
+                Process process = processBuilder.start();
 
-            // read the output from the command
-            System.out.println("Here is the standard output of the command:\n");
-            stdInput.lines().forEach(System.out::println);
+                // p.waitFor();
+                try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                     BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream())))
+                {
+                    // read the output from the command
+                    System.out.println("Here is the standard output of the command:");
+                    stdInput.lines().forEach(System.out::println);
 
-            // read any errors from the attempted command
-            System.out.println("\nHere is the standard error of the command (if any):\n");
-            stdError.lines().forEach(System.out::println);
+                    // read any errors from the attempted command
+                    System.out.println("Here is the standard error of the command (if any):");
+                    stdError.lines().forEach(System.out::println);
+                }
+
+                System.out.println();
+                process.destroy();
+            }
 
             System.exit(0);
         }
         catch (final IOException ex)
         {
-            System.out.println("exception happened - here's what I know: ");
             ex.printStackTrace();
             System.exit(-1);
         }
-    }
-
-    /**
-     * @throws Exception Falls was schief geht.
-     */
-    static void processStartCommand() throws Exception
-    {
-        // new ProcessBuilder().directory(pomPath.toFile());
-
-        // @formatter:off
-        Process process = new ProcessBuilder()
-                //.command("ipconfig", "/all")
-                .command("netstat", "-a")
-                .redirectErrorStream(true)
-                .start();
-        // @formatter:on
-
-        // Charset charset = Charset.forName("windows-1252");
-        Charset charset = StandardCharsets.UTF_8;
-        List<String> output = null;
-
-        // try (InputStreamReader isr = new InputStreamReader(process.getInputStream()))
-        // {
-        // System.out.println(isr.getEncoding());
-        // }
-        try (BufferedReader readerIn = new BufferedReader(new InputStreamReader(process.getInputStream(), charset)))
-        {
-            // @formatter:off
-            output = readerIn.lines().collect(Collectors.toList());
-            // @formatter:on
-        }
-
-        process.destroy();
-
-        output.forEach(System.out::println);
     }
 
     /**
