@@ -8,7 +8,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -396,16 +396,20 @@ public final class Misc
         int[] guest = new int[2];
         int[] guestNice = new int[2];
 
+        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
+
         try
         {
             for (int i = 0; i < 50; i++)
             {
-                try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(new FileInputStream("/proc/stat"), StandardCharsets.UTF_8)))
+                try (BufferedReader stdInput = new BufferedReader(new FileReader("/proc/stat", StandardCharsets.UTF_8)))
                 {
                     String line = stdInput.readLine();
-                    line = line.replace("  ", " ");
+                    // line = line.replace(" ", " ");
 
-                    String[] splits = line.split("[ ]");
+                    // "[ ]" = "\\s+" = Whitespace: einer oder mehrere
+                    String[] splits = line.split("\\s+");
 
                     user[1] = Integer.parseInt(splits[1]);
                     nice[1] = Integer.parseInt(splits[2]);
@@ -417,6 +421,8 @@ public final class Misc
                     steal[1] = Integer.parseInt(splits[8]);
                     guest[1] = Integer.parseInt(splits[9]);
                     guestNice[1] = Integer.parseInt(splits[10]);
+
+                    System.out.println("OperatingSystemMXBean: CPU-Load in % = " + (os.getCpuLoad() * 100D));
 
                     // Einfache Rechnung
                     double sum = user[1] + nice[1] + system[1] + idle[1];
@@ -437,7 +443,7 @@ public final class Misc
                     double totalDiff = currentTotal - prevTotal;
                     double idleDiff = currentIdle - prevIdle;
 
-                    percent = 1D - ((totalDiff - idleDiff) / totalDiff);
+                    percent = idleDiff / totalDiff;
                     System.out.println("Vorgänger-Rechnung: CPU-Load in % = " + (percent * 100D));
 
                     // Aktuelle Werte merken.
@@ -1339,16 +1345,21 @@ public final class Misc
         OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
 
+        // Das funktioniert nur, wenn es mehrmals aufgerufen wird.
+        os.getCpuLoad();
+        os.getCpuLoad();
+
         System.out.println("\tArch: " + os.getArch());
         System.out.println("\tName: " + os.getName());
         System.out.println("\tVersion: " + os.getVersion());
+        System.out.println("\tCpuLoad: " + os.getCpuLoad());
+        System.out.println("\tCpuLoad: " + os.getCpuLoad());
         System.out.println("\tAvailableProcessors: " + os.getAvailableProcessors());
         System.out.println("\tCommittedVirtualMemorySize: " + os.getCommittedVirtualMemorySize());
         System.out.println("\tFreePhysicalMemorySize(: " + os.getFreeMemorySize());
         System.out.println("\tFreeSwapSpaceSize: " + os.getFreeSwapSpaceSize());
         System.out.println("\tProcessCpuLoad: " + os.getProcessCpuLoad());
         System.out.println("\tProcessCpuTime: " + os.getProcessCpuTime());
-        System.out.println("\tSystemCpuLoad: " + os.getCpuLoad());
         System.out.println("\tSystemLoadAverage: " + os.getSystemLoadAverage());
         System.out.println("\tTotalPhysicalMemorySize: " + os.getTotalMemorySize());
         System.out.println("\tTotalSwapSpaceSize: " + os.getTotalSwapSpaceSize());
@@ -1364,7 +1375,7 @@ public final class Misc
         lastSystemTime = systemTime;
         lastProcessCpuTime = processCpuTime;
 
-        Thread.sleep(5000);
+        Thread.sleep(3000);
 
         systemTime = System.nanoTime();
         processCpuTime = os.getProcessCpuTime();
