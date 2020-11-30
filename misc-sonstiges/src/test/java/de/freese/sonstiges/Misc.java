@@ -8,7 +8,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -350,130 +349,6 @@ public final class Misc
 
             System.out.printf("writeTask finished: %s%n", Thread.currentThread().getName());
             System.out.printf("copy ... finished: %s%n", Thread.currentThread().getName());
-        }
-    }
-
-    /**
-    *
-    */
-    static void cpuLoad()
-    {
-        // CPU-Load: cat /proc/stat
-        // cpu 35421 0 4092 158570 3325 408 6 0
-        // cpu0 35421 0 4092 158570 3325 408 6 0
-        // [...]
-        // Relevant sind jeweils die ersten vier Zahlen, die für User, Nice, System und Idle stehen.
-        // Zusammengerechnet geben sie im Beispiel 198.083, wovon der Idle-Wert 158.570 ausmacht, was etwa 80 % des Gesamtwerts entspricht.
-        // Die effektive CPU-Auslastung seit Systemstart liegt also bei gerade 20 %.
-        //
-        // Effektive Auslastung: user nice system idle iowait irq softirq steal guest guest_nice
-        //
-        // PrevIdle = previdle + previowait
-        // Idle = idle + iowait
-        //
-        // PrevNonIdle = prevuser + prevnice + prevsystem + previrq + prevsoftirq + prevsteal
-        // NonIdle = user + nice + system + irq + softirq + steal
-        //
-        // PrevTotal = PrevIdle + PrevNonIdle
-        // Total = Idle + NonIdle
-        //
-        // # differentiate: actual value minus the previous one
-        // totald = Total - PrevTotal
-        // idled = Idle - PrevIdle
-        //
-        // CPU_Percentage = (totald - idled)/totald
-
-        // Index 0 = Previous
-        // Index 1 = Current
-        int[] user = new int[2];
-        int[] nice = new int[2];
-        int[] system = new int[2];
-        int[] idle = new int[2];
-        int[] ioWait = new int[2];
-        int[] irq = new int[2];
-        int[] softIrq = new int[2];
-        int[] steal = new int[2];
-        int[] guest = new int[2];
-        int[] guestNice = new int[2];
-
-        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
-        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) operatingSystemMXBean;
-
-        try
-        {
-            for (int i = 0; i < 50; i++)
-            {
-                try (BufferedReader stdInput = new BufferedReader(new FileReader("/proc/stat", StandardCharsets.UTF_8)))
-                {
-                    String line = stdInput.readLine();
-                    // line = line.replace(" ", " ");
-
-                    // "[ ]" = "\\s+" = Whitespace: einer oder mehrere
-                    String[] splits = line.split("\\s+");
-
-                    user[1] = Integer.parseInt(splits[1]);
-                    nice[1] = Integer.parseInt(splits[2]);
-                    system[1] = Integer.parseInt(splits[3]);
-                    idle[1] = Integer.parseInt(splits[4]);
-                    ioWait[1] = Integer.parseInt(splits[5]);
-                    irq[1] = Integer.parseInt(splits[6]);
-                    softIrq[1] = Integer.parseInt(splits[7]);
-                    steal[1] = Integer.parseInt(splits[8]);
-                    guest[1] = Integer.parseInt(splits[9]);
-                    guestNice[1] = Integer.parseInt(splits[10]);
-
-                    System.out.println("OperatingSystemMXBean: CPU-Load in % = " + (os.getCpuLoad() * 100D));
-
-                    // Einfache Rechnung
-                    double sum = user[1] + nice[1] + system[1] + idle[1];
-                    double percent = 1D - (idle[1] / sum);
-                    System.out.println("Einfache Rechnung: CPU-Load in % = " + (percent * 100D));
-
-                    // Vorgänger-Rechnung
-                    int prevIdle = idle[0] + ioWait[0];
-                    int currentIdle = idle[1] + ioWait[1];
-
-                    int prevNonIdle = user[0] + nice[0] + system[0] + irq[0] + softIrq[0] + steal[0];
-                    int currentNonIdle = user[1] + nice[1] + system[1] + irq[1] + softIrq[1] + steal[1];
-
-                    int prevTotal = prevIdle + prevNonIdle;
-                    int currentTotal = currentIdle + currentNonIdle;
-
-                    // differentiate: actual value minus the previous one
-                    double totalDiff = currentTotal - prevTotal;
-                    double idleDiff = currentIdle - prevIdle;
-
-                    percent = idleDiff / totalDiff;
-                    System.out.println("Vorgänger-Rechnung: CPU-Load in % = " + (percent * 100D));
-
-                    // Aktuelle Werte merken.
-                    user[0] = user[1];
-                    nice[0] = nice[1];
-                    system[0] = system[1];
-                    idle[0] = idle[1];
-                    ioWait[0] = ioWait[1];
-                    irq[0] = irq[0];
-                    softIrq[0] = softIrq[1];
-                    steal[0] = steal[1];
-                    guest[0] = guest[1];
-                    guestNice[0] = guestNice[1];
-
-                    Thread.sleep(1000);
-
-                    // // read any errors from the attempted command
-                    // System.out.println("Here is the standard error of the command (if any):");
-                    // stdError.lines().forEach(System.out::println);
-                }
-
-                System.out.println();
-            }
-
-            System.exit(0);
-        }
-        catch (final Exception ex)
-        {
-            ex.printStackTrace();
-            System.exit(-1);
         }
     }
 
@@ -894,7 +769,6 @@ public final class Misc
         // byteBuffer();
         // copyPipedStreamsInToOut();
         // copyPipedStreamsOutToIn();
-        cpuLoad();
         // dateTime();
         // fileSystems();
         // System.out.println(generatePW(new SecureRandom(), "lllll_UUUUU_dddddd."));

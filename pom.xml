@@ -33,6 +33,7 @@
     <modules>
         <module>misc-cache</module>
         <module>misc-genetic-algorithm</module>
+        <module>misc-jconky</module>
         <module>misc-jigsaw</module>
         <module>misc-jsensors</module>
         <module>misc-junit5</module>
