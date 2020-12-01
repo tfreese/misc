@@ -1,145 +1,159 @@
+// Created: 15.11.2020
+
 package de.freese.jconky;
-//// Created: 15.11.2020
-// package de.freese.jconky.model;
-//
-// import java.awt.Color;
-// import java.awt.Component;
-// import java.awt.GradientPaint;
-// import java.awt.Graphics2D;
-// import java.awt.GraphicsConfiguration;
-// import java.awt.GraphicsDevice;
-// import java.awt.GraphicsDevice.WindowTranslucency;
-// import java.awt.GraphicsEnvironment;
-// import java.awt.geom.Rectangle2D;
-// import java.util.List;
-// import java.util.concurrent.Executors;
-// import java.util.concurrent.ScheduledExecutorService;
-// import java.util.concurrent.TimeUnit;
-// import java.util.function.Supplier;
-// import javax.swing.JFrame;
-// import javax.swing.SwingUtilities;
-// import javax.swing.WindowConstants;
-// import de.freese.base.swing.components.graph.DefaultGraphComponent;
-// import de.freese.base.swing.components.graph.demo.SinusValueSupplier;
-// import de.freese.base.swing.components.graph.painter.AbstractGraphPainter;
-//
-/// **
-// * @author Thomas Freese
-// */
-// public final class JConky
-// {
-// /**
-// * @author Thomas Freese
-// */
-// private static final class JConkyPainter extends AbstractGraphPainter
-// {
-// /**
-// *
-// */
-// private final Rectangle2D rectangle2d = new Rectangle2D.Float();
-//
-// /**
-// * @see de.freese.base.swing.components.graph.model.AbstractPainterModel#getYKoordinate(float, float)
-// */
-// @Override
-// protected float getYKoordinate(final float value, final float height)
-// {
-// // Sinus: X-Achse auf halber Höhe
-// float middle = height / 2F;
-//
-// return (value * middle) + middle;
-// }
-//
-// /**
-// * @see de.freese.base.swing.components.graph.painter.AbstractGraphPainter#paintGraph(java.awt.Graphics2D, java.awt.Component, float, float)
-// */
-// @Override
-// public void paintGraph(final Graphics2D g, final Component parent, final float width, final float height)
-// {
-// List<Float> values = getLastValues((int) width);
-//
-// if (values.isEmpty())
-// {
-// return;
-// }
-//
-// float xOffset = width - values.size(); // Diagramm von rechts aufbauen.
-// // float xOffset = 0F; // Diagramm von links aufbauen.
-//
-// g.setPaint(new GradientPaint(0, 0, Color.RED, 0, height, Color.GREEN));
-//
-// for (int i = 0; i < values.size(); i++)
-// {
-// float value = values.get(i);
-//
-// float x = getXKoordinate(value, i, width);
-// float y = getYKoordinate(value, height);
-//
-// x += xOffset;
-//
-// // g.fillRect(y, 0, 1, (int) y);
-//
-// this.rectangle2d.setRect(x, y, 1, height);
-// g.fill(this.rectangle2d);
-// }
-// }
-// }
-//
-// /**
-// * @param args String[]
-// */
-// public static void main(final String[] args)
-// {
-// // Die Transparenz verschwindet, wenn der Frame auf den 2. Monitor verschoben wird.
-//
-// GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-//
-// GraphicsDevice[] gds = ge.getScreenDevices();
-//
-// for (GraphicsDevice gd : gds)
-// {
-// boolean isPerPixelTranslucencySupported = gd.isWindowTranslucencySupported(WindowTranslucency.PERPIXEL_TRANSLUCENT);
-//
-// if (!isPerPixelTranslucencySupported)
-// {
-// System.out.println("Per-pixel translucency is not supported on device " + gd.getIDstring());
-// System.exit(0);
-// }
-// }
-//
-// Supplier<Float> valueSupplier = new SinusValueSupplier();
-// JConkyPainter painter = new JConkyPainter();
-// DefaultGraphComponent graph = new DefaultGraphComponent(painter);
-// graph.useBufferedImage(false);
-//
-// ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-// scheduledExecutorService.scheduleWithFixedDelay(() -> {
-// painter.addValue(valueSupplier.get());
-// graph.paintGraph();
-// }, 500, 40, TimeUnit.MILLISECONDS);
-//
-// // jConky immer auf dem 2. Monitor.
-// final GraphicsDevice graphicsDevice = gds[1];
-// GraphicsConfiguration graphicsConfiguration = graphicsDevice.getDefaultConfiguration();
-//
-// // Sonst kommt Exception: The frame is decorated
-// JFrame.setDefaultLookAndFeelDecorated(true);
-//
-// JFrame frame = new JFrame("jConky", graphicsConfiguration);
-// frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-// frame.setSize(335, 1060);
-// frame.setResizable(true);
-// // frame.setUndecorated(true);
-// // frame.setOpacity(0.55F);
-// frame.setBackground(new Color(0, 0, 0, 75));
-//
-// frame.add(graph);
-//
-// // Position releativ zum Monitor in der rechten oberen Ecke.
-// frame.setLocation(graphicsConfiguration.getBounds().x, 10);
-// // frame.setLocation(2700, 10);
-// // frame.setLocationRelativeTo(null);
-//
-// SwingUtilities.invokeLater(() -> frame.setVisible(true));
-// }
-// }
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import javafx.application.Application;
+import javafx.application.ConditionalFeature;
+import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+
+/**
+ * Geht momentan nicht aus der IDE, sondern nur per Console: mvn compile exec:java<br>
+ * <br>
+ * In Eclipse:<br>
+ * <ol>
+ * <li>Konstruktor muss public empty-arg sein oder nicht vorhanden sein.
+ * <li>VM-Parameter: --add-modules javafx.controls
+ * <li>Module-Classpath: OpenJFX die jeweils 2 Jars für javafx-base, javafx-controls und javafx-graphics hinzufügen
+ * </ol>
+ *
+ * @author Thomas Freese
+ */
+public final class JConky extends Application
+{
+    /**
+     *
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(JConky.class);
+
+    /**
+     * @param args final String[]
+     */
+    public static void main(final String[] args)
+    {
+        launch(args);
+    }
+
+    /**
+    *
+    */
+    private GraphicsContext gc;
+
+    /**
+    *
+    */
+    private ScheduledExecutorService scheduledExecutorService;
+
+    /**
+     * @return {@link Logger}
+     */
+    public Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
+     * @see javafx.application.Application#init()
+     */
+    @Override
+    public void init() throws Exception
+    {
+        getLogger().info("init");
+    }
+
+    /**
+     * @see javafx.application.Application#start(javafx.stage.Stage)
+     */
+    @Override
+    public void start(final Stage primaryStage) throws Exception
+    {
+        getLogger().info("start");
+
+        Canvas canvas = new Canvas();
+        this.gc = canvas.getGraphicsContext2D();
+
+        Group pane = new Group();
+        pane.getChildren().add(canvas);
+
+        // GridPane pane = new GridPane();
+        // pane.add(canvas, 0, 0);
+
+        // Scene
+        Scene scene = new Scene(pane, 335, 1060, true, SceneAntialiasing.BALANCED);
+
+        // Bind canvas size to scene size.
+        canvas.widthProperty().bind(scene.widthProperty());
+        canvas.heightProperty().bind(scene.heightProperty());
+
+        getLogger().info("Antialising: {}", scene.getAntiAliasing());
+
+        // Transparenz
+        boolean isTransparentSupported = Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW);
+        // isTransparentSupported = false;
+
+        if (isTransparentSupported)
+        {
+            // Fenster wird hierbei undecorated, aber der Graph wird normal gezeichnet.
+
+            // For Stage
+            primaryStage.initStyle(StageStyle.TRANSPARENT);
+
+            // For Scene
+            // scene.setFill(Color.TRANSPARENT);
+            scene.setFill(new Color(0D, 0D, 0D, 0.5D));
+
+            // For Containers
+            // pane.setBackground(Background.EMPTY);
+            // pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
+            // pane.setStyle("-fx-background-color: transparent;");
+
+            // Das gesamte Fenster wird transparent, inklusive Titelleiste und Graph.
+            // primaryStage.setOpacity(0.3D);
+        }
+        else
+        {
+            scene.setFill(Color.BLACK);
+        }
+
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            // TODO
+        }, 500, 40, TimeUnit.MILLISECONDS);
+
+        primaryStage.setTitle("Graph Monitor");
+        primaryStage.setScene(scene);
+
+        // Auf dem 2. Monitor
+        // List<Screen> screens = Screen.getScreens();
+        // Screen screen = screens.get(screens.size() - 1);
+        // primaryStage.setX(screen.getVisualBounds().getMinX() + 1200);
+        // primaryStage.setY(10D);
+
+        primaryStage.show();
+    }
+
+    /**
+     * @see javafx.application.Application#stop()
+     */
+    @Override
+    public void stop() throws Exception
+    {
+        getLogger().info("stop");
+
+        this.scheduledExecutorService.shutdown();
+
+        System.exit(0);
+    }
+}

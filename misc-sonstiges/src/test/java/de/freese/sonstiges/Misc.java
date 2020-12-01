@@ -898,9 +898,8 @@ public final class Misc
             {
                 Process process = processBuilder.start();
 
-                // p.waitFor();
-                try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                     BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream())))
+                try (BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+                     BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8)))
                 {
                     // read the output from the command
                     System.out.println("Here is the standard output of the command:");
@@ -912,6 +911,7 @@ public final class Misc
                 }
 
                 System.out.println();
+                // process.waitFor();
                 process.destroy();
             }
 
