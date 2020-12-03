@@ -23,6 +23,14 @@ public class HostInfo
 
     /**
      * Erstellt ein neues {@link HostInfo} Object.
+     */
+    public HostInfo()
+    {
+        this("", "", "");
+    }
+
+    /**
+     * Erstellt ein neues {@link HostInfo} Object.
      *
      * @param name String String
      * @param version String String

@@ -7,6 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jconky.monitor.HostInfoMonitor;
+import de.freese.jconky.monitor.Monitor;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -101,7 +103,7 @@ public final class JConky extends Application
 
         // Transparenz
         boolean isTransparentSupported = Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW);
-        // isTransparentSupported = false;
+        isTransparentSupported = false;
 
         if (isTransparentSupported)
         {
@@ -127,10 +129,19 @@ public final class JConky extends Application
             scene.setFill(Color.BLACK);
         }
 
+        Monitor hostInfoMonitor = new HostInfoMonitor();
+
         this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
         this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            // TODO
-        }, 500, 40, TimeUnit.MILLISECONDS);
+            double width = canvas.getWidth();
+            double height = canvas.getHeight();
+
+            this.gc.clearRect(0, 0, width, height);
+
+            hostInfoMonitor.updateValue();
+
+            hostInfoMonitor.paintValue(this.gc, width);
+        }, 500, 4000, TimeUnit.MILLISECONDS);
 
         primaryStage.setTitle("Graph Monitor");
         primaryStage.setScene(scene);
