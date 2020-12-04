@@ -2,6 +2,8 @@
 
 package de.freese.jconky;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +18,6 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -49,14 +50,42 @@ public final class JConky extends Application
     }
 
     /**
-    *
-    */
-    private GraphicsContext gc;
+     *
+     */
+    private JConkyPainter conkyPainter;
 
     /**
-    *
-    */
+     * Monitore, die nicht alle paar Sekunden aktualisiert werden müssen.
+     */
+    private List<Monitor> longScheduledMonitors = new ArrayList<>();
+
+    /**
+     *
+     */
     private ScheduledExecutorService scheduledExecutorService;
+
+    /**
+     * Monitore, die alle paar Sekunden aktualisiert werden müssen.
+     */
+    private List<Monitor> shotScheduledMonitors = new ArrayList<>();
+
+    /**
+     * @param monitor {@link Monitor}
+     * @param shortScheduled boolean
+     */
+    private void addMonitor(final Monitor monitor, final boolean shortScheduled)
+    {
+        this.conkyPainter.addMonitor(monitor);
+
+        if (shortScheduled)
+        {
+            this.shotScheduledMonitors.add(monitor);
+        }
+        else
+        {
+            this.longScheduledMonitors.add(monitor);
+        }
+    }
 
     /**
      * @return {@link Logger}
@@ -83,8 +112,10 @@ public final class JConky extends Application
     {
         getLogger().info("start");
 
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+
         Canvas canvas = new Canvas();
-        this.gc = canvas.getGraphicsContext2D();
+        this.conkyPainter = new JConkyPainter(canvas);
 
         Group pane = new Group();
         pane.getChildren().add(canvas);
@@ -129,19 +160,20 @@ public final class JConky extends Application
             scene.setFill(Color.BLACK);
         }
 
-        Monitor hostInfoMonitor = new HostInfoMonitor();
+        addMonitor(new HostInfoMonitor(), false);
 
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
         this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            double width = canvas.getWidth();
-            double height = canvas.getHeight();
+            getLogger().debug("longScheduled updateValue");
+            this.longScheduledMonitors.forEach(Monitor::updateValue);
+        }, 0, 15, TimeUnit.MINUTES);
 
-            this.gc.clearRect(0, 0, width, height);
+        this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            getLogger().debug("shotScheduled updateValue");
+            this.shotScheduledMonitors.forEach(Monitor::updateValue);
 
-            hostInfoMonitor.updateValue();
-
-            hostInfoMonitor.paintValue(this.gc, width);
-        }, 500, 4000, TimeUnit.MILLISECONDS);
+            getLogger().debug("paint");
+            this.conkyPainter.paint();
+        }, 250, 3000, TimeUnit.MILLISECONDS);
 
         primaryStage.setTitle("Graph Monitor");
         primaryStage.setScene(scene);

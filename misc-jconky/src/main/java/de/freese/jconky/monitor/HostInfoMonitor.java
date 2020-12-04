@@ -3,7 +3,6 @@ package de.freese.jconky.monitor;
 
 import de.freese.jconky.model.HostInfo;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.text.Font;
 
 /**
  * @author Thomas Freese
@@ -21,9 +20,7 @@ public class HostInfoMonitor extends AbstractMonitor
     @Override
     public double paintValue(final GraphicsContext gc, final double width)
     {
-        Font font = new Font(getSettings().getFontName(), getSettings().getFontSize());
-        gc.setFont(font);
-
+        gc.setFont(getSettings().getFont());
         gc.setFill(getSettings().getColorText());
 
         double y = getSettings().getFontSize() * 1.5D;
@@ -32,7 +29,6 @@ public class HostInfoMonitor extends AbstractMonitor
         gc.fillText(text, 10D, y);
 
         double height = getSettings().getFontSize() * 2D;
-
         drawDebugBorder(gc, width, height);
 
         return height;

@@ -55,14 +55,4 @@ public abstract class AbstractMonitor implements Monitor
     {
         return getSettings().getSystemMonitor();
     }
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#paintValue(javafx.scene.canvas.GraphicsContext, double)
-     */
-    @Override
-    public double paintValue(final GraphicsContext gc, final double width)
-    {
-        // TODO Auto-generated method stub
-        return 0;
-    }
 }

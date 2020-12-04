@@ -48,6 +48,8 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
 
         HostInfo hostInfo = new HostInfo(splits[1], splits[2], splits[12] + " " + splits[13]);
 
+        getLogger().debug(hostInfo.toString());
+
         return hostInfo;
     }
 }

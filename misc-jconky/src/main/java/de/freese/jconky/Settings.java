@@ -4,6 +4,7 @@ package de.freese.jconky;
 import de.freese.jconky.system.LinuxSystemMonitor;
 import de.freese.jconky.system.SystemMonitor;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 /**
  * @author Thomas Freese
@@ -42,6 +43,11 @@ public final class Settings
     /**
      *
      */
+    private Font font;
+
+    /**
+     *
+     */
     private final SystemMonitor systemMonitor;
 
     /**
@@ -59,7 +65,21 @@ public final class Settings
      */
     public Color getColorText()
     {
-        return Color.WHITE;
+        return Color.LIGHTGRAY;
+    }
+
+    /**
+     * @return {@link Font}
+     */
+    public Font getFont()
+    {
+        if (this.font == null)
+        {
+            // this.font = new Font(getFontName(), getFontSize());
+            this.font = Font.font(getFontName(), getFontSize());
+        }
+
+        return this.font;
     }
 
     /**
