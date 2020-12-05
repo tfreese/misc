@@ -42,75 +42,90 @@ public class CpuTimes
     /**
      *
      */
-    private long guest;
+    private final long guest;
 
     /**
      *
      */
-    private long guestNice;
+    private final long guestNice;
 
     /**
      *
      */
-    private long idle;
+    private final long idle;
 
     /**
      *
      */
-    private long ioWait;
+    private final long ioWait;
 
     /**
      *
      */
-    private long irq;
+    private final long irq;
 
     /**
      *
      */
-    private long nice;
+    private final long nice;
 
     /**
      *
      */
-    private long softIrq;
+    private final long softIrq;
 
     /**
      *
      */
-    private long steal;
+    private final long steal;
 
     /**
      *
      */
-    private long system;
+    private final long system;
 
     /**
      *
      */
-    private long user;
+    private final long user;
 
     /**
      * Erstellt ein neues {@link CpuTimes} Object.
      */
     public CpuTimes()
     {
-        super();
+        this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     /**
-     * Liefert die CPU-Auslastung in %.
+     * Erstellt ein neues {@link CpuTimes} Object.
      *
-     * @param previous {@link CpuTimes}
-     * @return double
+     * @param user long
+     * @param nice long
+     * @param system long
+     * @param idle long
+     * @param ioWait long
+     * @param irq long
+     * @param softIrq long
+     * @param steal long
+     * @param guest long
+     * @param guestNice long
      */
-    public double getCpuUsage(final CpuTimes previous)
+    public CpuTimes(final long user, final long nice, final long system, final long idle, final long ioWait, final long irq, final long softIrq,
+            final long steal, final long guest, final long guestNice)
     {
-        double totalDiff = (double) getTotal() - previous.getTotal();
-        double idleDiff = (double) getTotalIdle() - previous.getTotalIdle();
+        super();
 
-        double percent = 1D - (idleDiff / totalDiff);
-
-        return percent * 100D;
+        this.user = user;
+        this.nice = nice;
+        this.system = system;
+        this.idle = idle;
+        this.ioWait = ioWait;
+        this.irq = irq;
+        this.softIrq = softIrq;
+        this.steal = steal;
+        this.guest = guest;
+        this.guestNice = guestNice;
     }
 
     /**
@@ -210,90 +225,31 @@ public class CpuTimes
     }
 
     /**
+     * Liefert die CPU-Auslastung in %.
+     *
+     * @param previous {@link CpuTimes}
+     * @return double
+     */
+    public double getUsage(final CpuTimes previous)
+    {
+        double totalDiff = (double) getTotal() - previous.getTotal();
+        double idleDiff = (double) getTotalIdle() - previous.getTotalIdle();
+
+        double percent = 1D - (idleDiff / totalDiff);
+
+        if (Double.isNaN(percent))
+        {
+            return 0D;
+        }
+
+        return percent * 100D;
+    }
+
+    /**
      * @return long
      */
     public long getUser()
     {
         return this.user;
-    }
-
-    /**
-     * @param guest long
-     */
-    public void setGuest(final long guest)
-    {
-        this.guest = guest;
-    }
-
-    /**
-     * @param guestNice long
-     */
-    public void setGuestNice(final long guestNice)
-    {
-        this.guestNice = guestNice;
-    }
-
-    /**
-     * @param idle long
-     */
-    public void setIdle(final long idle)
-    {
-        this.idle = idle;
-    }
-
-    /**
-     * @param ioWait long
-     */
-    public void setIoWait(final long ioWait)
-    {
-        this.ioWait = ioWait;
-    }
-
-    /**
-     * @param irq long
-     */
-    public void setIrq(final long irq)
-    {
-        this.irq = irq;
-    }
-
-    /**
-     * @param nice long
-     */
-    public void setNice(final long nice)
-    {
-        this.nice = nice;
-    }
-
-    /**
-     * @param softIrq long
-     */
-    public void setSoftIrq(final long softIrq)
-    {
-        this.softIrq = softIrq;
-    }
-
-    /**
-     * @param steal long
-     */
-    public void setSteal(final long steal)
-    {
-        this.steal = steal;
-    }
-
-    /**
-     * @param system long
-     */
-    public void setSystem(final long system)
-    {
-        this.system = system;
-    }
-
-    /**
-     * @param user long
-     */
-    public void setUser(final long user)
-    {
-        this.user = user;
     }
 }

@@ -3,6 +3,7 @@ package de.freese.jconky;
 
 import de.freese.jconky.system.LinuxSystemMonitor;
 import de.freese.jconky.system.SystemMonitor;
+import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
@@ -41,9 +42,44 @@ public final class Settings
     }
 
     /**
+    *
+    */
+    private final Color colorText;
+
+    /**
+    *
+    */
+    private final Color colorTitle;
+
+    /**
+    *
+    */
+    private final Color colorValue;
+
+    /**
      *
      */
-    private Font font;
+    private final Font font;
+
+    /**
+     *
+     */
+    private final String fontName;
+
+    /**
+     *
+     */
+    private final double fontSize;
+
+    /**
+    *
+    */
+    private final Insets marginInner;
+
+    /**
+     *
+     */
+    private final Insets marginOuter;
 
     /**
      *
@@ -58,6 +94,17 @@ public final class Settings
         super();
 
         this.systemMonitor = new LinuxSystemMonitor();
+
+        this.colorText = Color.LIGHTGRAY;
+        this.colorTitle = Color.web("#CC9900");
+        this.colorValue = Color.web("#009BF9");
+
+        this.fontName = "DejaVu Sans Mono";
+        this.fontSize = 12D;
+        this.font = Font.font(this.fontName, this.fontSize); // new Font(getFontName(), getFontSize());
+
+        this.marginOuter = new Insets(5D, 5D, 5D, 5D);
+        this.marginInner = new Insets(2.5D, 2.5D, 2.5D, 2.5D);
     }
 
     /**
@@ -65,7 +112,23 @@ public final class Settings
      */
     public Color getColorText()
     {
-        return Color.LIGHTGRAY;
+        return this.colorText;
+    }
+
+    /**
+     * @return {@link Color}
+     */
+    public Color getColorTitle()
+    {
+        return this.colorTitle;
+    }
+
+    /**
+     * @return {@link Color}
+     */
+    public Color getColorValue()
+    {
+        return this.colorValue;
     }
 
     /**
@@ -73,12 +136,6 @@ public final class Settings
      */
     public Font getFont()
     {
-        if (this.font == null)
-        {
-            // this.font = new Font(getFontName(), getFontSize());
-            this.font = Font.font(getFontName(), getFontSize());
-        }
-
         return this.font;
     }
 
@@ -87,15 +144,35 @@ public final class Settings
      */
     public String getFontName()
     {
-        return "DejaVu Sans Mono";
+        return this.fontName;
     }
 
     /**
-     * @return int
+     * @return double
      */
-    public int getFontSize()
+    public double getFontSize()
     {
-        return 12;
+        return this.fontSize;
+    }
+
+    /**
+     * Innerer Rand.
+     *
+     * @return {@link Insets}
+     */
+    public Insets getMarginInner()
+    {
+        return this.marginInner;
+    }
+
+    /**
+     * Äusserer Rand.
+     *
+     * @return {@link Insets}
+     */
+    public Insets getMarginOuter()
+    {
+        return this.marginOuter;
     }
 
     /**

@@ -21,14 +21,16 @@ public class HostInfoMonitor extends AbstractMonitor
     public double paintValue(final GraphicsContext gc, final double width)
     {
         gc.setFont(getSettings().getFont());
-        gc.setFill(getSettings().getColorText());
 
-        double y = getSettings().getFontSize() * 1.5D;
+        double fontSize = getSettings().getFontSize();
 
+        double x = getSettings().getMarginInner().getLeft();
+        double y = fontSize * 1.25D;
         String text = String.format("%s - %s on %s", this.hostInfo.getName(), this.hostInfo.getVersion(), this.hostInfo.getArchitecture());
-        gc.fillText(text, 10D, y);
+        gc.setFill(getSettings().getColorText());
+        gc.fillText(text, x, y);
 
-        double height = getSettings().getFontSize() * 2D;
+        double height = y + 5D;
         drawDebugBorder(gc, width, height);
 
         return height;

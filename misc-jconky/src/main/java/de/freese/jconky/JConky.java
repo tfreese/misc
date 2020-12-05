@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jconky.monitor.CpuInfoMonitor;
 import de.freese.jconky.monitor.HostInfoMonitor;
 import de.freese.jconky.monitor.Monitor;
 import javafx.application.Application;
@@ -85,6 +86,8 @@ public final class JConky extends Application
         {
             this.longScheduledMonitors.add(monitor);
         }
+
+        getScheduledExecutorService().execute(monitor::updateValue);
     }
 
     /**
@@ -96,12 +99,54 @@ public final class JConky extends Application
     }
 
     /**
+     * @return {@link ScheduledExecutorService}
+     */
+    private ScheduledExecutorService getScheduledExecutorService()
+    {
+        return this.scheduledExecutorService;
+    }
+
+    /**
      * @see javafx.application.Application#init()
      */
     @Override
     public void init() throws Exception
     {
         getLogger().info("init");
+
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        this.conkyPainter = new JConkyPainter();
+
+        initMonitors();
+        initScheduling();
+    }
+
+    /**
+     *
+     */
+    private void initMonitors()
+    {
+        addMonitor(new HostInfoMonitor(), false);
+        addMonitor(new CpuInfoMonitor(), true);
+    }
+
+    /**
+    *
+    */
+    private void initScheduling()
+    {
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> {
+            getLogger().debug("longScheduled updateValue");
+            this.longScheduledMonitors.forEach(Monitor::updateValue);
+        }, 15, 15, TimeUnit.MINUTES);
+
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> {
+            getLogger().debug("shotScheduled updateValue");
+            this.shotScheduledMonitors.forEach(Monitor::updateValue);
+
+            getLogger().debug("paint");
+            this.conkyPainter.paint();
+        }, 3000, 3000, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -112,10 +157,8 @@ public final class JConky extends Application
     {
         getLogger().info("start");
 
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
-
         Canvas canvas = new Canvas();
-        this.conkyPainter = new JConkyPainter(canvas);
+        this.conkyPainter.setCanvas(canvas);
 
         Group pane = new Group();
         pane.getChildren().add(canvas);
@@ -160,21 +203,6 @@ public final class JConky extends Application
             scene.setFill(Color.BLACK);
         }
 
-        addMonitor(new HostInfoMonitor(), false);
-
-        this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            getLogger().debug("longScheduled updateValue");
-            this.longScheduledMonitors.forEach(Monitor::updateValue);
-        }, 0, 15, TimeUnit.MINUTES);
-
-        this.scheduledExecutorService.scheduleWithFixedDelay(() -> {
-            getLogger().debug("shotScheduled updateValue");
-            this.shotScheduledMonitors.forEach(Monitor::updateValue);
-
-            getLogger().debug("paint");
-            this.conkyPainter.paint();
-        }, 250, 3000, TimeUnit.MILLISECONDS);
-
         primaryStage.setTitle("Graph Monitor");
         primaryStage.setScene(scene);
 
@@ -184,6 +212,7 @@ public final class JConky extends Application
         // primaryStage.setX(screen.getVisualBounds().getMinX() + 1200);
         // primaryStage.setY(10D);
 
+        Platform.runLater(this.conkyPainter::paint);
         primaryStage.show();
     }
 
@@ -195,7 +224,7 @@ public final class JConky extends Application
     {
         getLogger().info("stop");
 
-        this.scheduledExecutorService.shutdown();
+        getScheduledExecutorService().shutdown();
 
         System.exit(0);
     }

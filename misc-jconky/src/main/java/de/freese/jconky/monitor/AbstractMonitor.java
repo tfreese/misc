@@ -27,6 +27,7 @@ public abstract class AbstractMonitor implements Monitor
     {
         if (getSettings().isDebug())
         {
+            gc.setLineDashes();
             gc.setStroke(Color.RED);
             gc.strokeRect(0, 0, width, height);
         }

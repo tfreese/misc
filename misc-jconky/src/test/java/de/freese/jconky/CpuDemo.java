@@ -43,17 +43,18 @@ public class CpuDemo
             // "[ ]" = "\\s+" = Whitespace: einer oder mehrere
             String[] splits = line.split("\\s+");
 
-            CpuTimes cpuTimes = new CpuTimes();
-            cpuTimes.setUser(Long.parseLong(splits[1]));
-            cpuTimes.setNice(Long.parseLong(splits[2]));
-            cpuTimes.setSystem(Long.parseLong(splits[3]));
-            cpuTimes.setIdle(Long.parseLong(splits[4]));
-            cpuTimes.setIoWait(Long.parseLong(splits[5]));
-            cpuTimes.setIrq(Long.parseLong(splits[6]));
-            cpuTimes.setSoftIrq(Long.parseLong(splits[7]));
-            cpuTimes.setSteal(Long.parseLong(splits[8]));
-            cpuTimes.setGuest(Long.parseLong(splits[9]));
-            cpuTimes.setGuestNice(Long.parseLong(splits[10]));
+            long user = Long.parseLong(splits[1]);
+            long nice = Long.parseLong(splits[2]);
+            long system = Long.parseLong(splits[3]);
+            long idle = Long.parseLong(splits[4]);
+            long ioWait = Long.parseLong(splits[5]);
+            long irq = Long.parseLong(splits[6]);
+            long softIrq = Long.parseLong(splits[7]);
+            long steal = Long.parseLong(splits[8]);
+            long guest = Long.parseLong(splits[9]);
+            long guestNice = Long.parseLong(splits[10]);
+
+            CpuTimes cpuTimes = new CpuTimes(user, nice, system, idle, ioWait, irq, softIrq, steal, guest, guestNice);
 
             return cpuTimes;
         }
@@ -107,7 +108,7 @@ public class CpuDemo
         System.out.println("CPU-Load [%] - OperatingSystemMXBean: " + (operatingSystemMXBean.getCpuLoad() * 100D));
 
         CpuTimes cpuTimes = getCpuTimes();
-        System.out.println("CPU-Load [%] - Vorgänger-Rechnung: " + cpuTimes.getCpuUsage(prev));
+        System.out.println("CPU-Load [%] - Vorgänger-Rechnung: " + cpuTimes.getUsage(prev));
         prev = cpuTimes;
 
         System.out.println();
