@@ -42,18 +42,28 @@ public final class Settings
     }
 
     /**
+     *
+     */
+    private final Color colorGradientStart;
+
+    /**
+     *
+     */
+    private final Color colorGradientStop;
+
+    /**
     *
     */
     private final Color colorText;
 
     /**
-    *
-    */
+     *
+     */
     private final Color colorTitle;
 
     /**
-    *
-    */
+     *
+     */
     private final Color colorValue;
 
     /**
@@ -72,8 +82,8 @@ public final class Settings
     private final double fontSize;
 
     /**
-    *
-    */
+     *
+     */
     private final Insets marginInner;
 
     /**
@@ -98,6 +108,8 @@ public final class Settings
         this.colorText = Color.LIGHTGRAY;
         this.colorTitle = Color.web("#CC9900");
         this.colorValue = Color.web("#009BF9");
+        this.colorGradientStart = Color.GREEN;
+        this.colorGradientStop = Color.RED;
 
         this.fontName = "DejaVu Sans Mono";
         this.fontSize = 12D;
@@ -105,6 +117,22 @@ public final class Settings
 
         this.marginOuter = new Insets(5D, 5D, 5D, 5D);
         this.marginInner = new Insets(2.5D, 2.5D, 2.5D, 2.5D);
+    }
+
+    /**
+     * @return {@link Color}
+     */
+    public Color getColorGradientStart()
+    {
+        return this.colorGradientStart;
+    }
+
+    /**
+     * @return {@link Color}
+     */
+    public Color getColorGradientStop()
+    {
+        return this.colorGradientStop;
     }
 
     /**

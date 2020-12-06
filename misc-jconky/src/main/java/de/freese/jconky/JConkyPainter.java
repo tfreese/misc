@@ -43,7 +43,7 @@ public class JConkyPainter
     public void addMonitor(final Monitor monitor)
     {
         this.monitors.add(monitor);
-        this.monitors.add(monitor);
+        // this.monitors.add(monitor);
     }
 
     /**
@@ -55,6 +55,7 @@ public class JConkyPainter
         double height = this.canvas.getHeight();
 
         this.gc.clearRect(0, 0, width, height);
+        this.gc.save();
 
         Insets marginOuter = Settings.getInstance().getMarginOuter();
         this.gc.translate(marginOuter.getLeft(), marginOuter.getTop());
@@ -72,7 +73,8 @@ public class JConkyPainter
         }
 
         // Koordinatenursprung wieder nach oben links verlegen um es komplett malen zu lassen.
-        this.gc.translate(-marginOuter.getLeft(), -totalY - marginOuter.getTop());
+        // this.gc.translate(-marginOuter.getLeft(), -totalY - marginOuter.getTop());
+        this.gc.restore();
     }
 
     /**

@@ -108,7 +108,7 @@ public class CpuDemo
         System.out.println("CPU-Load [%] - OperatingSystemMXBean: " + (operatingSystemMXBean.getCpuLoad() * 100D));
 
         CpuTimes cpuTimes = getCpuTimes();
-        System.out.println("CPU-Load [%] - Vorgänger-Rechnung: " + cpuTimes.getUsage(prev));
+        System.out.println("CPU-Load [%] - Vorgänger-Rechnung: " + (cpuTimes.getCpuUsage(prev) * 100D));
         prev = cpuTimes;
 
         System.out.println();

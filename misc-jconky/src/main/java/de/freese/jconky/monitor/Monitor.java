@@ -11,7 +11,7 @@ public interface Monitor
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
-     * @return double; benutzte Höhe.
+     * @return double Höhe
      */
     public double paintValue(GraphicsContext gc, final double width);
 

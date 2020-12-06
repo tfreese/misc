@@ -129,6 +129,27 @@ public class CpuTimes
     }
 
     /**
+     * Liefert die CPU-Auslastung von 0 - 1.<br>
+     *
+     * @param previous {@link CpuTimes}
+     * @return double
+     */
+    public double getCpuUsage(final CpuTimes previous)
+    {
+        double totalDiff = (double) getTotal() - previous.getTotal();
+        double idleDiff = (double) getTotalIdle() - previous.getTotalIdle();
+
+        double percent = 1D - (idleDiff / totalDiff);
+
+        if (Double.isNaN(percent))
+        {
+            return 0D;
+        }
+
+        return percent;
+    }
+
+    /**
      * @return long
      */
     public long getGuest()
@@ -222,27 +243,6 @@ public class CpuTimes
     public long getTotalNonIdle()
     {
         return getUser() + getNice() + getSystem() + getIrq() + getSoftIrq() + getSteal();
-    }
-
-    /**
-     * Liefert die CPU-Auslastung in %.
-     *
-     * @param previous {@link CpuTimes}
-     * @return double
-     */
-    public double getUsage(final CpuTimes previous)
-    {
-        double totalDiff = (double) getTotal() - previous.getTotal();
-        double idleDiff = (double) getTotalIdle() - previous.getTotalIdle();
-
-        double percent = 1D - (idleDiff / totalDiff);
-
-        if (Double.isNaN(percent))
-        {
-            return 0D;
-        }
-
-        return percent * 100D;
     }
 
     /**
