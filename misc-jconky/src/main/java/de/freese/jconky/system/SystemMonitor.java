@@ -4,6 +4,7 @@ package de.freese.jconky.system;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.ProcessInfos;
 
 /**
  * @author Thomas Freese
@@ -24,4 +25,14 @@ public interface SystemMonitor
      * @return {@link HostInfo}
      */
     public HostInfo getHostInfo();
+
+    /**
+     * @return {@link ProcessInfos}
+     */
+    public ProcessInfos getProcessInfos();
+
+    /**
+     * @return double
+     */
+    public double getUptimeInSeconds();
 }

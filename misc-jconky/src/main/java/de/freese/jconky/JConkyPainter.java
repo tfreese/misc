@@ -61,7 +61,7 @@ public class JConkyPainter
         this.gc.translate(marginOuter.getLeft(), marginOuter.getTop());
 
         double monitorWidth = width - (marginOuter.getRight() * 2D);
-        double totalY = 0D;
+        // double totalY = 0D;
 
         for (Monitor monitor : this.monitors)
         {
@@ -69,7 +69,7 @@ public class JConkyPainter
 
             this.gc.translate(0D, monitorHeight);
 
-            totalY += monitorHeight;
+            // totalY += monitorHeight;
         }
 
         // Koordinatenursprung wieder nach oben links verlegen um es komplett malen zu lassen.
@@ -84,5 +84,8 @@ public class JConkyPainter
     {
         this.canvas = Objects.requireNonNull(canvas, "canvas required");
         this.gc = Objects.requireNonNull(canvas.getGraphicsContext2D(), "graphicsContext required");
+
+        // Font-Antalising, Gray = Default
+        // this.gc.setFontSmoothingType(FontSmoothingType.LCD);
     }
 }

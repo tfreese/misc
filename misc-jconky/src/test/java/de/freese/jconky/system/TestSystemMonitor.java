@@ -12,6 +12,8 @@ import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.ProcessInfo;
+import de.freese.jconky.model.ProcessInfos;
 
 /**
  * @author Thomas Freese
@@ -77,5 +79,20 @@ class TestSystemMonitor
         assertNotNull(hostInfo.getName());
         assertNotNull(hostInfo.getVersion());
         assertNotNull(hostInfo.getArchitecture());
+    }
+
+    /**
+    *
+    */
+    @Test
+    void testProcessInfos()
+    {
+        ProcessInfos processInfos = new LinuxSystemMonitor().getProcessInfos();
+        assertNotNull(processInfos);
+
+        for (ProcessInfo processInfo : processInfos.getSortedByName(Integer.MAX_VALUE))
+        {
+            System.out.println(processInfo);
+        }
     }
 }

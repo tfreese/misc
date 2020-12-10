@@ -1,16 +1,23 @@
 // Created: 01.12.2020
 package de.freese.jconky.system;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import de.freese.jconky.model.CpuInfo;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.ProcessInfo;
+import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.util.JConkyUtils;
 
 /**
  * @author Thomas Freese
@@ -18,8 +25,83 @@ import de.freese.jconky.model.HostInfo;
 public class LinuxSystemMonitor extends AbstractSystemMonitor
 {
     /**
-    *
-    */
+     * /proc/stat: cpu\\s+(.*)
+     */
+    static final Pattern CPU_JIFFIES_PATTERN = Pattern.compile("cpu\\s+(.*)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/cpuinfo: processor\\s+:\\s+(\\d+)
+     */
+    static final Pattern CPUINFO_NUM_CPU_PATTERN = Pattern.compile("processor\\s+:\\s+(\\d+)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     *
+     */
+    private static final Pattern PROC_DIR_PATTERN = Pattern.compile("([\\d]*)");
+
+    /**
+     *
+     */
+    private static final FilenameFilter PROCESS_DIRECTORY_FILTER = (dir, name) -> {
+        File fileToTest = new File(dir, name);
+
+        return fileToTest.isDirectory() && PROC_DIR_PATTERN.matcher(name).matches();
+    };
+
+    /**
+     * sensors: ore\\s{1}\\d+:.*
+     */
+    private static final Pattern SENSORS_CORE_PATTERN = Pattern.compile("Core\\s{1}\\d+:.*", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/stat: cpu\\d+
+     */
+    protected static final Pattern STAT_NUM_CPU_PATTERN = Pattern.compile("cpu\\d+", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/%s/status: Name:\\s+(\\w+)
+     */
+    private static final Pattern STATUS_NAME_MATCHER = Pattern.compile("Name:\\s+(\\w+)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/%s/status: Uid:\\s+(\\d+)\\s.*
+     */
+    private static final Pattern STATUS_UID_MATCHER = Pattern.compile("Uid:\\s+(\\d+)\\s.*", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/%s/status: VmRSS:\\s+(\\d+) kB
+     */
+    private static final Pattern STATUS_VM_RSS_MATCHER = Pattern.compile("VmRSS:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * /proc/%s/status: VmSize:\\s+(\\d+) kB
+     */
+    private static final Pattern STATUS_VM_SIZE_MATCHER = Pattern.compile("VmSize:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    // private static final Pattern TOTAL_MEMORY_PATTERN =
+    // Pattern.compile("MemTotal:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern FREE_MEMORY_PATTERN =
+    // Pattern.compile("MemFree:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern BUFFERS_PATTERN =
+    // Pattern.compile("Buffers:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern CACHED_PATTERN =
+    // Pattern.compile("Cached:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern TOTAL_SWAP_PATTERN =
+    // Pattern.compile("SwapTotal:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern FREE_SWAP_PATTERN =
+    // Pattern.compile("SwapFree:\\s+(\\d+) kB", Pattern.MULTILINE);
+    // private static final Pattern CPU_FREQ_PATTERN =
+    // Pattern.compile("model name[^@]*@\\s+([0-9.A-Za-z]*)", Pattern.MULTILINE);
+    // private static final Pattern UPTIME_PATTERN =
+    // Pattern.compile("([\\d]*).*");
+    // private static final Pattern PID_PATTERN =
+    // Pattern.compile("([\\d]*).*");
+    // private static final Pattern DISTRIBUTION =
+    // Pattern.compile("DISTRIB_DESCRIPTION=\"(.*)\"", Pattern.MULTILINE);
+
+    /**
+     *
+     */
     private final ProcessBuilder processBuilderSensors;
 
     /**
@@ -146,8 +228,6 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     public CpuLoadAvg getCpuLoadAvg()
     {
         List<String> lines = readContent("/proc/loadavg");
-
-        // Nur eine Zeile erwartet.
         String line = lines.get(0);
 
         // ArchLinux
@@ -201,8 +281,6 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     public HostInfo getHostInfo()
     {
         List<String> lines = readContent(this.processBuilderUname);
-
-        // Nur eine Zeile erwartet.
         String line = lines.get(0);
 
         // ArchLinux
@@ -216,6 +294,126 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         getLogger().debug(hostInfo.toString());
 
         return hostInfo;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getProcessInfos()
+     */
+    @Override
+    public ProcessInfos getProcessInfos()
+    {
+        double uptimeInSeconds = getUptimeInSeconds();
+
+        String[] pids = new File("/proc").list(PROCESS_DIRECTORY_FILTER);
+
+        List<ProcessInfo> infos = new ArrayList<>(pids.length);
+
+        for (String pid : pids)
+        {
+            // /proc/4543/stat
+            // 4543 (cinnamon) S 4231 3355 3355 0 -1 4194304 159763 53230 432 4977 11873 3096 1461 181 20 0 12 0 3831 4350136320 79932 18446744073709551615
+            // 94314044076032 94314044078533 140729316610576 0 0 0 0 16781312 82952 0 0 0 17 0 0 0 833 0 0 94314044087280 94314044088448 94314055774208
+            // 140729316617080 140729316617099 140729316617099 140729316618214 0
+            String file = String.format("/proc/%s/stat", pid);
+            List<String> lines = readContent(file);
+            String line = lines.get(0);
+
+            String[] splitsStat = SPACE_PATTERN.split(line);
+
+            // String pid = splits[0];
+            int parentPid = Integer.parseInt(splitsStat[0]); // The PID of the parent of this process.
+            int utimeJiffie = Integer.parseInt(splitsStat[13]); // CPU time spent in user code, measured in clock ticks.
+            int stimeJiffie = Integer.parseInt(splitsStat[14]); // CPU time spent in kernel code, measured in clock ticks.
+            int cutimeJiffie = Integer.parseInt(splitsStat[15]); // Waited-for children's CPU time spent in user code in clock ticks.
+            int cstimeJiffie = Integer.parseInt(splitsStat[13]); // Waited-for children's CPU time spent in kernel code in clock ticks.
+            int starttime = Integer.parseInt(splitsStat[21]); // Waited-for children's CPU time spent in kernel code in clock ticks.
+
+            double totalTimeJiffie = utimeJiffie + stimeJiffie;
+
+            // Inklusive Child-Processes.
+            totalTimeJiffie += cutimeJiffie + cstimeJiffie;
+
+            double seconds = uptimeInSeconds - JConkyUtils.jiffieToSeconds(starttime);
+            double cpuUsage = JConkyUtils.jiffieToSeconds(totalTimeJiffie) / seconds;
+
+            file = String.format("/proc/%s/cmdline", pid);
+            lines = readContent(file);
+            String command = null;
+
+            if (!lines.isEmpty())
+            {
+                command = lines.get(0);
+            }
+            else
+            {
+                command = splitsStat[1];
+            }
+
+            command = splitsStat[1].replace("(", "").replace(")", "");
+
+            file = String.format("/proc/%s/status", pid);
+            String status = readContent(file).stream().collect(Collectors.joining("\n"));
+
+            Matcher matcher = STATUS_NAME_MATCHER.matcher(status);
+            String name = null;
+
+            if (matcher.find())
+            {
+                name = matcher.group(1);
+            }
+            else
+            {
+                name = command;
+            }
+
+            matcher = STATUS_VM_RSS_MATCHER.matcher(status);
+            long residentBytes = 0L;
+
+            if (matcher.find())
+            {
+                residentBytes = Long.parseLong(matcher.group(1));
+            }
+
+            matcher = STATUS_VM_SIZE_MATCHER.matcher(status);
+            long totalBytes = 0L;
+
+            if (matcher.find())
+            {
+                totalBytes = Long.parseLong(matcher.group(1));
+            }
+
+            matcher = STATUS_UID_MATCHER.matcher(status);
+            matcher.find();
+            String uid = matcher.group(1);
+            String owner = uid;
+
+            ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), parentPid, cpuUsage, command, name, residentBytes, totalBytes, owner);
+            infos.add(processInfo);
+
+            // // UnixPasswdParser passwdParser = new UnixPasswdParser();
+            //
+            // final LinuxProcessInfoParser parser = new LinuxProcessInfoParser(stat, status, cmdline, passwdParser.parse(), userHz);
+            // processTable.add(parser.parse());
+        }
+
+        return new ProcessInfos(infos);
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getUptimeInSeconds()
+     */
+    @Override
+    public double getUptimeInSeconds()
+    {
+        List<String> lines = readContent("/proc/uptime");
+        String line = lines.get(0);
+
+        // ArchLinux
+        // 1147.04 8069.99
+
+        String[] splits = SPACE_PATTERN.split(line);
+
+        return Double.parseDouble(splits[0]);
     }
 
     /**

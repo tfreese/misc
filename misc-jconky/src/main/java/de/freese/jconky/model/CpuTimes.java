@@ -9,7 +9,7 @@ package de.freese.jconky.model;
  * [...]<br>
  * user nice system idle iowait irq softirq steal guest guest_nice<br>
  * <br>
- * Diese Zahlen sind soggenannte Jiffies.<br>
+ * Diese Zahlen sind sogenannte Jiffies (CPU Clock Ticks), CPU-Zeit-Einheit.<br>
  * Ein Jiffie ist der Anteil eines CPU-Zyklus, der für die Ausführung eines Befehls benötigt wurde.<br>
  * Oder auch benannt als: Periodendauer des Timer-Interrupts<br>
  *
@@ -17,28 +17,6 @@ package de.freese.jconky.model;
  */
 public class CpuTimes
 {
-    /**
-     * @param jiffie long
-     * @return long
-     */
-    public static long jiffieToMillies(final long jiffie)
-    {
-        return jiffieToMillies(jiffie, 100);
-    }
-
-    /**
-     * @param jiffie long
-     * @param userHz int Betriebssystem spezifischer Faktor, bei Linux in der Regel 100.<br>
-     *            ArchLinux: getconf CLK_TCK;<br>
-     * @return long
-     */
-    public static long jiffieToMillies(final long jiffie, final int userHz)
-    {
-        int multiplier = 1000 / userHz;
-
-        return jiffie * multiplier;
-    }
-
     /**
      *
      */

@@ -157,6 +157,8 @@ public final class JConky extends Application
     {
         getLogger().info("start");
 
+        System.setProperty("prism.lcdtext", "true");
+
         Canvas canvas = new Canvas();
         this.conkyPainter.setCanvas(canvas);
 
