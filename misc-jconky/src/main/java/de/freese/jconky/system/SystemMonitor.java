@@ -32,6 +32,11 @@ public interface SystemMonitor
     public ProcessInfos getProcessInfos();
 
     /**
+     * @return long
+     */
+    public long getTotalSystemMemory();
+
+    /**
      * @return double
      */
     public double getUptimeInSeconds();

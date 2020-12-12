@@ -44,13 +44,19 @@ public class ProcessInfo
     /**
      *
      */
-    private final long totalBytes;;
+    private final String state;
+
+    /**
+     *
+     */
+    private final long totalBytes;
 
     /**
      * Erstellt ein neues {@link ProcessInfo} Object.
      *
      * @param pid int
      * @param parentPid int
+     * @param state String
      * @param cpuUsage double
      * @param command String
      * @param name String
@@ -58,13 +64,14 @@ public class ProcessInfo
      * @param totalBytes long
      * @param owner String
      */
-    public ProcessInfo(final int pid, final int parentPid, final double cpuUsage, final String command, final String name, final long residentBytes,
-            final long totalBytes, final String owner)
+    public ProcessInfo(final int pid, final int parentPid, final String state, final double cpuUsage, final String command, final String name,
+            final long residentBytes, final long totalBytes, final String owner)
     {
         super();
 
         this.pid = pid;
         this.parentPid = parentPid;
+        this.state = state;
         this.command = command;
         this.name = name;
         this.owner = owner;
@@ -132,6 +139,20 @@ public class ProcessInfo
     }
 
     /**
+     * R Running<br>
+     * S Sleeping in an interruptible wait<br>
+     * D Waiting in uninterruptible disk sleep<br>
+     * <br>
+     * See: https://man7.org/linux/man-pages/man5/proc.5.html<br>
+     *
+     * @return String
+     */
+    public String getState()
+    {
+        return this.state;
+    }
+
+    /**
      * @return long
      */
     public long getTotalBytes()
@@ -149,12 +170,12 @@ public class ProcessInfo
         builder.append("[");
         builder.append(" pid=").append(this.pid);
         builder.append(", name=").append(this.name);
-        builder.append(", command=").append(this.command);
         builder.append(", owner=").append(this.owner);
         builder.append(", cpuUsage=").append(this.cpuUsage);
         builder.append(", residentBytes=").append(this.residentBytes);
         builder.append(", totalBytes=").append(this.totalBytes);
         builder.append(", parentPid=").append(this.parentPid);
+        builder.append(", command=").append(this.command);
         builder.append("]");
 
         return builder.toString();

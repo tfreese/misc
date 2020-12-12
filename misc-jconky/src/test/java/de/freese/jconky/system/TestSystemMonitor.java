@@ -92,6 +92,11 @@ class TestSystemMonitor
 
         for (ProcessInfo processInfo : processInfos.getSortedByName(Integer.MAX_VALUE))
         {
+            if ("clementine".equals(processInfo.getName()))
+            {
+                System.out.print("");
+            }
+
             System.out.println(processInfo);
         }
     }

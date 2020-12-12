@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import de.freese.jconky.monitor.CpuInfoMonitor;
 import de.freese.jconky.monitor.HostInfoMonitor;
 import de.freese.jconky.monitor.Monitor;
+import de.freese.jconky.monitor.ProcessMonitor;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -128,6 +129,7 @@ public final class JConky extends Application
     {
         addMonitor(new HostInfoMonitor(), false);
         addMonitor(new CpuInfoMonitor(), true);
+        addMonitor(new ProcessMonitor(), true);
     }
 
     /**
@@ -169,7 +171,7 @@ public final class JConky extends Application
         // pane.add(canvas, 0, 0);
 
         // Scene
-        Scene scene = new Scene(pane, 335, 1060, true, SceneAntialiasing.BALANCED);
+        Scene scene = new Scene(pane, 335, 700, true, SceneAntialiasing.BALANCED);
 
         // Bind canvas size to scene size.
         canvas.widthProperty().bind(scene.widthProperty());

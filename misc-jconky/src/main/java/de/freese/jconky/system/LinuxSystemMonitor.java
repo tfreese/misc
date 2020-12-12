@@ -322,13 +322,14 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
 
             // String pid = splits[0];
             int parentPid = Integer.parseInt(splitsStat[0]); // The PID of the parent of this process.
+            String state = splitsStat[2];
             int utimeJiffie = Integer.parseInt(splitsStat[13]); // CPU time spent in user code, measured in clock ticks.
             int stimeJiffie = Integer.parseInt(splitsStat[14]); // CPU time spent in kernel code, measured in clock ticks.
             int cutimeJiffie = Integer.parseInt(splitsStat[15]); // Waited-for children's CPU time spent in user code in clock ticks.
             int cstimeJiffie = Integer.parseInt(splitsStat[13]); // Waited-for children's CPU time spent in kernel code in clock ticks.
             int starttime = Integer.parseInt(splitsStat[21]); // Waited-for children's CPU time spent in kernel code in clock ticks.
 
-            double totalTimeJiffie = utimeJiffie + stimeJiffie;
+            double totalTimeJiffie = (double) utimeJiffie + stimeJiffie;
 
             // Inklusive Child-Processes.
             totalTimeJiffie += cutimeJiffie + cstimeJiffie;
@@ -349,7 +350,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
                 command = splitsStat[1];
             }
 
-            command = splitsStat[1].replace("(", "").replace(")", "");
+            command = command.replace("(", "").replace(")", "").replace("\\r", "").replace("\\n", "");
 
             file = String.format("/proc/%s/status", pid);
             String status = readContent(file).stream().collect(Collectors.joining("\n"));
@@ -387,16 +388,18 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             String uid = matcher.group(1);
             String owner = uid;
 
-            ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), parentPid, cpuUsage, command, name, residentBytes, totalBytes, owner);
+            ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), parentPid, state, cpuUsage, command, name, residentBytes, totalBytes, owner);
             infos.add(processInfo);
 
-            // // UnixPasswdParser passwdParser = new UnixPasswdParser();
-            //
-            // final LinuxProcessInfoParser parser = new LinuxProcessInfoParser(stat, status, cmdline, passwdParser.parse(), userHz);
-            // processTable.add(parser.parse());
+            // TODO
+            // /etc/passwd auslesen für UIDs.
         }
 
-        return new ProcessInfos(infos);
+        ProcessInfos processInfos = new ProcessInfos(infos, uptimeInSeconds);
+
+        getLogger().debug(processInfos.toString());
+
+        return processInfos;
     }
 
     /**

@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -21,6 +22,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractSystemMonitor implements SystemMonitor
 {
+    /**
+    *
+    */
+    private static final com.sun.management.OperatingSystemMXBean OPERATING_SYSTEM_MX_BEAN =
+            (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
     /**
      * "[ ]" = "\\s+" = Whitespace: einer oder mehrere
      */
@@ -45,6 +52,15 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     protected Logger getLogger()
     {
         return this.logger;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getTotalSystemMemory()
+     */
+    @Override
+    public long getTotalSystemMemory()
+    {
+        return OPERATING_SYSTEM_MX_BEAN.getTotalMemorySize();
     }
 
     /**
