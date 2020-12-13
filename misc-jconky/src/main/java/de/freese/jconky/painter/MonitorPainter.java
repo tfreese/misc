@@ -1,12 +1,12 @@
-// Created: 01.12.2020
-package de.freese.jconky.monitor;
+// Created: 13.12.2020
+package de.freese.jconky.painter;
 
 import javafx.scene.canvas.GraphicsContext;
 
 /**
  * @author Thomas Freese
  */
-public interface Monitor
+public interface MonitorPainter
 {
     /**
      * @param gc {@link GraphicsContext}
@@ -14,9 +14,4 @@ public interface Monitor
      * @return double Höhe
      */
     public double paintValue(GraphicsContext gc, final double width);
-
-    /**
-     *
-     */
-    public void updateValue();
 }

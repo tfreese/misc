@@ -1,5 +1,5 @@
 // Created: 03.12.2020
-package de.freese.jconky.monitor;
+package de.freese.jconky.painter;
 
 import de.freese.jconky.model.HostInfo;
 import javafx.scene.canvas.GraphicsContext;
@@ -7,26 +7,23 @@ import javafx.scene.canvas.GraphicsContext;
 /**
  * @author Thomas Freese
  */
-public class HostInfoMonitor extends AbstractMonitor
+public class HostMonitorPainter extends AbstractMonitorPainter
 {
     /**
-     *
-     */
-    private HostInfo hostInfo = new HostInfo();
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#paintValue(javafx.scene.canvas.GraphicsContext, double)
+     * @see de.freese.jconky.painter.MonitorPainter#paintValue(javafx.scene.canvas.GraphicsContext, double)
      */
     @Override
     public double paintValue(final GraphicsContext gc, final double width)
     {
+        HostInfo hostInfo = getContext().getHostInfo();
+
         gc.setFont(getSettings().getFont());
 
         double fontSize = getSettings().getFontSize();
 
         double x = getSettings().getMarginInner().getLeft();
         double y = fontSize * 1.25D;
-        String text = String.format("%s - %s on %s", this.hostInfo.getName(), this.hostInfo.getVersion(), this.hostInfo.getArchitecture());
+        String text = String.format("%s - %s on %s", hostInfo.getName(), hostInfo.getVersion(), hostInfo.getArchitecture());
         gc.setFill(getSettings().getColorText());
         gc.fillText(text, x, y);
 
@@ -34,16 +31,5 @@ public class HostInfoMonitor extends AbstractMonitor
         drawDebugBorder(gc, width, height);
 
         return height;
-    }
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#updateValue()
-     */
-    @Override
-    public void updateValue()
-    {
-        HostInfo newInfo = getSystemMonitor().getHostInfo();
-
-        this.hostInfo = newInfo;
     }
 }

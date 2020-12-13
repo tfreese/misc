@@ -27,9 +27,16 @@ public interface SystemMonitor
     public HostInfo getHostInfo();
 
     /**
+     * @return int
+     */
+    public int getNumberOfCores();
+
+    /**
+     * @param uptimeInSeconds double
+     * @param totalSystemMemory long
      * @return {@link ProcessInfos}
      */
-    public ProcessInfos getProcessInfos();
+    public ProcessInfos getProcessInfos(double uptimeInSeconds, long totalSystemMemory);
 
     /**
      * @return long

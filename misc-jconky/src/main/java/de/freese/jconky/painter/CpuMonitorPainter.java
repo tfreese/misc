@@ -1,5 +1,5 @@
 // Created: 05.12.2020
-package de.freese.jconky.monitor;
+package de.freese.jconky.painter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.Map;
 import de.freese.jconky.model.CpuInfo;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
-import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.Values;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.CycleMethod;
@@ -17,7 +16,7 @@ import javafx.scene.paint.Stop;
 /**
  * @author Thomas Freese
  */
-public class CpuInfoMonitor extends AbstractMonitor
+public class CpuMonitorPainter extends AbstractMonitorPainter
 {
     /**
      *
@@ -25,29 +24,14 @@ public class CpuInfoMonitor extends AbstractMonitor
     private Map<Integer, Values<Double>> coreUsageMap = new HashMap<>();
 
     /**
-    *
-    */
-    private CpuInfos cpuInfosCurrent = new CpuInfos();
-
-    /**
-    *
-    */
-    private CpuInfos cpuInfosPrevious = new CpuInfos();
-
-    /**
      *
      */
     private final Stop[] gradientStops;
 
     /**
-     *
+     * Erstellt ein neues {@link CpuMonitorPainter} Object.
      */
-    private CpuLoadAvg loadAvg = new CpuLoadAvg();
-
-    /**
-     * Erstellt ein neues {@link CpuInfoMonitor} Object.
-     */
-    public CpuInfoMonitor()
+    public CpuMonitorPainter()
     {
         super();
 
@@ -60,10 +44,10 @@ public class CpuInfoMonitor extends AbstractMonitor
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
-     * @param core int
+     * @param cpuInfo {@link CpuInfo}
      * @return double Höhe
      */
-    private double paintCore(final GraphicsContext gc, final double width, final int core)
+    private double paintCore(final GraphicsContext gc, final double width, final CpuInfo cpuInfo)
     {
         double fontSize = getSettings().getFontSize();
 
@@ -72,12 +56,10 @@ public class CpuInfoMonitor extends AbstractMonitor
 
         gc.setFill(getSettings().getColorText());
 
-        CpuInfo cpuInfoCurrent = this.cpuInfosCurrent.get(core);
-        CpuInfo cpuInfoPrevious = this.cpuInfosPrevious.get(core);
-
-        double usage = cpuInfoCurrent.getCpuTimes().getCpuUsage(cpuInfoPrevious.getCpuTimes());
-        int frequency = cpuInfoCurrent.getFrequency() / 1000;
-        double temperature = cpuInfoCurrent.getTemperature();
+        int core = cpuInfo.getCore();
+        double usage = cpuInfo.getUsage();
+        int frequency = cpuInfo.getFrequency() / 1000;
+        double temperature = cpuInfo.getTemperature();
 
         String text = null;
 
@@ -115,23 +97,23 @@ public class CpuInfoMonitor extends AbstractMonitor
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
+     * @param cpuInfos {@link CpuInfos}
      * @return double Höhe
      */
-    private double paintCores(final GraphicsContext gc, final double width)
+    private double paintCores(final GraphicsContext gc, final double width, final CpuInfos cpuInfos)
     {
         double fontSize = getSettings().getFontSize();
 
         double x = getSettings().getMarginInner().getLeft();
         double y = fontSize;
 
-        int numCpus = this.cpuInfosCurrent.getNumCpus();
         double coreWidth = width - getSettings().getMarginInner().getLeft() - getSettings().getMarginInner().getRight();
 
-        for (int core = 0; core < numCpus; core++)
+        for (int i = 0; i < getContext().getNumberOfCores(); i++)
         {
             gc.save();
             gc.translate(x, y);
-            y += paintCore(gc, coreWidth, core);
+            y += paintCore(gc, coreWidth, cpuInfos.get(i));
             gc.restore();
         }
 
@@ -141,10 +123,13 @@ public class CpuInfoMonitor extends AbstractMonitor
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
+     * @param cpuInfos {@link CpuInfos}
      * @return double Höhe
      */
-    private double paintTotal(final GraphicsContext gc, final double width)
+    private double paintTotal(final GraphicsContext gc, final double width, final CpuInfos cpuInfos)
     {
+        CpuLoadAvg cpuLoadAvg = getContext().getCpuLoadAvg();
+
         double fontSize = getSettings().getFontSize();
 
         gc.setFont(getSettings().getFont());
@@ -171,7 +156,7 @@ public class CpuInfoMonitor extends AbstractMonitor
         gc.fillText("Loads:", x, y);
 
         x += fontSize * 4D;
-        String loads = String.format("%.2f %.2f %.2f", this.loadAvg.getOneMinute(), this.loadAvg.getFiveMinutes(), this.loadAvg.getFifteenMinutes());
+        String loads = String.format("%.2f %.2f %.2f", cpuLoadAvg.getOneMinute(), cpuLoadAvg.getFiveMinutes(), cpuLoadAvg.getFifteenMinutes());
         gc.setFill(getSettings().getColorValue());
         gc.fillText(loads, x, y);
 
@@ -181,7 +166,7 @@ public class CpuInfoMonitor extends AbstractMonitor
 
         gc.save();
         gc.translate(x, y);
-        y += paintTotalBar(gc, width - x - getSettings().getMarginInner().getRight());
+        y += paintTotalBar(gc, width - x - getSettings().getMarginInner().getRight(), cpuInfos);
         gc.restore();
 
         // CpuUsage Graph
@@ -199,9 +184,10 @@ public class CpuInfoMonitor extends AbstractMonitor
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
+     * @param cpuInfos {@link CpuInfos}
      * @return double Höhe
      */
-    private double paintTotalBar(final GraphicsContext gc, final double width)
+    private double paintTotalBar(final GraphicsContext gc, final double width, final CpuInfos cpuInfos)
     {
         double height = 15D;
         double fontSize = getSettings().getFontSize();
@@ -209,15 +195,14 @@ public class CpuInfoMonitor extends AbstractMonitor
         double x = 0D;
         double y = 0D;
 
-        CpuTimes cpuTimesCurrent = this.cpuInfosCurrent.getTotal().getCpuTimes();
-        CpuTimes cpuTimesPrevious = this.cpuInfosPrevious.getTotal().getCpuTimes();
-        double usage = cpuTimesCurrent.getCpuUsage(cpuTimesPrevious);
+        double usage = cpuInfos.getTotal().getUsage();
+        double temperature = cpuInfos.getTotal().getTemperature();
 
-        String totalUsage = String.format("%3.0f%%", usage * 100D);
+        String text = String.format("%3.0f%% %2.0f°C", usage * 100D, temperature);
         gc.setFill(getSettings().getColorValue());
-        gc.fillText(totalUsage, x, y);
+        gc.fillText(text, x, y);
 
-        x += 35D;
+        x += 70D;
         y += 3D;
         double barWidth = width - x;
 
@@ -265,49 +250,30 @@ public class CpuInfoMonitor extends AbstractMonitor
     }
 
     /**
-     * @see de.freese.jconky.monitor.Monitor#paintValue(javafx.scene.canvas.GraphicsContext, double)
+     * @see de.freese.jconky.painter.MonitorPainter#paintValue(javafx.scene.canvas.GraphicsContext, double)
      */
     @Override
     public double paintValue(final GraphicsContext gc, final double width)
     {
-        double y = paintTotal(gc, width);
+        CpuInfos cpuInfos = getContext().getCpuInfos();
+
+        this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>()).addValue(cpuInfos.getTotal().getUsage());
+
+        for (int i = 0; i < getContext().getNumberOfCores(); i++)
+        {
+            this.coreUsageMap.computeIfAbsent(i, key -> new Values<>()).addValue(cpuInfos.get(i).getUsage());
+        }
+
+        double y = paintTotal(gc, width, cpuInfos);
 
         gc.save();
         gc.translate(0, y);
-        y += paintCores(gc, width);
+        y += paintCores(gc, width, cpuInfos);
         gc.restore();
 
         double height = y - 10D;
         drawDebugBorder(gc, width, height);
 
         return height;
-    }
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#updateValue()
-     */
-    @Override
-    public void updateValue()
-    {
-        this.loadAvg = getSystemMonitor().getCpuLoadAvg();
-
-        this.cpuInfosPrevious = this.cpuInfosCurrent;
-        this.cpuInfosCurrent = getSystemMonitor().getCpuInfos();
-
-        // CpuUsages berechnen.
-        CpuTimes cpuTimesCurrent = this.cpuInfosCurrent.getTotal().getCpuTimes();
-        CpuTimes cpuTimesPrevious = this.cpuInfosPrevious.getTotal().getCpuTimes();
-        double usage = cpuTimesCurrent.getCpuUsage(cpuTimesPrevious);
-
-        this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>()).addValue(usage);
-
-        for (int i = 0; i < this.cpuInfosCurrent.getNumCpus(); i++)
-        {
-            cpuTimesCurrent = this.cpuInfosCurrent.get(i).getCpuTimes();
-            cpuTimesPrevious = this.cpuInfosPrevious.get(i).getCpuTimes();
-            usage = cpuTimesCurrent.getCpuUsage(cpuTimesPrevious);
-
-            this.coreUsageMap.computeIfAbsent(i, key -> new Values<>()).addValue(usage);
-        }
     }
 }

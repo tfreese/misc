@@ -27,6 +27,11 @@ public class CpuInfo
     private final double temperature;
 
     /**
+    *
+    */
+    private double usage;
+
+    /**
      * Erstellt ein neues {@link CpuInfo} Object.
      */
     public CpuInfo()
@@ -85,6 +90,26 @@ public class CpuInfo
     }
 
     /**
+     * Liefert die CPU-Auslastung von 0 - 1.<br>
+     *
+     * @return double
+     */
+    public double getUsage()
+    {
+        return this.usage;
+    }
+
+    /**
+     * Setzt die CPU-Auslastung von 0 - 1.<br>
+     *
+     * @param usage double
+     */
+    public void setUsage(final double usage)
+    {
+        this.usage = usage;
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     @Override
@@ -93,6 +118,7 @@ public class CpuInfo
         StringBuilder builder = new StringBuilder(getClass().getSimpleName());
         builder.append("[");
         builder.append("core=").append(this.core);
+        builder.append(", usage=").append(this.usage);
         builder.append(", temperature=").append(this.temperature);
         builder.append(", frequency=").append(this.frequency);
         builder.append("]");

@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import de.freese.jconky.model.CpuInfo;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
@@ -22,12 +24,23 @@ import de.freese.jconky.model.ProcessInfos;
 class TestSystemMonitor
 {
     /**
+     * @return {@link SystemMonitor}
+     */
+    private SystemMonitor createSystemMonitor()
+    {
+        return new LinuxSystemMonitor();
+    }
+
+    /**
     *
     */
     @Test
+    @EnabledOnOs(OS.LINUX)
     void testCpuInfos()
     {
-        CpuInfos cpuInfos = new LinuxSystemMonitor().getCpuInfos();
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        CpuInfos cpuInfos = systemMonitor.getCpuInfos();
         assertNotNull(cpuInfos);
 
         CpuInfo cpuInfo = cpuInfos.get(-1);
@@ -57,9 +70,12 @@ class TestSystemMonitor
     *
     */
     @Test
+    @EnabledOnOs(OS.LINUX)
     void testCpuLoadAvg()
     {
-        CpuLoadAvg loadAvg = new LinuxSystemMonitor().getCpuLoadAvg();
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        CpuLoadAvg loadAvg = systemMonitor.getCpuLoadAvg();
 
         assertNotNull(loadAvg);
         assertTrue(loadAvg.getOneMinute() > 0D);
@@ -71,9 +87,12 @@ class TestSystemMonitor
      *
      */
     @Test
+    @EnabledOnOs(OS.LINUX)
     void testHostInfo()
     {
-        HostInfo hostInfo = new LinuxSystemMonitor().getHostInfo();
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        HostInfo hostInfo = systemMonitor.getHostInfo();
 
         assertNotNull(hostInfo);
         assertNotNull(hostInfo.getName());
@@ -85,9 +104,15 @@ class TestSystemMonitor
     *
     */
     @Test
+    @EnabledOnOs(OS.LINUX)
     void testProcessInfos()
     {
-        ProcessInfos processInfos = new LinuxSystemMonitor().getProcessInfos();
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        double uptimeInSeconds = systemMonitor.getUptimeInSeconds();
+        long totalSystemMemory = systemMonitor.getTotalSystemMemory();
+
+        ProcessInfos processInfos = systemMonitor.getProcessInfos(uptimeInSeconds, totalSystemMemory);
         assertNotNull(processInfos);
 
         for (ProcessInfo processInfo : processInfos.getSortedByName(Integer.MAX_VALUE))

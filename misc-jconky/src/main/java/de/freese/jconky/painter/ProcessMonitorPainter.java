@@ -1,5 +1,5 @@
 // Created: 10.12.2020
-package de.freese.jconky.monitor;
+package de.freese.jconky.painter;
 
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
@@ -8,28 +8,15 @@ import javafx.scene.canvas.GraphicsContext;
 /**
  * @author Thomas Freese
  */
-public class ProcessMonitor extends AbstractMonitor
+public class ProcessMonitorPainter extends AbstractMonitorPainter
 {
     /**
-     *
-     */
-    private ProcessInfos processInfos = new ProcessInfos();
-
-    /**
-     * Erstellt ein neues {@link ProcessMonitor} Object.
-     */
-    public ProcessMonitor()
-    {
-        super();
-    }
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#paintValue(javafx.scene.canvas.GraphicsContext, double)
+     * @see de.freese.jconky.painter.MonitorPainter#paintValue(javafx.scene.canvas.GraphicsContext, double)
      */
     @Override
     public double paintValue(final GraphicsContext gc, final double width)
     {
-        ProcessInfos infos = this.processInfos;
+        ProcessInfos infos = getContext().getProcessInfos();
 
         gc.setFont(getSettings().getFont());
 
@@ -73,7 +60,12 @@ public class ProcessMonitor extends AbstractMonitor
 
         x += 55D;
         gc.setFill(getSettings().getColorValue());
-        gc.fillText(infos.getUptime(), x, y);
+
+        double uptimeInSeconds = getContext().getUptimeInSeconds();
+        int seconds = (int) uptimeInSeconds % 60;
+        int minutes = (int) (uptimeInSeconds / 60) % 60;
+        int hours = (int) (uptimeInSeconds / 60 / 60) % 60;
+        gc.fillText(String.format("%02d:%02d:%02d", hours, minutes, seconds), x, y);
 
         // Highest Usage
         x = getSettings().getMarginInner().getLeft();
@@ -86,15 +78,11 @@ public class ProcessMonitor extends AbstractMonitor
 
         y += fontSize * 1.5D;
 
-        long totalSystemMemory = getSystemMonitor().getTotalSystemMemory();
-
         for (ProcessInfo processInfo : infos.getSortedByCpuUsage(3))
         {
             gc.fillText(processInfo.getName(), x, y);
 
-            double memoryUsage = (double) processInfo.getResidentBytes() / totalSystemMemory;
-
-            text = String.format("%8d %8.2f %8.2f", processInfo.getPid(), processInfo.getCpuUsage() * 100D, memoryUsage * 100D);
+            text = String.format("%8d %8.2f %8.2f", processInfo.getPid(), processInfo.getCpuUsage() * 100D, processInfo.getMemoryUsage() * 100D);
             gc.fillText(text, x + 100D, y);
 
             y += fontSize * 1.5D;
@@ -114,9 +102,7 @@ public class ProcessMonitor extends AbstractMonitor
         {
             gc.fillText(processInfo.getName(), x, y);
 
-            double memoryUsage = (double) processInfo.getResidentBytes() / totalSystemMemory;
-
-            text = String.format("%8d %8.2f %8.2f", processInfo.getPid(), memoryUsage * 100D, processInfo.getCpuUsage() * 100D);
+            text = String.format("%8d %8.2f %8.2f", processInfo.getPid(), processInfo.getMemoryUsage() * 100D, processInfo.getCpuUsage() * 100D);
             gc.fillText(text, x + 100D, y);
 
             y += fontSize * 1.5D;
@@ -126,14 +112,5 @@ public class ProcessMonitor extends AbstractMonitor
         drawDebugBorder(gc, width, height);
 
         return height;
-    }
-
-    /**
-     * @see de.freese.jconky.monitor.Monitor#updateValue()
-     */
-    @Override
-    public void updateValue()
-    {
-        this.processInfos = getSystemMonitor().getProcessInfos();
     }
 }

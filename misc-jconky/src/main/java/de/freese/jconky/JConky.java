@@ -2,17 +2,14 @@
 
 package de.freese.jconky;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.jconky.monitor.CpuInfoMonitor;
-import de.freese.jconky.monitor.HostInfoMonitor;
-import de.freese.jconky.monitor.Monitor;
-import de.freese.jconky.monitor.ProcessMonitor;
+import de.freese.jconky.painter.CpuMonitorPainter;
+import de.freese.jconky.painter.HostMonitorPainter;
+import de.freese.jconky.painter.ProcessMonitorPainter;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -54,42 +51,12 @@ public final class JConky extends Application
     /**
      *
      */
-    private JConkyPainter conkyPainter;
-
-    /**
-     * Monitore, die nicht alle paar Sekunden aktualisiert werden müssen.
-     */
-    private List<Monitor> longScheduledMonitors = new ArrayList<>();
+    private ContextPainter conkyContextPainter;
 
     /**
      *
      */
     private ScheduledExecutorService scheduledExecutorService;
-
-    /**
-     * Monitore, die alle paar Sekunden aktualisiert werden müssen.
-     */
-    private List<Monitor> shotScheduledMonitors = new ArrayList<>();
-
-    /**
-     * @param monitor {@link Monitor}
-     * @param shortScheduled boolean
-     */
-    private void addMonitor(final Monitor monitor, final boolean shortScheduled)
-    {
-        this.conkyPainter.addMonitor(monitor);
-
-        if (shortScheduled)
-        {
-            this.shotScheduledMonitors.add(monitor);
-        }
-        else
-        {
-            this.longScheduledMonitors.add(monitor);
-        }
-
-        getScheduledExecutorService().execute(monitor::updateValue);
-    }
 
     /**
      * @return {@link Logger}
@@ -116,38 +83,27 @@ public final class JConky extends Application
         getLogger().info("init");
 
         this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        this.conkyPainter = new JConkyPainter();
+        this.conkyContextPainter = new ContextPainter();
 
-        initMonitors();
-        initScheduling();
-    }
+        this.conkyContextPainter.addMonitorPainter(new HostMonitorPainter());
+        this.conkyContextPainter.addMonitorPainter(new CpuMonitorPainter());
+        this.conkyContextPainter.addMonitorPainter(new ProcessMonitorPainter());
 
-    /**
-     *
-     */
-    private void initMonitors()
-    {
-        addMonitor(new HostInfoMonitor(), false);
-        addMonitor(new CpuInfoMonitor(), true);
-        addMonitor(new ProcessMonitor(), true);
-    }
+        Context.getInstance().updateOneShot();
+        Context.getInstance().updateLongScheduled();
+        Context.getInstance().updateShortScheduled();
 
-    /**
-    *
-    */
-    private void initScheduling()
-    {
         getScheduledExecutorService().scheduleWithFixedDelay(() -> {
             getLogger().debug("longScheduled updateValue");
-            this.longScheduledMonitors.forEach(Monitor::updateValue);
+            Context.getInstance().updateLongScheduled();
         }, 15, 15, TimeUnit.MINUTES);
 
         getScheduledExecutorService().scheduleWithFixedDelay(() -> {
             getLogger().debug("shotScheduled updateValue");
-            this.shotScheduledMonitors.forEach(Monitor::updateValue);
+            Context.getInstance().updateShortScheduled();
 
             getLogger().debug("paint");
-            this.conkyPainter.paint();
+            this.conkyContextPainter.paint();
         }, 3000, 3000, TimeUnit.MILLISECONDS);
     }
 
@@ -162,7 +118,7 @@ public final class JConky extends Application
         System.setProperty("prism.lcdtext", "true");
 
         Canvas canvas = new Canvas();
-        this.conkyPainter.setCanvas(canvas);
+        this.conkyContextPainter.setCanvas(canvas);
 
         Group pane = new Group();
         pane.getChildren().add(canvas);
@@ -216,7 +172,7 @@ public final class JConky extends Application
         // primaryStage.setX(screen.getVisualBounds().getMinX() + 1200);
         // primaryStage.setY(10D);
 
-        Platform.runLater(this.conkyPainter::paint);
+        Platform.runLater(this.conkyContextPainter::paint);
         primaryStage.show();
     }
 

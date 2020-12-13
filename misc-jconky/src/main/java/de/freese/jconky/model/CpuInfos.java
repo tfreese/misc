@@ -20,29 +20,22 @@ public class CpuInfos
     private final Map<Integer, CpuInfo> infos;
 
     /**
-     *
-     */
-    private final int numCpus;
-
-    /**
      * Erstellt ein neues {@link CpuInfos} Object.
      */
     public CpuInfos()
     {
-        this(Runtime.getRuntime().availableProcessors(), Collections.emptyMap());
+        this(Collections.emptyMap());
     }
 
     /**
      * Erstellt ein neues {@link CpuInfos} Object.
      *
-     * @param numCpus int
      * @param infos {@link Map}
      */
-    public CpuInfos(final int numCpus, final Map<Integer, CpuInfo> infos)
+    public CpuInfos(final Map<Integer, CpuInfo> infos)
     {
         super();
 
-        this.numCpus = numCpus;
         this.infos = infos;
     }
 
@@ -58,14 +51,6 @@ public class CpuInfos
     }
 
     /**
-     * @return int
-     */
-    public int getNumCpus()
-    {
-        return this.numCpus;
-    }
-
-    /**
      * Zusammenfassung des Prozessors.
      *
      * @return {@link CpuInfo}
@@ -73,5 +58,13 @@ public class CpuInfos
     public CpuInfo getTotal()
     {
         return get(-1);
+    }
+
+    /**
+     * @return int
+     */
+    public int size()
+    {
+        return this.infos.size();
     }
 }

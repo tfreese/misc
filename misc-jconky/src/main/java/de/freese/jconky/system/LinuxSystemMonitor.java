@@ -49,9 +49,14 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     };
 
     /**
-     * sensors: ore\\s{1}\\d+:.*
+     * sensors: Core\\s{1}\\d+:.*
      */
     private static final Pattern SENSORS_CORE_PATTERN = Pattern.compile("Core\\s{1}\\d+:.*", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+
+    /**
+     * sensors: Package\\s{1}id\\s{1}\\d+:.*
+     */
+    private static final Pattern SENSORS_PACKAGE_PATTERN = Pattern.compile("Package\\s{1}id\\s{1}\\d+:.*", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
 
     /**
      * /proc/stat: cpu\\d+
@@ -69,14 +74,16 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     private static final Pattern STATUS_UID_MATCHER = Pattern.compile("Uid:\\s+(\\d+)\\s.*", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
 
     /**
-     * /proc/%s/status: VmRSS:\\s+(\\d+) kB
+     * /proc/%s/status: VmRSS:\\s+(\\d+) kB<br>
+     * residentBytes
      */
     private static final Pattern STATUS_VM_RSS_MATCHER = Pattern.compile("VmRSS:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
 
-    /**
-     * /proc/%s/status: VmSize:\\s+(\\d+) kB
-     */
-    private static final Pattern STATUS_VM_SIZE_MATCHER = Pattern.compile("VmSize:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+    // /**
+    // * /proc/%s/status: VmSize:\\s+(\\d+) kB<br>
+    // * totalBytes
+    // */
+    // private static final Pattern STATUS_VM_SIZE_MATCHER = Pattern.compile("VmSize:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
 
     // private static final Pattern TOTAL_MEMORY_PATTERN =
     // Pattern.compile("MemTotal:\\s+(\\d+) kB", Pattern.MULTILINE);
@@ -214,7 +221,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             cpuInfoMap.put(cpuInfo.getCore(), cpuInfo);
         }
 
-        CpuInfos cpuInfos = new CpuInfos(numCpus, cpuInfoMap);
+        CpuInfos cpuInfos = new CpuInfos(cpuInfoMap);
 
         getLogger().debug(cpuInfos.get(-1).toString());
 
@@ -271,6 +278,22 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             temperatures.put(core, temperature);
         }
 
+        // Package
+        matcher = SENSORS_PACKAGE_PATTERN.matcher(output);
+
+        if (matcher.find())
+        {
+            String line = matcher.group();
+
+            String[] splits = SPACE_PATTERN.split(line);
+
+            String temperatureString = splits[3];
+            temperatureString = temperatureString.replace("+", "").replace("°C", "");
+            double temperature = Double.parseDouble(temperatureString);
+
+            temperatures.put(-1, temperature);
+        }
+
         return temperatures;
     }
 
@@ -297,12 +320,13 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     }
 
     /**
-     * @see de.freese.jconky.system.SystemMonitor#getProcessInfos()
+     * @see de.freese.jconky.system.SystemMonitor#getProcessInfos(double, long)
      */
     @Override
-    public ProcessInfos getProcessInfos()
+    public ProcessInfos getProcessInfos(final double uptimeInSeconds, final long totalSystemMemory)
     {
-        double uptimeInSeconds = getUptimeInSeconds();
+        // top -b -n 1
+        // top -b -c -n 1
 
         String[] pids = new File("/proc").list(PROCESS_DIRECTORY_FILTER);
 
@@ -321,7 +345,6 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             String[] splitsStat = SPACE_PATTERN.split(line);
 
             // String pid = splits[0];
-            int parentPid = Integer.parseInt(splitsStat[0]); // The PID of the parent of this process.
             String state = splitsStat[2];
             int utimeJiffie = Integer.parseInt(splitsStat[13]); // CPU time spent in user code, measured in clock ticks.
             int stimeJiffie = Integer.parseInt(splitsStat[14]); // CPU time spent in kernel code, measured in clock ticks.
@@ -375,27 +398,27 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
                 residentBytes = Long.parseLong(matcher.group(1));
             }
 
-            matcher = STATUS_VM_SIZE_MATCHER.matcher(status);
-            long totalBytes = 0L;
-
-            if (matcher.find())
-            {
-                totalBytes = Long.parseLong(matcher.group(1));
-            }
+            // matcher = STATUS_VM_SIZE_MATCHER.matcher(status);
+            // long totalBytes = 0L;
+            //
+            // if (matcher.find())
+            // {
+            // totalBytes = Long.parseLong(matcher.group(1));
+            // }
 
             matcher = STATUS_UID_MATCHER.matcher(status);
             matcher.find();
             String uid = matcher.group(1);
             String owner = uid;
 
-            ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), parentPid, state, cpuUsage, command, name, residentBytes, totalBytes, owner);
+            ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), state, name, owner, cpuUsage, (double) residentBytes / totalSystemMemory);
             infos.add(processInfo);
 
             // TODO
             // /etc/passwd auslesen für UIDs.
         }
 
-        ProcessInfos processInfos = new ProcessInfos(infos, uptimeInSeconds);
+        ProcessInfos processInfos = new ProcessInfos(infos);
 
         getLogger().debug(processInfos.toString());
 

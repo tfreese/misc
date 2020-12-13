@@ -33,30 +33,23 @@ public class ProcessInfos
     private final List<ProcessInfo> infos;
 
     /**
-     *
-     */
-    private final double uptimeInSeconds;
-
-    /**
      * Erstellt ein neues {@link ProcessInfos} Object.
      */
     public ProcessInfos()
     {
-        this(Collections.emptyList(), 0D);
+        this(Collections.emptyList());
     }
 
     /**
      * Erstellt ein neues {@link ProcessInfos} Object.
      *
      * @param infos {@link List}
-     * @param uptimeInSeconds double
      */
-    public ProcessInfos(final List<ProcessInfo> infos, final double uptimeInSeconds)
+    public ProcessInfos(final List<ProcessInfo> infos)
     {
         super();
 
         this.infos = infos;
-        this.uptimeInSeconds = uptimeInSeconds;
     }
 
     /**
@@ -96,7 +89,7 @@ public class ProcessInfos
      */
     public List<ProcessInfo> getSortedByMemoryUsage(final int count)
     {
-        return this.infos.stream().sorted(Comparator.comparing(ProcessInfo::getTotalBytes).reversed()).limit(count).collect(Collectors.toList());
+        return this.infos.stream().sorted(Comparator.comparing(ProcessInfo::getMemoryUsage).reversed()).limit(count).collect(Collectors.toList());
     }
 
     /**
@@ -106,26 +99,6 @@ public class ProcessInfos
     public List<ProcessInfo> getSortedByName(final int count)
     {
         return this.infos.stream().sorted(Comparator.comparing(ProcessInfo::getName)).limit(count).collect(Collectors.toList());
-    }
-
-    /**
-     * @return String
-     */
-    public String getUptime()
-    {
-        int seconds = (int) getUptimeInSeconds() % 60;
-        int minutes = (int) (getUptimeInSeconds() / 60) % 60;
-        int hours = (int) (getUptimeInSeconds() / 60 / 60) % 60;
-
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }
-
-    /**
-     * @return double
-     */
-    public double getUptimeInSeconds()
-    {
-        return this.uptimeInSeconds;
     }
 
     /**
@@ -145,7 +118,6 @@ public class ProcessInfos
         StringBuilder builder = new StringBuilder(getClass().getSimpleName());
         builder.append("[");
         builder.append("size=").append(size());
-        builder.append(", uptimeInSeconds=").append(this.uptimeInSeconds);
         builder.append("]");
 
         return builder.toString();

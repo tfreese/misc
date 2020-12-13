@@ -4,7 +4,7 @@ package de.freese.jconky;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import de.freese.jconky.monitor.Monitor;
+import de.freese.jconky.painter.MonitorPainter;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,7 +12,7 @@ import javafx.scene.canvas.GraphicsContext;
 /**
  * @author Thomas Freese
  */
-public class JConkyPainter
+public class ContextPainter
 {
     /**
      *
@@ -27,23 +27,14 @@ public class JConkyPainter
     /**
      *
      */
-    private final List<Monitor> monitors = new ArrayList<>();
+    private final List<MonitorPainter> painters = new ArrayList<>();
 
     /**
-     * Erstellt ein neues {@link JConkyPainter} Object.
+     * @param monitorPainter {@link MonitorPainter}
      */
-    public JConkyPainter()
+    public void addMonitorPainter(final MonitorPainter monitorPainter)
     {
-        super();
-    }
-
-    /**
-     * @param monitor {@link Monitor}
-     */
-    public void addMonitor(final Monitor monitor)
-    {
-        this.monitors.add(monitor);
-        // this.monitors.add(monitor);
+        this.painters.add(monitorPainter);
     }
 
     /**
@@ -63,9 +54,9 @@ public class JConkyPainter
         double monitorWidth = width - (marginOuter.getRight() * 2D);
         // double totalY = 0D;
 
-        for (Monitor monitor : this.monitors)
+        for (MonitorPainter painter : this.painters)
         {
-            double monitorHeight = monitor.paintValue(this.gc, monitorWidth);
+            double monitorHeight = painter.paintValue(this.gc, monitorWidth);
 
             this.gc.translate(0D, monitorHeight);
 

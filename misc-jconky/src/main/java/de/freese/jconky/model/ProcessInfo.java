@@ -9,12 +9,12 @@ public class ProcessInfo
     /**
      *
      */
-    private final String command;
+    private final double cpuUsage;
 
     /**
      *
      */
-    private final double cpuUsage;
+    private final double memoryUsage;
 
     /**
      *
@@ -29,17 +29,7 @@ public class ProcessInfo
     /**
      *
      */
-    private final int parentPid;
-
-    /**
-     *
-     */
     private final int pid;
-
-    /**
-     *
-     */
-    private final long residentBytes;
 
     /**
      *
@@ -47,47 +37,25 @@ public class ProcessInfo
     private final String state;
 
     /**
-     *
-     */
-    private final long totalBytes;
-
-    /**
      * Erstellt ein neues {@link ProcessInfo} Object.
      *
      * @param pid int
-     * @param parentPid int
      * @param state String
-     * @param cpuUsage double
-     * @param command String
      * @param name String
-     * @param residentBytes long
-     * @param totalBytes long
      * @param owner String
+     * @param cpuUsage double
+     * @param memoryUsage double
      */
-    public ProcessInfo(final int pid, final int parentPid, final String state, final double cpuUsage, final String command, final String name,
-            final long residentBytes, final long totalBytes, final String owner)
+    public ProcessInfo(final int pid, final String state, final String name, final String owner, final double cpuUsage, final double memoryUsage)
     {
         super();
 
         this.pid = pid;
-        this.parentPid = parentPid;
         this.state = state;
-        this.command = command;
         this.name = name;
         this.owner = owner;
         this.cpuUsage = cpuUsage;
-        this.residentBytes = residentBytes;
-        this.totalBytes = totalBytes;
-
-        // CpuTimes cpuTimes = new CpuTimes(user, nice, system, idle, ioWait, irq, softIrq, steal, guest, guestNice)
-    }
-
-    /**
-     * @return String
-     */
-    public String getCommand()
-    {
-        return this.command;
+        this.memoryUsage = memoryUsage;
     }
 
     /**
@@ -96,6 +64,14 @@ public class ProcessInfo
     public double getCpuUsage()
     {
         return this.cpuUsage;
+    }
+
+    /**
+     * @return double
+     */
+    public double getMemoryUsage()
+    {
+        return this.memoryUsage;
     }
 
     /**
@@ -117,31 +93,17 @@ public class ProcessInfo
     /**
      * @return int
      */
-    public int getParentPid()
-    {
-        return this.parentPid;
-    }
-
-    /**
-     * @return int
-     */
     public int getPid()
     {
         return this.pid;
     }
 
     /**
-     * @return long
-     */
-    public long getResidentBytes()
-    {
-        return this.residentBytes;
-    }
-
-    /**
      * R Running<br>
-     * S Sleeping in an interruptible wait<br>
+     * S Sleeping<br>
+     * I Idle<br>
      * D Waiting in uninterruptible disk sleep<br>
+     * Z Zombie<br>
      * <br>
      * See: https://man7.org/linux/man-pages/man5/proc.5.html<br>
      *
@@ -150,14 +112,6 @@ public class ProcessInfo
     public String getState()
     {
         return this.state;
-    }
-
-    /**
-     * @return long
-     */
-    public long getTotalBytes()
-    {
-        return this.totalBytes;
     }
 
     /**
@@ -172,10 +126,7 @@ public class ProcessInfo
         builder.append(", name=").append(this.name);
         builder.append(", owner=").append(this.owner);
         builder.append(", cpuUsage=").append(this.cpuUsage);
-        builder.append(", residentBytes=").append(this.residentBytes);
-        builder.append(", totalBytes=").append(this.totalBytes);
-        builder.append(", parentPid=").append(this.parentPid);
-        builder.append(", command=").append(this.command);
+        builder.append(", memoryUsage=").append(this.memoryUsage);
         builder.append("]");
 
         return builder.toString();

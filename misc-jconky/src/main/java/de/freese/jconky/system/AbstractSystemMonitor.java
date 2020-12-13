@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractSystemMonitor implements SystemMonitor
 {
     /**
-    *
-    */
+     *
+     */
     private static final com.sun.management.OperatingSystemMXBean OPERATING_SYSTEM_MX_BEAN =
             (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
@@ -52,6 +52,15 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     protected Logger getLogger()
     {
         return this.logger;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getNumberOfCores()
+     */
+    @Override
+    public int getNumberOfCores()
+    {
+        return Runtime.getRuntime().availableProcessors();
     }
 
     /**
