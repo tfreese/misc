@@ -114,6 +114,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     /**
      *
      */
+    private final ProcessBuilder processBuilderTop;
+
+    /**
+     *
+     */
     private final ProcessBuilder processBuilderUname;
 
     /**
@@ -133,6 +138,12 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         // @formatter:off
         this.processBuilderSensors = new ProcessBuilder()
                 .command("/bin/sh", "-c", "sensors")
+                ;
+        // @formatter:on
+
+        // @formatter:off
+        this.processBuilderTop = new ProcessBuilder()
+                .command("/bin/sh", "-c", "top -b -n 1") // -u tommy
                 ;
         // @formatter:on
     }
@@ -325,9 +336,17 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     @Override
     public ProcessInfos getProcessInfos(final double uptimeInSeconds, final long totalSystemMemory)
     {
-        // top -b -n 1
-        // top -b -c -n 1
+        return getProcessInfosByTop();
+        // return getProcessInfosByProc(uptimeInSeconds, totalSystemMemory);
+    }
 
+    /**
+     * @param uptimeInSeconds double
+     * @param totalSystemMemory long
+     * @return {@link ProcessInfos}
+     */
+    ProcessInfos getProcessInfosByProc(final double uptimeInSeconds, final long totalSystemMemory)
+    {
         String[] pids = new File("/proc").list(PROCESS_DIRECTORY_FILTER);
 
         List<ProcessInfo> infos = new ArrayList<>(pids.length);
@@ -338,11 +357,19 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             // 4543 (cinnamon) S 4231 3355 3355 0 -1 4194304 159763 53230 432 4977 11873 3096 1461 181 20 0 12 0 3831 4350136320 79932 18446744073709551615
             // 94314044076032 94314044078533 140729316610576 0 0 0 0 16781312 82952 0 0 0 17 0 0 0 833 0 0 94314044087280 94314044088448 94314055774208
             // 140729316617080 140729316617099 140729316617099 140729316618214 0
-            String file = String.format("/proc/%s/stat", pid);
-            List<String> lines = readContent(file);
-            String line = lines.get(0);
+            List<String> stat = readContent(String.format("/proc/%s/stat", pid));
+            List<String> cmdLine = readContent(String.format("/proc/%s/cmdline", pid));
+            List<String> status = readContent(String.format("/proc/%s/status", pid));
 
-            String[] splitsStat = SPACE_PATTERN.split(line);
+            if (stat.isEmpty() || cmdLine.isEmpty() || status.isEmpty())
+            {
+                // Prozess existiert nicht mehr.
+                continue;
+            }
+
+            String lineStat = stat.get(0);
+
+            String[] splitsStat = SPACE_PATTERN.split(lineStat);
 
             // String pid = splits[0];
             String state = splitsStat[2];
@@ -360,13 +387,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             double seconds = uptimeInSeconds - JConkyUtils.jiffieToSeconds(starttime);
             double cpuUsage = JConkyUtils.jiffieToSeconds(totalTimeJiffie) / seconds;
 
-            file = String.format("/proc/%s/cmdline", pid);
-            lines = readContent(file);
             String command = null;
 
-            if (!lines.isEmpty())
+            if (!cmdLine.isEmpty())
             {
-                command = lines.get(0);
+                command = cmdLine.get(0);
             }
             else
             {
@@ -375,10 +400,9 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
 
             command = command.replace("(", "").replace(")", "").replace("\\r", "").replace("\\n", "");
 
-            file = String.format("/proc/%s/status", pid);
-            String status = readContent(file).stream().collect(Collectors.joining("\n"));
+            String statusOutput = status.stream().collect(Collectors.joining("\n"));
 
-            Matcher matcher = STATUS_NAME_MATCHER.matcher(status);
+            Matcher matcher = STATUS_NAME_MATCHER.matcher(statusOutput);
             String name = null;
 
             if (matcher.find())
@@ -390,7 +414,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
                 name = command;
             }
 
-            matcher = STATUS_VM_RSS_MATCHER.matcher(status);
+            matcher = STATUS_VM_RSS_MATCHER.matcher(statusOutput);
             long residentBytes = 0L;
 
             if (matcher.find())
@@ -406,7 +430,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             // totalBytes = Long.parseLong(matcher.group(1));
             // }
 
-            matcher = STATUS_UID_MATCHER.matcher(status);
+            matcher = STATUS_UID_MATCHER.matcher(statusOutput);
             matcher.find();
             String uid = matcher.group(1);
             String owner = uid;
@@ -414,8 +438,73 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             ProcessInfo processInfo = new ProcessInfo(Integer.parseInt(pid), state, name, owner, cpuUsage, (double) residentBytes / totalSystemMemory);
             infos.add(processInfo);
 
-            // TODO
-            // /etc/passwd auslesen für UIDs.
+            // TODO /etc/passwd auslesen für UIDs.
+        }
+
+        ProcessInfos processInfos = new ProcessInfos(infos);
+
+        getLogger().debug(processInfos.toString());
+
+        return processInfos;
+    }
+
+    /**
+     * @return {@link ProcessInfos}
+     */
+    ProcessInfos getProcessInfosByTop()
+    {
+        List<ProcessInfo> infos = new ArrayList<>(300);
+
+        // String output = readContent(this.processBuilderSensors).stream().collect(Collectors.joining("\n"));
+        List<String> lines = readContent(this.processBuilderTop);
+
+        // GiB Spch: 15,6 total, 12,4 free, 2,0 used, 1,1 buff/cache
+        // GiB Swap: 14,4 total, 14,4 free, 0,0 used. 13,2 avail Spch
+
+        // Bis zur ProzessLise gehen.
+        int startIndex = 0;
+
+        for (String line : lines)
+        {
+            startIndex++;
+
+            if (line.trim().startsWith("PID USER"))
+            {
+                break;
+            }
+        }
+
+        for (int i = startIndex; i < lines.size(); i++)
+        {
+            String line = lines.get(i);
+
+            String[] splits = SPACE_PATTERN.split(line.trim());
+
+            int pid = Integer.parseInt(splits[0]);
+            String owner = splits[1];
+            double cpuUsage = Double.parseDouble(splits[6].replace(",", "."));
+            double memoryUsage = Double.parseDouble(splits[7].replace(",", "."));
+            String state = splits[9];
+            String name = splits[10];
+
+            if (getMyPid() == pid)
+            {
+                // jConky wollen wir nicht.
+                continue;
+            }
+            else if ("top".equals(name))
+            {
+                // top wollen wir nicht.
+                continue;
+            }
+            else if ("java".equals(name))
+            {
+                // java wollen wir nicht.
+                continue;
+            }
+
+            ProcessInfo processInfo = new ProcessInfo(pid, state, name, owner, cpuUsage / 100D, memoryUsage / 100D);
+            infos.add(processInfo);
         }
 
         ProcessInfos processInfos = new ProcessInfos(infos);

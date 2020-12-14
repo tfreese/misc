@@ -13,6 +13,11 @@ import java.util.stream.Collectors;
 public class ProcessInfos
 {
     /**
+    *
+    */
+    private static final Predicate<ProcessInfo> PREDICATE_IDLE = ph -> "I".equals(ph.getState());
+
+    /**
      *
      */
     private static final Predicate<ProcessInfo> PREDICATE_RUNNING = ph -> "R".equals(ph.getState());
@@ -57,7 +62,7 @@ public class ProcessInfos
      */
     public int getAlive()
     {
-        Predicate<ProcessInfo> predicateAlive = PREDICATE_RUNNING.or(PREDICATE_SLEEPING).or(PREDICATE_WAITING);
+        Predicate<ProcessInfo> predicateAlive = PREDICATE_RUNNING.or(PREDICATE_SLEEPING).or(PREDICATE_WAITING).or(PREDICATE_IDLE);
 
         return (int) this.infos.stream().filter(predicateAlive).count();
     }

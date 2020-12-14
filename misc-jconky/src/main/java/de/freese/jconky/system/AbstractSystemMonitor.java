@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -39,11 +40,18 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
+     *
+     */
+    private long myPid;
+
+    /**
      * Erstellt ein neues {@link AbstractSystemMonitor} Object.
      */
     public AbstractSystemMonitor()
     {
         super();
+
+        this.myPid = ProcessHandle.current().pid();
     }
 
     /**
@@ -52,6 +60,16 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     protected Logger getLogger()
     {
         return this.logger;
+    }
+
+    /**
+     * Liefert die eigene Process-ID
+     *
+     * @return long
+     */
+    public long getMyPid()
+    {
+        return this.myPid;
     }
 
     /**
@@ -134,6 +152,11 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     {
         Path path = Paths.get(fileName);
 
+        if (Files.notExists(path))
+        {
+            return Collections.emptyList();
+        }
+
         try
         {
             List<String> lines = Files.readAllLines(path, charset);
@@ -163,5 +186,13 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
         {
             throw new UncheckedIOException(ex);
         }
+    }
+
+    /**
+     * @param myPid long
+     */
+    public void setMyPid(final long myPid)
+    {
+        this.myPid = myPid;
     }
 }
