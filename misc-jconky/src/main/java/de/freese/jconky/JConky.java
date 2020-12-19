@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.freese.jconky.painter.CpuMonitorPainter;
 import de.freese.jconky.painter.HostMonitorPainter;
+import de.freese.jconky.painter.NetworkMonitorPainter;
 import de.freese.jconky.painter.ProcessMonitorPainter;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
@@ -88,6 +89,7 @@ public final class JConky extends Application
         this.conkyContextPainter.addMonitorPainter(new HostMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new CpuMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new ProcessMonitorPainter());
+        this.conkyContextPainter.addMonitorPainter(new NetworkMonitorPainter());
 
         Context.getInstance().updateOneShot();
         Context.getInstance().updateLongScheduled();
@@ -127,7 +129,7 @@ public final class JConky extends Application
         // pane.add(canvas, 0, 0);
 
         // Scene
-        Scene scene = new Scene(pane, 335, 700, true, SceneAntialiasing.BALANCED);
+        Scene scene = new Scene(pane, 335, 1000, true, SceneAntialiasing.BALANCED);
 
         // Bind canvas size to scene size.
         canvas.widthProperty().bind(scene.widthProperty());

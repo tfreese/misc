@@ -4,6 +4,7 @@ package de.freese.jconky;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.system.SystemMonitor;
 
@@ -54,7 +55,17 @@ public final class Context
     /**
      *
      */
+    private String externalIp = "";
+
+    /**
+     *
+     */
     private HostInfo hostInfo = new HostInfo();
+
+    /**
+     *
+     */
+    private NetworkInfos networkInfos = new NetworkInfos();
 
     /**
      *
@@ -101,11 +112,27 @@ public final class Context
     }
 
     /**
+     * @return String
+     */
+    public String getExternalIp()
+    {
+        return this.externalIp;
+    }
+
+    /**
      * @return {@link HostInfo}
      */
     public HostInfo getHostInfo()
     {
         return this.hostInfo;
+    }
+
+    /**
+     * @return {@link NetworkInfos}
+     */
+    public NetworkInfos getNetworkInfos()
+    {
+        return this.networkInfos;
     }
 
     /**
@@ -171,6 +198,7 @@ public final class Context
     {
         this.numberOfCores = getSystemMonitor().getNumberOfCores();
         this.totalSystemMemory = getSystemMonitor().getTotalSystemMemory();
+        this.externalIp = getSystemMonitor().getExternalIp();
     }
 
     /**
@@ -195,5 +223,6 @@ public final class Context
         }
 
         this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
+        this.networkInfos = getSystemMonitor().getNetworkInfos();
     }
 }

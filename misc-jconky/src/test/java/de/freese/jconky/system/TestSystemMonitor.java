@@ -14,6 +14,7 @@ import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
 
@@ -84,6 +85,20 @@ class TestSystemMonitor
     }
 
     /**
+    *
+    */
+    @Test
+    void testExternalIp()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        String externalIp = systemMonitor.getExternalIp();
+
+        assertNotNull(externalIp);
+        assertTrue(!externalIp.isBlank());
+    }
+
+    /**
      *
      */
     @Test
@@ -98,6 +113,21 @@ class TestSystemMonitor
         assertNotNull(hostInfo.getName());
         assertNotNull(hostInfo.getVersion());
         assertNotNull(hostInfo.getArchitecture());
+    }
+
+    /**
+    *
+    */
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void testNetworkInfos()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        NetworkInfos networkInfos = systemMonitor.getNetworkInfos();
+
+        assertNotNull(networkInfos);
+        assertTrue(networkInfos.size() > 1);
     }
 
     /**

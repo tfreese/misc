@@ -1,8 +1,14 @@
 // Created: 01.12.2020
 package de.freese.jconky.system;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +21,8 @@ import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.NetworkInfo;
+import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.util.JConkyUtils;
@@ -107,6 +115,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     // Pattern.compile("DISTRIB_DESCRIPTION=\"(.*)\"", Pattern.MULTILINE);
 
     /**
+    *
+    */
+    private final ProcessBuilder processBuilderIfconfig;
+
+    /**
      *
      */
     private final ProcessBuilder processBuilderSensors;
@@ -128,24 +141,15 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     {
         super();
 
-        // @formatter:off
-        this.processBuilderUname = new ProcessBuilder()
-                .command("/bin/sh", "-c", "uname -a")
-                //.redirectErrorStream(true); // Gibt Fehler auf dem InputStream aus.
-                ;
-        // @formatter:on
+        // .redirectErrorStream(true); // Gibt Fehler auf dem InputStream aus.
+        this.processBuilderUname = new ProcessBuilder().command("/bin/sh", "-c", "uname -a");
 
-        // @formatter:off
-        this.processBuilderSensors = new ProcessBuilder()
-                .command("/bin/sh", "-c", "sensors")
-                ;
-        // @formatter:on
+        this.processBuilderSensors = new ProcessBuilder().command("/bin/sh", "-c", "sensors");
 
-        // @formatter:off
-        this.processBuilderTop = new ProcessBuilder()
-                .command("/bin/sh", "-c", "top -b -n 1") // -u tommy
-                ;
-        // @formatter:on
+        // -u tommy
+        this.processBuilderTop = new ProcessBuilder().command("/bin/sh", "-c", "top -b -n 1");
+
+        this.processBuilderIfconfig = new ProcessBuilder().command("/bin/sh", "-c", "ifconfig");
     }
 
     /**
@@ -309,6 +313,35 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     }
 
     /**
+     * @see de.freese.jconky.system.SystemMonitor#getExternalIp()
+     */
+    @Override
+    public String getExternalIp()
+    {
+        String externalIp = "";
+
+        try
+        {
+            URL url = URI.create("https://ifconfig.me").toURL();
+            URLConnection connection = url.openConnection();
+            // connection.connect();
+
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8)))
+            {
+                externalIp = br.readLine();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Empty
+        }
+
+        getLogger().debug("externalIp = {}", externalIp);
+
+        return externalIp;
+    }
+
+    /**
      * @see de.freese.jconky.system.SystemMonitor#getHostInfo()
      */
     @Override
@@ -331,13 +364,103 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     }
 
     /**
+     * @see de.freese.jconky.system.SystemMonitor#getNetworkInfos()
+     */
+    @Override
+    public NetworkInfos getNetworkInfos()
+    {
+        // ifconfig
+        // cat /sys/class/net/
+        // cat /proc/net/dev
+
+        // ss -s
+        // ss -l
+        // ss -t -a
+        // ss -t -s
+        // netstat -natp
+        // netstat -nat
+        // netstat -natu | grep 'ESTABLISHED'
+        // netstat -s
+
+        List<String> lines = readContent(this.processBuilderIfconfig);
+
+        // Trennung der Interfaces durch leere Zeile.
+        Map<Integer, List<String>> map = new HashMap<>();
+        int n = 0;
+
+        for (String line : lines)
+        {
+            if (line.isBlank())
+            {
+                n++;
+                continue;
+            }
+
+            map.computeIfAbsent(n, key -> new ArrayList<>()).add(line);
+        }
+
+        Map<String, NetworkInfo> networkInfoMap = new HashMap<>();
+
+        for (List<String> ifLines : map.values())
+        {
+            String interfaceName = null;
+            String ip = null;
+            long bytesReceived = 0L;
+            long bytesTransmitted = 0L;
+
+            for (int i = 0; i < ifLines.size(); i++)
+            {
+                String line = ifLines.get(i).trim();
+
+                if (i == 0)
+                {
+                    // Interface Name
+                    int index = line.indexOf(':');
+                    interfaceName = line.substring(0, index);
+                }
+                else if (line.startsWith("inet "))
+                {
+                    // IP
+                    String[] splits = SPACE_PATTERN.split(line);
+                    ip = splits[1];
+                }
+                else if (line.startsWith("RX packets"))
+                {
+                    // Bytes Received
+                    String[] splits = SPACE_PATTERN.split(line);
+                    bytesReceived = Long.parseLong(splits[4]);
+                }
+                else if (line.startsWith("TX packets"))
+                {
+                    // Bytes Transmitted
+                    String[] splits = SPACE_PATTERN.split(line);
+                    bytesTransmitted = Long.parseLong(splits[4]);
+                }
+            }
+
+            NetworkInfo networkInfo = new NetworkInfo(interfaceName, ip, bytesReceived, bytesTransmitted);
+            networkInfoMap.put(interfaceName, networkInfo);
+        }
+
+        NetworkInfos networkInfos = new NetworkInfos(networkInfoMap);
+
+        getLogger().debug(networkInfos.toString());
+
+        return networkInfos;
+    }
+
+    /**
      * @see de.freese.jconky.system.SystemMonitor#getProcessInfos(double, long)
      */
     @Override
     public ProcessInfos getProcessInfos(final double uptimeInSeconds, final long totalSystemMemory)
     {
-        return getProcessInfosByTop();
-        // return getProcessInfosByProc(uptimeInSeconds, totalSystemMemory);
+        ProcessInfos processInfos = getProcessInfosByTop();
+        // ProcessInfos processInfos = getProcessInfosByProc(uptimeInSeconds, totalSystemMemory);
+
+        getLogger().debug(processInfos.toString());
+
+        return processInfos;
     }
 
     /**
@@ -441,11 +564,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             // TODO /etc/passwd auslesen für UIDs.
         }
 
-        ProcessInfos processInfos = new ProcessInfos(infos);
-
-        getLogger().debug(processInfos.toString());
-
-        return processInfos;
+        return new ProcessInfos(infos);
     }
 
     /**
@@ -507,11 +626,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             infos.add(processInfo);
         }
 
-        ProcessInfos processInfos = new ProcessInfos(infos);
-
-        getLogger().debug(processInfos.toString());
-
-        return processInfos;
+        return new ProcessInfos(infos);
     }
 
     /**
@@ -528,7 +643,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
 
         String[] splits = SPACE_PATTERN.split(line);
 
-        return Double.parseDouble(splits[0]);
+        double uptimeInSeconds = Double.parseDouble(splits[0]);
+
+        getLogger().debug("uptimeInSeconds = {}", uptimeInSeconds);
+
+        return uptimeInSeconds;
     }
 
     /**

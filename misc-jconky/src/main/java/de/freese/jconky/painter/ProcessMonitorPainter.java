@@ -96,16 +96,14 @@ public class ProcessMonitorPainter extends AbstractMonitorPainter
         text = String.format("%8s %8s %8s", "PID", "MEM%", "CPU%");
         gc.fillText(text, x + 100D, y);
 
-        y += fontSize * 1.5D;
-
         for (ProcessInfo processInfo : infos.getSortedByMemoryUsage(3))
         {
+            y += fontSize * 1.5D;
+
             gc.fillText(processInfo.getName(), x, y);
 
             text = String.format("%8d %8.2f %8.2f", processInfo.getPid(), processInfo.getMemoryUsage() * 100D, processInfo.getCpuUsage() * 100D);
             gc.fillText(text, x + 100D, y);
-
-            y += fontSize * 1.5D;
         }
 
         double height = y + 5D;
