@@ -19,12 +19,30 @@ public class NetworkInfo
     /**
      *
      */
+    private String download;
+
+    /**
+     *
+     */
     private final String interfaceName;
 
     /**
      *
      */
     private final String ip;
+
+    /**
+     *
+     */
+    private String upload;
+
+    /**
+     * Erstellt ein neues {@link NetworkInfo} Object.
+     */
+    public NetworkInfo()
+    {
+        this("", "", 0L, 0L);
+    }
 
     /**
      * Erstellt ein neues {@link NetworkInfo} Object.
@@ -63,6 +81,14 @@ public class NetworkInfo
     /**
      * @return String
      */
+    public String getDownload()
+    {
+        return this.download;
+    }
+
+    /**
+     * @return String
+     */
     public String getInterfaceName()
     {
         return this.interfaceName;
@@ -74,6 +100,30 @@ public class NetworkInfo
     public String getIp()
     {
         return this.ip;
+    }
+
+    /**
+     * @return String
+     */
+    public String getUpload()
+    {
+        return this.upload;
+    }
+
+    /**
+     * @param download String
+     */
+    public void setDownload(final String download)
+    {
+        this.download = download;
+    }
+
+    /**
+     * @param upload String
+     */
+    public void setUpload(final String upload)
+    {
+        this.upload = upload;
     }
 
     /**

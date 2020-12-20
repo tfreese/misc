@@ -128,6 +128,7 @@ class TestSystemMonitor
 
         assertNotNull(networkInfos);
         assertTrue(networkInfos.size() > 1);
+        assertNotNull(networkInfos.getProtocolInfo());
     }
 
     /**

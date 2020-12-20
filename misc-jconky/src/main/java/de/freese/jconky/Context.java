@@ -4,9 +4,11 @@ package de.freese.jconky;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.system.SystemMonitor;
+import de.freese.jconky.util.JConkyUtils;
 
 /**
  * @author Thomas Freese
@@ -223,6 +225,33 @@ public final class Context
         }
 
         this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
+
+        // Netzwerk: Download/Upload berechnen.
+        NetworkInfos networkInfosPrevious = this.networkInfos;
         this.networkInfos = getSystemMonitor().getNetworkInfos();
+
+        NetworkInfo eth0Previous = networkInfosPrevious.getByName("eth0");
+        NetworkInfo eth0 = this.networkInfos.getByName("eth0");
+
+        // Nicht beim ersten Durchlauf.
+        if (eth0Previous.getBytesReceived() > 0L)
+        {
+            long deltaDownload = eth0.getBytesReceived() - eth0Previous.getBytesReceived();
+            long deltaUpload = eth0.getBytesTransmitted() - eth0Previous.getBytesTransmitted();
+
+            System.out.printf("BytesReceived=%d / %d; Delta=%d%n", eth0Previous.getBytesReceived(), eth0.getBytesReceived(), deltaDownload);
+            System.out.printf("BytesTransmitted=%d / %d; Delta=%d%n", eth0Previous.getBytesTransmitted(), eth0.getBytesTransmitted(), deltaUpload);
+
+            // 3 Sekunden Scan-Intervall berücksichtigen.
+            deltaDownload /= 3.5D;
+            deltaUpload /= 3.5D;
+
+            String download = JConkyUtils.toHumanReadableSize(deltaDownload);
+            String upload = JConkyUtils.toHumanReadableSize(deltaUpload);
+            // System.out.println(download + " / " + upload);
+
+            eth0.setDownload(download);
+            eth0.setUpload(upload);
+        }
     }
 }

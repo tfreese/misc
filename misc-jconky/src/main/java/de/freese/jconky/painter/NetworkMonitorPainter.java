@@ -3,6 +3,7 @@ package de.freese.jconky.painter;
 
 import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
+import de.freese.jconky.model.NetworkProtocolInfo;
 import javafx.scene.canvas.GraphicsContext;
 
 /**
@@ -20,7 +21,8 @@ public class NetworkMonitorPainter extends AbstractMonitorPainter
     {
         double x = getSettings().getMarginInner().getLeft();
 
-        // TODO
+        gc.setFill(getSettings().getColorText());
+        gc.fillText("Download:", x, y);
 
         return y;
     }
@@ -31,19 +33,23 @@ public class NetworkMonitorPainter extends AbstractMonitorPainter
     @Override
     public double paintValue(final GraphicsContext gc, final double width)
     {
-        NetworkInfos infos = getContext().getNetworkInfos();
+        NetworkInfos networkInfos = getContext().getNetworkInfos();
+        NetworkProtocolInfo protocolInfo = networkInfos.getProtocolInfo();
         String externalIp = getContext().getExternalIp();
 
         gc.setFont(getSettings().getFont());
 
         double fontSize = getSettings().getFontSize();
 
+        NetworkInfo eth0 = networkInfos.getByName("eth0");
+
         double x = getSettings().getMarginInner().getLeft();
         double y = fontSize * 1.25D;
         gc.setFill(getSettings().getColorTitle());
-        gc.fillText("Network", x, y);
+        String text = String.format("Network: %s -> %s", eth0.getIp(), externalIp);
+        gc.fillText(text, x, y);
 
-        x = fontSize * 6.5D;
+        x = width - 20D;
         y = fontSize;
         gc.setStroke(getSettings().getColorTitle());
         gc.setLineDashes(5D);
@@ -52,7 +58,15 @@ public class NetworkMonitorPainter extends AbstractMonitorPainter
 
         y += fontSize * 1.5D;
 
-        y += paintInterface(gc, y, width, infos.getByName("eth0"));
+        y += paintInterface(gc, y, width, eth0);
+
+        x = getSettings().getMarginInner().getLeft();
+        y += fontSize * 1.5D;
+        gc.setFill(getSettings().getColorText());
+        gc.fillText("TCP-Connections:", x, y);
+        x += fontSize * 10D;
+        gc.setFill(getSettings().getColorValue());
+        gc.fillText(Integer.toString(protocolInfo.getTcpConnections()), x, y);
 
         double height = y + 5D;
         drawDebugBorder(gc, width, height);

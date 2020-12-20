@@ -1,7 +1,7 @@
 // Created: 19.12.2020
 package de.freese.jconky.model;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,26 +12,38 @@ public class NetworkInfos
     /**
     *
     */
+    private static final NetworkInfo DEFAUL_NETWORK_INFO = new NetworkInfo();
+
+    /**
+     *
+     */
     private final Map<String, NetworkInfo> interfaces;
+
+    /**
+     *
+     */
+    private final NetworkProtocolInfo protocolInfo;
 
     /**
      * Erstellt ein neues {@link NetworkInfos} Object.
      */
     public NetworkInfos()
     {
-        this(Collections.emptyMap());
+        this(new HashMap<>(), new NetworkProtocolInfo());
     }
 
     /**
      * Erstellt ein neues {@link NetworkInfos} Object.
      *
      * @param interfaces {@link Map}
+     * @param protocolInfo {@link NetworkProtocolInfo}
      */
-    public NetworkInfos(final Map<String, NetworkInfo> interfaces)
+    public NetworkInfos(final Map<String, NetworkInfo> interfaces, final NetworkProtocolInfo protocolInfo)
     {
         super();
 
         this.interfaces = interfaces;
+        this.protocolInfo = protocolInfo;
     }
 
     /**
@@ -40,7 +52,7 @@ public class NetworkInfos
      */
     public NetworkInfo getByIp(final String ip)
     {
-        return this.interfaces.values().stream().filter(ni -> ni.getIp().equals(ip)).findFirst().orElse(null);
+        return this.interfaces.values().stream().filter(ni -> ni.getIp().equals(ip)).findFirst().orElse(DEFAUL_NETWORK_INFO);
     }
 
     /**
@@ -49,7 +61,15 @@ public class NetworkInfos
      */
     public NetworkInfo getByName(final String interfaceName)
     {
-        return this.interfaces.get(interfaceName);
+        return this.interfaces.computeIfAbsent(interfaceName, key -> DEFAUL_NETWORK_INFO);
+    }
+
+    /**
+     * @return {@link NetworkProtocolInfo}
+     */
+    public NetworkProtocolInfo getProtocolInfo()
+    {
+        return this.protocolInfo;
     }
 
     /**

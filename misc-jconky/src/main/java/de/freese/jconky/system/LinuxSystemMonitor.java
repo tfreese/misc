@@ -23,6 +23,7 @@ import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
 import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
+import de.freese.jconky.model.NetworkProtocolInfo;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.util.JConkyUtils;
@@ -120,6 +121,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     private final ProcessBuilder processBuilderIfconfig;
 
     /**
+    *
+    */
+    private final ProcessBuilder processBuilderNetstat;
+
+    /**
      *
      */
     private final ProcessBuilder processBuilderSensors;
@@ -150,6 +156,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         this.processBuilderTop = new ProcessBuilder().command("/bin/sh", "-c", "top -b -n 1");
 
         this.processBuilderIfconfig = new ProcessBuilder().command("/bin/sh", "-c", "ifconfig");
+        this.processBuilderNetstat = new ProcessBuilder().command("/bin/sh", "-c", "netstat -s");
     }
 
     /**
@@ -372,16 +379,6 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         // ifconfig
         // cat /sys/class/net/
         // cat /proc/net/dev
-
-        // ss -s
-        // ss -l
-        // ss -t -a
-        // ss -t -s
-        // netstat -natp
-        // netstat -nat
-        // netstat -natu | grep 'ESTABLISHED'
-        // netstat -s
-
         List<String> lines = readContent(this.processBuilderIfconfig);
 
         // Trennung der Interfaces durch leere Zeile.
@@ -442,7 +439,89 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             networkInfoMap.put(interfaceName, networkInfo);
         }
 
-        NetworkInfos networkInfos = new NetworkInfos(networkInfoMap);
+        // Protokollinfos
+        // ss -s
+        // ss -l
+        // ss -t -a
+        // ss -t -s
+        // netstat -natp
+        // netstat -nat
+        // netstat -natu | grep 'ESTABLISHED'
+        // netstat -s
+        lines = readContent(this.processBuilderNetstat);
+        // String output = lines.stream().collect(Collectors.joining("\n"));
+        // Pattern patternIpIn =
+        // Pattern.compile("\\d+\\s+(total packets received|Pakete insgesamt empfangen)", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
+        // Matcher matcher = patternIpIn.matcher(output);
+        // if (matcher.find())
+        // {
+        // System.out.println(matcher.group());
+        // }
+        long icmpIn = 0;
+        long icmpOut = 0;
+        long ipIn = 0;
+        long ipOut = 0;
+        int tcpConnections = 0;
+        long tcpIn = 0;
+        long tcpOut = 0;
+        long udpIn = 0;
+        long udpOut = 0;
+
+        for (String line : lines)
+        {
+            line = line.trim();
+
+            if (line.contains("total packets received") || line.contains("Pakete insgesamt empfangen"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                ipIn = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("requests sent out") || line.contains("eingehende Pakete ausgeliefert"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                ipOut = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("ICMP messages received") || line.contains("ICMP-Meldungen empfangen"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                icmpIn = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("ICMP messages sent") || line.contains("ICMP Nachrichten gesendet"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                icmpOut = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("connections established") || line.contains("Verbindungen aufgebaut"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                tcpConnections = Integer.valueOf(splits[0]);
+            }
+            else if ((line.contains("segments received") || line.contains("Segmente empfangen")) && (tcpIn == 0))
+            {
+                // 45825 segments received
+                // 0 bad segments received
+                String[] splits = SPACE_PATTERN.split(line);
+                tcpIn = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("segments sent out") || line.contains("Segmente ausgesendet"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                tcpOut = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("packets received") || line.contains("Pakete empfangen"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                udpIn = Long.valueOf(splits[0]);
+            }
+            else if (line.contains("packets sent") || line.contains("Pakete gesendet"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                udpOut = Long.valueOf(splits[0]);
+            }
+        }
+
+        NetworkProtocolInfo protocolInfo = new NetworkProtocolInfo(icmpIn, icmpOut, ipIn, ipOut, tcpConnections, tcpIn, tcpOut, udpIn, udpOut);
+        NetworkInfos networkInfos = new NetworkInfos(networkInfoMap, protocolInfo);
 
         getLogger().debug(networkInfos.toString());
 
