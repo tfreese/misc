@@ -88,8 +88,8 @@ public final class JConky extends Application
 
         this.conkyContextPainter.addMonitorPainter(new HostMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new CpuMonitorPainter());
-        this.conkyContextPainter.addMonitorPainter(new ProcessMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new NetworkMonitorPainter());
+        this.conkyContextPainter.addMonitorPainter(new ProcessMonitorPainter());
 
         Context.getInstance().updateOneShot();
         Context.getInstance().updateLongScheduled();
@@ -102,7 +102,15 @@ public final class JConky extends Application
 
         getScheduledExecutorService().scheduleWithFixedDelay(() -> {
             getLogger().debug("shotScheduled updateValue");
-            Context.getInstance().updateShortScheduled();
+
+            try
+            {
+                Context.getInstance().updateShortScheduled();
+            }
+            catch (Exception ex)
+            {
+                getLogger().error(null, ex);
+            }
 
             getLogger().debug("paint");
             this.conkyContextPainter.paint();

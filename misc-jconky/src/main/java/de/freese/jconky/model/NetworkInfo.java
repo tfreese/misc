@@ -19,7 +19,7 @@ public class NetworkInfo
     /**
      *
      */
-    private String download;
+    private double downloadPerSecond;
 
     /**
      *
@@ -34,7 +34,12 @@ public class NetworkInfo
     /**
      *
      */
-    private String upload;
+    private final long timestamp;
+
+    /**
+     *
+     */
+    private double uploadPerSecond;
 
     /**
      * Erstellt ein neues {@link NetworkInfo} Object.
@@ -60,6 +65,18 @@ public class NetworkInfo
         this.ip = ip;
         this.bytesReceived = bytesReceived;
         this.bytesTransmitted = bytesTransmitted;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    /**
+     * @param previous {@link NetworkInfo}
+     */
+    public void calculateUpAndDownload(final NetworkInfo previous)
+    {
+        double time = (getTimestamp() - previous.getTimestamp()) / 1000D;
+
+        this.downloadPerSecond = (getBytesReceived() - previous.getBytesReceived()) / time;
+        this.uploadPerSecond = (getBytesTransmitted() - previous.getBytesTransmitted()) / time;
     }
 
     /**
@@ -79,11 +96,11 @@ public class NetworkInfo
     }
 
     /**
-     * @return String
+     * @return double
      */
-    public String getDownload()
+    public double getDownloadPerSecond()
     {
-        return this.download;
+        return this.downloadPerSecond;
     }
 
     /**
@@ -103,27 +120,19 @@ public class NetworkInfo
     }
 
     /**
-     * @return String
+     * @return long
      */
-    public String getUpload()
+    public long getTimestamp()
     {
-        return this.upload;
+        return this.timestamp;
     }
 
     /**
-     * @param download String
+     * @return double
      */
-    public void setDownload(final String download)
+    public double getUploadPerSecond()
     {
-        this.download = download;
-    }
-
-    /**
-     * @param upload String
-     */
-    public void setUpload(final String upload)
-    {
-        this.upload = upload;
+        return this.uploadPerSecond;
     }
 
     /**

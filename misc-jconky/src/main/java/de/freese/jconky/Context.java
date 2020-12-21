@@ -8,7 +8,6 @@ import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.system.SystemMonitor;
-import de.freese.jconky.util.JConkyUtils;
 
 /**
  * @author Thomas Freese
@@ -215,13 +214,11 @@ public final class Context
         CpuInfos cpuInfosPrevious = this.cpuInfos;
         this.cpuInfos = getSystemMonitor().getCpuInfos();
 
-        double usage = this.cpuInfos.getTotal().getCpuTimes().getCpuUsage(cpuInfosPrevious.getTotal().getCpuTimes());
-        this.cpuInfos.getTotal().setUsage(usage);
+        this.cpuInfos.getTotal().calculateCpuUsage(cpuInfosPrevious.getTotal());
 
         for (int i = 0; i < getNumberOfCores(); i++)
         {
-            usage = this.cpuInfos.get(i).getCpuTimes().getCpuUsage(cpuInfosPrevious.get(i).getCpuTimes());
-            this.cpuInfos.get(i).setUsage(usage);
+            this.cpuInfos.get(i).calculateCpuUsage(cpuInfosPrevious.get(i));
         }
 
         this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
@@ -233,25 +230,10 @@ public final class Context
         NetworkInfo eth0Previous = networkInfosPrevious.getByName("eth0");
         NetworkInfo eth0 = this.networkInfos.getByName("eth0");
 
-        // Nicht beim ersten Durchlauf.
+        // Den ersten Durchlauf ignorieren, sonst stimmen die Zahlen nicht.
         if (eth0Previous.getBytesReceived() > 0L)
         {
-            long deltaDownload = eth0.getBytesReceived() - eth0Previous.getBytesReceived();
-            long deltaUpload = eth0.getBytesTransmitted() - eth0Previous.getBytesTransmitted();
-
-            System.out.printf("BytesReceived=%d / %d; Delta=%d%n", eth0Previous.getBytesReceived(), eth0.getBytesReceived(), deltaDownload);
-            System.out.printf("BytesTransmitted=%d / %d; Delta=%d%n", eth0Previous.getBytesTransmitted(), eth0.getBytesTransmitted(), deltaUpload);
-
-            // 3 Sekunden Scan-Intervall berücksichtigen.
-            deltaDownload /= 3.5D;
-            deltaUpload /= 3.5D;
-
-            String download = JConkyUtils.toHumanReadableSize(deltaDownload);
-            String upload = JConkyUtils.toHumanReadableSize(deltaUpload);
-            // System.out.println(download + " / " + upload);
-
-            eth0.setDownload(download);
-            eth0.setUpload(upload);
+            eth0.calculateUpAndDownload(eth0Previous);
         }
     }
 }

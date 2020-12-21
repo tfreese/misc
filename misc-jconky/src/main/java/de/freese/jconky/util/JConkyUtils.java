@@ -64,53 +64,53 @@ public final class JConkyUtils
     }
 
     /**
-     * @param size long
+     * @param size double
      * @return String, z.B. '___,___ MB'
      */
-    public static String toHumanReadableSize(final long size)
+    public static String toHumanReadableSize(final double size)
     {
-        // int unitIndex = 0;
-        //
-        // if (size > 0)
-        // {
-        // unitIndex = (int) (Math.log10(size) / 3);
-        // }
-        //
-        // double unitValue = 1 << (unitIndex * 10);
-        //
+        int unitIndex = 0;
+
+        if (size > 0)
+        {
+            unitIndex = (int) (Math.log10(size) / 3);
+        }
+
+        double unitValue = 1 << (unitIndex * 10);
+
         // // String readableSize = new DecimalFormat("#,##0.#").format(size / unitValue) + " " + SIZE_UNITS[unitIndex];
         // // String readableSize = String.format("%7.0f %s", size / unitValue, SIZE_UNITS[unitIndex]);
-        // String readableSize = String.format("%.0f %s", size / unitValue, SIZE_UNITS[unitIndex]);
-        //
-        // return readableSize;
-
-        double divider = 1D;
-        String unit = "";
-
-        if (size <= 1024)
-        {
-            divider = 1D;
-            unit = "B";
-        }
-        else if (size <= 1_048_576)
-        {
-            divider = 1024D;
-            unit = "KB";
-        }
-        else if (size <= 1_073_741_824)
-        {
-            divider = 1_048_576D;
-            unit = "MB";
-        }
-        else if (size <= (1_048_576 * 1_048_576))
-        {
-            divider = 1_073_741_824D;
-            unit = "GB";
-        }
-
-        String readableSize = String.format("%.2f %s", size / divider, unit);
+        String readableSize = String.format("%.2f %s", size / unitValue, SIZE_UNITS[unitIndex]);
 
         return readableSize;
+
+        // double divider = 1D;
+        // String unit = "";
+        //
+        // if (size <= 1024)
+        // {
+        // divider = 1D;
+        // unit = "B";
+        // }
+        // else if (size <= 1_048_576)
+        // {
+        // divider = 1024D;
+        // unit = "KB";
+        // }
+        // else if (size <= 1_073_741_824)
+        // {
+        // divider = 1_048_576D;
+        // unit = "MB";
+        // }
+        // else if (size <= (1_048_576 * 1_048_576))
+        // {
+        // divider = 1_073_741_824D;
+        // unit = "GB";
+        // }
+        //
+        // String readableSize = String.format("%.2f %s", size / divider, unit);
+        //
+        // return readableSize;
     }
 
     /**

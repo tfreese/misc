@@ -54,10 +54,8 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
         double x = 0D;
         double y = 0D;
 
-        gc.setFill(getSettings().getColorText());
-
         int core = cpuInfo.getCore();
-        double usage = cpuInfo.getUsage();
+        double usage = cpuInfo.getCpuUsage();
         int frequency = cpuInfo.getFrequency() / 1000;
         double temperature = cpuInfo.getTemperature();
 
@@ -72,14 +70,7 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
             text = String.format("Core%d%3.0f%% %4dMhz", core, usage * 100D, frequency);
         }
 
-        gc.fillText(text, x, y);
-
-        // x = 0D;
-        // y = -4D;
-        // gc.setStroke(getSettings().getColorTitle());
-        // gc.setLineDashes(5D);
-        // gc.strokeLine(x, y, width, y);
-        // gc.setLineDashes();
+        paintText(gc, text, x, y);
 
         x = fontSize * 14D;
         y = -fontSize + 3D;
@@ -136,29 +127,16 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
 
         double x = getSettings().getMarginInner().getLeft();
         double y = fontSize * 1.25D;
-        gc.setFill(getSettings().getColorTitle());
-        gc.fillText("CPU", x, y);
-
-        x = fontSize * 3D;
-        y = fontSize;
-        gc.setStroke(getSettings().getColorTitle());
-        gc.setLineDashes(5D);
-        gc.strokeLine(x, y, width - getSettings().getMarginInner().getRight(), y);
-        gc.setLineDashes();
+        paintTitle(gc, "CPU", x, y, width);
 
         // CpuLoads
         x = getSettings().getMarginInner().getLeft();
         y += fontSize + 5D;
-        gc.setFill(getSettings().getColorText());
-        gc.fillText("Total", x, y);
+        paintText(gc, "Total", x, y);
 
         x = width - (fontSize * 13D);
-        gc.fillText("Loads:", x, y);
-
-        x += fontSize * 4D;
-        String loads = String.format("%.2f %.2f %.2f", cpuLoadAvg.getOneMinute(), cpuLoadAvg.getFiveMinutes(), cpuLoadAvg.getFifteenMinutes());
-        gc.setFill(getSettings().getColorValue());
-        gc.fillText(loads, x, y);
+        paintTextAndValue(gc, "Loads:", String.format("%.2f %.2f %.2f", cpuLoadAvg.getOneMinute(), cpuLoadAvg.getFiveMinutes(), cpuLoadAvg.getFifteenMinutes()),
+                x, y);
 
         // CpuUsage Bar
         x = getSettings().getMarginInner().getLeft();
@@ -195,12 +173,10 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
         double x = 0D;
         double y = 0D;
 
-        double usage = cpuInfos.getTotal().getUsage();
+        double usage = cpuInfos.getTotal().getCpuUsage();
         double temperature = cpuInfos.getTotal().getTemperature();
 
-        String text = String.format("%3.0f%% %2.0f°C", usage * 100D, temperature);
-        gc.setFill(getSettings().getColorValue());
-        gc.fillText(text, x, y);
+        paintTextValue(gc, String.format("%3.0f%% %2.0f°C", usage * 100D, temperature), x, y);
 
         x += 70D;
         y += 3D;
@@ -257,11 +233,11 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
     {
         CpuInfos cpuInfos = getContext().getCpuInfos();
 
-        this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>()).addValue(cpuInfos.getTotal().getUsage());
+        this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>()).addValue(cpuInfos.getTotal().getCpuUsage());
 
         for (int i = 0; i < getContext().getNumberOfCores(); i++)
         {
-            this.coreUsageMap.computeIfAbsent(i, key -> new Values<>()).addValue(cpuInfos.get(i).getUsage());
+            this.coreUsageMap.computeIfAbsent(i, key -> new Values<>()).addValue(cpuInfos.get(i).getCpuUsage());
         }
 
         double y = paintTotal(gc, width, cpuInfos);

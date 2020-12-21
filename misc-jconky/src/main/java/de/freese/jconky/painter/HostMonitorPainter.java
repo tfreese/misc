@@ -23,9 +23,7 @@ public class HostMonitorPainter extends AbstractMonitorPainter
 
         double x = getSettings().getMarginInner().getLeft();
         double y = fontSize * 1.25D;
-        String text = String.format("%s - %s on %s", hostInfo.getName(), hostInfo.getVersion(), hostInfo.getArchitecture());
-        gc.setFill(getSettings().getColorText());
-        gc.fillText(text, x, y);
+        paintText(gc, String.format("%s - %s on %s", hostInfo.getName(), hostInfo.getVersion(), hostInfo.getArchitecture()), x, y);
 
         double height = y + 5D;
         drawDebugBorder(gc, width, height);

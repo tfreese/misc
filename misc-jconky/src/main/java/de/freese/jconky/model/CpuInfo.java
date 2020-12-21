@@ -58,6 +58,16 @@ public class CpuInfo
     }
 
     /**
+     * Berechnet die CPU-Auslastung von 0 - 1.<br>
+     *
+     * @param previous {@link CpuInfo}
+     */
+    public void calculateCpuUsage(final CpuInfo previous)
+    {
+        this.usage = getCpuTimes().getCpuUsage(previous.getCpuTimes());
+    }
+
+    /**
      * @return int
      */
     public int getCore()
@@ -74,6 +84,16 @@ public class CpuInfo
     }
 
     /**
+     * Liefert die CPU-Auslastung von 0 - 1.<br>
+     *
+     * @return double
+     */
+    public double getCpuUsage()
+    {
+        return this.usage;
+    }
+
+    /**
      * @return int
      */
     public int getFrequency()
@@ -87,26 +107,6 @@ public class CpuInfo
     public double getTemperature()
     {
         return this.temperature;
-    }
-
-    /**
-     * Liefert die CPU-Auslastung von 0 - 1.<br>
-     *
-     * @return double
-     */
-    public double getUsage()
-    {
-        return this.usage;
-    }
-
-    /**
-     * Setzt die CPU-Auslastung von 0 - 1.<br>
-     *
-     * @param usage double
-     */
-    public void setUsage(final double usage)
-    {
-        this.usage = usage;
     }
 
     /**
