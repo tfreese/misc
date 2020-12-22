@@ -11,6 +11,7 @@ import de.freese.jconky.painter.CpuMonitorPainter;
 import de.freese.jconky.painter.HostMonitorPainter;
 import de.freese.jconky.painter.NetworkMonitorPainter;
 import de.freese.jconky.painter.ProcessMonitorPainter;
+import de.freese.jconky.painter.SystemMonitorPainter;
 import javafx.application.Application;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -42,6 +43,14 @@ public final class JConky extends Application
     private static final Logger LOGGER = LoggerFactory.getLogger(JConky.class);
 
     /**
+     * @return {@link Logger}
+     */
+    public static Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
      * @param args final String[]
      */
     public static void main(final String[] args)
@@ -60,14 +69,6 @@ public final class JConky extends Application
     private ScheduledExecutorService scheduledExecutorService;
 
     /**
-     * @return {@link Logger}
-     */
-    public Logger getLogger()
-    {
-        return LOGGER;
-    }
-
-    /**
      * @return {@link ScheduledExecutorService}
      */
     private ScheduledExecutorService getScheduledExecutorService()
@@ -83,38 +84,31 @@ public final class JConky extends Application
     {
         getLogger().info("init");
 
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(4);
         this.conkyContextPainter = new ContextPainter();
 
         this.conkyContextPainter.addMonitorPainter(new HostMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new CpuMonitorPainter());
+        this.conkyContextPainter.addMonitorPainter(new SystemMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new NetworkMonitorPainter());
         this.conkyContextPainter.addMonitorPainter(new ProcessMonitorPainter());
 
-        Context.getInstance().updateOneShot();
-        Context.getInstance().updateLongScheduled();
-        Context.getInstance().updateShortScheduled();
+        getScheduledExecutorService().execute(() -> Context.getInstance().updateOneShot());
 
-        getScheduledExecutorService().scheduleWithFixedDelay(() -> {
-            getLogger().debug("longScheduled updateValue");
-            Context.getInstance().updateLongScheduled();
-        }, 15, 15, TimeUnit.MINUTES);
+        // Short-Scheduled
+        TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+        long delay = 3000;
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateUptimeInSeconds(), 0, delay, timeUnit);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateCpuInfos(), 0, delay, timeUnit);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateNetworkInfos(), 0, delay, timeUnit);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateUsages(), 0, delay, timeUnit);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateProcessInfos(), 0, delay, timeUnit);
 
-        getScheduledExecutorService().scheduleWithFixedDelay(() -> {
-            getLogger().debug("shotScheduled updateValue");
-
-            try
-            {
-                Context.getInstance().updateShortScheduled();
-            }
-            catch (Exception ex)
-            {
-                getLogger().error(null, ex);
-            }
-
-            getLogger().debug("paint");
-            this.conkyContextPainter.paint();
-        }, 3000, 3000, TimeUnit.MILLISECONDS);
+        // Long-Scheduled
+        timeUnit = TimeUnit.MINUTES;
+        delay = 15;
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateHostInfo(), 0, delay, timeUnit);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> Context.getInstance().updateUpdates(), 0, delay, timeUnit);
     }
 
     /**
@@ -137,7 +131,7 @@ public final class JConky extends Application
         // pane.add(canvas, 0, 0);
 
         // Scene
-        Scene scene = new Scene(pane, 335, 1000, true, SceneAntialiasing.BALANCED);
+        Scene scene = new Scene(pane, 335, 1060, true, SceneAntialiasing.BALANCED);
 
         // Bind canvas size to scene size.
         canvas.widthProperty().bind(scene.widthProperty());
@@ -182,7 +176,17 @@ public final class JConky extends Application
         // primaryStage.setX(screen.getVisualBounds().getMinX() + 1200);
         // primaryStage.setY(10D);
 
-        Platform.runLater(this.conkyContextPainter::paint);
+        getScheduledExecutorService().scheduleWithFixedDelay(() -> {
+            try
+            {
+                Platform.runLater(this.conkyContextPainter::paint);
+            }
+            catch (Exception ex)
+            {
+                getLogger().error(null, ex);
+            }
+        }, 300, 3000, TimeUnit.MILLISECONDS);
+
         primaryStage.show();
     }
 

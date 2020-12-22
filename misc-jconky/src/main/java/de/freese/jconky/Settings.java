@@ -216,6 +216,6 @@ public final class Settings
      */
     public boolean isDebug()
     {
-        return true;
+        return false;
     }
 }

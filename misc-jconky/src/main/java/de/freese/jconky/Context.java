@@ -1,12 +1,15 @@
 // Created: 13.12.2020
 package de.freese.jconky;
 
+import java.util.HashMap;
+import java.util.Map;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
 import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.UsageInfo;
 import de.freese.jconky.system.SystemMonitor;
 
 /**
@@ -84,9 +87,19 @@ public final class Context
     private long totalSystemMemory;
 
     /**
+    *
+    */
+    private int updates = 0;
+
+    /**
      *
      */
     private double uptimeInSeconds;
+
+    /**
+     *
+     */
+    private Map<String, UsageInfo> usages = new HashMap<>();
 
     /**
      * Erstellt ein neues {@link Context} Object.
@@ -177,6 +190,14 @@ public final class Context
     }
 
     /**
+     * @return int
+     */
+    public int getUpdates()
+    {
+        return this.updates;
+    }
+
+    /**
      * @return double
      */
     public double getUptimeInSeconds()
@@ -185,11 +206,78 @@ public final class Context
     }
 
     /**
-     * Daten, die alle paar Muniten aktualisiert werden müssen.
+     * @return {@link Map}<String,UsageInfo>
      */
-    public void updateLongScheduled()
+    public Map<String, UsageInfo> getUsages()
     {
-        this.hostInfo = getSystemMonitor().getHostInfo();
+        return this.usages;
+    }
+
+    /**
+    *
+    */
+    public void updateCpuInfos()
+    {
+        try
+        {
+            this.cpuLoadAvg = getSystemMonitor().getCpuLoadAvg();
+
+            // CpuUsages berechnen.
+            CpuInfos cpuInfosPrevious = this.cpuInfos;
+            this.cpuInfos = getSystemMonitor().getCpuInfos();
+
+            this.cpuInfos.getTotal().calculateCpuUsage(cpuInfosPrevious.getTotal());
+
+            for (int i = 0; i < getNumberOfCores(); i++)
+            {
+                this.cpuInfos.get(i).calculateCpuUsage(cpuInfosPrevious.get(i));
+            }
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
+    public void updateHostInfo()
+    {
+        try
+        {
+            this.hostInfo = getSystemMonitor().getHostInfo();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
+    public void updateNetworkInfos()
+    {
+        try
+        {
+            // Netzwerk: Download/Upload berechnen.
+            NetworkInfos networkInfosPrevious = this.networkInfos;
+            this.networkInfos = getSystemMonitor().getNetworkInfos();
+
+            NetworkInfo eth0Previous = networkInfosPrevious.getByName("eth0");
+            NetworkInfo eth0 = this.networkInfos.getByName("eth0");
+
+            // Den ersten Durchlauf ignorieren, sonst stimmen die Zahlen nicht.
+            if (eth0Previous.getBytesReceived() > 0L)
+            {
+                eth0.calculateUpAndDownload(eth0Previous);
+            }
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
     }
 
     /**
@@ -197,43 +285,95 @@ public final class Context
      */
     public void updateOneShot()
     {
-        this.numberOfCores = getSystemMonitor().getNumberOfCores();
-        this.totalSystemMemory = getSystemMonitor().getTotalSystemMemory();
-        this.externalIp = getSystemMonitor().getExternalIp();
+        try
+        {
+            this.numberOfCores = getSystemMonitor().getNumberOfCores();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+
+        try
+        {
+            this.totalSystemMemory = getSystemMonitor().getTotalSystemMemory();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+
+        try
+        {
+            this.externalIp = getSystemMonitor().getExternalIp();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+     *
+     */
+    public void updateProcessInfos()
+    {
+        try
+        {
+            this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
+    public void updateUpdates()
+    {
+        try
+        {
+            this.updates = getSystemMonitor().getUpdates();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
+    public void updateUptimeInSeconds()
+    {
+        try
+        {
+            this.uptimeInSeconds = getSystemMonitor().getUptimeInSeconds();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
     }
 
     /**
      * Daten, die alle paar Sekunden aktualisiert werden müssen.
      */
-    public void updateShortScheduled()
+    public void updateUsages()
     {
-        this.cpuLoadAvg = getSystemMonitor().getCpuLoadAvg();
-        this.uptimeInSeconds = getSystemMonitor().getUptimeInSeconds();
-
-        // CpuUsages berechnen.
-        CpuInfos cpuInfosPrevious = this.cpuInfos;
-        this.cpuInfos = getSystemMonitor().getCpuInfos();
-
-        this.cpuInfos.getTotal().calculateCpuUsage(cpuInfosPrevious.getTotal());
-
-        for (int i = 0; i < getNumberOfCores(); i++)
+        try
         {
-            this.cpuInfos.get(i).calculateCpuUsage(cpuInfosPrevious.get(i));
+            Map<String, UsageInfo> map = new HashMap<>();
+            map.putAll(getSystemMonitor().getRamAndSwap());
+            map.putAll(getSystemMonitor().getFilesystems());
+
+            this.usages = map;
         }
-
-        this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
-
-        // Netzwerk: Download/Upload berechnen.
-        NetworkInfos networkInfosPrevious = this.networkInfos;
-        this.networkInfos = getSystemMonitor().getNetworkInfos();
-
-        NetworkInfo eth0Previous = networkInfosPrevious.getByName("eth0");
-        NetworkInfo eth0 = this.networkInfos.getByName("eth0");
-
-        // Den ersten Durchlauf ignorieren, sonst stimmen die Zahlen nicht.
-        if (eth0Previous.getBytesReceived() > 0L)
+        catch (Exception ex)
         {
-            eth0.calculateUpAndDownload(eth0Previous);
+            JConky.getLogger().error(null, ex);
         }
     }
 }

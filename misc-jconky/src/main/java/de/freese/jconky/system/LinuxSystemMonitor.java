@@ -26,6 +26,7 @@ import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.NetworkProtocolInfo;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.UsageInfo;
 import de.freese.jconky.util.JConkyUtils;
 
 /**
@@ -118,6 +119,21 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     /**
     *
     */
+    private final ProcessBuilder processBuilderCheckUpdates;
+
+    /**
+    *
+    */
+    private final ProcessBuilder processBuilderDf;
+
+    /**
+    *
+    */
+    private final ProcessBuilder processBuilderFree;
+
+    /**
+    *
+    */
     private final ProcessBuilder processBuilderIfconfig;
 
     /**
@@ -148,7 +164,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         super();
 
         // .redirectErrorStream(true); // Gibt Fehler auf dem InputStream aus.
-        this.processBuilderUname = new ProcessBuilder().command("/bin/sh", "-c", "uname -a");
+        this.processBuilderUname = new ProcessBuilder().command("/bin/sh", "-c", "uname --all");
 
         this.processBuilderSensors = new ProcessBuilder().command("/bin/sh", "-c", "sensors");
 
@@ -156,7 +172,10 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         this.processBuilderTop = new ProcessBuilder().command("/bin/sh", "-c", "top -b -n 1");
 
         this.processBuilderIfconfig = new ProcessBuilder().command("/bin/sh", "-c", "ifconfig");
-        this.processBuilderNetstat = new ProcessBuilder().command("/bin/sh", "-c", "netstat -s");
+        this.processBuilderNetstat = new ProcessBuilder().command("/bin/sh", "-c", "netstat --statistics ");
+        this.processBuilderDf = new ProcessBuilder().command("/bin/sh", "-c", "df --block-size=1K");
+        this.processBuilderFree = new ProcessBuilder().command("/bin/sh", "-c", "free --bytes");
+        this.processBuilderCheckUpdates = new ProcessBuilder().command("/bin/sh", "-c", "checkupdates");
     }
 
     /**
@@ -346,6 +365,34 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         getLogger().debug("externalIp = {}", externalIp);
 
         return externalIp;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getFilesystems()
+     */
+    @Override
+    public Map<String, UsageInfo> getFilesystems()
+    {
+        Map<String, UsageInfo> map = new HashMap<>();
+
+        List<String> lines = readContent(this.processBuilderDf);
+
+        for (String line : lines)
+        {
+            if (line.contains("vgdesktop-root") || line.contains("/tmp"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                String path = splits[5];
+                long size = Long.parseLong(splits[1]);
+                long used = Long.parseLong(splits[2]);
+
+                map.put(path, new UsageInfo(path, size * 1024L, used * 1024L));
+            }
+        }
+
+        getLogger().debug(map.toString());
+
+        return map;
     }
 
     /**
@@ -706,6 +753,55 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         }
 
         return new ProcessInfos(infos);
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getRamAndSwap()
+     */
+    @Override
+    public Map<String, UsageInfo> getRamAndSwap()
+    {
+        // /proc/meminfo
+        Map<String, UsageInfo> map = new HashMap<>();
+
+        List<String> lines = readContent(this.processBuilderFree);
+
+        for (int i = 0; i < lines.size(); i++)
+        {
+            if (i == 1)
+            {
+                // Speicher
+                String[] splits = SPACE_PATTERN.split(lines.get(i));
+                String path = "RAM";
+                long size = Long.parseLong(splits[1]);
+                long used = Long.parseLong(splits[2]);
+
+                map.put(path, new UsageInfo(path, size, used));
+            }
+            else if (i == 2)
+            {
+                // Swap
+                String[] splits = SPACE_PATTERN.split(lines.get(i));
+                String path = "SWAP";
+                long size = Long.parseLong(splits[1]);
+                long used = Long.parseLong(splits[2]);
+
+                map.put(path, new UsageInfo(path, size, used));
+            }
+        }
+
+        getLogger().debug(map.toString());
+
+        return map;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getUpdates()
+     */
+    @Override
+    public int getUpdates()
+    {
+        return (int) readContent(this.processBuilderCheckUpdates).stream().count();
     }
 
     /**

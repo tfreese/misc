@@ -4,6 +4,7 @@ package de.freese.jconky.system;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Map;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -17,6 +18,7 @@ import de.freese.jconky.model.HostInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.UsageInfo;
 
 /**
  * @author Thomas Freese
@@ -99,6 +101,21 @@ class TestSystemMonitor
     }
 
     /**
+    *
+    */
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void testFilesystems()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        Map<String, UsageInfo> map = systemMonitor.getFilesystems();
+
+        assertNotNull(map);
+        assertEquals(2, map.size());
+    }
+
+    /**
      *
      */
     @Test
@@ -155,5 +172,20 @@ class TestSystemMonitor
 
             System.out.println(processInfo);
         }
+    }
+
+    /**
+    *
+    */
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void testRamAndSwap()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        Map<String, UsageInfo> map = systemMonitor.getRamAndSwap();
+
+        assertNotNull(map);
+        assertEquals(2, map.size());
     }
 }

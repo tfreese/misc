@@ -1,11 +1,13 @@
 // Created: 01.12.2020
 package de.freese.jconky.system;
 
+import java.util.Map;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.UsageInfo;
 
 /**
  * @author Thomas Freese
@@ -26,6 +28,11 @@ public interface SystemMonitor
      * @return String
      */
     public String getExternalIp();
+
+    /**
+     * @return {@link Map}
+     */
+    public Map<String, UsageInfo> getFilesystems();
 
     /**
      * @return {@link HostInfo}
@@ -50,9 +57,19 @@ public interface SystemMonitor
     public ProcessInfos getProcessInfos(double uptimeInSeconds, long totalSystemMemory);
 
     /**
+     * @return {@link Map}
+     */
+    public Map<String, UsageInfo> getRamAndSwap();
+
+    /**
      * @return long
      */
     public long getTotalSystemMemory();
+
+    /**
+     * @return int
+     */
+    public int getUpdates();
 
     /**
      * @return double

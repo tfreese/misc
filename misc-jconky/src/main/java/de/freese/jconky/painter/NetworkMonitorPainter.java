@@ -149,7 +149,6 @@ public class NetworkMonitorPainter extends AbstractMonitorPainter
         double y = fontSize * 1.25D;
         paintTitle(gc, String.format("Network: %s -> %s", eth0.getIp(), externalIp), x, y, width);
 
-        x = getSettings().getMarginInner().getLeft();
         y += fontSize * 1.5D;
 
         gc.save();

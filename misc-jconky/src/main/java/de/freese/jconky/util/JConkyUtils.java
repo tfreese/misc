@@ -11,7 +11,7 @@ public final class JConkyUtils
     */
     private static final String[] SIZE_UNITS = new String[]
     {
-            "B", "KB", "MB", "GB", "TB"
+            "B", "K", "M", "G", "T"
     };
 
     /**
@@ -69,20 +69,7 @@ public final class JConkyUtils
      */
     public static String toHumanReadableSize(final double size)
     {
-        int unitIndex = 0;
-
-        if (size > 0)
-        {
-            unitIndex = (int) (Math.log10(size) / 3);
-        }
-
-        double unitValue = 1 << (unitIndex * 10);
-
-        // // String readableSize = new DecimalFormat("#,##0.#").format(size / unitValue) + " " + SIZE_UNITS[unitIndex];
-        // // String readableSize = String.format("%7.0f %s", size / unitValue, SIZE_UNITS[unitIndex]);
-        String readableSize = String.format("%.2f %s", size / unitValue, SIZE_UNITS[unitIndex]);
-
-        return readableSize;
+        return toHumanReadableSize(size, "%.1f %s");
 
         // double divider = 1D;
         // String unit = "";
@@ -108,9 +95,32 @@ public final class JConkyUtils
         // unit = "GB";
         // }
         //
-        // String readableSize = String.format("%.2f %s", size / divider, unit);
+        // String readableSize = String.format("%.1f %s", size / divider, unit);
         //
         // return readableSize;
+    }
+
+    /**
+     * @param size double
+     * @param format String
+     * @return String, z.B. '___,___ MB'
+     */
+    public static String toHumanReadableSize(final double size, final String format)
+    {
+        int unitIndex = 0;
+
+        if (size > 0)
+        {
+            unitIndex = (int) (Math.log10(size) / 3);
+        }
+
+        double unitValue = 1 << (unitIndex * 10);
+
+        // // String readableSize = new DecimalFormat("#,##0.#").format(size / unitValue) + " " + SIZE_UNITS[unitIndex];
+        // // String readableSize = String.format("%7.0f %s", size / unitValue, SIZE_UNITS[unitIndex]);
+        String readableSize = String.format(format, size / unitValue, SIZE_UNITS[unitIndex]);
+
+        return readableSize;
     }
 
     /**

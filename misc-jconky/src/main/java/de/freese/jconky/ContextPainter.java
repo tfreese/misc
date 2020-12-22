@@ -4,6 +4,8 @@ package de.freese.jconky;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import de.freese.jconky.painter.MonitorPainter;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
@@ -17,8 +19,12 @@ public class ContextPainter
     /**
      *
      */
-    private Canvas canvas;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContextPainter.class);
 
+    /**
+     *
+     */
+    private Canvas canvas;
     /**
      *
      */
@@ -38,10 +44,20 @@ public class ContextPainter
     }
 
     /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return LOGGER;
+    }
+
+    /**
      *
      */
     public void paint()
     {
+        getLogger().debug("paint");
+
         double width = this.canvas.getWidth();
         double height = this.canvas.getHeight();
 
