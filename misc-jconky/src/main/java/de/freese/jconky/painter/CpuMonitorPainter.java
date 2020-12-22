@@ -199,24 +199,28 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
      */
     private double paintTotalGraph(final GraphicsContext gc, final double width)
     {
-        List<Double> values = this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>()).getLastValues((int) width);
+        Values<Double> values = this.coreUsageMap.computeIfAbsent(-1, key -> new Values<>());
+        List<Double> valueList = values.getLastValues((int) width);
         double height = 20D;
 
-        // gc.setStroke(getSettings().getColorText());
-        // gc.strokeRect(0D, 0D, width, height);
+        // double minValue = 0D;
+        // double maxValue = values.getMaxValue();
+        // double minNorm = 0D;
+        // double maxNorm = height - 2;
 
         // gc.setFill(new LinearGradient(0D, height - 2, 0D, 0D, false, CycleMethod.NO_CYCLE, this.gradientStops));
         gc.setStroke(new LinearGradient(0D, height - 2, 0D, 0D, false, CycleMethod.NO_CYCLE, this.gradientStops));
 
-        double xOffset = width - values.size(); // Diagramm von rechts aufbauen.
+        double xOffset = width - valueList.size(); // Diagramm von rechts aufbauen.
         // double xOffset = 0D; // Diagramm von links aufbauen.
 
-        for (int i = 0; i < values.size(); i++)
+        for (int i = 0; i < valueList.size(); i++)
         {
-            double value = values.get(i);
+            double value = valueList.get(i);
 
             double x = i + xOffset;
             double y = value * (height - 2);
+            // double y = minNorm + (((value - minValue) * (maxNorm - minNorm)) / (maxValue - minValue));
 
             // gc.fillRect(x, height - 1 - y, 1, y);
             gc.strokeLine(x, height - 1 - y, x, height - 1);

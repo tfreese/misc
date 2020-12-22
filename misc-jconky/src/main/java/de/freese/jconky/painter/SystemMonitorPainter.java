@@ -57,7 +57,7 @@ public class SystemMonitorPainter extends AbstractMonitorPainter
 
         x = 190D;
         y = -9.5D;
-        double barWidth = 130D;
+        double barWidth = width - x;
         gc.setStroke(getSettings().getColorText());
         gc.strokeRect(x, y, barWidth, 10D);
 
