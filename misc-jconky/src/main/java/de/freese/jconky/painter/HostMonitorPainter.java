@@ -22,7 +22,7 @@ public class HostMonitorPainter extends AbstractMonitorPainter
         double fontSize = getSettings().getFontSize();
 
         double x = getSettings().getMarginInner().getLeft();
-        double y = fontSize * 1.25D;
+        double y = fontSize;
         paintText(gc, String.format("%s - %s on %s", hostInfo.getName(), hostInfo.getVersion(), hostInfo.getArchitecture()), x, y);
 
         double height = y + 5D;

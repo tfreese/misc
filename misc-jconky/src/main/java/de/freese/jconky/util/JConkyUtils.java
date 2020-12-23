@@ -64,6 +64,41 @@ public final class JConkyUtils
     }
 
     /**
+     * @param duration double
+     * @return String, z.B. 'HH:mm:ss', oder 'm:ss'
+     */
+    public static String toClockString(final double duration)
+    {
+        return toClockString(duration, "%02d:%02d:%02d", "%02d:%02d");
+    }
+
+    /**
+     * @param duration double
+     * @param withHourPattern String; %02d:%02d:%02d
+     * @param withoutHourPattern String; %1d:%02d
+     * @return String
+     */
+    public static String toClockString(final double duration, final String withHourPattern, final String withoutHourPattern)
+    {
+        int seconds = (int) duration % 60;
+        int minutes = (int) (duration / 60) % 60;
+        int hours = (int) (duration / 60 / 60) % 60;
+
+        String clock = null;
+
+        if (hours > 0)
+        {
+            clock = String.format(withHourPattern, hours, minutes, seconds);
+        }
+        else
+        {
+            clock = String.format(withoutHourPattern, minutes, seconds);
+        }
+
+        return clock;
+    }
+
+    /**
      * @param size double
      * @return String, z.B. '___,___ MB'
      */

@@ -20,12 +20,15 @@ import de.freese.jconky.model.CpuInfo;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
+import de.freese.jconky.model.GpuInfo;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.MusicInfo;
 import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.NetworkProtocolInfo;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.TemperatureInfo;
 import de.freese.jconky.model.UsageInfo;
 import de.freese.jconky.util.JConkyUtils;
 
@@ -95,56 +98,60 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     // */
     // private static final Pattern STATUS_VM_SIZE_MATCHER = Pattern.compile("VmSize:\\s+(\\d+) kB", Pattern.UNICODE_CHARACTER_CLASS | Pattern.MULTILINE);
 
-    // private static final Pattern TOTAL_MEMORY_PATTERN =
-    // Pattern.compile("MemTotal:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern FREE_MEMORY_PATTERN =
-    // Pattern.compile("MemFree:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern BUFFERS_PATTERN =
-    // Pattern.compile("Buffers:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern CACHED_PATTERN =
-    // Pattern.compile("Cached:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern TOTAL_SWAP_PATTERN =
-    // Pattern.compile("SwapTotal:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern FREE_SWAP_PATTERN =
-    // Pattern.compile("SwapFree:\\s+(\\d+) kB", Pattern.MULTILINE);
-    // private static final Pattern CPU_FREQ_PATTERN =
-    // Pattern.compile("model name[^@]*@\\s+([0-9.A-Za-z]*)", Pattern.MULTILINE);
-    // private static final Pattern UPTIME_PATTERN =
-    // Pattern.compile("([\\d]*).*");
-    // private static final Pattern PID_PATTERN =
-    // Pattern.compile("([\\d]*).*");
-    // private static final Pattern DISTRIBUTION =
-    // Pattern.compile("DISTRIB_DESCRIPTION=\"(.*)\"", Pattern.MULTILINE);
-
     /**
-    *
-    */
+     *
+     */
     private final ProcessBuilder processBuilderCheckUpdates;
 
     /**
-    *
-    */
+     *
+     */
     private final ProcessBuilder processBuilderDf;
 
     /**
-    *
-    */
+     *
+     */
     private final ProcessBuilder processBuilderFree;
 
     /**
-    *
-    */
+     *
+     */
+    private final ProcessBuilder processBuilderHddtemp;
+
+    /**
+     *
+     */
     private final ProcessBuilder processBuilderIfconfig;
 
     /**
-    *
-    */
+     *
+     */
     private final ProcessBuilder processBuilderNetstat;
 
     /**
      *
      */
+    private final ProcessBuilder processBuilderNvidiaSmi;
+
+    /**
+     *
+     */
+    private final ProcessBuilder processBuilderPlayerctlMetaData;
+
+    /**
+     *
+     */
+    private final ProcessBuilder processBuilderPlayerctlPosition;
+
+    /**
+     *
+     */
     private final ProcessBuilder processBuilderSensors;
+
+    /**
+     *
+     */
+    private final ProcessBuilder processBuilderSmartctl;
 
     /**
      *
@@ -176,6 +183,12 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         this.processBuilderDf = new ProcessBuilder().command("/bin/sh", "-c", "df --block-size=1K");
         this.processBuilderFree = new ProcessBuilder().command("/bin/sh", "-c", "free --bytes");
         this.processBuilderCheckUpdates = new ProcessBuilder().command("/bin/sh", "-c", "checkupdates");
+        this.processBuilderPlayerctlMetaData = new ProcessBuilder().command("/bin/sh", "-c", "playerctl -p clementine -s metadata");
+        this.processBuilderPlayerctlPosition = new ProcessBuilder().command("/bin/sh", "-c", "playerctl -p clementine -s position");
+        this.processBuilderHddtemp = new ProcessBuilder().command("/bin/sh", "-c", "sudo hddtemp /dev/sda /dev/sdb /dev/sdc");
+        this.processBuilderSmartctl = new ProcessBuilder().command("/bin/sh", "-c", "sudo smartctl -i -A /dev/nvme0n1");
+        this.processBuilderNvidiaSmi = new ProcessBuilder().command("/bin/sh", "-c",
+                "nvidia-smi --format=csv,noheader,nounits --query-gpu=temperature.gpu,power.draw,fan.speed,utilization.gpu");
     }
 
     /**
@@ -415,6 +428,67 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         getLogger().debug(hostInfo.toString());
 
         return hostInfo;
+    }
+
+    /**
+     * @see de.freese.jconky.system.SystemMonitor#getMusicInfo()
+     */
+    @Override
+    public MusicInfo getMusicInfo()
+    {
+        List<String> lines = readContent(this.processBuilderPlayerctlMetaData);
+        // String output = lines.stream().collect(Collectors.joining("\n"));
+
+        String artist = null;
+        String album = null;
+        String title = null;
+        int length = 0;
+        int position = 0;
+        int bitRate = 0;
+        URI imageUri = null;
+
+        for (String line : lines)
+        {
+            if (line.contains("xesam:artist "))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                artist = splits[2];
+            }
+            else if (line.contains("xesam:album "))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                album = splits[2];
+            }
+            else if (line.contains("xesam:title "))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                title = splits[2];
+            }
+            else if (line.contains("mpris:length "))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                length = (int) (Long.parseLong(splits[2]) / 1_000_000L); // Nano-Sekunden -> Sekunden
+            }
+            else if (line.contains("bitrate"))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                bitRate = Integer.parseInt(splits[2]);
+            }
+            else if (line.contains("mpris:artUrl"))
+            {
+                String[] splits = SPACE_PATTERN.split(line, 3);
+                imageUri = URI.create(splits[2]);
+            }
+        }
+
+        lines = readContent(this.processBuilderPlayerctlPosition);
+        position = Double.valueOf(lines.get(0)).intValue();
+
+        MusicInfo musicInfo = new MusicInfo(artist, album, title, length, position, bitRate, imageUri);
+
+        getLogger().debug(musicInfo.toString());
+
+        return musicInfo;
     }
 
     /**
@@ -700,8 +774,8 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     {
         List<ProcessInfo> infos = new ArrayList<>(300);
 
-        // String output = readContent(this.processBuilderSensors).stream().collect(Collectors.joining("\n"));
         List<String> lines = readContent(this.processBuilderTop);
+        // String output = lines.stream().collect(Collectors.joining("\n"));
 
         // GiB Spch: 15,6 total, 12,4 free, 2,0 used, 1,1 buff/cache
         // GiB Swap: 14,4 total, 14,4 free, 0,0 used. 13,2 avail Spch
@@ -796,12 +870,66 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
     }
 
     /**
+     * @see de.freese.jconky.system.SystemMonitor#getTemperatures()
+     */
+    @Override
+    public Map<String, TemperatureInfo> getTemperatures()
+    {
+        Map<String, TemperatureInfo> map = new HashMap<>();
+
+        List<String> lines = readContent(this.processBuilderHddtemp);
+        // String output = lines.stream().collect(Collectors.joining("\n"))
+
+        for (String line : lines)
+        {
+            String[] splits = SPACE_PATTERN.split(line);
+            String device = splits[0].replace(":", "");
+            double temperature = Double.parseDouble(splits[splits.length - 1].replace("°C", ""));
+
+            map.put(device, new TemperatureInfo(device, temperature));
+        }
+
+        lines = readContent(this.processBuilderSmartctl);
+
+        for (String line : lines)
+        {
+            if (line.startsWith("Temperature Sensor 2:"))
+            {
+                String[] splits = SPACE_PATTERN.split(line);
+                double temperature = Double.parseDouble(splits[3]);
+
+                map.put("/dev/nvme0n1", new TemperatureInfo("/dev/nvme0n1", temperature));
+            }
+        }
+
+        lines = readContent(this.processBuilderNvidiaSmi);
+        String line = lines.get(0);
+
+        String[] splits = SPACE_PATTERN.split(line);
+
+        double temperature = Double.parseDouble(splits[0].replace(",", ""));
+        double power = Double.parseDouble(splits[1].replace(",", ""));
+        int fanSpeed = Integer.parseInt(splits[2].replace(",", ""));
+        int usage = Integer.parseInt(splits[3].replace(",", ""));
+
+        map.put("GPU", new GpuInfo(temperature, power, fanSpeed, usage));
+
+        getLogger().debug(map.toString());
+
+        return map;
+    }
+
+    /**
      * @see de.freese.jconky.system.SystemMonitor#getUpdates()
      */
     @Override
     public int getUpdates()
     {
-        return (int) readContent(this.processBuilderCheckUpdates).stream().count();
+        long updates = readContent(this.processBuilderCheckUpdates).stream().count();
+
+        getLogger().debug("updates = {}", updates);
+
+        return (int) updates;
     }
 
     /**

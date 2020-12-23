@@ -5,8 +5,10 @@ import java.util.Map;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.MusicInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.TemperatureInfo;
 import de.freese.jconky.model.UsageInfo;
 
 /**
@@ -40,6 +42,11 @@ public interface SystemMonitor
     public HostInfo getHostInfo();
 
     /**
+     * @return {@link MusicInfo}
+     */
+    public MusicInfo getMusicInfo();
+
+    /**
      * @return {@link NetworkInfos}
      */
     public NetworkInfos getNetworkInfos();
@@ -60,6 +67,11 @@ public interface SystemMonitor
      * @return {@link Map}
      */
     public Map<String, UsageInfo> getRamAndSwap();
+
+    /**
+     * @return {@link Map}
+     */
+    public Map<String, TemperatureInfo> getTemperatures();
 
     /**
      * @return long

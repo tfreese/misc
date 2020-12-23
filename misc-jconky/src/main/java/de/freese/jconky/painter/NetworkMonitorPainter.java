@@ -146,17 +146,17 @@ public class NetworkMonitorPainter extends AbstractMonitorPainter
         double fontSize = getSettings().getFontSize();
 
         double x = getSettings().getMarginInner().getLeft();
-        double y = fontSize * 1.25D;
+        double y = fontSize;
         paintTitle(gc, String.format("Network: %s -> %s", eth0.getIp(), externalIp), x, y, width);
 
-        y += fontSize * 1.5D;
+        y += fontSize * 1.25D;
 
         gc.save();
         gc.translate(x, y);
         y += paintInterface(gc, width - x - getSettings().getMarginInner().getRight(), eth0);
         gc.restore();
 
-        y += fontSize * 1.2D;
+        y += fontSize * 1.25D;
         paintTextAndValue(gc, "TCP-Connections:", Integer.toString(protocolInfo.getTcpConnections()), x, y);
 
         double height = y + 5D;

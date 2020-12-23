@@ -1,6 +1,8 @@
 // Created: 13.12.2020
 package de.freese.jconky.painter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import de.freese.jconky.Context;
 import de.freese.jconky.Settings;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +13,11 @@ import javafx.scene.paint.Color;
  */
 public abstract class AbstractMonitorPainter implements MonitorPainter
 {
+    /**
+     *
+     */
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
      * @param gc {@link GraphicsContext}
      * @param width double
@@ -32,6 +39,14 @@ public abstract class AbstractMonitorPainter implements MonitorPainter
     protected Context getContext()
     {
         return Context.getInstance();
+    }
+
+    /**
+     * @return {@link Logger}
+     */
+    protected Logger getLogger()
+    {
+        return this.logger;
     }
 
     /**

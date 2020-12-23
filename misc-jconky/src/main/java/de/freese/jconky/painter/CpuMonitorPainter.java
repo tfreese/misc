@@ -126,7 +126,7 @@ public class CpuMonitorPainter extends AbstractMonitorPainter
         gc.setFont(getSettings().getFont());
 
         double x = getSettings().getMarginInner().getLeft();
-        double y = fontSize * 1.25D;
+        double y = fontSize;
         paintTitle(gc, "CPU", x, y, width);
 
         // CpuLoads

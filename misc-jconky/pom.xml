@@ -17,10 +17,10 @@
 
 	<dependencies>
 		<!-- compile scope -->
-		<dependency>
+		<!--dependency>
 			<groupId>com.danielflower.apprunner</groupId>
 			<artifactId>javasysmon</artifactId>
-		</dependency>
+		</dependency-->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>

@@ -50,10 +50,11 @@ public class SystemMonitorPainter extends AbstractMonitorPainter
         long used = usageInfo.getUsed();
         long size = usageInfo.getSize();
         double usage = usageInfo.getUsage();
-        String value =
-                String.format("%s/%s %.1f%%", JConkyUtils.toHumanReadableSize(used, format), JConkyUtils.toHumanReadableSize(size, format), usage * 100D);
-
+        String value = String.format("%s/%s", JConkyUtils.toHumanReadableSize(used, format), JConkyUtils.toHumanReadableSize(size, format));
         paintTextAndValue(gc, path, value, x, y);
+
+        x = 150D;
+        paintTextValue(gc, String.format("%4.1f%%", usage * 100D), x, y);
 
         x = 190D;
         y = -9.5D;
@@ -76,14 +77,14 @@ public class SystemMonitorPainter extends AbstractMonitorPainter
         double fontSize = getSettings().getFontSize();
 
         double x = getSettings().getMarginInner().getLeft();
-        double y = fontSize * 1.25D;
+        double y = fontSize;
         paintTitle(gc, "System", x, y, width);
 
         List<String> paths = Arrays.asList("RAM", "SWAP", "/", "/tmp");
 
         for (String path : paths)
         {
-            y += fontSize * 1.5D;
+            y += fontSize * 1.25D;
 
             gc.save();
             gc.translate(x, y);
@@ -91,7 +92,7 @@ public class SystemMonitorPainter extends AbstractMonitorPainter
             gc.restore();
         }
 
-        y += fontSize * 1.5D;
+        y += fontSize * 1.25D;
         paintTextAndValue(gc, "Updates:", Integer.toString(getContext().getUpdates()), x, y);
 
         double height = y + 5D;

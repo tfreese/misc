@@ -15,9 +15,11 @@ import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.MusicInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.TemperatureInfo;
 import de.freese.jconky.model.UsageInfo;
 
 /**
@@ -137,6 +139,20 @@ class TestSystemMonitor
     */
     @Test
     @EnabledOnOs(OS.LINUX)
+    void testMusicInfo()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        MusicInfo musicInfo = systemMonitor.getMusicInfo();
+
+        assertNotNull(musicInfo);
+    }
+
+    /**
+    *
+    */
+    @Test
+    @EnabledOnOs(OS.LINUX)
     void testNetworkInfos()
     {
         SystemMonitor systemMonitor = createSystemMonitor();
@@ -187,5 +203,20 @@ class TestSystemMonitor
 
         assertNotNull(map);
         assertEquals(2, map.size());
+    }
+
+    /**
+    *
+    */
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void testTemperatures()
+    {
+        SystemMonitor systemMonitor = createSystemMonitor();
+
+        Map<String, TemperatureInfo> map = systemMonitor.getTemperatures();
+
+        assertNotNull(map);
+        assertTrue(map.size() > 3);
     }
 }

@@ -6,9 +6,11 @@ import java.util.Map;
 import de.freese.jconky.model.CpuInfos;
 import de.freese.jconky.model.CpuLoadAvg;
 import de.freese.jconky.model.HostInfo;
+import de.freese.jconky.model.MusicInfo;
 import de.freese.jconky.model.NetworkInfo;
 import de.freese.jconky.model.NetworkInfos;
 import de.freese.jconky.model.ProcessInfos;
+import de.freese.jconky.model.TemperatureInfo;
 import de.freese.jconky.model.UsageInfo;
 import de.freese.jconky.system.SystemMonitor;
 
@@ -69,6 +71,11 @@ public final class Context
     /**
      *
      */
+    private MusicInfo musicInfo = new MusicInfo();
+
+    /**
+     *
+     */
     private NetworkInfos networkInfos = new NetworkInfos();
 
     /**
@@ -80,6 +87,11 @@ public final class Context
      *
      */
     private ProcessInfos processInfos = new ProcessInfos();
+
+    /**
+    *
+    */
+    private Map<String, TemperatureInfo> temperatures = new HashMap<>();
 
     /**
      *
@@ -142,6 +154,14 @@ public final class Context
     }
 
     /**
+     * @return {@link MusicInfo}
+     */
+    public MusicInfo getMusicInfo()
+    {
+        return this.musicInfo;
+    }
+
+    /**
      * @return {@link NetworkInfos}
      */
     public NetworkInfos getNetworkInfos()
@@ -179,6 +199,14 @@ public final class Context
     private SystemMonitor getSystemMonitor()
     {
         return getSettings().getSystemMonitor();
+    }
+
+    /**
+     * @return {@link Map}<String,TemperatureInfo>
+     */
+    public Map<String, TemperatureInfo> getTemperatures()
+    {
+        return this.temperatures;
     }
 
     /**
@@ -257,6 +285,21 @@ public final class Context
     /**
     *
     */
+    public void updateMusicInfo()
+    {
+        try
+        {
+            this.musicInfo = getSystemMonitor().getMusicInfo();
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
     public void updateNetworkInfos()
     {
         try
@@ -321,6 +364,21 @@ public final class Context
         try
         {
             this.processInfos = getSystemMonitor().getProcessInfos(getUptimeInSeconds(), getTotalSystemMemory());
+        }
+        catch (Exception ex)
+        {
+            JConky.getLogger().error(null, ex);
+        }
+    }
+
+    /**
+    *
+    */
+    public void updateTemperatures()
+    {
+        try
+        {
+            this.temperatures = getSystemMonitor().getTemperatures();
         }
         catch (Exception ex)
         {

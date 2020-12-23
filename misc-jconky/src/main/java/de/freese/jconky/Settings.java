@@ -44,6 +44,11 @@ public final class Settings
     /**
      *
      */
+    private final double alpha;
+
+    /**
+     *
+     */
     private final Color colorGradientStart;
 
     /**
@@ -105,7 +110,8 @@ public final class Settings
 
         this.systemMonitor = new LinuxSystemMonitor();
 
-        this.colorText = Color.LIGHTGRAY;
+        this.alpha = 0.65D;
+        this.colorText = Color.LIGHTGRAY.brighter();
         this.colorTitle = Color.web("#CC9900");
         this.colorValue = Color.web("#009BF9");
         this.colorGradientStart = Color.GREEN;
@@ -117,6 +123,14 @@ public final class Settings
 
         this.marginOuter = new Insets(5D, 5D, 5D, 5D);
         this.marginInner = new Insets(2.5D, 2.5D, 2.5D, 2.5D);
+    }
+
+    /**
+     * @return double
+     */
+    public double getAlpha()
+    {
+        return this.alpha;
     }
 
     /**

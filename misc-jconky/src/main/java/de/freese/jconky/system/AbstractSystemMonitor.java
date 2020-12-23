@@ -47,7 +47,7 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
     /**
      * Erstellt ein neues {@link AbstractSystemMonitor} Object.
      */
-    public AbstractSystemMonitor()
+    protected AbstractSystemMonitor()
     {
         super();
 
@@ -128,7 +128,7 @@ public abstract class AbstractSystemMonitor implements SystemMonitor
 
         if ((errors != null) && !errors.isEmpty())
         {
-            getLogger().error(errors.stream().collect(Collectors.joining("\n")));
+            getLogger().error("'{}': {}", processBuilder.command(), errors.stream().collect(Collectors.joining("\n")));
         }
 
         return lines;
