@@ -86,6 +86,9 @@ public final class JConky extends Application
     @Override
     public void init() throws Exception
     {
+        // "JavaFX-Launcher" umbenennen.
+        Thread.currentThread().setName("JavaFX-Init");
+
         getLogger().info("init");
 
         this.scheduledExecutorService = Executors.newScheduledThreadPool(4);
@@ -125,6 +128,9 @@ public final class JConky extends Application
     @Override
     public void start(final Stage primaryStage) throws Exception
     {
+        // "JavaFX Application Thread" umbenennen.
+        Thread.currentThread().setName("JavaFX-Thread");
+
         getLogger().info("start");
 
         // Font-Antializing
