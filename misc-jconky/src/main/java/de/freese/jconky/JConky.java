@@ -22,15 +22,14 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * Geht momentan nicht aus der IDE, sondern nur per Console: mvn compile exec:java<br>
- * <br>
- * In Eclipse:<br>
+ * In Eclipse: mit JConkyLauncher ausführen oder JConky direkt mit foldenden Restruktionen:<br>
  * <ol>
  * <li>Konstruktor muss public empty-arg sein oder nicht vorhanden sein.
  * <li>VM-Parameter: --add-modules javafx.controls
@@ -71,6 +70,35 @@ public final class JConky extends Application
      *
      */
     private ScheduledExecutorService scheduledExecutorService;
+
+    /**
+     * @return {@link Scene}
+     */
+    public Scene createScene()
+    {
+        // Font-Antializing
+        System.setProperty("prism.lcdtext", "true");
+
+        Canvas canvas = new Canvas();
+        this.conkyContextPainter.setCanvas(canvas);
+
+        Group pane = new Group();
+        pane.getChildren().add(canvas);
+
+        // GridPane pane = new GridPane();
+        // pane.add(canvas, 0, 0);
+
+        // Scene
+        Scene scene = new Scene(pane, 335, 1070, true, SceneAntialiasing.BALANCED);
+
+        // Bind canvas size to scene size.
+        canvas.widthProperty().bind(scene.widthProperty());
+        canvas.heightProperty().bind(scene.heightProperty());
+
+        getLogger().info("Antialising: {}", scene.getAntiAliasing());
+
+        return scene;
+    }
 
     /**
      * @return {@link ScheduledExecutorService}
@@ -133,26 +161,7 @@ public final class JConky extends Application
 
         getLogger().info("start");
 
-        // Font-Antializing
-        System.setProperty("prism.lcdtext", "true");
-
-        Canvas canvas = new Canvas();
-        this.conkyContextPainter.setCanvas(canvas);
-
-        Group pane = new Group();
-        pane.getChildren().add(canvas);
-
-        // GridPane pane = new GridPane();
-        // pane.add(canvas, 0, 0);
-
-        // Scene
-        Scene scene = new Scene(pane, 335, 1070, true, SceneAntialiasing.BALANCED);
-
-        // Bind canvas size to scene size.
-        canvas.widthProperty().bind(scene.widthProperty());
-        canvas.heightProperty().bind(scene.heightProperty());
-
-        getLogger().info("Antialising: {}", scene.getAntiAliasing());
+        Scene scene = createScene();
 
         // Transparenz
         boolean isTransparentSupported = Platform.isSupported(ConditionalFeature.TRANSPARENT_WINDOW);
@@ -165,7 +174,7 @@ public final class JConky extends Application
             // For Stage
             primaryStage.initStyle(StageStyle.TRANSPARENT);
 
-            // Das gesamte Fenster wird transparent, inklusive Titelleiste und Graph.
+            // Das gesamte Fenster wird transparent, inklusive Titelleiste und Inhalt.
             // primaryStage.setOpacity(Settings.getInstance().getAlpha());
 
             // For Scene
@@ -174,7 +183,7 @@ public final class JConky extends Application
 
             // canvas.setOpacity(Settings.getInstance().getAlpha());
 
-            // For Containers
+            // Für Container.
             // pane.setBackground(Background.EMPTY);
             // pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.5);");
             // pane.setStyle("-fx-background-color: transparent;");
@@ -185,6 +194,7 @@ public final class JConky extends Application
         }
 
         primaryStage.setTitle("jConky");
+        primaryStage.getIcons().add(new Image("conky.png"));
         primaryStage.setScene(scene);
 
         // Auf dem 2. Monitor
@@ -193,6 +203,20 @@ public final class JConky extends Application
         primaryStage.setX(screen.getVisualBounds().getMinX() + 1240);
         primaryStage.setY(5D);
 
+        startRepaintSchedule();
+
+        // Runtime wird nicht beendet, wenn letztes Fenster geschlossen wird.
+        // Platform.setImplicitExit(false);
+
+        // primaryStage.sizeToScene();
+        primaryStage.show();
+    }
+
+    /**
+     *
+     */
+    public void startRepaintSchedule()
+    {
         getScheduledExecutorService().scheduleWithFixedDelay(() -> {
             try
             {
@@ -203,8 +227,6 @@ public final class JConky extends Application
                 getLogger().error(null, ex);
             }
         }, 400, 3000, TimeUnit.MILLISECONDS);
-
-        primaryStage.show();
     }
 
     /**

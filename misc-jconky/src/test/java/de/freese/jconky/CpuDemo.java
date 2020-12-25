@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import de.freese.jconky.model.CpuTimes;
 
 /**
@@ -92,12 +95,8 @@ public class CpuDemo
         //
         // CPU_Percentage = (totald - idled)/totald
 
-        // ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        // scheduledExecutorService.scheduleWithFixedDelay(CpuDemo::showCpuLoad, 1, 1, TimeUnit.SECONDS);
-
-        System.out.printf("%.1f%n", 0.1D);
-        System.out.printf("%4.1f%n", 0.1D);
-        System.out.printf("%04.1f%n", 0.1D);
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        scheduledExecutorService.scheduleWithFixedDelay(CpuDemo::showCpuLoad, 1, 1, TimeUnit.SECONDS);
     }
 
     /**

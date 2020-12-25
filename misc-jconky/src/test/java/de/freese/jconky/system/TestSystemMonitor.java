@@ -17,7 +17,6 @@ import de.freese.jconky.model.CpuTimes;
 import de.freese.jconky.model.HostInfo;
 import de.freese.jconky.model.MusicInfo;
 import de.freese.jconky.model.NetworkInfos;
-import de.freese.jconky.model.ProcessInfo;
 import de.freese.jconky.model.ProcessInfos;
 import de.freese.jconky.model.TemperatureInfo;
 import de.freese.jconky.model.UsageInfo;
@@ -177,17 +176,19 @@ class TestSystemMonitor
         long totalSystemMemory = systemMonitor.getTotalSystemMemory();
 
         ProcessInfos processInfos = systemMonitor.getProcessInfos(uptimeInSeconds, totalSystemMemory);
+
         assertNotNull(processInfos);
+        assertTrue(processInfos.size() > 1);
 
-        for (ProcessInfo processInfo : processInfos.getSortedByName(Integer.MAX_VALUE))
-        {
-            if ("clementine".equals(processInfo.getName()))
-            {
-                System.out.print("");
-            }
-
-            System.out.println(processInfo);
-        }
+        // for (ProcessInfo processInfo : processInfos.getSortedByName(Integer.MAX_VALUE))
+        // {
+        // if ("clementine".equals(processInfo.getName()))
+        // {
+        // System.out.print("");
+        // }
+        //
+        // System.out.println(processInfo);
+        // }
     }
 
     /**
