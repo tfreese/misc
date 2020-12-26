@@ -1,6 +1,7 @@
 // Created: 28.10.2020
 package de.freese.jsensors.backend;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
@@ -38,5 +39,7 @@ class TestRRDToolBackend
         sensor.scan();
 
         rrdToolBackend.stop();
+
+        assertTrue(true);
     }
 }

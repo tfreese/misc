@@ -1,6 +1,7 @@
 // Created: 28.10.2020
 package de.freese.jsensors.backend;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +41,7 @@ class TestScheduler
 
         scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 0, 1, TimeUnit.SECONDS);
 
-        future.get();
+        assertNotNull(future.get());
     }
 
     /**
@@ -75,6 +76,6 @@ class TestScheduler
 
         scheduledExecutorService.scheduleWithFixedDelay(sensor::scan, 0, 1, TimeUnit.SECONDS);
 
-        future.get();
+        assertNotNull(future.get());
     }
 }

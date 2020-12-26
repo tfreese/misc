@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.sun.javafx.application.PlatformImpl;
 import de.freese.jconky.painter.CpuMonitorPainter;
 import de.freese.jconky.painter.HostMonitorPainter;
 import de.freese.jconky.painter.MusicMonitorPainter;
@@ -58,6 +59,18 @@ public final class JConky extends Application
      */
     public static void main(final String[] args)
     {
+        // Kein Taskbar Icon, funktioniert unter Linux aber nicht.
+        PlatformImpl.setTaskbarApplication(false);
+
+        // Runtime wird nicht beendet, wenn letztes Fenster geschlossen wird.
+        // Platform.setImplicitExit(false);
+
+        // System.setProperty("apple.awt.UIElement", "true");
+        // System.setProperty("apple.awt.headless", "true");
+        // System.setProperty("java.awt.headless", "true");
+        // System.setProperty("javafx.macosx.embedded", "true");
+        // java.awt.Toolkit.getDefaultToolkit();
+
         launch(args);
     }
 
@@ -204,9 +217,6 @@ public final class JConky extends Application
         primaryStage.setY(5D);
 
         startRepaintSchedule();
-
-        // Runtime wird nicht beendet, wenn letztes Fenster geschlossen wird.
-        // Platform.setImplicitExit(false);
 
         // primaryStage.sizeToScene();
         primaryStage.show();

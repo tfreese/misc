@@ -20,12 +20,12 @@ import de.freese.jsensors.sensor.Sensor;
  * @author Thomas Freese
  */
 // @Component
-public class SensorSchedulerTest implements ApplicationContextAware
+public class SpringSensorScheduler implements ApplicationContextAware
 {
     /**
      *
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SensorSchedulerTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringSensorScheduler.class);
 
     /**
     *
@@ -38,9 +38,9 @@ public class SensorSchedulerTest implements ApplicationContextAware
     private final List<Sensor> sensors = new ArrayList<>();
 
     /**
-     * Erzeugt eine neue Instanz von {@link SensorSchedulerTest}.
+     * Erzeugt eine neue Instanz von {@link SpringSensorScheduler}.
      */
-    public SensorSchedulerTest()
+    public SpringSensorScheduler()
     {
         super();
     }
