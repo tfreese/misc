@@ -1,5 +1,6 @@
 package de.freese.sonstiges;
 
+import static org.junit.jupiter.api.DynamicTest.stream;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -79,7 +80,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.swing.filechooser.FileSystemView;
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import de.freese.sonstiges.xml.jaxb.model.DJ;
 import reactor.core.publisher.Flux;
@@ -779,7 +779,6 @@ public final class Misc
         // listDirectories();
         // nioPipe();
         // processBuilder();
-        rasterize();
         // reactor();
         // securityProviders();
         // shift();
@@ -923,98 +922,6 @@ public final class Misc
         {
             ex.printStackTrace();
             System.exit(-1);
-        }
-    }
-
-    /**
-     * Rasterformat: 5 x 7 Dots.
-     */
-    static void rasterize()
-    {
-
-        Map<Object, byte[]> map = new HashedMap<>();
-        map.put(" ", new byte[]
-        {
-                0, 0, 0, 0, 0
-        });
-        map.put("A", new byte[]
-        {
-                126, 9, 9, 9, 126
-        });
-        map.put("a", new byte[]
-        {
-                32, 84, 84, 84, 120
-        });
-
-        int dotHeight = 1;
-        int dotWidth = 1;
-        int hGap = 1;
-        int vGap = 1;
-        int x = 0;
-        int y = 0;
-
-        byte[] bytes = map.get("A");
-
-        for (byte b : bytes)
-        {
-            for (int row = 0; row < 7; row++)
-            {
-                // Spaltenweise die Dots ermitteln.
-                System.out.printf("row=%d, 1<<row=%d, b=%d, b & (1 << row)=%d%n", row, 1 << row, b, b & (1 << row));
-
-                if ((b & (1 << row)) != 0)
-                {
-                    // graphics.setColor(color);
-                    y = (row * (dotHeight + vGap));
-                    // graphics.fillRect(x, offset + y, dotWidth, dotHeight);
-                    // System.out.printf("x=%d, y=%d, width=%d, height=%d%n", x, y, dotWidth, dotHeight);
-                }
-            }
-
-            x += (dotWidth + hGap);
-            break;
-        }
-
-        // Dots für das 'A', am besten in Excel eintragen und kopieren.
-        // byte[][] rasterBytes = new byte[7][5];
-        byte[][] rasterBytes =
-        {
-                {
-                        0, 1, 1, 1, 0
-                },
-                {
-                        1, 0, 0, 0, 1
-                },
-                {
-                        1, 0, 0, 0, 1
-                },
-                {
-                        1, 1, 1, 1, 1
-                },
-                {
-                        1, 0, 0, 0, 1
-                },
-                {
-                        1, 0, 0, 0, 1
-                },
-                {
-                        1, 0, 0, 0, 1
-                }
-        };
-
-        for (int col = 0; col < rasterBytes[0].length; col++)
-        {
-            // Bitmask pro Spalte anlegen.
-            int mask = 0;
-
-            for (int row = 0; row < rasterBytes.length; row++)
-            {
-                byte b = rasterBytes[row][col];
-
-                mask |= (b << row);
-            }
-
-            System.out.printf("col=%d, mask=%d%n", col, mask);
         }
     }
 
