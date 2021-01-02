@@ -782,6 +782,7 @@ public final class Misc
         // reactor();
         // securityProviders();
         // shift();
+        showMemory();
         // splitList();
         // systemMXBean();
         // textBlocks();
