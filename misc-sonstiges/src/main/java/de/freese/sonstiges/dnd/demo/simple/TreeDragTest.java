@@ -31,11 +31,13 @@ public class TreeDragTest extends JFrame
     /**
      *
      */
+    @SuppressWarnings("unused")
     private final TreeDragSource ds;
 
     /**
      *
      */
+    @SuppressWarnings("unused")
     private final TreeDropTarget dt;
 
     /**

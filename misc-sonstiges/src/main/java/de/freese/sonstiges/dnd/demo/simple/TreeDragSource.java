@@ -23,13 +23,14 @@ import javax.swing.tree.TreePath;
 public class TreeDragSource implements DragSourceListener, DragGestureListener
 {
     /**
-     * 
+     *
      */
     private DefaultMutableTreeNode oldNode;
 
     /**
-     * 
+     *
      */
+    @SuppressWarnings("unused")
     private final DragGestureRecognizer recognizer;
 
     /**
@@ -38,18 +39,13 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
     private final DragSource source;
 
     /**
-     * 
+     *
      */
     private final JTree sourceTree;
 
     /**
-     * 
-     */
-    private TransferableTreeNode transferable;
-
-    /**
      * Creates a new {@link TreeDragSource} object.
-     * 
+     *
      * @param tree {@link JTree}
      * @param actions int
      */
@@ -116,8 +112,8 @@ public class TreeDragSource implements DragSourceListener, DragGestureListener
         }
 
         this.oldNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-        this.transferable = new TransferableTreeNode(path);
-        this.source.startDrag(dge, DragSource.DefaultMoveNoDrop, this.transferable, this);
+        TransferableTreeNode transferable = new TransferableTreeNode(path);
+        this.source.startDrag(dge, DragSource.DefaultMoveNoDrop, transferable, this);
 
         // If you support dropping the node anywhere, you should probably
         // start with a valid move cursor:

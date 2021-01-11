@@ -1,6 +1,5 @@
 package de.freese.sonstiges;
 
-import static org.junit.jupiter.api.DynamicTest.stream;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;

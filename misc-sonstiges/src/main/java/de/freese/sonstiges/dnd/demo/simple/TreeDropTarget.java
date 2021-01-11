@@ -26,6 +26,7 @@ public class TreeDropTarget implements DropTargetListener
     /**
      *
      */
+    @SuppressWarnings("unused")
     private final DropTarget target;
 
     /**
