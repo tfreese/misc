@@ -4,6 +4,10 @@
     <version>0.3.5.1</version>
 </dependency>
 
+https://github.com/profesorfalken/jSensors
+https://github.com/openhardwaremonitor
+
+
 # Windows CPU Auslastung
 wmic cpu get loadpercentage
 Ausgabe:
@@ -27,3 +31,4 @@ totald = Total - PrevTotal
 idled = Idle - PrevIdle
 
 CPU_Percentage = (totald - idled)/totald    
+
