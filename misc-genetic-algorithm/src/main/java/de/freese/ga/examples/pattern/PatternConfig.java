@@ -14,7 +14,7 @@ public class PatternConfig extends Config
     /**
     *
     */
-    private boolean[] solution = null;
+    private boolean[] solution;
 
     /**
      * Erstellt ein neues {@link PatternConfig} Object.

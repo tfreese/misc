@@ -59,7 +59,7 @@ public class ReadImapMails
     /**
      * @author Thomas Freese
      */
-    private abstract class AbstractTextPart
+    private abstract static class AbstractTextPart
     {
         /**
          *
@@ -115,7 +115,7 @@ public class ReadImapMails
     /**
      * @author Thomas Freese
      */
-    private final class HTMLTextPart extends AbstractTextPart
+    private static final class HTMLTextPart extends AbstractTextPart
     {
         /**
          * Erstellt ein neues {@link HTMLTextPart} Object.
@@ -131,7 +131,7 @@ public class ReadImapMails
     /**
      * @author Thomas Freese
      */
-    private final class PlainTextPart extends AbstractTextPart
+    private static final class PlainTextPart extends AbstractTextPart
     {
         /**
          * Erstellt ein neues {@link PlainTextPart} Object.

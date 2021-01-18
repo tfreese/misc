@@ -31,7 +31,7 @@ public abstract class AbstractRepository implements Repository
      *
      * @param uri {@link URI}; Ressourenquelle des Repositories
      */
-    public AbstractRepository(final URI uri)
+    protected AbstractRepository(final URI uri)
     {
         super();
 

@@ -24,20 +24,12 @@ public class AlgorythmLinear implements ISudokuAlgorythm
     /**
      *
      */
-    private int[][] grid = null;
+    private int[][] grid;
 
     /**
      *
      */
-    private List<Integer> numberList = null;
-
-    /**
-     * Erstellt ein neues {@link AlgorythmLinear} Object.
-     */
-    public AlgorythmLinear()
-    {
-        super();
-    }
+    private List<Integer> numberList;
 
     /**
      * @see de.freese.sudoku.generator.algorythm.ISudokuAlgorythm#create(int[][])
@@ -118,7 +110,7 @@ public class AlgorythmLinear implements ISudokuAlgorythm
 
     /**
      * Fuellen der internen Liste mit allen noch verfuegbaren Zahlen.
-     * 
+     *
      * @param row int
      * @param col int
      * @return int, Anzahl verfuegbarer Zahlen
@@ -179,7 +171,7 @@ public class AlgorythmLinear implements ISudokuAlgorythm
 
     /**
      * Versuchen eine Zeile aufzubauen.
-     * 
+     *
      * @param row int
      * @return boolean
      */
@@ -203,7 +195,7 @@ public class AlgorythmLinear implements ISudokuAlgorythm
 
     /**
      * Liefert die erste und letzte Zeile/Spalte innerhal des Blocks.
-     * 
+     *
      * @param rowOrCol int
      * @return {@link Point}
      */

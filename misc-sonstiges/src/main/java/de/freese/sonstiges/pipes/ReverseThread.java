@@ -41,7 +41,7 @@ public class ReverseThread extends Thread
     {
         int i = 0;
         int len = source.length();
-        StringBuffer sb = new StringBuffer(len);
+        StringBuilder sb = new StringBuilder(len);
 
         for (i = (len - 1); i >= 0; i--)
         {

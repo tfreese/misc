@@ -16,7 +16,7 @@ public class OpeningDateAdapter extends XmlAdapter<String, Date>
     /**
      *
      */
-    private final static DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * Erstellt ein neues {@link OpeningDateAdapter} Object.
@@ -32,7 +32,7 @@ public class OpeningDateAdapter extends XmlAdapter<String, Date>
     @Override
     public String marshal(final Date date) throws Exception
     {
-        return formatter.format(date);
+        return DATE_FORMAT.format(date);
     }
 
     /**
@@ -41,6 +41,6 @@ public class OpeningDateAdapter extends XmlAdapter<String, Date>
     @Override
     public Date unmarshal(final String date) throws Exception
     {
-        return formatter.parse(date);
+        return DATE_FORMAT.parse(date);
     }
 }

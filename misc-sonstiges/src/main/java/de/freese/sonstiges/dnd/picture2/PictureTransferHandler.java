@@ -19,7 +19,7 @@ class PictureTransferHandler extends TransferHandler
     /**
      * @author Thomas Freese
      */
-    class PictureTransferable implements Transferable
+    static class PictureTransferable implements Transferable
     {
         /**
          *

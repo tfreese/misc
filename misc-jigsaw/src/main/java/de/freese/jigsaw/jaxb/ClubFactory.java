@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Thomas Freese
  */
-public class ClubFactory
+public final class ClubFactory
 {
     /**
      * @return {@link List}
@@ -45,5 +45,13 @@ public class ClubFactory
             System.out.println("\tDJ-Firstname:" + dj.getFirstName());
             System.out.println("\tDJ-Lastname:" + dj.getLastName());
         }
+    }
+
+    /**
+     * Erstellt ein neues {@link ClubFactory} Object.
+     */
+    private ClubFactory()
+    {
+        super();
     }
 }

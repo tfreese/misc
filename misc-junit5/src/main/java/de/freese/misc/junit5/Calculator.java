@@ -18,7 +18,7 @@ public class Calculator
     /**
      *
      */
-    private BigDecimal value = null;
+    private BigDecimal value;
 
     /**
      * Erstellt ein neues {@link Calculator} Object.
@@ -42,7 +42,6 @@ public class Calculator
      * Add calculator.
      *
      * @param addend long
-     *
      * @return {@link Calculator}
      */
     public Calculator add(final long addend)
@@ -54,7 +53,6 @@ public class Calculator
      * Divide calculator.
      *
      * @param divisor long
-     *
      * @return {@link Calculator}
      */
     public Calculator divide(final long divisor)
@@ -96,7 +94,6 @@ public class Calculator
      * Multiply calculator.
      *
      * @param factor long
-     *
      * @return {@link Calculator}
      */
     public Calculator multiply(final long factor)
@@ -108,7 +105,6 @@ public class Calculator
      * Power calculator.
      *
      * @param exponent int
-     *
      * @return {@link Calculator}
      */
     public Calculator power(final int exponent)
@@ -120,7 +116,6 @@ public class Calculator
      * Set calculator.
      *
      * @param value {@link java.math.BigDecimal}
-     *
      * @return {@link Calculator}
      */
     public Calculator set(final BigDecimal value)
@@ -138,7 +133,6 @@ public class Calculator
      * Set calculator.
      *
      * @param value double
-     *
      * @return {@link Calculator}
      */
     public Calculator set(final double value)
@@ -150,7 +144,6 @@ public class Calculator
      * Set calculator.
      *
      * @param value long
-     *
      * @return {@link Calculator}
      */
     public Calculator set(final long value)

@@ -17,14 +17,6 @@ public class Epsg4326 implements Projection
     private static final int DEGREES360 = 360;
 
     /**
-     * Erstellt ein neues {@link Epsg4326} Object.
-     */
-    public Epsg4326()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.openstreetmap.model.projection.Projection#eastNorth2latlon(de.freese.openstreetmap.model.coordinates.EastNorth)
      */
     @Override
@@ -53,7 +45,7 @@ public class Epsg4326 implements Projection
 
     /**
      * 1/360
-     * 
+     *
      * @see de.freese.openstreetmap.model.projection.Projection#scaleFactor()
      */
     @Override
@@ -64,7 +56,7 @@ public class Epsg4326 implements Projection
 
     /**
      * "EPSG:4326"
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

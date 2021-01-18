@@ -23,7 +23,7 @@ public abstract class AbstractBlobStore implements BlobStore
     /**
      * Erstellt ein neues {@link AbstractBlobStore} Object.
      */
-    public AbstractBlobStore()
+    protected AbstractBlobStore()
     {
         super();
     }

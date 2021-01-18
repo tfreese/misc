@@ -108,12 +108,14 @@ public class GridDrawer
 
     /**
      * Erstellt ein neues {@link GridDrawer} Object.
-     * 
+     *
      * @param w int
      * @param h int
      */
     GridDrawer(final int w, final int h)
     {
+        super();
+
         this.dim = new Dimension(w, h);
         this.squareWidth = Math.min((w - (2 * this.xOffset)) / 9, (h - this.xOffset - this.yOffset) / 9);
         this.squareHeight = this.squareWidth;
@@ -121,7 +123,7 @@ public class GridDrawer
 
     /**
      * Erstellt ein neues {@link GridDrawer} Object.
-     * 
+     *
      * @param gridSol int[][]
      * @param w int
      * @param h int
@@ -129,7 +131,8 @@ public class GridDrawer
     GridDrawer(final int[][] gridSol, final int w, final int h)
     {
         this(w, h);
-        this.setSolution(gridSol);
+
+        setSolution(gridSol);
     }
 
     /**
@@ -205,6 +208,7 @@ public class GridDrawer
             g.setColor(GridDrawer.CLR_SELECTED);
             g.fillRect(this.xOffset + (x * this.squareWidth), this.yOffset + (y * this.squareHeight), this.squareWidth, this.squareHeight);
         }
+
         g.setColor(Color.black);
 
         // Draw the numbers and coloured squares:
@@ -229,6 +233,7 @@ public class GridDrawer
                     }
 
                 }
+
                 // Show given number
                 if (grid[i][j] != 0)
                 {
@@ -244,8 +249,8 @@ public class GridDrawer
                         g.fillRect(this.xOffset + (i * this.squareWidth), this.yOffset + (j * this.squareHeight), this.squareWidth, this.squareHeight);
                     }
                     g.setColor(GridDrawer.CLR_TEXT);
-                    g.drawString((Sudoku.OPTION_ALPHA ? String.valueOf((char) (64 + grid[i][j])) : "" + grid[i][j]), this.xOffset + (i * this.squareWidth)
-                            + txtXOffset, this.yOffset + (j * this.squareHeight) + txtYOffset);
+                    g.drawString((Sudoku.OPTION_ALPHA ? String.valueOf((char) (64 + grid[i][j])) : "" + grid[i][j]),
+                            this.xOffset + (i * this.squareWidth) + txtXOffset, this.yOffset + (j * this.squareHeight) + txtYOffset);
                 }
                 else
                 {
@@ -253,8 +258,8 @@ public class GridDrawer
                     {
                         g.setFont(GridDrawer.FNT_NORMAL);
                         g.setColor(GridDrawer.CLR_TEXT);
-                        g.drawString((Sudoku.OPTION_ALPHA ? String.valueOf((char) (64 + user[i][j])) : "" + user[i][j]), this.xOffset + (i * this.squareWidth)
-                                + txtXOffset, this.yOffset + (j * this.squareHeight) + txtYOffset);
+                        g.drawString((Sudoku.OPTION_ALPHA ? String.valueOf((char) (64 + user[i][j])) : "" + user[i][j]),
+                                this.xOffset + (i * this.squareWidth) + txtXOffset, this.yOffset + (j * this.squareHeight) + txtYOffset);
                     }
                 }
             }
@@ -262,9 +267,11 @@ public class GridDrawer
 
         // Show the little numbers in the corners if the user selected "Toon mogelijkheden":
         g.setColor(GridDrawer.CLR_TEXT);
+
         if (showValids && (this.V != null))
         {
             g.setFont(GridDrawer.FNT_SMALL);
+
             // For each square (i,j)
             for (int i = 0; i < N; i++)
             {
@@ -282,8 +289,9 @@ public class GridDrawer
                                 // Print it!
                                 int a = (k < 3 ? 0 : (k < 6 ? 1 : 2));
                                 int b = k % 3;
-                                g.drawString("" + (k + 1), this.xOffset + (i * this.squareWidth) + ((11 * b) + 2), this.yOffset + (j * this.squareHeight)
-                                        + ((11 * a) + 9));
+
+                                g.drawString("" + (k + 1), this.xOffset + (i * this.squareWidth) + ((11 * b) + 2),
+                                        this.yOffset + (j * this.squareHeight) + ((11 * a) + 9));
                             }
                         }
                     }
@@ -294,6 +302,7 @@ public class GridDrawer
         // Draw the grid itself:
         g.setColor(GridDrawer.CLR_GRID);
         g.drawRect(this.xOffset - 3, this.yOffset - 3, (this.squareWidth * N) + 6, (this.squareHeight * N) + 6);
+
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
@@ -302,6 +311,7 @@ public class GridDrawer
                         (this.squareHeight * n) + 2);
             }
         }
+
         for (int i = 0; i <= N; i++)
         {
             g.drawLine(this.xOffset, this.yOffset + (this.squareHeight * i), this.xOffset + (this.squareWidth * N), this.yOffset + (this.squareHeight * i));
@@ -317,6 +327,7 @@ public class GridDrawer
                 g.fillOval(this.xOffset + (i * 10), this.yOffset - 15, 10, 10);
                 g.setColor(GridDrawer.CLR_GRID);
             }
+
             g.drawOval(this.xOffset + (i * 10), this.yOffset - 15, 10, 10);
         }
 

@@ -45,7 +45,7 @@ public abstract class AbstractIoHandler<T> implements IoHandler<T>
     /**
      * Erstellt ein neues {@link AbstractIoHandler} Object.
      */
-    public AbstractIoHandler()
+    protected AbstractIoHandler()
     {
         super();
     }

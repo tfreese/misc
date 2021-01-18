@@ -43,7 +43,7 @@ public abstract class AbstractServer implements Runnable
      *
      * @param port int
      */
-    public AbstractServer(final int port)
+    protected AbstractServer(final int port)
     {
         super();
 

@@ -14,20 +14,12 @@ import org.junit.jupiter.api.parallel.ResourceLock;
  * @author Thomas Freese
  */
 @Execution(ExecutionMode.CONCURRENT)
-public class SharedResourcesDemo
+class SharedResourcesTests
 {
     /**
      *
      */
-    private Properties backup = null;
-
-    /**
-     * Erstellt ein neues {@link SharedResourcesDemo} Object.
-     */
-    public SharedResourcesDemo()
-    {
-        super();
-    }
+    private Properties backup;
 
     /**
      *
@@ -42,9 +34,18 @@ public class SharedResourcesDemo
     /**
      *
      */
+    @AfterEach
+    void restore()
+    {
+        System.setProperties(this.backup);
+    }
+
+    /**
+     *
+     */
     @Test
     @ResourceLock(value = "system.properties", mode = ResourceAccessMode.READ_WRITE)
-    void canSetCustomPropertyToBar()
+    void testCanSetCustomPropertyToBar()
     {
         System.setProperty("my.prop", "bar");
         Assertions.assertEquals("bar", System.getProperty("my.prop"));
@@ -55,7 +56,7 @@ public class SharedResourcesDemo
      */
     @Test
     @ResourceLock(value = "system.properties", mode = ResourceAccessMode.READ_WRITE)
-    void canSetCustomPropertyToFoo()
+    void testCanSetCustomPropertyToFoo()
     {
         System.setProperty("my.prop", "foo");
         Assertions.assertEquals("foo", System.getProperty("my.prop"));
@@ -66,17 +67,8 @@ public class SharedResourcesDemo
      */
     @Test
     @ResourceLock(value = "system.properties", mode = ResourceAccessMode.READ)
-    void customPropertyIsNotSetByDefault()
+    void testCustomPropertyIsNotSetByDefault()
     {
         Assertions.assertNull(System.getProperty("my.prop"));
-    }
-
-    /**
-     *
-     */
-    @AfterEach
-    void restore()
-    {
-        System.setProperties(this.backup);
     }
 }

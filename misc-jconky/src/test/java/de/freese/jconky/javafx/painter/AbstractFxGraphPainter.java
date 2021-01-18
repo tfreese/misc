@@ -17,7 +17,7 @@ public abstract class AbstractFxGraphPainter
     /**
      * Erstellt ein neues {@link AbstractFxGraphPainter} Object.
      */
-    public AbstractFxGraphPainter()
+    protected AbstractFxGraphPainter()
     {
         super();
     }

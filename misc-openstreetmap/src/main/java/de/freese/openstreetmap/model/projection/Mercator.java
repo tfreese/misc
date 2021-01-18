@@ -28,14 +28,6 @@ public class Mercator implements Projection
     private static final double QUARTERPI = Math.PI / (2 + 2);
 
     /**
-     * Erstellt ein neues {@link Mercator} Object.
-     */
-    public Mercator()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.openstreetmap.model.projection.Projection#eastNorth2latlon(de.freese.openstreetmap.model.coordinates.EastNorth)
      */
     @Override

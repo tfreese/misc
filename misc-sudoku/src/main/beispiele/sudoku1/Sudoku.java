@@ -21,7 +21,7 @@ package sudoku1;
  * |   9   | 7   1 |   4   |
  *  -----------------------
  * </pre>
- * 
+ *
  * The goal is to fill in the missing numbers so that every row, column and box contains each of the numbers <code>1-9</code>. Here is the solution to the
  * problem above:
  *
@@ -117,6 +117,7 @@ public class Sudoku
 
         int boxRowOffset = (i / 3) * 3;
         int boxColOffset = (j / 3) * 3;
+
         for (int k = 0; k < 3; ++k)
         {
             for (int m = 0; m < 3; ++m)
@@ -133,13 +134,14 @@ public class Sudoku
 
     /**
      * Print the specified Sudoku problem and its solution. The problem is encoded as specified in the class documentation above.
-     * 
+     *
      * @param args The command-line arguments encoding the problem.
      */
     public static void main(final String[] args)
     {
         int[][] matrix = parseProblem(args);
         writeMatrix(matrix);
+
         if (solve(0, 0, matrix))
         {
             writeMatrix(matrix);
@@ -157,6 +159,7 @@ public class Sudoku
     static int[][] parseProblem(final String[] args)
     {
         int[][] problem = new int[9][9]; // default 0 vals
+
         for (String arg : args)
         {
             int i = Integer.parseInt(arg.substring(0, 1));
@@ -164,6 +167,7 @@ public class Sudoku
             int val = Integer.parseInt(arg.substring(2, 3));
             problem[i][j] = val;
         }
+
         return problem;
     }
 
@@ -184,6 +188,7 @@ public class Sudoku
                 return true;
             }
         }
+
         if (cells[i][j] != 0)
         {
             return solve(i + 1, j, cells);
@@ -200,7 +205,9 @@ public class Sudoku
                 }
             }
         }
+
         cells[i][j] = 0; // reset on backtrack
+
         return false;
     }
 
@@ -215,18 +222,22 @@ public class Sudoku
             {
                 System.out.println(" -----------------------");
             }
+
             for (int j = 0; j < 9; ++j)
             {
                 if ((j % 3) == 0)
                 {
                     System.out.print("| ");
                 }
+
                 System.out.print(solution[i][j] == 0 ? " " : Integer.toString(solution[i][j]));
 
                 System.out.print(' ');
             }
+
             System.out.println("|");
         }
+
         System.out.println(" -----------------------");
     }
 

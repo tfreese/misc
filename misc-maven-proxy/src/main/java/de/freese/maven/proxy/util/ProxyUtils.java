@@ -15,6 +15,7 @@ import java.net.ProxySelector;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -102,7 +103,7 @@ public final class ProxyUtils
                 // URLConnection connection = url.openConnection();
 
                 try (InputStream response = connection.getInputStream();
-                     BufferedReader in = new BufferedReader(new InputStreamReader(response)))
+                     BufferedReader in = new BufferedReader(new InputStreamReader(response, StandardCharsets.UTF_8)))
                 {
                     String line = null;
 

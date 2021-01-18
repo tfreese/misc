@@ -19,27 +19,19 @@ import de.freese.openstreetmap.Mercator;
 public class OSMWay extends AbstractOSMEntity
 {
     /**
-     * 
+     *
      */
     private Rectangle bounds;
 
     /**
-     * 
+     *
      */
     public List<OSMNode> nodes;
 
     /**
-     * 
+     *
      */
     private Polygon polygon;
-
-    /**
-     * Erstellt ein neues {@link OSMWay} Object.
-     */
-    public OSMWay()
-    {
-        super();
-    }
 
     /**
      * @return {@link Rectangle}

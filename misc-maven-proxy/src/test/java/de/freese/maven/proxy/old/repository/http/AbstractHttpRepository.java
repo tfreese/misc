@@ -48,7 +48,7 @@ public abstract class AbstractHttpRepository extends AbstractRepository
      * @param uri String; Quelle des Repositories
      * @throws URISyntaxException Falls was schief geht.
      */
-    public AbstractHttpRepository(final String uri) throws URISyntaxException
+    protected AbstractHttpRepository(final String uri) throws URISyntaxException
     {
         this(new URI(uri));
     }

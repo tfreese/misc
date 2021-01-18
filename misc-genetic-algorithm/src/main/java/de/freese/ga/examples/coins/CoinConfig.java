@@ -31,7 +31,7 @@ public class CoinConfig extends Config
     /**
      *
      */
-    private int targetCents = 0;
+    private int targetCents;
 
     /**
      * Erstellt ein neues {@link CoinConfig} Object.

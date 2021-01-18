@@ -42,6 +42,7 @@ class Solver
         if (i < 6)
         {
             r[0] = 3;
+
             if (i < 3)
             {
                 r[0] = 0;
@@ -179,7 +180,7 @@ class Solver
         // Count and countOld are used to determine if there are still new values
         // found. If, after a loop, countOld==count, no new values have been found
         // and looping any further is useless.
-        int count = this.countKnown();
+        int count = countKnown();
         int countOld = -1;
         int iter = 0;
 
@@ -203,7 +204,7 @@ class Solver
                         if (r[0] == 1)
                         {
                             this.difficulty += Solver.WEIGHT_METHOD1_HIT;
-                            this.fillSquare(i, j, r[1] + 1);
+                            fillSquare(i, j, r[1] + 1);
                         }
                         else
                         {
@@ -223,6 +224,7 @@ class Solver
                 for (int k = 0; k < N; k++)
                 {
                     int r = 0, rj = -1;
+
                     // ...for each square in the row...
                     for (int j = 0; j < N; j++)
                     {
@@ -239,7 +241,7 @@ class Solver
                         // ...and if there's only one, we got one step further to
                         // a solution.
                         this.difficulty += Solver.WEIGHT_METHOD2_HIT;
-                        this.fillSquare(i, rj, k + 1);
+                        fillSquare(i, rj, k + 1);
                     }
                     else
                     {
@@ -257,6 +259,7 @@ class Solver
                 for (int k = 0; k < N; k++)
                 {
                     int r = 0, ri = -1;
+
                     // ...for each square in the row...
                     for (int i = 0; i < N; i++)
                     {
@@ -273,7 +276,7 @@ class Solver
                         // ...and if there's only one, we got one step further to
                         // a solution.
                         this.difficulty += Solver.WEIGHT_METHOD2_HIT;
-                        this.fillSquare(ri, j, k + 1);
+                        fillSquare(ri, j, k + 1);
                     }
                     else
                     {
@@ -294,6 +297,7 @@ class Solver
                     for (int k = 0; k < N; k++)
                     {
                         int r = 0, ri = -1, rj = -1;
+
                         // ...for each square in the box...
                         for (int l = 0; l < 3; l++)
                         {
@@ -314,7 +318,7 @@ class Solver
                             // ...and if there's only one, we got one step further to
                             // a solution.
                             this.difficulty += Solver.WEIGHT_METHOD2_HIT;
-                            this.fillSquare(ri, rj, k + 1);
+                            fillSquare(ri, rj, k + 1);
                         }
                         else
                         {
@@ -325,7 +329,7 @@ class Solver
             }
 
             this.difficulty += 3;
-            count = this.countKnown();
+            count = countKnown();
         }
 
         // To do:
@@ -339,9 +343,7 @@ class Solver
         {
             return this.difficulty;
         }
-        else
-        {
-            return 0;
-        }
+
+        return 0;
     }
 }

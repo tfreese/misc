@@ -19,7 +19,7 @@ import de.freese.openstreetmap.Mercator;
 public class OSMRelation extends AbstractOSMEntity
 {
     /**
-     * 
+     *
      */
     private Rectangle bounds;
 
@@ -29,7 +29,7 @@ public class OSMRelation extends AbstractOSMEntity
     public List<OSMNode> nodes;
 
     /**
-     * 
+     *
      */
     private Polygon polygon;
 
@@ -37,14 +37,6 @@ public class OSMRelation extends AbstractOSMEntity
      *
      */
     public List<OSMWay> ways;
-
-    /**
-     * Erstellt ein neues {@link OSMRelation} Object.
-     */
-    public OSMRelation()
-    {
-        super();
-    }
 
     /**
      * @return {@link Rectangle}

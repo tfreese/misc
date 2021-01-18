@@ -31,7 +31,7 @@ public abstract class AbstractBlob implements Blob
      *
      * @param id {@link BlobId}
      */
-    public AbstractBlob(final BlobId id)
+    protected AbstractBlob(final BlobId id)
     {
         super();
 

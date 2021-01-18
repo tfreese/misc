@@ -101,7 +101,7 @@ public final class Context
     /**
     *
     */
-    private int updates = 0;
+    private int updates;
 
     /**
      *

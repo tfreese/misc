@@ -1,25 +1,31 @@
 package de.freese.misc.junit5;
 
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
-import org.junit.jupiter.params.provider.CsvSource;
-
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * @author Thomas Freese
  */
-public class CalculatorTests
+class CalculatorTests
 {
     /**
      *
      */
-    private Calculator calculator = null;
-
+    private Calculator calculator;
 
     /**
      *
@@ -27,19 +33,6 @@ public class CalculatorTests
     public CalculatorTests()
     {
         super();
-    }
-
-    /**
-     *
-     */
-    // @Disabled
-    @Test
-    @Tag("input-validation")
-    void cannotSetValueToNull()
-    {
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> this.calculator.set(null));
-
-        Assertions.assertEquals("cannot set value to null", exception.getMessage());
     }
 
     /**
@@ -54,11 +47,24 @@ public class CalculatorTests
     /**
      *
      */
+    // @Disabled
+    @Test
+    @Tag("input-validation")
+    void testCannotSetValueToNull()
+    {
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> this.calculator.set(null));
+
+        Assertions.assertEquals("cannot set value to null", exception.getMessage());
+    }
+
+    /**
+     *
+     */
     @Test
     @DisplayName("(2 * 3) / 4 = 6/4 = 3/2 = 1.5")
     @Tag("multiplication")
     @Tag("division")
-    void divideResultOfMultiplication()
+    void testDivideResultOfMultiplication()
     {
         BigDecimal newValue = this.calculator.set(2).multiply(3).divide(4).get();
 
@@ -71,7 +77,7 @@ public class CalculatorTests
     @Disabled("Dieser Test ist durch RNG nicht immer erfolgreich.")
     @RepeatedTest(10)
     @Tag("power")
-    void flakyTest()
+    void testFlakyTest()
     {
         double actualResult = this.calculator.set(Math.random()).power(2).doubleValue();
 
@@ -84,7 +90,7 @@ public class CalculatorTests
     @Test
     @DisplayName("1 + 1 = 2")
     @Tag("addition")
-    void onePlusOneIsTwo()
+    void testOnePlusOneIsTwo()
     {
         long newValue = this.calculator.set(1).add(1).longValue();
 
@@ -97,10 +103,9 @@ public class CalculatorTests
     @TestFactory
     @Tag("multiplication")
     @Tag("power")
-    Stream<DynamicTest> powersOfTwo()
+    Stream<DynamicTest> testPowerOfTwo()
     {
-        return IntStream.range(1, 100).mapToObj(value -> DynamicTest.dynamicTest(MessageFormat.format("{0}^2 = {0} * {0}", value), () ->
-        {
+        return IntStream.range(1, 100).mapToObj(value -> DynamicTest.dynamicTest(MessageFormat.format("{0}^2 = {0} * {0}", value), () -> {
             var expectedValue = new Calculator(value).multiply(value).get();
             var actualValue = this.calculator.set(value).power(2).get();
             Assertions.assertEquals(expectedValue, actualValue);
@@ -108,38 +113,37 @@ public class CalculatorTests
     }
 
     /**
-     * @param input          long
+     * @param input long
      * @param expectedResult double
      */
     @ParameterizedTest(name = "sqrt({0}) = {1}")
     @CsvSource(
-            {
-                    // @formatter:off
+    {
+    // @formatter:off
             "1, 1.0000000000000000",
             "2, 1.4142135623730951",
             "3, 1.7320508075688772",
             "4, 2.0000000000000000"
             // @formatter:on
-            })
+    })
     @Tag("sqrt")
-    void sqrt(final long input, final double expectedResult)
+    void testSqrt(final long input, final double expectedResult)
     {
         double actualResult = this.calculator.set(input).sqrt().doubleValue();
 
         Assertions.assertEquals(expectedResult, actualResult, 1e-16);
     }
 
-
     /**
      * Sqrt from file.
      *
-     * @param input          long
+     * @param input long
      * @param expectedResult double
      */
     @ParameterizedTest(name = "sqrt({0}) = {1}")
     @CsvFileSource(resources = "/sqrt.csv")
     @Tag("sqrt")
-    void sqrtFromFile(final long input, final double expectedResult)
+    void testSqrtFromFile(final long input, final double expectedResult)
     {
         double actualResult = this.calculator.set(input).sqrt().doubleValue();
 

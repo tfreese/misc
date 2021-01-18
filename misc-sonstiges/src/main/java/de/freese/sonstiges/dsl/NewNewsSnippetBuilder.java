@@ -1,10 +1,8 @@
-//Created: 14.06.2012
+// Created: 14.06.2012
 package de.freese.sonstiges.dsl;
 
 import java.util.Date;
-
 import de.freese.sonstiges.dsl.tools.DateRangeBuilder;
-import de.freese.sonstiges.dsl.tools.DateRangeBuilderCallback;
 
 /**
  * @author Thomas Freese
@@ -33,25 +31,14 @@ public class NewNewsSnippetBuilder extends AbstractNewsSnippetBuilder<NewNewsSni
 
     /**
      * @param from {@link Date}
-     *
      * @return {@link AbstractNewsSnippetBuilder}
      */
     public DateRangeBuilder<NewNewsSnippetBuilder> validFrom(final Date from)
     {
-        DateRangeBuilder<NewNewsSnippetBuilder> dateRangeBuilder =
-                new DateRangeBuilder<>(from, this, new DateRangeBuilderCallback()
-                {
-                    /**
-                     * @see de.freese.sonstiges.dsl.tools.DateRangeBuilderCallback#setDateRange(java.util.Date,
-                     *      java.util.Date)
-                     */
-                    @Override
-                    public void setDateRange(final Date from, final Date to)
-                    {
-                        getObjectUnderConstruction().setValidFrom(from);
-                        getObjectUnderConstruction().setValidTo(to);
-                    }
-                });
+        DateRangeBuilder<NewNewsSnippetBuilder> dateRangeBuilder = new DateRangeBuilder<>(from, this, (f, t) -> {
+            getObjectUnderConstruction().setValidFrom(f);
+            getObjectUnderConstruction().setValidTo(t);
+        });
 
         return dateRangeBuilder;
     }

@@ -6,72 +6,64 @@ package de.freese.openstreetmap.model;
 
 /**
  * Enthält die Koordinateninformationen eines geografischen Punktes.
- * 
+ *
  * @author Thomas Freese
  */
 public class OSMNode extends AbstractOSMEntity
 {
-	/**
-	 * Längengrad.<br>
-	 * >−90.0 and <90.0
-	 */
-	public float latitude = 0.0F;
+    /**
+     * Längengrad.<br>
+     * >−90.0 and <90.0
+     */
+    public float latitude;
 
-	/**
-	 * Breitengrad.<br>
-	 * >−180 and <180
-	 */
-	public float longitude = 0.0F;
+    /**
+     * Breitengrad.<br>
+     * >−180 and <180
+     */
+    public float longitude;
 
-	/**
-	 * Erstellt ein neues {@link OSMNode} Object.
-	 */
-	public OSMNode()
-	{
-		super();
-	}
+    /**
+     * Längengrad.<br>
+     * >−90.0 and <90.0
+     *
+     * @return float
+     */
+    public float getLatitude()
+    {
+        return this.latitude;
+    }
 
-	/**
-	 * Längengrad.<br>
-	 * >−90.0 and <90.0
-	 * 
-	 * @return float
-	 */
-	public float getLatitude()
-	{
-		return this.latitude;
-	}
+    /**
+     * Breitengrad.<br>
+     * >−180 and <180
+     *
+     * @return float
+     */
+    public float getLongitude()
+    {
+        return this.longitude;
+    }
 
-	/**
-	 * Breitengrad.<br>
-	 * >−180 and <180
-	 * 
-	 * @return float
-	 */
-	public float getLongitude()
-	{
-		return this.longitude;
-	}
+    /**
+     * Längengrad.<br>
+     * >−90.0 and <90.0
+     *
+     * @param latitude float
+     */
+    public void setLatitude(final float latitude)
+    {
+        this.latitude = latitude;
+    }
 
-	/**
-	 * Längengrad.<br>
-	 * >−90.0 and <90.0
-	 * 
-	 * @param latitude float
-	 */
-	public void setLatitude(final float latitude)
-	{
-		this.latitude = latitude;
-	}
-
-	/**
-	 * Breitengrad.<br>
-	 * >−180 and <180
-	 * 
-	 * @param longitude float
-	 */
-	public void setLongitude(final float longitude)
-	{
-		this.longitude = longitude;
-	}
+    /**
+     * Breitengrad.<br>
+     * >−180 and <180
+     *
+     * @param longitude float
+     */
+    public void setLongitude(final float longitude)
+    {
+        this.longitude = longitude;
+    }
 }

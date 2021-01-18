@@ -20,7 +20,7 @@ class TestSudoku
     /**
      *
      */
-    private static SudokuChromosome chromosome = null;
+    private static SudokuChromosome chromosome;
 
     /**
      *

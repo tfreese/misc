@@ -30,7 +30,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * In Eclipse: mit JConkyLauncher ausführen oder JConky direkt mit foldenden Restruktionen:<br>
+ * Mit JConkyLauncher ausführen oder JConky direkt mit foldenden Restruktionen:<br>
+ * <br>
+ * In Eclipse:<br>
  * <ol>
  * <li>Konstruktor muss public empty-arg sein oder nicht vorhanden sein.
  * <li>VM-Parameter: --add-modules javafx.controls

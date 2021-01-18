@@ -36,7 +36,7 @@ class CoverPage implements Printable
         g.setColor(Color.black);
 
         // Text mit Schriftgroesse 30 ausgeben
-        g.setFont(g.getFont().deriveFont(128f));
+        g.setFont(g.getFont().deriveFont(128F));
         g.drawString("JAVA!", 100, 300);
 
         return Printable.PAGE_EXISTS;

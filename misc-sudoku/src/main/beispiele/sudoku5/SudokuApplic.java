@@ -11,35 +11,35 @@ import java.awt.event.WindowEvent;
  */
 public class SudokuApplic extends Frame
 {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -4999414040070593165L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4999414040070593165L;
 
-	/**
-	 * @param args String[]
-	 */
-	public static void main(final String[] args)
-	{
-		new SudokuApplic().setVisible(true);
-	}
+    /**
+     * @param args String[]
+     */
+    public static void main(final String[] args)
+    {
+        new SudokuApplic().setVisible(true);
+    }
 
-	/**
-	 * Erstellt ein neues {@link SudokuApplic} Object.
-	 */
-	SudokuApplic()
-	{
-		int w = 400;
-		int h = 440;
+    /**
+     * Erstellt ein neues {@link SudokuApplic} Object.
+     */
+    SudokuApplic()
+    {
+        int w = 400;
+        int h = 440;
 
-		this.setSize(w, h);
-		this.setTitle("Sudoku");
-		this.setBackground(Color.lightGray);
+        setSize(w, h);
+        setTitle("Sudoku");
+        setBackground(Color.lightGray);
 
-		this.add(new Sudoku(true, w, h), BorderLayout.CENTER);
+        add(new Sudoku(true, w, h), BorderLayout.CENTER);
 
-		this.addWindowListener(new WindowClose());
-	}
+        addWindowListener(new WindowClose());
+    }
 }
 
 /**
@@ -47,19 +47,12 @@ public class SudokuApplic extends Frame
  */
 class WindowClose extends WindowAdapter
 {
-	/**
-	 * Erstellt ein neues {@link WindowClose} Object.
-	 */
-	public WindowClose()
-	{
-	}
-
-	/**
-	 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
-	 */
-	@Override
-	public void windowClosing(final WindowEvent e)
-	{
-		System.exit(0);
-	}
+    /**
+     * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
+     */
+    @Override
+    public void windowClosing(final WindowEvent e)
+    {
+        System.exit(0);
+    }
 }

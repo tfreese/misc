@@ -27,12 +27,12 @@ class TestJaxB
     /**
     *
     */
-    private static byte[] bytes = null;
+    private static byte[] bytes;
 
     /**
     *
     */
-    private static JAXBContext jaxbContext = null;
+    private static JAXBContext jaxbContext;
 
     /**
      * @throws Exception Falls was schief geht.
@@ -47,7 +47,7 @@ class TestJaxB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void test1ToXML() throws Exception
+    void test010ToXML() throws Exception
     {
         Club club = ClubFactory.createClub();
 
@@ -71,7 +71,7 @@ class TestJaxB
      * @throws Exception Falls was schief geht.
      */
     @Test
-    void test2FromXML() throws Exception
+    void test020FromXML() throws Exception
     {
         // System.out.println(new String(TestJaxB.bytes, StandardCharsets.UTF_8));
 

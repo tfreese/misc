@@ -116,8 +116,6 @@ public class NettyMavenRequestHandler extends SimpleChannelInboundHandler<FullHt
             response.headers().set(HttpHeaderNames.CONNECTION, "close");
 
             ctx.writeAndFlush(response);
-
-            return;
         }
         else
         {

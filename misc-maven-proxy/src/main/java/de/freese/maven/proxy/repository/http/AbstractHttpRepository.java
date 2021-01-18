@@ -25,7 +25,7 @@ public abstract class AbstractHttpRepository extends AbstractRemoteRepository im
      *
      * @param uri {@link URI}; Quelle des Repositories
      */
-    public AbstractHttpRepository(final URI uri)
+    protected AbstractHttpRepository(final URI uri)
     {
         super();
 

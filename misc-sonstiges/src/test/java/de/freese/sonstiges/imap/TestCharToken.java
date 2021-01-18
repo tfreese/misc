@@ -42,7 +42,7 @@ class TestCharToken
      *
      */
     @Test
-    void testappendNull()
+    void testAppendNull()
     {
         CharToken charToken = new CharToken().appendNull();
 

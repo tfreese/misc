@@ -30,7 +30,7 @@ class Sudoku
 
     /**
      * Konstruktor args[0] = dateiname args[1] = smart
-     * 
+     *
      * @param n int
      * @param what String
      * @param filename String
@@ -66,7 +66,7 @@ class Sudoku
 
     /**
      * Prueft ob dieses Feld gesetzt werden kann (ruft dabei 3 Subfunktionen auf)
-     * 
+     *
      * @param i int
      * @param j int
      * @param value int
@@ -99,7 +99,7 @@ class Sudoku
 
     /**
      * Prueft ob der Wert bereits in der BOX existiert
-     * 
+     *
      * @param i int
      * @param j int
      * @param value int
@@ -127,7 +127,7 @@ class Sudoku
 
     /**
      * Prueft ob der Wert bereits in der (horizontalen) SPALTE existiert
-     * 
+     *
      * @param j int
      * @param value int
      * @return boolean; Gibt true zurueck, wenn der Wert bereits existiert
@@ -147,7 +147,7 @@ class Sudoku
 
     /**
      * Prueft ob der Wert bereits in der (vertikalen) REIHE existiert
-     * 
+     *
      * @param i int
      * @param value int
      * @return boolean; Gibt true zurueck, wenn der Wert bereits existiert
@@ -167,7 +167,7 @@ class Sudoku
 
     /**
      * Liest ein Raetsel ein
-     * 
+     *
      * @param filename String
      */
     public void read(final String filename)
@@ -200,12 +200,13 @@ class Sudoku
     /**
      * Sucht die Position der besten Möglichkeit gibt es eine Anzahl von Moeglichkeiten oefter, dann dann wird die letzte Zahl als beste Moeglichkeit gewaehlt,
      * um in einem späteren Schleifendurchläufen Performance zu sparen
-     * 
+     *
      * @return int[]; Gibt die Koordinaten zurueck
      */
     public int[] smartChoice()
     {
         int minCount = this.n, minI = -1, minJ = -1;
+
         for (int i = 0; i < this.n; i++)
         {
             for (int j = 0; j < this.n; j++)
@@ -222,16 +223,18 @@ class Sudoku
                 }
             }
         }
+
         int[] results =
         {
                 minI, minJ
         };
+
         return results;
     }
 
     /**
      * SMART: Zaehlt die leeren Felder (die Anzahl an moeglichen Loesungen)
-     * 
+     *
      * @param i int
      * @param j int
      * @return int
@@ -246,6 +249,7 @@ class Sudoku
             {
                 list[this.feld[i][a]] = true; // Durch "true" schliessen wir die Felder mit Wert aus
             }
+
             if (this.feld[a][j] > 0)
             {
                 list[this.feld[a][j]] = true;
@@ -255,6 +259,7 @@ class Sudoku
         // Box
         int i_start = (i / this.box_n) * this.box_n;
         int j_start = (j / this.box_n) * this.box_n;
+
         for (int a = i_start; a < (i_start + this.box_n); a++)
         {
             if (a != i)
@@ -272,9 +277,10 @@ class Sudoku
 
         // Jetzt zaehlen wir die Felder, die wir gefunden haben
         byte max = 0, possible = 0;
+
         for (byte a = 1; a <= this.n; a++)
         {
-            if (list[a] == false)
+            if (!list[a])
             {
                 max++;
             }
@@ -294,7 +300,7 @@ class Sudoku
 
     /**
      * SMART: Loest das Raetsel intelligenter
-     * 
+     *
      * @return boolean
      */
     public boolean smartSolve()
@@ -310,7 +316,7 @@ class Sudoku
         for (byte a = 1; a < (this.n + 1); a++)
         {
             // System.out.print("pruefe wert "+a+" in ");
-            if (check(i, j, a) == false)
+            if (!check(i, j, a))
             {
                 this.feld[i][j] = a;
                 if (smartSolve())
@@ -321,12 +327,13 @@ class Sudoku
         }
 
         this.feld[i][j] = 0; // Der Versuch war wohl nichts
+
         return false;
     }
 
     /**
      * Loest das Raetsel durch Backtracking
-     * 
+     *
      * @param i int
      * @param j int
      * @return boolean
@@ -355,7 +362,7 @@ class Sudoku
 
         for (byte a = 1; a < (this.n + 1); a++)
         {
-            if (check(i, j, a) == false)
+            if (!check(i, j, a))
             {
                 this.feld[i][j] = a;
                 if (solveBacktrack(i, j + 1))
@@ -366,6 +373,7 @@ class Sudoku
         }
 
         this.feld[i][j] = 0; // Der Versuch war wohl nichts
+
         return false;
     }
 
@@ -375,7 +383,7 @@ class Sudoku
     @Override
     public String toString()
     {
-        StringBuffer returns = new StringBuffer();
+        StringBuilder returns = new StringBuilder();
 
         for (int i = 0; i < (this.n * this.n); i++)
         {
@@ -396,7 +404,9 @@ class Sudoku
 
             returns.append(this.feld[i / this.n][i % this.n] == 0 ? "  " : " " + this.feld[i / this.n][i % this.n]);
         }
+
         returns.append("\nEs wurden " + this.tries + " Platzierungen ausprobiert in ");
+
         return returns.toString();
     }
 }

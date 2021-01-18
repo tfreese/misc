@@ -14,97 +14,97 @@ import javax.sound.midi.Synthesizer;
 /**
  * @author Thomas Freese
  */
-public class SingleNoteSynthesizer
+public final class SingleNoteSynthesizer
 {
-	/**
+    /**
+     * @param args String[]
+     */
+    public static void main(final String[] args)
+    {
+        new SingleNoteSynthesizer().playNote(60);
+    }
+
+    /**
      *
      */
-	private Receiver receiver;
+    private ShortMessage message = new ShortMessage();
 
-	/**
+    /**
      *
      */
-	private ShortMessage message = new ShortMessage();
+    private Receiver receiver;
 
-	/**
+    /**
      *
      */
-	private Synthesizer synth;
+    private Synthesizer synth;
 
-	/**
-	 * Creates a new {@link SingleNoteSynthesizer} object.
-	 */
-	private SingleNoteSynthesizer()
-	{
-		super();
+    /**
+     * Creates a new {@link SingleNoteSynthesizer} object.
+     */
+    private SingleNoteSynthesizer()
+    {
+        super();
 
-		try
-		{
-			this.synth = MidiSystem.getSynthesizer();
-			this.synth.open();
-			this.receiver = this.synth.getReceiver();
-		}
-		catch (MidiUnavailableException ex)
-		{
-			ex.printStackTrace();
-		}
-	}
+        try
+        {
+            this.synth = MidiSystem.getSynthesizer();
+            this.synth.open();
+            this.receiver = this.synth.getReceiver();
+        }
+        catch (MidiUnavailableException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 
-	/**
-	 * @param args String[]
-	 */
-	public static void main(final String[] args)
-	{
-		new SingleNoteSynthesizer().playNote(60);
-	}
-
-	/**
+    /**
      *
      */
-	public void listAvailableInstruments()
-	{
-		Instrument[] instrument = this.synth.getAvailableInstruments();
+    public void listAvailableInstruments()
+    {
+        Instrument[] instrument = this.synth.getAvailableInstruments();
 
-		for (int i = 0; i < instrument.length; i++)
-		{
-			System.out.println(i + "   " + instrument[i].getName());
-		}
-	}
+        for (int i = 0; i < instrument.length; i++)
+        {
+            System.out.println(i + "   " + instrument[i].getName());
+        }
+    }
 
-	/**
-	 * @param note int
-	 */
-	public void playNote(final int note)
-	{
-		setShortMessage(note, ShortMessage.NOTE_ON);
-		this.receiver.send(this.message, -1);
+    /**
+     * @param note int
+     */
+    public void playNote(final int note)
+    {
+        setShortMessage(note, ShortMessage.NOTE_ON);
+        this.receiver.send(this.message, -1);
 
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException ex)
-		{
-			ex.printStackTrace();
-		}
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException ex)
+        {
+            ex.printStackTrace();
+        }
 
-		setShortMessage(note, ShortMessage.NOTE_OFF);
-		this.receiver.send(this.message, -1);
-	}
+        setShortMessage(note, ShortMessage.NOTE_OFF);
+        this.receiver.send(this.message, -1);
+    }
 
-	/**
-	 * @param note int
-	 * @param onOrOff int
-	 */
-	private void setShortMessage(final int note, final int onOrOff)
-	{
-		try
-		{
-			this.message.setMessage(onOrOff, 0, note, 70);
-		}
-		catch (InvalidMidiDataException ex)
-		{
-			ex.printStackTrace();
-		}
-	}
+    /**
+     * @param note int
+     * @param onOrOff int
+     */
+    private void setShortMessage(final int note, final int onOrOff)
+    {
+        try
+        {
+            this.message.setMessage(onOrOff, 0, note, 70);
+        }
+        catch (InvalidMidiDataException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
 }

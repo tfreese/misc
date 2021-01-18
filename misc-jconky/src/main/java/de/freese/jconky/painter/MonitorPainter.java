@@ -6,6 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 /**
  * @author Thomas Freese
  */
+@FunctionalInterface
 public interface MonitorPainter
 {
     /**

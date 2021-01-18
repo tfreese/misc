@@ -25,6 +25,7 @@ public class ContextPainter
      *
      */
     private Canvas canvas;
+
     /**
      *
      */

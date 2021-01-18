@@ -13,7 +13,7 @@ public class Gene implements Comparable<Gene>
     /**
      *
      */
-    private Object value = null;
+    private Object value;
 
     /**
      * Erstellt ein neues {@link Gene} Object.

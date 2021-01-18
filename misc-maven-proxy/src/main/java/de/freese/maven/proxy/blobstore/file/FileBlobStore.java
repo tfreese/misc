@@ -27,7 +27,7 @@ public class FileBlobStore extends AbstractBlobStore
      *
      * @author Thomas Freese
      */
-    public class FileBlob extends AbstractBlob
+    private final class FileBlob extends AbstractBlob
     {
         /**
          *

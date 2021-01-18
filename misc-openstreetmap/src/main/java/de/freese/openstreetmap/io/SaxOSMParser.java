@@ -20,14 +20,6 @@ import de.freese.openstreetmap.model.OSMModel;
 public class SaxOSMParser implements IOSMParser
 {
     /**
-     * Erstellt ein neues {@link SaxOSMParser} Object.
-     */
-    public SaxOSMParser()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.openstreetmap.io.IOSMParser#parse(java.io.InputStream)
      */
     @Override

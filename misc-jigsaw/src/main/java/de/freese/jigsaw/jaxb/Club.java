@@ -30,7 +30,7 @@ public class Club
      *
      */
     @XmlAttribute
-    private int employees = 0;
+    private int employees;
 
     /**
      *

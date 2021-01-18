@@ -8,7 +8,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
-
 import javax.swing.JComponent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -16,204 +15,198 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Position;
 
 /**
- * An implementation of TransferHandler that adds support for the import of dnd.color and the import
- * and export of text. Dropping a dnd.color on a component having this TransferHandler changes the
- * foreground of the component to the imported dnd.color.
+ * An implementation of TransferHandler that adds support for the import of dnd.color and the import and export of text. Dropping a dnd.color on a component
+ * having this TransferHandler changes the foreground of the component to the imported dnd.color.
  */
 class ColorAndTextTransferHandler extends ColorTransferHandler
 {
-	// Start and end position in the source text.
-	// We need this information when performing a MOVE
-	// in order to remove the dragged text from the source.
+    // Start and end position in the source text.
+    // We need this information when performing a MOVE
+    // in order to remove the dragged text from the source.
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = -2099117900708234471L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -2099117900708234471L;
 
-	/**
-	 * 
-	 */
-	Position p0 = null;
+    /**
+     * 
+     */
+    Position p0;
 
-	// Start and end position in the source text.
-	// We need this information when performing a MOVE
-	// in order to remove the dragged text from the source.
+    // Start and end position in the source text.
+    // We need this information when performing a MOVE
+    // in order to remove the dragged text from the source.
 
-	/**
-	 *
-	 */
-	Position p1 = null;
+    /**
+     *
+     */
+    Position p1;
 
-	/**
-	 * 
-	 */
-	private DataFlavor stringFlavor = DataFlavor.stringFlavor;
+    /**
+     * 
+     */
+    private boolean shouldRemove;
 
-	/**
-	 * 
-	 */
-	private JTextComponent source;
+    /**
+     * 
+     */
+    private JTextComponent source;
 
-	/**
-	 * 
-	 */
-	private boolean shouldRemove;
+    /**
+     * 
+     */
+    private DataFlavor stringFlavor = DataFlavor.stringFlavor;
 
-	/**
-	 * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
-	 */
-	@Override
-	public int getSourceActions(final JComponent c)
-	{
-		return COPY_OR_MOVE;
-	}
+    /**
+     * @see de.freese.sonstiges.dnd.color.textfield.ColorTransferHandler#canImport(javax.swing.JComponent, java.awt.datatransfer.DataFlavor[])
+     */
+    @Override
+    public boolean canImport(final JComponent c, final DataFlavor[] flavors)
+    {
+        if (hasStringFlavor(flavors))
+        {
+            return true;
+        }
 
-	/**
-	 * @see de.freese.sonstiges.dnd.color.textfield.ColorTransferHandler#canImport(javax.swing.JComponent, java.awt.datatransfer.DataFlavor[])
-	 */
-	@Override
-	public boolean canImport(final JComponent c, final DataFlavor[] flavors)
-	{
-		if (hasStringFlavor(flavors))
-		{
-			return true;
-		}
+        return super.canImport(c, flavors);
+    }
 
-		return super.canImport(c, flavors);
-	}
+    // Create a Transferable implementation that contains the
+    // selected text.
+    /**
+     * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
+     */
+    @Override
+    protected Transferable createTransferable(final JComponent c)
+    {
+        this.source = (JTextComponent) c;
 
-	// Get the flavors from the Transferable.
-	// Is there a dnd.color flavor? If so, set the foreground dnd.color.
-	// Is there a string flavor? If so, set the text property.
-	/**
-	 * @see de.freese.sonstiges.dnd.color.textfield.ColorTransferHandler#importData(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable)
-	 */
-	@Override
-	public boolean importData(final JComponent c, final Transferable t)
-	{
-		JTextComponent tc = (JTextComponent) c;
+        int start = this.source.getSelectionStart();
+        int end = this.source.getSelectionEnd();
+        Document doc = this.source.getDocument();
 
-		if (!canImport(c, t.getTransferDataFlavors()))
-		{
-			return false;
-		}
+        if (start == end)
+        {
+            return null;
+        }
 
-		if (tc.equals(this.source) && (tc.getCaretPosition() >= this.p0.getOffset())
-				&& (tc.getCaretPosition() <= this.p1.getOffset()))
-		{
-			this.shouldRemove = false;
+        try
+        {
+            this.p0 = doc.createPosition(start);
+            this.p1 = doc.createPosition(end);
+        }
+        catch (BadLocationException e)
+        {
+            System.out.println("Can't create position - unable to remove text from source.");
+        }
 
-			return true;
-		}
+        this.shouldRemove = true;
 
-		if (hasStringFlavor(t.getTransferDataFlavors()))
-		{
-			try
-			{
-				String str = (String) t.getTransferData(this.stringFlavor);
-				tc.replaceSelection(str);
+        String data = this.source.getSelectedText();
 
-				return true;
-			}
-			catch (UnsupportedFlavorException ufe)
-			{
-				System.out.println("importData: unsupported data flavor");
-			}
-			catch (IOException ioe)
-			{
-				System.out.println("importData: I/O exception");
-			}
-		}
+        return new StringSelection(data);
+    }
 
-		// The ColorTransferHandler superclass handles dnd.color.
-		return super.importData(c, t);
-	}
+    // Remove the old text if the action is a MOVE.
+    // However, we do not allow dropping on top of the selected text,
+    // so in that case do nothing.
+    /**
+     * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent, java.awt.datatransfer.Transferable, int)
+     */
+    @Override
+    protected void exportDone(final JComponent c, final Transferable data, final int action)
+    {
+        if (this.shouldRemove && (action == MOVE))
+        {
+            if ((this.p0 != null) && (this.p1 != null) && (this.p0.getOffset() != this.p1.getOffset()))
+            {
+                try
+                {
+                    JTextComponent tc = (JTextComponent) c;
+                    tc.getDocument().remove(this.p0.getOffset(), this.p1.getOffset() - this.p0.getOffset());
+                }
+                catch (BadLocationException e)
+                {
+                    System.out.println("Can't remove text from source.");
+                }
+            }
+        }
 
-	// Create a Transferable implementation that contains the
-	// selected text.
-	/**
-	 * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
-	 */
-	@Override
-	protected Transferable createTransferable(final JComponent c)
-	{
-		this.source = (JTextComponent) c;
+        this.source = null;
+    }
 
-		int start = this.source.getSelectionStart();
-		int end = this.source.getSelectionEnd();
-		Document doc = this.source.getDocument();
+    /**
+     * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+     */
+    @Override
+    public int getSourceActions(final JComponent c)
+    {
+        return COPY_OR_MOVE;
+    }
 
-		if (start == end)
-		{
-			return null;
-		}
+    /**
+     * Does the flavor list have a string flavor?
+     * 
+     * @param flavors {@link DataFlavor}[]
+     * @return boolean
+     */
+    protected boolean hasStringFlavor(final DataFlavor[] flavors)
+    {
+        for (DataFlavor flavor : flavors)
+        {
+            if (this.stringFlavor.equals(flavor))
+            {
+                return true;
+            }
+        }
 
-		try
-		{
-			this.p0 = doc.createPosition(start);
-			this.p1 = doc.createPosition(end);
-		}
-		catch (BadLocationException e)
-		{
-			System.out.println("Can't create position - unable to remove text from source.");
-		}
+        return false;
+    }
 
-		this.shouldRemove = true;
+    // Get the flavors from the Transferable.
+    // Is there a dnd.color flavor? If so, set the foreground dnd.color.
+    // Is there a string flavor? If so, set the text property.
+    /**
+     * @see de.freese.sonstiges.dnd.color.textfield.ColorTransferHandler#importData(javax.swing.JComponent, java.awt.datatransfer.Transferable)
+     */
+    @Override
+    public boolean importData(final JComponent c, final Transferable t)
+    {
+        JTextComponent tc = (JTextComponent) c;
 
-		String data = this.source.getSelectedText();
+        if (!canImport(c, t.getTransferDataFlavors()))
+        {
+            return false;
+        }
 
-		return new StringSelection(data);
-	}
+        if (tc.equals(this.source) && (tc.getCaretPosition() >= this.p0.getOffset()) && (tc.getCaretPosition() <= this.p1.getOffset()))
+        {
+            this.shouldRemove = false;
 
-	// Remove the old text if the action is a MOVE.
-	// However, we do not allow dropping on top of the selected text,
-	// so in that case do nothing.
-	/**
-	 * @see javax.swing.TransferHandler#exportDone(javax.swing.JComponent,
-	 *      java.awt.datatransfer.Transferable, int)
-	 */
-	@Override
-	protected void exportDone(final JComponent c, final Transferable data, final int action)
-	{
-		if (this.shouldRemove && (action == MOVE))
-		{
-			if ((this.p0 != null) && (this.p1 != null)
-					&& (this.p0.getOffset() != this.p1.getOffset()))
-			{
-				try
-				{
-					JTextComponent tc = (JTextComponent) c;
-					tc.getDocument().remove(this.p0.getOffset(),
-							this.p1.getOffset() - this.p0.getOffset());
-				}
-				catch (BadLocationException e)
-				{
-					System.out.println("Can't remove text from source.");
-				}
-			}
-		}
+            return true;
+        }
 
-		this.source = null;
-	}
+        if (hasStringFlavor(t.getTransferDataFlavors()))
+        {
+            try
+            {
+                String str = (String) t.getTransferData(this.stringFlavor);
+                tc.replaceSelection(str);
 
-	/**
-	 * Does the flavor list have a string flavor?
-	 * 
-	 * @param flavors {@link DataFlavor}[]
-	 * @return boolean
-	 */
-	protected boolean hasStringFlavor(final DataFlavor[] flavors)
-	{
-		for (DataFlavor flavor : flavors)
-		{
-			if (this.stringFlavor.equals(flavor))
-			{
-				return true;
-			}
-		}
+                return true;
+            }
+            catch (UnsupportedFlavorException ufe)
+            {
+                System.out.println("importData: unsupported data flavor");
+            }
+            catch (IOException ioe)
+            {
+                System.out.println("importData: I/O exception");
+            }
+        }
 
-		return false;
-	}
+        // The ColorTransferHandler superclass handles dnd.color.
+        return super.importData(c, t);
+    }
 }

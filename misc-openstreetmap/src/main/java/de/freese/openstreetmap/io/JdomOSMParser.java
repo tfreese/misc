@@ -27,14 +27,6 @@ import de.freese.openstreetmap.model.OSMWay;
 public class JdomOSMParser implements IOSMParser
 {
     /**
-     * Erstellt ein neues {@link JdomOSMParser} Object.
-     */
-    public JdomOSMParser()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.openstreetmap.io.IOSMParser#parse(java.io.InputStream)
      */
     @Override

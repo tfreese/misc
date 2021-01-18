@@ -1,21 +1,33 @@
 package sudoku5;
 
 /**
- * Sudoku.java Sudoku generator applet author: M.T.Lagerberg version: 2.00 website:
- * http://mathijs.jurresip.nl copyright: (c) 2006 - Mathijs Lagerberg Classes: - Sudoku Extends
- * Applet. Controls the interface. - SudokuApplic Extends Frame. Enables creation of an applications
- * that contains the applet. - Grid Does all the important work. Creates sudoku's. - GridDrawer
- * Draws the puzzle on a canvas - Solver Tries to solve sudoku's using smart rules - not brute
- * force! - Valids Keeps track of numbers that are valid for each square. Used for solving puzzles
- * and for helping the user. To do: - possibility to load and save games - optional 4 grey blocks -
- * optional 1-9 on the diagonals - let the user pick the colours - add more rules for solving
- * puzzles - create puzzles of difficulty level set by user - enter your own puzzle and let the
- * computer solve it
+ * Sudoku.java Sudoku generator applet author: M.T.Lagerberg version: 2.00 website: http://mathijs.jurresip.nl copyright: (c) 2006 - Mathijs Lagerberg Classes:
+ * - Sudoku Extends Applet. Controls the interface. - SudokuApplic Extends Frame. Enables creation of an applications that contains the applet. - Grid Does all
+ * the important work. Creates sudoku's. - GridDrawer Draws the puzzle on a canvas - Solver Tries to solve sudoku's using smart rules - not brute force! -
+ * Valids Keeps track of numbers that are valid for each square. Used for solving puzzles and for helping the user. To do: - possibility to load and save games
+ * - optional 4 grey blocks - optional 1-9 on the diagonals - let the user pick the colours - add more rules for solving puzzles - create puzzles of difficulty
+ * level set by user - enter your own puzzle and let the computer solve it
  */
 
 import java.applet.Applet;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.ResourceBundle;
 
@@ -39,23 +51,15 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
     /**
      *
      */
+    private static final long serialVersionUID = 7008759494629941097L;
+    /**
+     *
+     */
     public static final int SHOW_ERRORS = 2;
     /**
      * Several stati:
      */
     public static final int SHOW_POPUP = 1;
-    /**
-     *
-     */
-    private static final long serialVersionUID = 7008759494629941097L;
-    /**
-     * Dimension of a block (e.g. 3)
-     */
-    public int n;
-    /**
-     * Dimension of the puzzle (= n*n)
-     */
-    public int N;
     /**
      *
      */
@@ -92,6 +96,14 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
      *
      */
     Point mouse = new Point(0, 0);
+    /**
+     * Dimension of a block (e.g. 3)
+     */
+    public int n;
+    /**
+     * Dimension of the puzzle (= n*n)
+     */
+    public int N;
     /**
      *
      */
@@ -144,15 +156,18 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
      * Contructor of applications
      *
      * @param isApplic boolean
-     * @param w        int
-     * @param h        int
+     * @param w int
+     * @param h int
      */
     public Sudoku(final boolean isApplic, final int w, final int h)
     {
+        super();
+
         this.width = w;
         this.height = h;
         this.n = 3;
         this.N = this.n * this.n;
+
         if (isApplic)
         {
             init();
@@ -185,6 +200,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
     public void buttonAction(final Button b)
     {
         String s = b.getLabel();
+
         if (s.equals(this.language.getString("BUTTON_SOLUTION")))
         {
             for (int i = 0; i < this.N; i++)
@@ -195,6 +211,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
                     this.user[i][j] = this.grid.grid[i][j];
                 }
             }
+
             paintSudoku();
         }
         else if (s.equals(this.language.getString("BUTTON_NEW")))
@@ -212,6 +229,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
             // Count the number of empty squares:
             int count = 0;
             int firstI = -1, firstJ = -1;
+
             for (int i = 0; i < this.N; i++)
             {
                 for (int j = 0; j < this.N; j++)
@@ -227,30 +245,37 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
                     }
                 }
             }
+
             // If puzzle is full, we can't give a hint
             if (count == 0)
             {
                 return;
             }
+
             // If >5 squares empty, we can pick them @ random
             int x = -1, y = -1;
+
             if (count > 5)
             {
                 int i = 0;
+
                 while (x < 0)
                 {
                     if ((i++) > 50)
                     {
                         break;
                     }
+
                     x = (int) (Math.random() * this.N);
                     y = (int) (Math.random() * this.N);
+
                     if ((this.user[x][y] != 0) && (this.user[x][y] == this.grid.grid[x][y]))
                     {
                         x = -1;
                     }
                 }
             }
+
             // If <5 squares empty, we just pick the first (don't waste
             // time endlessly picking already filled-in squares)
             if (x < 0)
@@ -258,11 +283,13 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
                 x = firstI;
                 y = firstJ;
             }
+
             this.given[x][y] = this.grid.grid[x][y];
             this.user[x][y] = this.grid.grid[x][y];
             this.V.set(x, y, this.grid.grid[x][y]);
             this.X = x;
             this.Y = y;
+
             paintSudoku();
         }
 
@@ -313,6 +340,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
         // any numbers the user derives, are put in a second array, 'user', because we
         // want to remember which numbers were given in the beginning.
         this.given = this.grid.given;
+
         for (int i = 0; i < this.N; i++)
         {
             for (int j = 0; j < this.N; j++)
@@ -354,6 +382,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
         c.add(bCheck);
         c.add(bHint);
         c.add(this.showValids);
+
         return c;
     }
 
@@ -375,14 +404,14 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
         // Create the popup menu:
         this.popup = new PopupMenu();
         this.items = new MenuItem[this.N + 2];
+
         for (int i = 0; i < this.N; i++)
         {
-            this.items[i] =
-                    new MenuItem(Sudoku.OPTION_ALPHA ? String.valueOf((char) (65 + i)) : ""
-                            + (i + 1));
+            this.items[i] = new MenuItem(Sudoku.OPTION_ALPHA ? String.valueOf((char) (65 + i)) : "" + (i + 1));
             this.items[i].addActionListener(this);
             this.popup.add(this.items[i]);
         }
+
         this.popup.addSeparator();
         this.items[this.N] = new MenuItem("?");
         this.items[this.N].addActionListener(this);
@@ -418,13 +447,13 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
     {
         if ((this.bufferImage == null) || (this.bufferGraphics == null))
         {
-            this.bufferImage =
-                    new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+            this.bufferImage = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+
             if (this.bufferImage == null)
             {
-                System.out.println("bufferImage==null, width: " + getSize().width + ", height: "
-                        + getSize().height);
+                System.out.println("bufferImage==null, width: " + getSize().width + ", height: " + getSize().height);
             }
+
             this.bufferGraphics = (Graphics2D) this.bufferImage.getGraphics();
         }
     }
@@ -445,12 +474,11 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
         }
         else
         {
-            int i =
-                    (Sudoku.OPTION_ALPHA ? Character.getNumericValue(mi.getLabel().charAt(0)) - 9
-                            : Integer.parseInt(mi.getLabel()));
+            int i = (Sudoku.OPTION_ALPHA ? Character.getNumericValue(mi.getLabel().charAt(0)) - 9 : Integer.parseInt(mi.getLabel()));
             this.user[this.X][this.Y] = i;
             this.V.set(this.X, this.Y, i);
         }
+
         paintSudoku();
     }
 
@@ -469,6 +497,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
             {
                 this.X = r[0];
                 this.Y = r[1];
+
                 if (e.getButton() == MouseEvent.BUTTON1)
                 {
                     this.stateUser = Sudoku.SHOW_POPUP;
@@ -487,6 +516,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
             this.X = -1;
             this.Y = -1;
         }
+
         paintSudoku();
     }
 
@@ -562,6 +592,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
             makeNewBuffer();
             g.drawImage(this.bufferImage, 0, 0, this);
         }
+
         if (this.stateUser == Sudoku.SHOW_POPUP)
         {
             this.popup.show(this, this.mouse.x, this.mouse.y);
@@ -585,8 +616,7 @@ public class Sudoku extends Applet implements MouseListener, ActionListener, Ite
         makeNewBuffer();
 
         boolean showv = (this.showValids == null ? false : this.showValids.getState());
-        this.drawer.paintSudoku(this.bufferGraphics, this.given, this.user, this.X, this.Y,
-                this.stateUser, showv, this.grid.getDifficultyLevel());
+        this.drawer.paintSudoku(this.bufferGraphics, this.given, this.user, this.X, this.Y, this.stateUser, showv, this.grid.getDifficultyLevel());
 
         if (rp)
         {

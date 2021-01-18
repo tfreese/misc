@@ -8,7 +8,7 @@ package de.freese.openstreetmap;
  *
  * @author Thomas Freese
  */
-public class Mercator
+public final class Mercator
 {
     // @formatter:off
     /**
@@ -19,8 +19,40 @@ public class Mercator
     /**
      * Minimaler Erdradius in m.
      */
-    private static final double MITTLERER_RADIUS = 6371000.8D;  
+    private static final double POLAR_RADIUS = 6356752.3142D;
     
+    /**
+     * Minimaler Erdradius in m.
+     */
+    private static final double MITTLERER_RADIUS = 6371000.8D;
+
+    /**
+     * Erdumfang in Meter.
+     */
+    private static final double ERD_UMFANG = 2.0D * MITTLERER_RADIUS * Math.PI;
+
+    /**
+     * POLAR_RADIUS / AEQUATOR_RADIUS
+     */
+    private static final double FORMFAKTOR = POLAR_RADIUS / AEQUATOR_RADIUS;
+    
+    /**
+     * 1.0D - (FORMFAKTOR * FORMFAKTOR)
+     */
+    private static final double ABPLATTUNG = 1.0D - (FORMFAKTOR * FORMFAKTOR);
+    
+    /**
+     * Math.sqrt(ABPLATTUNG)
+     */
+    private static final double EXZENTRIZITAET = Math.sqrt(ABPLATTUNG);
+    
+
+    /**
+     * EXZENTRIZITAET / 2.0D
+     */
+    @SuppressWarnings("unused")
+    private static final double EXZENTRIZITAET_HALBE = EXZENTRIZITAET / 2.0D;
+
     /**
      * Math.PI / 2.0D
      */
@@ -31,42 +63,11 @@ public class Mercator
      * Math.PI / 4.0D
      */
     private static final double PI_VIERTEL = Math.PI / 4.0D;
-    
-    /**
-     * Minimaler Erdradius in m.
-     */
-    private static final double POLAR_RADIUS = 6356752.3142D;
-    
+
     /**
      * Rad = Winkel * (Math.PI / 180.0D) = Math.toRadians(Winkel)
      */
-    private static final double RAD = Math.PI / 180.0D;    
-            
-    /**
-     * POLAR_RADIUS / AEQUATOR_RADIUS
-     */
-    private static final double FORMFAKTOR = POLAR_RADIUS / AEQUATOR_RADIUS;
-    
-    /**
-     * 1.0D - (FORMFAKTOR * FORMFAKTOR)
-     */
-    private static final double ABPLATTUNG = 1.0D - (FORMFAKTOR * FORMFAKTOR);
-
-    /**
-     * Erdumfang in Meter.
-     */
-    private static final double ERD_UMFANG = 2.0D * MITTLERER_RADIUS * Math.PI;
-
-    /**
-     * Math.sqrt(ABPLATTUNG)
-     */
-    private static final double EXZENTRIZITAET = Math.sqrt(ABPLATTUNG);
-
-    /**
-     * EXZENTRIZITAET / 2.0D
-     */
-    @SuppressWarnings("unused")
-    private static final double EXZENTRIZITAET_HALBE = EXZENTRIZITAET / 2.0D;
+    private static final double RAD = Math.PI / 180.0D;
 
     /**
      * RAD * ERD_UMFANG
@@ -84,7 +85,7 @@ public class Mercator
      */
     private static final double RAD_HALBE = RAD / 2.0D;
     // @formatter:on
-    
+
     /**
      * Breitengrad.<br>
      * Quelle: http://wiki.openstreetmap.org/wiki/Mercator
@@ -139,5 +140,13 @@ public class Mercator
         y = Math.log(Math.tan(PI_VIERTEL + (lat * RAD_HALBE))) * ERD_UMFANG;
 
         return y;
+    }
+
+    /**
+     * Erstellt ein neues {@link Mercator} Object.
+     */
+    private Mercator()
+    {
+        super();
     }
 }

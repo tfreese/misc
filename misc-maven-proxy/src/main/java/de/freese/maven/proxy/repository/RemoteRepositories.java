@@ -18,7 +18,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
     /**
      *
      */
-    private final List<RemoteRepository> remoteRepositories = new ArrayList<>();
+    private final List<RemoteRepository> repositories = new ArrayList<>();
 
     /**
      * Erstellt ein neues {@link RemoteRepositories} Object.
@@ -33,7 +33,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
      */
     public void addRepository(final RemoteRepository remoteRepository)
     {
-        this.remoteRepositories.add(remoteRepository);
+        this.repositories.add(remoteRepository);
     }
 
     /**
@@ -44,7 +44,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
     {
         boolean exist = false;
 
-        for (RemoteRepository remoteRepository : this.remoteRepositories)
+        for (RemoteRepository remoteRepository : this.repositories)
         {
             try
             {
@@ -72,7 +72,7 @@ public class RemoteRepositories extends AbstractRemoteRepository
     {
         InputStream inputStream = null;
 
-        for (RemoteRepository remoteRepository : this.remoteRepositories)
+        for (RemoteRepository remoteRepository : this.repositories)
         {
             try
             {

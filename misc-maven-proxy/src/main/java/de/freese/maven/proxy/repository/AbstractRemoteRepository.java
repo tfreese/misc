@@ -22,7 +22,7 @@ public abstract class AbstractRemoteRepository implements RemoteRepository
     /**
      * Erstellt ein neues {@link AbstractRemoteRepository} Object.
      */
-    public AbstractRemoteRepository()
+    protected AbstractRemoteRepository()
     {
         super();
     }

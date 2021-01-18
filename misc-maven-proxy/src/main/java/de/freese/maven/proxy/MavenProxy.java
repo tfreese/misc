@@ -45,12 +45,12 @@ public class MavenProxy
     /**
     *
     */
-    private EventLoopGroup acceptorGroup = null;
+    private EventLoopGroup acceptorGroup;
 
     /**
     *
     */
-    private ExecutorService executorService = null;
+    private ExecutorService executorService;
 
     /**
      *
@@ -65,12 +65,12 @@ public class MavenProxy
     /**
     *
     */
-    private EventLoopGroup workerGroup = null;
+    private EventLoopGroup workerGroup;
 
     /**
      *
      */
-    private Path workingDirectory = null;
+    private Path workingDirectory;
 
     /**
      * Erstellt ein neues {@link MavenProxy} Object.

@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
- * Geht momentan nicht aus der IDE, sondern nur per Console: mvn compile exec:java<br>
+ * Mit JavaFxDemoLauncher ausführen oder JavaFxDemo direkt mit foldenden Restruktionen:<br>
  * <br>
  * In Eclipse:<br>
  * <ol>

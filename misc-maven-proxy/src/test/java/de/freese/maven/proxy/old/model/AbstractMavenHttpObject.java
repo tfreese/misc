@@ -93,12 +93,12 @@ public abstract class AbstractMavenHttpObject
     /**
      * HTTP/1.1
      */
-    private String httpProtocol = null;
+    private String httpProtocol;
 
     /**
     *
     */
-    private String httpUri = null;
+    private String httpUri;
 
     /**
     *
