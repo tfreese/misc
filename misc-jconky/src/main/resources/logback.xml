@@ -11,7 +11,8 @@
     <!--property name="PATTERN" value="%date{yyyy-MM-dd HH:mm:ss.SSS} - %-5level[%thread] - %logger{0}[%method] - %message%n" /-->
     <property name="PATTERN" value="%date{HH:mm:ss.SSS} - %5level - [%16.-16thread] - %replace(%-40.-40logger{0}){' ', '.'} - %message%n" />
     
-    <property name="LOG_DIR" value="${user.home}/.java/jconky" />
+    <!-- Siehe: JConkyLauncher.main -->
+    <!--property name="LOG_DIR" value="${user.home}/.java/jconky" /-->
     
     <!-- Conditions brauchen org.codehaus.janino:janino -->
     <!--if condition='isNull("LOG_DIR")'>
