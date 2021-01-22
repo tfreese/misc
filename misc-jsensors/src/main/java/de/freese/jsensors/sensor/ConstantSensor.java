@@ -1,6 +1,7 @@
 // Created: 28.10.2020
 package de.freese.jsensors.sensor;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -8,6 +9,11 @@ import java.util.Objects;
  */
 public class ConstantSensor extends AbstractSensor
 {
+    /**
+    *
+    */
+    private final String name;
+
     /**
      *
      */
@@ -21,17 +27,27 @@ public class ConstantSensor extends AbstractSensor
      */
     public ConstantSensor(final String name, final String value)
     {
-        super(name);
+        super();
 
+        this.name = Objects.requireNonNull(name, "name required");
         this.value = Objects.requireNonNull(value, "value required");
     }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
+     * @see de.freese.jsensors.sensor.Sensor#getNames()
      */
     @Override
-    protected void scanValue() throws Exception
+    public List<String> getNames()
     {
-        save(this.value);
+        return List.of(this.name);
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.AbstractSensor#measureImpl()
+     */
+    @Override
+    protected void measureImpl() throws Exception
+    {
+        store(this.name, this.value);
     }
 }

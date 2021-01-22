@@ -3,13 +3,11 @@ package de.freese.jsensors.backend.rsocket;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.jsensors.SensorBackendRegistry;
+import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.utils.LifeCycle;
 import io.netty.buffer.ByteBuf;
 import io.rsocket.Payload;
@@ -50,7 +48,7 @@ public class SensorRSocketServer implements LifeCycle
     /**
      *
      */
-    private SensorBackendRegistry sensorBackendRegistry;
+    private SensorRegistry sensorRegistry;
 
     /**
      *
@@ -99,25 +97,7 @@ public class SensorRSocketServer implements LifeCycle
     {
         SensorValue sensorValue = decode(payload);
 
-        List<Backend> backends = this.sensorBackendRegistry.getBackends(sensorValue.getName());
-
-        if ((backends == null) || backends.isEmpty())
-        {
-            getLogger().error("no backends configured for sensor '{}'", sensorValue.getName());
-            return Mono.empty();
-        }
-
-        for (Backend backend : backends)
-        {
-            try
-            {
-                backend.save(sensorValue);
-            }
-            catch (Exception ex)
-            {
-                getLogger().error(null, ex);
-            }
-        }
+        this.sensorRegistry.store(sensorValue);
 
         return Mono.empty();
     }
@@ -149,11 +129,11 @@ public class SensorRSocketServer implements LifeCycle
     }
 
     /**
-     * @param sensorBackendRegistry {@link SensorBackendRegistry}
+     * @param sensorRegistry {@link SensorRegistry}
      */
-    public void setSensorBackendRegistry(final SensorBackendRegistry sensorBackendRegistry)
+    public void setSensorRegistry(final SensorRegistry sensorRegistry)
     {
-        this.sensorBackendRegistry = Objects.requireNonNull(sensorBackendRegistry, "sensorBackendRegistry required");
+        this.sensorRegistry = Objects.requireNonNull(sensorRegistry, "sensorRegistry required");
     }
 
     /**
@@ -187,7 +167,7 @@ public class SensorRSocketServer implements LifeCycle
             throw new IllegalArgumentException("workerCount must be >= 1");
         }
 
-        Objects.requireNonNull(this.sensorBackendRegistry, "sensorBackendRegistry required");
+        Objects.requireNonNull(this.sensorRegistry, "sensorRegistry required");
 
         getLogger().info("starting jsensor-rsocket server on port: {}", this.port);
 

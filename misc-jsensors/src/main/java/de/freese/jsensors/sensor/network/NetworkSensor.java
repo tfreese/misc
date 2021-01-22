@@ -17,7 +17,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
+public class NetworkSensor extends AbstractSensor implements LifeCycle
 {
     /**
      *
@@ -30,13 +30,20 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
     private final List<String> interfaces = new ArrayList<>();
 
     /**
-     * Erstellt ein neues {@link NetworkUsageSensor} Object.
-     *
-     * @param name String
+     * Erstellt ein neues {@link NetworkSensor} Object.
      */
-    public NetworkUsageSensor(final String name)
+    public NetworkSensor()
     {
-        super(name);
+        super();
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.Sensor#getNames()
+     */
+    @Override
+    public List<String> getNames()
+    {
+        return List.of("network.in", "network.out");
     }
 
     /**
@@ -107,7 +114,7 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
         String line = lines.stream().filter(l -> l.startsWith("Bytes") || l.startsWith("Octets")).findFirst().get();
         line = Utils.trimAndStripWhitespaces(line);
 
-        String[] splits = line.split("[ ]");
+        String[] splits = line.split("\\s+"); // Whitespace: einer oder mehrere
         String[] values = new String[]
         {
                 splits[1], splits[2]
@@ -117,10 +124,10 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
     }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
+     * @see de.freese.jsensors.sensor.AbstractSensor#measureImpl()
      */
     @Override
-    protected void scanValue() throws Exception
+    protected void measureImpl() throws Exception
     {
         String[] values = null;
 
@@ -142,8 +149,8 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
 
         long timeStamp = System.currentTimeMillis();
 
-        save(bytesInput, timeStamp, getName() + "-IN");
-        save(bytesOutput, timeStamp, getName() + "-OUT");
+        store("network.in", bytesInput, timeStamp);
+        store("network.out", bytesOutput, timeStamp);
     }
 
     /**
@@ -169,7 +176,7 @@ public class NetworkUsageSensor extends AbstractSensor implements LifeCycle
             // Beispiel: em1 lo wlp6so
             List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
 
-            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(l.split("[ ]"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(l.split("\\s+"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
         }
     }
 

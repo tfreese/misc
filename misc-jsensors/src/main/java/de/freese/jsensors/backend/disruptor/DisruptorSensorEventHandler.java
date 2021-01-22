@@ -1,12 +1,11 @@
 // Created: 27.10.2020
 package de.freese.jsensors.backend.disruptor;
 
-import java.util.List;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.lmax.disruptor.EventHandler;
-import de.freese.jsensors.SensorBackendRegistry;
+import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -33,20 +32,20 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     /**
      *
      */
-    private final SensorBackendRegistry sensorBackendRegistry;
+    private final SensorRegistry sensorRegistry;
 
     /**
      * @param ordinal int
      * @param parallelism int
-     * @param sensorBackendRegistry {@link SensorBackendRegistry}
+     * @param sensorRegistry {@link SensorRegistry}
      */
-    public DisruptorSensorEventHandler(final int ordinal, final int parallelism, final SensorBackendRegistry sensorBackendRegistry)
+    public DisruptorSensorEventHandler(final int ordinal, final int parallelism, final SensorRegistry sensorRegistry)
     {
         super();
 
         this.ordinal = ordinal;
         this.parallelism = parallelism;
-        this.sensorBackendRegistry = Objects.requireNonNull(sensorBackendRegistry, "sensorBackendRegistry required");
+        this.sensorRegistry = Objects.requireNonNull(sensorRegistry, "sensorRegistry required");
     }
 
     /**
@@ -69,34 +68,16 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
             SensorValue sensorValue = event.getSensorValue();
             event.setSensorValue(null);
 
-            save(sensorValue);
+            store(sensorValue);
         }
     }
 
     /**
-     * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.Backend#store(de.freese.jsensors.SensorValue)
      */
     @Override
-    public void save(final SensorValue sensorValue)
+    public void store(final SensorValue sensorValue)
     {
-        List<Backend> backends = this.sensorBackendRegistry.getBackends(sensorValue.getName());
-
-        if ((backends == null) || backends.isEmpty())
-        {
-            getLogger().error("no backends configured for sensor '{}'", sensorValue.getName());
-            return;
-        }
-
-        for (Backend backend : backends)
-        {
-            try
-            {
-                backend.save(sensorValue);
-            }
-            catch (Exception ex)
-            {
-                getLogger().error(null, ex);
-            }
-        }
+        this.sensorRegistry.store(sensorValue);
     }
 }

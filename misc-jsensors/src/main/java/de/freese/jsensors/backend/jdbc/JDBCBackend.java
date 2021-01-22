@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import javax.sql.DataSource;
 import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.backend.AbstractBatchBackend;
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.backend.batch.AbstractBatchBackend;
 import de.freese.jsensors.sensor.Sensor;
 
 /**
@@ -81,7 +81,7 @@ public class JDBCBackend extends AbstractBatchBackend
                     else
                     {
                         joiner.add("VALUE VARCHAR(20) NOT NULL");
-                        joiner.add("TIMESTAMP BIGINT PRIMARY KEY NOT NULL");
+                        joiner.add("TIMESTAMP BIGINT NOT NULL");
                     }
 
                     sql.append(joiner);
@@ -92,8 +92,14 @@ public class JDBCBackend extends AbstractBatchBackend
                     {
                         // Index
                         String index = String.format("CREATE UNIQUE INDEX %s_UNQ ON %s (NAME, TIMESTAMP);", tableName, tableName);
-
                         stmt.execute(index);
+
+                        // Diese Indices, existieren durch de UNIQUE INDEX.
+                        // index = String.format("CREATE INDEX NAME_IDX ON %s (NAME);", tableName);
+                        // stmt.execute(index);
+                        //
+                        // index = String.format("CREATE INDEX TIMESTAMP_IDX ON %s (TIMESTAMP);", tableName);
+                        // stmt.execute(index);
                     }
                 }
             }
@@ -119,57 +125,13 @@ public class JDBCBackend extends AbstractBatchBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.batch.AbstractBatchBackend#saveValues(java.util.List)
+     * @see de.freese.jsensors.backend.AbstractBackend#isExclusive()
      */
     @Override
-    protected void saveValues(final List<SensorValue> values) throws Exception
+    protected boolean isExclusive()
     {
-        if ((values == null) || values.isEmpty())
-        {
-            return;
-        }
-
-        StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO ").append(getTableName());
-
-        if (isExclusive())
-        {
-            sql.append(" (VALUE, TIMESTAMP)");
-            sql.append(" VALUES (?, ?)");
-        }
-        else
-        {
-            sql.append(" (NAME, VALUE, TIMESTAMP)");
-            sql.append(" VALUES (?, ?, ?)");
-        }
-
-        try (Connection con = getDataSource().getConnection();
-             PreparedStatement pstmt = con.prepareStatement(sql.toString()))
-        {
-            con.setAutoCommit(false);
-
-            for (SensorValue sensorValue : values)
-            {
-                if (isExclusive())
-                {
-                    pstmt.setString(1, sensorValue.getValue());
-                    pstmt.setLong(2, sensorValue.getTimestamp());
-                }
-                else
-                {
-                    pstmt.setString(1, sensorValue.getName());
-                    pstmt.setString(2, sensorValue.getValue());
-                    pstmt.setLong(3, sensorValue.getTimestamp());
-                }
-
-                pstmt.addBatch();
-                // pstmt.clearParameters();
-            }
-
-            pstmt.executeBatch();
-
-            con.commit();
-        }
+        // TODO Das muss hier eleganter gehen !
+        return false;
     }
 
     /**
@@ -224,5 +186,59 @@ public class JDBCBackend extends AbstractBatchBackend
         super.stop();
 
         this.dataSource = null;
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBatchBackend#storeValues(java.util.List)
+     */
+    @Override
+    protected void storeValues(final List<SensorValue> values) throws Exception
+    {
+        if ((values == null) || values.isEmpty())
+        {
+            return;
+        }
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ").append(getTableName());
+
+        if (isExclusive())
+        {
+            sql.append(" (VALUE, TIMESTAMP)");
+            sql.append(" VALUES (?, ?)");
+        }
+        else
+        {
+            sql.append(" (NAME, VALUE, TIMESTAMP)");
+            sql.append(" VALUES (?, ?, ?)");
+        }
+
+        try (Connection con = getDataSource().getConnection();
+             PreparedStatement pstmt = con.prepareStatement(sql.toString()))
+        {
+            con.setAutoCommit(false);
+
+            for (SensorValue sensorValue : values)
+            {
+                if (isExclusive())
+                {
+                    pstmt.setString(1, sensorValue.getValue());
+                    pstmt.setLong(2, sensorValue.getTimestamp());
+                }
+                else
+                {
+                    pstmt.setString(1, sensorValue.getName());
+                    pstmt.setString(2, sensorValue.getValue());
+                    pstmt.setLong(3, sensorValue.getTimestamp());
+                }
+
+                pstmt.addBatch();
+                // pstmt.clearParameters();
+            }
+
+            pstmt.executeBatch();
+
+            con.commit();
+        }
     }
 }

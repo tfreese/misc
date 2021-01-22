@@ -16,7 +16,6 @@ import de.freese.jsensors.backend.Backend;
  */
 public class CSVBackend extends AbstractFileBackend
 {
-
     /**
      * @see de.freese.jsensors.backend.file.AbstractFileBackend#createOutputStream(java.nio.file.Path)
      */
@@ -74,5 +73,15 @@ public class CSVBackend extends AbstractFileBackend
         byte[] bytes = formatted.getBytes(StandardCharsets.UTF_8);
 
         return bytes;
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#isExclusive()
+     */
+    @Override
+    protected boolean isExclusive()
+    {
+        // TODO Das muss hier eleganter gehen !
+        return false;
     }
 }

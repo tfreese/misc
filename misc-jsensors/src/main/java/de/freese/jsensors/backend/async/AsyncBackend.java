@@ -6,6 +6,7 @@ package de.freese.jsensors.backend.async;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import de.freese.jsensors.SensorValue;
@@ -43,7 +44,7 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
                         continue;
                     }
 
-                    AsyncBackend.this.delegate.save(sensorValue);
+                    AsyncBackend.this.delegate.store(sensorValue);
                 }
                 catch (InterruptedException iex)
                 {
@@ -80,6 +81,26 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
     private final List<QueueWorker> workers = new ArrayList<>();
 
     /**
+     * Erstellt ein neues {@link AsyncBackend} Object.
+     *
+     * @param delegate {@link Backend}
+     * @param numberOfWorkers int
+     */
+    public AsyncBackend(final Backend delegate, final int numberOfWorkers)
+    {
+        super();
+
+        this.delegate = Objects.requireNonNull(delegate, "delegate required");
+
+        if (numberOfWorkers <= 0)
+        {
+            throw new IllegalArgumentException("numberOfWorkers must be > 0: " + numberOfWorkers);
+        }
+
+        this.numberOfWorkers = numberOfWorkers;
+    }
+
+    /**
      * @return {@link BlockingQueue}
      */
     private BlockingQueue<SensorValue> getQueue()
@@ -88,48 +109,11 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
-     */
-    @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
-    {
-        getQueue().add(sensorValue);
-    }
-
-    /**
-     * @param delegate {@link Backend}
-     */
-    public void setDelegate(final Backend delegate)
-    {
-        this.delegate = delegate;
-    }
-
-    /**
-     * Setzt die Anzahl der Worker-Threads.
-     *
-     * @param numberOfWorkers int
-     */
-    public void setNumberOfWorkers(final int numberOfWorkers)
-    {
-        if (numberOfWorkers <= 0)
-        {
-            throw new IllegalArgumentException("numberOfWorkers <= 0: " + numberOfWorkers);
-        }
-
-        this.numberOfWorkers = numberOfWorkers;
-    }
-
-    /**
      * @see de.freese.jsensors.utils.LifeCycle#start()
      */
     @Override
     public void start()
     {
-        if (this.delegate == null)
-        {
-            throw new NullPointerException("delegate backend required");
-        }
-
         if (this.delegate instanceof LifeCycle)
         {
             ((LifeCycle) this.delegate).start();
@@ -163,7 +147,7 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
 
             while ((sv = getQueue().poll()) != null)
             {
-                this.delegate.save(sv);
+                this.delegate.store(sv);
             }
         }
 
@@ -173,5 +157,14 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
         {
             ((LifeCycle) this.delegate).stop();
         }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#storeValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void storeValue(final SensorValue sensorValue) throws Exception
+    {
+        getQueue().add(sensorValue);
     }
 }

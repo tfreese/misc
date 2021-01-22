@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.TimeoutException;
 import com.lmax.disruptor.dsl.Disruptor;
-import de.freese.jsensors.SensorBackendRegistry;
+import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.utils.JSensorThreadFactory;
@@ -35,29 +35,7 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    private SensorBackendRegistry sensorBackendRegistry;
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
-     */
-    @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
-    {
-        RingBuffer<SensorEvent> ringBuffer = this.disruptor.getRingBuffer();
-
-        long sequence = ringBuffer.next();
-
-        try
-        {
-            SensorEvent event = ringBuffer.get(sequence);
-
-            event.setSensorValue(sensorValue);
-        }
-        finally
-        {
-            ringBuffer.publish(sequence);
-        }
-    }
+    private SensorRegistry sensorRegistry;
 
     /**
      * Default: 3
@@ -81,11 +59,11 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @param sensorBackendRegistry {@link SensorBackendRegistry}
+     * @param sensorRegistry {@link SensorRegistry}
      */
-    public void setSensorBackendRegistry(final SensorBackendRegistry sensorBackendRegistry)
+    public void setSensorRegistry(final SensorRegistry sensorRegistry)
     {
-        this.sensorBackendRegistry = sensorBackendRegistry;
+        this.sensorRegistry = sensorRegistry;
     }
 
     /**
@@ -94,7 +72,7 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
-        Objects.requireNonNull(this.sensorBackendRegistry, "sensorBackendRegistry required");
+        Objects.requireNonNull(this.sensorRegistry, "sensorRegistry required");
 
         if (this.ringBufferSize < 1)
         {
@@ -107,7 +85,7 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
 
         for (int i = 0; i < handlers.length; i++)
         {
-            handlers[i] = new DisruptorSensorEventHandler(i, this.parallelism, this.sensorBackendRegistry);
+            handlers[i] = new DisruptorSensorEventHandler(i, this.parallelism, this.sensorRegistry);
         }
 
         // disruptor.handleEventsWith(handlers).then(new CleaningEventHandler());
@@ -131,6 +109,28 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
         catch (TimeoutException ex)
         {
             getLogger().error(null, ex);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#storeValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void storeValue(final SensorValue sensorValue) throws Exception
+    {
+        RingBuffer<SensorEvent> ringBuffer = this.disruptor.getRingBuffer();
+
+        long sequence = ringBuffer.next();
+
+        try
+        {
+            SensorEvent event = ringBuffer.get(sequence);
+
+            event.setSensorValue(sensorValue);
+        }
+        finally
+        {
+            ringBuffer.publish(sequence);
         }
     }
 }

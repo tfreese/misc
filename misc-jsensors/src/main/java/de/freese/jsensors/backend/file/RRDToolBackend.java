@@ -70,10 +70,41 @@ public class RRDToolBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.file.AbstractFileBackend#saveValues(java.util.List)
+     * @see de.freese.jsensors.backend.AbstractBackend#isExclusive()
      */
     @Override
-    protected void saveValues(final List<SensorValue> values) throws Exception
+    protected boolean isExclusive()
+    {
+        // TODO Das muss hier eleganter gehen !
+        return true;
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.file.AbstractFileBackend#start()
+     */
+    @Override
+    public void start()
+    {
+        super.start();
+
+        if (!isExclusive())
+        {
+            throw new IllegalArgumentException("RRDTool Backend must be exclusive for one sensor");
+        }
+
+        String pathString = getPath().toString();
+
+        if (!pathString.toLowerCase().endsWith(".rrd"))
+        {
+            throw new IllegalArgumentException("RRD files must have '.rrd' extension");
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.file.AbstractFileBackend#storeValues(java.util.List)
+     */
+    @Override
+    protected void storeValues(final List<SensorValue> values) throws Exception
     {
         if ((values == null) || values.isEmpty())
         {
@@ -99,27 +130,6 @@ public class RRDToolBackend extends AbstractFileBackend
             {
                 throw new IOException(lines.stream().collect(Collectors.joining(getLineSeparator())));
             }
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.file.AbstractFileBackend#start()
-     */
-    @Override
-    public void start()
-    {
-        super.start();
-
-        if (!isExclusive())
-        {
-            throw new IllegalArgumentException("RRDTool Backend must be exclusive for one sensor");
-        }
-
-        String pathString = getPath().toString();
-
-        if (!pathString.toLowerCase().endsWith(".rrd"))
-        {
-            throw new IllegalArgumentException("RRD files must have '.rrd' extension");
         }
     }
 }

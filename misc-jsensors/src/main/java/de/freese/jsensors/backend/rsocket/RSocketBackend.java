@@ -74,24 +74,6 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
-     */
-    @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
-    {
-        ByteBuf byteBuf = encode(sensorValue);
-
-        // @formatter:off
-        this.client
-            .fireAndForget(Mono.just(ByteBufPayload.create(byteBuf)))
-            .block()
-            ;
-        // @formatter:on
-
-        // byteBuf.release();
-    }
-
-    /**
      * @param uri {@link URI}
      */
     public void setUri(final URI uri)
@@ -153,5 +135,23 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     public void stop()
     {
         this.client.dispose();
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#storeValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void storeValue(final SensorValue sensorValue) throws Exception
+    {
+        ByteBuf byteBuf = encode(sensorValue);
+
+        // @formatter:off
+        this.client
+            .fireAndForget(Mono.just(ByteBufPayload.create(byteBuf)))
+            .block()
+            ;
+        // @formatter:on
+
+        // byteBuf.release();
     }
 }

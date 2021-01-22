@@ -1,6 +1,7 @@
 // Created: 01.06.2017
 package de.freese.jsensors.sensor.cpu;
 
+import java.util.List;
 import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
 import de.freese.jsensors.sensor.AbstractSensor;
@@ -11,7 +12,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class CpuUsageSensor extends AbstractSensor
+public class CpuSensor extends AbstractSensor
 {
     /**
      *
@@ -24,13 +25,11 @@ public class CpuUsageSensor extends AbstractSensor
     private final JavaSysMon monitor;
 
     /**
-     * Erzeugt eine neue Instanz von {@link CpuUsageSensor}.
-     *
-     * @param name String
+     * Erzeugt eine neue Instanz von {@link CpuSensor}.
      */
-    public CpuUsageSensor(final String name)
+    public CpuSensor()
     {
-        super(name);
+        super();
 
         this.monitor = new JavaSysMon();
 
@@ -55,19 +54,26 @@ public class CpuUsageSensor extends AbstractSensor
     // }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
+     * @see de.freese.jsensors.sensor.Sensor#getNames()
      */
     @Override
-    protected void scanValue() throws Exception
+    public List<String> getNames()
     {
-        String value = null;
+        return List.of("cpu.usage");
+    }
 
+    /**
+     * @see de.freese.jsensors.sensor.AbstractSensor#measureImpl()
+     */
+    @Override
+    protected void measureImpl() throws Exception
+    {
         CpuTimes cpuTimes = this.monitor.cpuTimes();
         float usage = cpuTimes.getCpuUsage(this.cpuTimesPrevious) * 100.0F;
         this.cpuTimesPrevious = cpuTimes;
 
-        value = Utils.format(usage);
-
+        // String value = Utils.format(usage);
+        //
         // if (Utils.isWindows())
         // {
         // value = getCpuUsageWindows();
@@ -77,6 +83,6 @@ public class CpuUsageSensor extends AbstractSensor
         // throw new IllegalStateException("unsupported operation system");
         // }
 
-        save(value);
+        store("cpu.usage", Utils.format(usage));
     }
 }

@@ -30,9 +30,19 @@
             <groupId>io.rsocket</groupId>
             <artifactId>rsocket-transport-netty</artifactId>
             <optional>true</optional>
-        </dependency>               
+        </dependency> 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>                        
 
 		<!-- runtime scope -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>runtime</scope>
+        </dependency> 
+                
 		<!-- provided scope -->
         
 		<!-- test scope -->
@@ -50,12 +60,7 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-            <scope>test</scope>
-        </dependency>             
+        </dependency>            
 	</dependencies>
 
 </project>

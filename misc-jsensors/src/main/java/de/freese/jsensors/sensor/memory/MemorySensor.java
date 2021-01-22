@@ -1,6 +1,7 @@
 // Created: 01.06.2017
 package de.freese.jsensors.sensor.memory;
 
+import java.util.List;
 import com.jezhumble.javasysmon.JavaSysMon;
 import com.jezhumble.javasysmon.MemoryStats;
 import de.freese.jsensors.sensor.AbstractSensor;
@@ -11,7 +12,7 @@ import de.freese.jsensors.utils.Utils;
  *
  * @author Thomas Freese
  */
-public class MemoryUsageSensor extends AbstractSensor
+public class MemorySensor extends AbstractSensor
 {
     /**
      *
@@ -19,30 +20,38 @@ public class MemoryUsageSensor extends AbstractSensor
     private final JavaSysMon monitor;
 
     /**
-     * Erzeugt eine neue Instanz von {@link MemoryUsageSensor}.
-     *
-     * @param name String
+     * Erzeugt eine neue Instanz von {@link MemorySensor}.
      */
-    public MemoryUsageSensor(final String name)
+    public MemorySensor()
     {
-        super(name);
+        super();
 
         this.monitor = new JavaSysMon();
     }
 
     /**
-     * @see de.freese.jsensors.sensor.AbstractSensor#scanValue()
+     * @see de.freese.jsensors.sensor.Sensor#getNames()
      */
     @Override
-    protected void scanValue() throws Exception
+    public List<String> getNames()
+    {
+        return List.of("memory.free", "memory.usage");
+    }
+
+    /**
+     * @see de.freese.jsensors.sensor.AbstractSensor#measureImpl()
+     */
+    @Override
+    protected void measureImpl() throws Exception
     {
         MemoryStats stats = this.monitor.physical();
         double free = stats.getFreeBytes();
         double total = stats.getTotalBytes();
         double usage = (1.0D - (free / total)) * 100.0D;
 
-        String value = Utils.format(usage);
+        long timeStamp = System.currentTimeMillis();
 
-        save(value);
+        store("memory.free", Utils.format(free), timeStamp);
+        store("memory.usage", Utils.format(usage), timeStamp);
     }
 }

@@ -4,7 +4,7 @@ package de.freese.jsensors.backend;
 import de.freese.jsensors.SensorValue;
 
 /**
- * Ein {@link Backend} speichert die gemessenen Sensorwerte.
+ * Ein {@link Backend} nimmt die gemessenen Sensorwerte entgegen und speichert oder verabeitet diese weiter.
  *
  * @author Thomas Freese
  */
@@ -16,5 +16,5 @@ public interface Backend
      *
      * @param sensorValue {@link SensorValue}
      */
-    public void save(SensorValue sensorValue);
+    public void store(SensorValue sensorValue);
 }

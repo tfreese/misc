@@ -3,10 +3,10 @@ package de.freese.jsensors.backend;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Paths;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.backend.file.RRDToolBackend;
 import de.freese.jsensors.sensor.ConstantSensor;
 import de.freese.jsensors.sensor.Sensor;
@@ -15,7 +15,7 @@ import de.freese.jsensors.sensor.Sensor;
  * @author Thomas Freese
  */
 @TestMethodOrder(MethodOrderer.MethodName.class)
-@Disabled("RRDTool ist nicht immer vorhanden")
+// @Disabled("RRDTool ist nicht immer vorhanden")
 class TestRRDToolBackend
 {
     /**
@@ -24,21 +24,23 @@ class TestRRDToolBackend
     @Test
     void testRRDToolBackend() throws Exception
     {
-        Sensor sensor = new ConstantSensor("TEST_SENSOR_RRDTOOL", "123.456");
+        SensorRegistry registry = new SensorRegistry();
+
+        Sensor sensor = new ConstantSensor("test.sensor.rrdtool", "123.456");
+        sensor.bindTo(registry);
 
         RRDToolBackend rrdToolBackend = new RRDToolBackend();
         rrdToolBackend.setPath(Paths.get("logs", "sensors.rrd"));
-        rrdToolBackend.setExclusive(true);
         rrdToolBackend.setBatchSize(2);
-        rrdToolBackend.start();
 
-        sensor.setBackend(rrdToolBackend);
+        registry.bind("test.sensor.rrdtool", rrdToolBackend);
+        registry.start();
 
-        sensor.scan();
-        sensor.scan();
-        sensor.scan();
+        sensor.measure();
+        sensor.measure();
+        sensor.measure();
 
-        rrdToolBackend.stop();
+        registry.stop();
 
         assertTrue(true);
     }

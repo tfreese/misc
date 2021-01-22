@@ -10,7 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.backend.batch.AbstractBatchBackend;
+import de.freese.jsensors.backend.AbstractBatchBackend;
 
 /**
  * Basis-implementierung eines Backends für Dateien.
@@ -100,27 +100,6 @@ public abstract class AbstractFileBackend extends AbstractBatchBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.batch.AbstractBatchBackend#saveValues(java.util.List)
-     */
-    @Override
-    protected void saveValues(final List<SensorValue> values) throws Exception
-    {
-        if ((values == null) || values.isEmpty())
-        {
-            return;
-        }
-
-        for (SensorValue sensorValue : values)
-        {
-            byte[] bytes = encode(sensorValue);
-
-            this.outputStream.write(bytes);
-        }
-
-        this.outputStream.flush();
-    }
-
-    /**
      * @param path {@link Path}
      */
     public void setPath(final Path path)
@@ -171,5 +150,26 @@ public abstract class AbstractFileBackend extends AbstractBatchBackend
         {
             getLogger().error(null, ex);
         }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBatchBackend#storeValues(java.util.List)
+     */
+    @Override
+    protected void storeValues(final List<SensorValue> values) throws Exception
+    {
+        if ((values == null) || values.isEmpty())
+        {
+            return;
+        }
+
+        for (SensorValue sensorValue : values)
+        {
+            byte[] bytes = encode(sensorValue);
+
+            this.outputStream.write(bytes);
+        }
+
+        this.outputStream.flush();
     }
 }

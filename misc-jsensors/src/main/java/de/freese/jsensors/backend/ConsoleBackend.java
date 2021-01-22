@@ -9,10 +9,10 @@ import de.freese.jsensors.SensorValue;
 public class ConsoleBackend extends AbstractBackend
 {
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.AbstractBackend#storeValue(de.freese.jsensors.SensorValue)
      */
     @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
+    protected void storeValue(final SensorValue sensorValue) throws Exception
     {
         System.out.println(sensorValue);
     }

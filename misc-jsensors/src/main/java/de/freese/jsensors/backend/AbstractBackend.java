@@ -25,7 +25,7 @@ public abstract class AbstractBackend implements Backend
     /**
      * Erstellt ein neues {@link AbstractBackend} Object.
      */
-    public AbstractBackend()
+    protected AbstractBackend()
     {
         super();
     }
@@ -48,11 +48,21 @@ public abstract class AbstractBackend implements Backend
         return this.exclusive;
     }
 
+    // /**
+    // * Das Backend ist exklusiv nur für einen Sensor.
+    // *
+    // * @param exclusive boolean
+    // */
+    // public void setExclusive(final boolean exclusive)
+    // {
+    // this.exclusive = exclusive;
+    // }
+
     /**
-     * @see de.freese.jsensors.backend.Backend#save(de.freese.jsensors.SensorValue)
+     * @see de.freese.jsensors.backend.Backend#store(de.freese.jsensors.SensorValue)
      */
     @Override
-    public final void save(final SensorValue sensorValue)
+    public final void store(final SensorValue sensorValue)
     {
         if (sensorValue == null)
         {
@@ -77,7 +87,7 @@ public abstract class AbstractBackend implements Backend
 
         try
         {
-            saveValue(sensorValue);
+            storeValue(sensorValue);
         }
         catch (Exception ex)
         {
@@ -91,15 +101,5 @@ public abstract class AbstractBackend implements Backend
      * @param sensorValue {@link SensorValue}
      * @throws Exception Falls was schief geht.
      */
-    protected abstract void saveValue(SensorValue sensorValue) throws Exception;
-
-    /**
-     * Das Backend ist exklusiv nur für einen Sensor.
-     *
-     * @param exclusive boolean
-     */
-    public void setExclusive(final boolean exclusive)
-    {
-        this.exclusive = exclusive;
-    }
+    protected abstract void storeValue(SensorValue sensorValue) throws Exception;
 }

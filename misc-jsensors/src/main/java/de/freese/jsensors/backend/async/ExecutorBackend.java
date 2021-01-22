@@ -5,7 +5,7 @@
 package de.freese.jsensors.backend.async;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
@@ -26,49 +26,20 @@ public class ExecutorBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    private ExecutorService executorService;
+    private Executor executor;
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#saveValue(de.freese.jsensors.SensorValue)
-     */
-    @Override
-    protected void saveValue(final SensorValue sensorValue) throws Exception
-    {
-        this.executorService.execute(() -> {
-            if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
-            {
-                return;
-            }
-
-            final Thread currentThread = Thread.currentThread();
-            String oldName = currentThread.getName();
-            currentThread.setName("task-" + sensorValue.getName());
-
-            try
-            {
-                this.delegate.save(sensorValue);
-            }
-            finally
-            {
-                currentThread.setName(oldName);
-            }
-        });
-    }
-
-    /**
+     * Erstellt ein neues {@link ExecutorBackend} Object.
+     *
      * @param delegate {@link Backend}
+     * @param executor {@link Executor}
      */
-    public void setDelegate(final Backend delegate)
+    public ExecutorBackend(final Backend delegate, final Executor executor)
     {
-        this.delegate = Objects.requireNonNull(delegate, "delegate required");
-    }
+        super();
 
-    /**
-     * @param executorService {@link ExecutorService}
-     */
-    public void setExecutorService(final ExecutorService executorService)
-    {
-        this.executorService = Objects.requireNonNull(executorService, "executorService required");
+        this.delegate = Objects.requireNonNull(delegate, "delegate required");
+        this.executor = Objects.requireNonNull(executor, "executor required");
     }
 
     /**
@@ -77,16 +48,6 @@ public class ExecutorBackend extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
-        if (this.delegate == null)
-        {
-            throw new NullPointerException("delegate backend required");
-        }
-
-        if (this.delegate == null)
-        {
-            throw new NullPointerException("executorService required");
-        }
-
         if (this.delegate instanceof LifeCycle)
         {
             ((LifeCycle) this.delegate).start();
@@ -103,5 +64,36 @@ public class ExecutorBackend extends AbstractBackend implements LifeCycle
         {
             ((LifeCycle) this.delegate).stop();
         }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBackend#storeValue(de.freese.jsensors.SensorValue)
+     */
+    @Override
+    protected void storeValue(final SensorValue sensorValue) throws Exception
+    {
+        this.executor.execute(() -> {
+            if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
+            {
+                return;
+            }
+
+            // final Thread currentThread = Thread.currentThread();
+            // String oldName = currentThread.getName();
+            // currentThread.setName("task-" + sensorValue.getName());
+
+            try
+            {
+                this.delegate.store(sensorValue);
+            }
+            catch (Exception ex)
+            {
+                getLogger().error(null, ex);
+            }
+            finally
+            {
+                // currentThread.setName(oldName);
+            }
+        });
     }
 }

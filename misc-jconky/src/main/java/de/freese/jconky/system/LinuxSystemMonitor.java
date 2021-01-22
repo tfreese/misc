@@ -372,7 +372,7 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
         }
         catch (Exception ex)
         {
-            // Empty
+            getLogger().error(null, ex);
         }
 
         getLogger().debug("externalIp = {}", externalIp);

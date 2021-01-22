@@ -1,6 +1,7 @@
 // Created: 31.10.2020
 package de.freese.jsensors;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,15 +9,14 @@ import java.util.concurrent.TimeUnit;
 import org.hsqldb.jdbc.JDBCPool;
 import de.freese.jsensors.backend.Backend;
 import de.freese.jsensors.backend.ConsoleBackend;
-import de.freese.jsensors.backend.disruptor.DisruptorBackend;
 import de.freese.jsensors.backend.file.CSVBackend;
 import de.freese.jsensors.backend.jdbc.JDBCBackend;
 import de.freese.jsensors.sensor.Sensor;
-import de.freese.jsensors.sensor.cpu.CpuUsageSensor;
-import de.freese.jsensors.sensor.disk.DiskFreeSpaceSensor;
-import de.freese.jsensors.sensor.disk.DiskUsageSensor;
-import de.freese.jsensors.sensor.memory.MemoryUsageSensor;
-import de.freese.jsensors.sensor.network.NetworkUsageSensor;
+import de.freese.jsensors.sensor.cpu.CpuSensor;
+import de.freese.jsensors.sensor.disk.DiskSensor;
+import de.freese.jsensors.sensor.memory.MemorySensor;
+import de.freese.jsensors.sensor.network.NetworkSensor;
+import de.freese.jsensors.sensor.swap.SwapSensor;
 
 /**
  * @author Thomas Freese
@@ -28,96 +28,71 @@ public class SimpleClientDemo
      */
     public static void main(final String[] args)
     {
+        SensorRegistry registry = new SensorRegistry();
+
         // Sensoren definieren
-        DiskFreeSpaceSensor sensorDiskFreeSpace = new DiskFreeSpaceSensor("DISKFREE_ROOT");
-        sensorDiskFreeSpace.setDisk("/");
+        DiskSensor sensorDisk = new DiskSensor(new File("/"), "root");
+        sensorDisk.bindTo(registry);
 
-        DiskUsageSensor sensorDiskUsage = new DiskUsageSensor("DISKUSAGE_ROOT");
-        sensorDiskUsage.setDisk("/");
+        Sensor sensorCpu = new CpuSensor();
+        sensorCpu.bindTo(registry);
 
-        Sensor sensorCpuUsage = new CpuUsageSensor("CPU_USAGE");
-        Sensor sensorMemoryUsage = new MemoryUsageSensor("MEMORY_USAGE");
-        Sensor sensorSwapUsage = new MemoryUsageSensor("SWAP_USAGE");
-        NetworkUsageSensor sensorNetworkUsage = new NetworkUsageSensor("NETWORK");
+        Sensor sensorMemory = new MemorySensor();
+        sensorMemory.bindTo(registry);
+
+        Sensor sensorSwap = new SwapSensor();
+        sensorSwap.bindTo(registry);
+
+        NetworkSensor sensorNetwork = new NetworkSensor();
+        sensorNetwork.bindTo(registry);
 
         // Backends definieren
-        CSVBackend csvBackendDiskFreeRoot = new CSVBackend();
-        csvBackendDiskFreeRoot.setPath(Paths.get("logs", "diskFreeRoot.csv"));
-        csvBackendDiskFreeRoot.setBatchSize(5);
-        csvBackendDiskFreeRoot.setExclusive(true);
+        CSVBackend csvBackendDiskRoot = new CSVBackend();
+        csvBackendDiskRoot.setPath(Paths.get("logs", "diskRoot.csv"));
+        csvBackendDiskRoot.setBatchSize(6);
 
         CSVBackend csvBackendOneFileForAll = new CSVBackend();
         csvBackendOneFileForAll.setPath(Paths.get("logs", "sensors.csv"));
-        csvBackendOneFileForAll.setBatchSize(5);
+        csvBackendOneFileForAll.setBatchSize(6);
 
         JDBCPool dataSource = new JDBCPool();
         dataSource.setUrl("jdbc:hsqldb:file:logs/hsqldb/sensordb;create=true;shutdown=true");
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
-        JDBCBackend jdbcBackendDiskFreeRoot = new JDBCBackend();
-        jdbcBackendDiskFreeRoot.setDataSource(dataSource);
-        jdbcBackendDiskFreeRoot.setTableName("DISKFREE_ROOT");
-        jdbcBackendDiskFreeRoot.setBatchSize(5);
-        jdbcBackendDiskFreeRoot.setExclusive(true);
+        JDBCBackend jdbcBackendDiskRoot = new JDBCBackend();
+        jdbcBackendDiskRoot.setDataSource(dataSource);
+        jdbcBackendDiskRoot.setTableName("DISK_ROOT");
+        jdbcBackendDiskRoot.setBatchSize(6);
 
         JDBCBackend jdbcBackendOneTableForAll = new JDBCBackend();
         jdbcBackendOneTableForAll.setDataSource(dataSource);
         jdbcBackendOneTableForAll.setTableName("SENSORS");
-        jdbcBackendOneTableForAll.setBatchSize(5);
+        jdbcBackendOneTableForAll.setBatchSize(6);
 
         Backend backendConsole = new ConsoleBackend();
 
         // Sensoren mit den Backends verknüpfen.
-        SensorBackendRegistry registry = new SensorBackendRegistry();
-        registry.register(sensorDiskFreeSpace, csvBackendDiskFreeRoot, jdbcBackendDiskFreeRoot);
-        registry.register(sensorDiskUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
-        registry.register(sensorCpuUsage, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
-        registry.register(sensorMemoryUsage, backendConsole);
-        registry.register(sensorSwapUsage, backendConsole);
-        registry.register("NETWORK-IN", backendConsole);
-        registry.register("NETWORK-OUT", backendConsole);
+        registry.bind("disk.free.root", csvBackendDiskRoot, jdbcBackendDiskRoot, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
+        registry.bind("disk.usage.root", csvBackendDiskRoot, jdbcBackendDiskRoot, csvBackendOneFileForAll, jdbcBackendOneTableForAll);
 
-        // Registry in den Disruptor setzen.
-        // Der Disruptor überträgt den SensorWert zum Speichern an einen anderen Thread.
-        DisruptorBackend backendDisruptor = new DisruptorBackend();
-        backendDisruptor.setParallelism(2);
-        backendDisruptor.setRingBufferSize(16);
-        backendDisruptor.setSensorBackendRegistry(registry);
+        registry.bind("cpu.usage", csvBackendOneFileForAll, jdbcBackendOneTableForAll);
 
-        sensorDiskFreeSpace.setBackend(backendDisruptor);
-        sensorDiskUsage.setBackend(backendDisruptor);
-        sensorCpuUsage.setBackend(backendDisruptor);
-        sensorMemoryUsage.setBackend(backendDisruptor);
-        sensorSwapUsage.setBackend(backendDisruptor);
-        sensorNetworkUsage.setBackend(backendDisruptor);
+        registry.bind("memory.free", backendConsole);
+        registry.bind("memory.usage", backendConsole);
 
-        // Backends starten
-        csvBackendDiskFreeRoot.start();
-        csvBackendOneFileForAll.start();
-        jdbcBackendDiskFreeRoot.start();
-        jdbcBackendOneTableForAll.start();
-        backendDisruptor.start();
+        registry.bind("swap.free", backendConsole);
+        registry.bind("swap.usage", backendConsole);
 
-        // Sensoren starten.
-        sensorDiskFreeSpace.start();
-        sensorDiskUsage.start();
-        sensorNetworkUsage.start();
+        registry.bind("network.in", backendConsole);
+        registry.bind("network.out", backendConsole);
+
+        registry.start();
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
         scheduledExecutorService.schedule(() -> {
-            scheduledExecutorService.shutdownNow();
-
-            sensorDiskFreeSpace.stop();
-            sensorDiskUsage.stop();
-            sensorNetworkUsage.stop();
-
-            backendDisruptor.stop();
-            csvBackendDiskFreeRoot.stop();
-            csvBackendOneFileForAll.stop();
-            jdbcBackendDiskFreeRoot.stop();
-            jdbcBackendOneTableForAll.stop();
+            registry.stop();
 
             try
             {
@@ -127,13 +102,14 @@ public class SimpleClientDemo
             {
                 ex.printStackTrace();
             }
+
+            scheduledExecutorService.shutdownNow();
         }, 20, TimeUnit.SECONDS);
 
-        scheduledExecutorService.scheduleWithFixedDelay(sensorDiskFreeSpace::scan, 1, 3, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleWithFixedDelay(sensorDiskUsage::scan, 1, 3, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleWithFixedDelay(sensorCpuUsage::scan, 1, 3, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleWithFixedDelay(sensorMemoryUsage::scan, 1, 3, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleWithFixedDelay(sensorSwapUsage::scan, 1, 3, TimeUnit.SECONDS);
-        scheduledExecutorService.scheduleWithFixedDelay(sensorNetworkUsage::scan, 1, 3, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensorDisk::measure, 1, 3, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensorCpu::measure, 1, 3, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensorMemory::measure, 1, 3, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensorSwap::measure, 1, 3, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(sensorNetwork::measure, 1, 3, TimeUnit.SECONDS);
     }
 }

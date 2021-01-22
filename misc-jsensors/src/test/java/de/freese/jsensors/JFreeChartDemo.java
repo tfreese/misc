@@ -8,10 +8,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import javax.swing.WindowConstants;
+import org.hsqldb.jdbc.JDBCPool;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -24,9 +24,6 @@ import org.jfree.data.time.FixedMillisecond;
 import org.jfree.data.time.RegularTimePeriod;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  * @author Thomas Freese
@@ -34,45 +31,40 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 public class JFreeChartDemo
 {
     /**
-    *
-    */
-    static void jfreeChart()
+     * @throws Exception Falls was schief geht.
+     */
+    static void jfreeChart() throws Exception
     {
-        // //File file = new File("/proc/loadavg");
-        // // File file = new File("/proc/cpuinfo");
-        // File file = new File("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq");
-        //
-        // List<String> result = FileUtils.readLines(file);
-        //
-        // for (String line : result)
-        // {
-        // System.out.println(line);
-        // }
+        String sensor = "cpu.usage";
 
-        final SingleConnectionDataSource ds = new SingleConnectionDataSource();
-        ds.setDriverClassName("com.mysql.jdbc.Driver");
-        ds.setUrl("jdbc:mysql://htpc2/RRDTOOL?user=...&password=...");
-        ds.setSuppressClose(true);
+        JDBCPool dataSource = new JDBCPool();
+        dataSource.setUrl("jdbc:hsqldb:file:logs/hsqldb/sensordb;create=true;shutdown=true");
+        dataSource.setUser("sa");
+        dataSource.setPassword("");
 
-        final JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        final TimeSeries timeSeries = new TimeSeries("cpu.usage");
 
-        final TimeSeries timeSeries = new TimeSeries("RRDSENSOR");
-        jdbcTemplate.query("select * from RRDVALUE where SENSOR_ID=11 and TIMESTAMP > ? order by TIMESTAMP asc", (ResultSetExtractor<Void>) rs -> {
-            while (rs.next())
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from SENSORS where NAME = ? order by TIMESTAMP asc");)
+        {
+            statement.setString(1, sensor);
+
+            try (ResultSet resultSet = statement.executeQuery())
             {
-                final long timestamp = rs.getLong("TIMESTAMP");
-                final double value = rs.getDouble("VALUE");
+                while (resultSet.next())
+                {
+                    final long timestamp = resultSet.getLong("TIMESTAMP");
+                    final double value = resultSet.getDouble("VALUE");
 
-                final RegularTimePeriod timePeriod = new FixedMillisecond(timestamp * 1000);
-                timeSeries.addOrUpdate(timePeriod, value);
+                    final RegularTimePeriod timePeriod = new FixedMillisecond(timestamp);
+                    timeSeries.addOrUpdate(timePeriod, value);
 
-                // System.out.println(timePeriod + "; " + value);
+                    // System.out.println(timePeriod + "; " + value);
+                }
             }
+        }
 
-            return null;
-        }, (System.currentTimeMillis() / 1000) - 36000);
-
-        ds.destroy();
+        dataSource.close(1);
 
         final TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(timeSeries);
@@ -88,7 +80,7 @@ public class JFreeChartDemo
         timeAxis.setTickLabelFont(font);
         timeAxis.setLabelFont(font);
 
-        final NumberAxis valueAxis = new NumberAxis("RRDSENSOR");
+        final NumberAxis valueAxis = new NumberAxis(sensor);
         valueAxis.setAutoRangeIncludesZero(false);
         valueAxis.setTickLabelFont(font);
         valueAxis.setLabelFont(font);
@@ -103,7 +95,7 @@ public class JFreeChartDemo
         final LegendTitle legend = chart.getLegend();
         legend.setItemFont(font);
 
-        final ChartFrame chartFrame = new ChartFrame("RRDSENSOR", chart, true);
+        final ChartFrame chartFrame = new ChartFrame(sensor, chart, true);
         chartFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         chartFrame.setSize(1280, 768);
         chartFrame.setLocationRelativeTo(null);
@@ -126,23 +118,6 @@ public class JFreeChartDemo
         // long value = Long.valueOf(matcher.group(1));
         // System.out.println(value);
 
-        mariaDB();
         jfreeChart();
-    }
-
-    /**
-     * @throws Exception Falls was schief geht.
-     */
-    static void mariaDB() throws Exception
-    {
-        // Test mariadb
-        try (Connection connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306/jsensors?user=tommy&password=tommy");
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("select CURRENT_DATE"))
-        {
-            resultSet.next();
-
-            System.out.println(resultSet.getString(1));
-        }
     }
 }

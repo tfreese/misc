@@ -1,31 +1,35 @@
 // Created: 12.05.2017
 package de.freese.jsensors.sensor;
 
-import de.freese.jsensors.backend.Backend;
+import java.util.List;
+import de.freese.jsensors.SensorRegistry;
 
 /**
- * {@link Sensor} der einen zu messenden Wert liefert.<br>
+ * {@link Sensor} zum Erfassen eines oder mehrerer Werte.<br>
  *
  * @author Thomas Freese
  */
 public interface Sensor
 {
     /**
-     * Liefert den Namen des Sensors.<br>
+     * Mit der {@link SensorRegistry} verknüpfen, zu der die Werte weitergeleitet werden.
      *
-     * @return String
+     * @param registry {@link SensorRegistry}
      */
-    public String getName();
+    public void bindTo(SensorRegistry registry);
 
     /**
-     * Messen des Wertes und schreiben in das Backend.
+     * Liefert die Namen der Werte, welche der Sensor erfassen kann.<br>
+     * Beispiel:<br>
+     * - network.in<br>
+     * - network.out<br>
+     *
+     * @return {@link List}
      */
-    public void scan();
+    public List<String> getNames();
 
     /**
-     * Setzt das {@link Backend} für das Speichern des Sensorwertes.
-     *
-     * @param backend {@link Backend}
+     * Werte ermitteln und an die Registry weiterleiten.
      */
-    public void setBackend(Backend backend);
+    public void measure();
 }

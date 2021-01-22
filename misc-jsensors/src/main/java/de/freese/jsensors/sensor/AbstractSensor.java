@@ -1,11 +1,9 @@
 // Created: 31.05.2017
 package de.freese.jsensors.sensor;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -19,57 +17,31 @@ public abstract class AbstractSensor implements Sensor
     /**
      *
      */
-    private static final Set<String> NAMES = new HashSet<>();
-
-    /**
-     *
-     */
-    private Backend backend;
-
-    /**
-    *
-    */
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-    *
-    */
-    private final String name;
+     *
+     */
+    private SensorRegistry registry;
 
     /**
      * Erstellt ein neues {@link AbstractSensor} Object.
-     *
-     * @param name String; Der Name wird in ein Datei- und Datenbankverträgliches Format umgewandelt.
      */
-    public AbstractSensor(final String name)
+    protected AbstractSensor()
     {
         super();
 
-        if ((name == null) || name.isBlank())
-        {
-            throw new IllegalArgumentException("name must not null or blank");
-        }
-
-        String formattedName = name.trim().toUpperCase();
-
-        if (NAMES.contains(formattedName))
-        {
-            String message = String.format("sensor '%s' already exist", formattedName);
-
-            throw new IllegalArgumentException(message);
-        }
-
-        NAMES.add(formattedName);
-
-        this.name = name;
     }
 
     /**
-     * @return {@link Backend}
+     * @see de.freese.jsensors.sensor.Sensor#bindTo(de.freese.jsensors.SensorRegistry)
      */
-    protected Backend getBackend()
+    @Override
+    public void bindTo(final SensorRegistry registry)
     {
-        return this.backend;
+        this.registry = registry;
+
+        this.registry.bind(this);
     }
 
     /**
@@ -81,47 +53,14 @@ public abstract class AbstractSensor implements Sensor
     }
 
     /**
-     * @see de.freese.jsensors.sensor.Sensor#getName()
+     * @see de.freese.jsensors.sensor.Sensor#measure()
      */
     @Override
-    public String getName()
-    {
-        return this.name;
-    }
-
-    /**
-     * Speichert den Sensorwert in den Backends.
-     *
-     * @param value String
-     */
-    protected void save(final String value)
-    {
-        save(value, System.currentTimeMillis(), getName());
-    }
-
-    /**
-     * Speichert den Sensorwert im {@link Backend}.
-     *
-     * @param value String
-     * @param timestamp long
-     * @param sensorName String
-     */
-    protected void save(final String value, final long timestamp, final String sensorName)
-    {
-        final SensorValue sensorValue = new SensorValue(sensorName, value, timestamp);
-
-        this.backend.save(sensorValue);
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#scan()
-     */
-    @Override
-    public final void scan()
+    public void measure()
     {
         try
         {
-            scanValue();
+            measureImpl();
         }
         catch (Exception ex)
         {
@@ -134,14 +73,30 @@ public abstract class AbstractSensor implements Sensor
      *
      * @throws Exception Falls was schief geht.
      */
-    protected abstract void scanValue() throws Exception;
+    protected abstract void measureImpl() throws Exception;
 
     /**
-     * @see de.freese.jsensors.sensor.Sensor#setBackend(de.freese.jsensors.backend.Backend)
+     * Speichert den Sensorwert in den Backends.
+     *
+     * @param name String
+     * @param value String
      */
-    @Override
-    public void setBackend(final Backend backend)
+    protected void store(final String name, final String value)
     {
-        this.backend = Objects.requireNonNull(backend, "backend required");
+        store(name, value, System.currentTimeMillis());
+    }
+
+    /**
+     * Speichert den Sensorwert im {@link Backend}.
+     *
+     * @param name String
+     * @param value String
+     * @param timestamp long
+     */
+    protected void store(final String name, final String value, final long timestamp)
+    {
+        final SensorValue sensorValue = new SensorValue(name, value, timestamp);
+
+        this.registry.store(sensorValue);
     }
 }
