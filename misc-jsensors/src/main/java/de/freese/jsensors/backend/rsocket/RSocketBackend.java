@@ -35,19 +35,41 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    private URI uri;
+    private final URI uri;
 
     /**
      *
      */
-    private int workerCount = 3;
+    private final int workerCount;
 
     /**
      * Erstellt ein neues {@link RSocketBackend} Object.
+     *
+     * @param uri {@link URI}
      */
-    public RSocketBackend()
+    public RSocketBackend(final URI uri)
+    {
+        this(uri, 3);
+    }
+
+    /**
+     * Erstellt ein neues {@link RSocketBackend} Object.
+     *
+     * @param uri {@link URI}
+     * @param workerCount int
+     */
+    public RSocketBackend(final URI uri, final int workerCount)
     {
         super();
+
+        this.uri = Objects.requireNonNull(uri, "uri required");
+
+        if (workerCount < 1)
+        {
+            throw new IllegalArgumentException("workerCount must be >= 1");
+        }
+
+        this.workerCount = workerCount;
     }
 
     /**
@@ -74,36 +96,11 @@ public class RSocketBackend extends AbstractBackend implements LifeCycle
     }
 
     /**
-     * @param uri {@link URI}
-     */
-    public void setUri(final URI uri)
-    {
-        this.uri = Objects.requireNonNull(uri, "uri required");
-    }
-
-    /**
-     * Default: 3
-     *
-     * @param workerCount int
-     */
-    public void setWorkerCount(final int workerCount)
-    {
-        this.workerCount = workerCount;
-    }
-
-    /**
      * @see de.freese.jsensors.utils.LifeCycle#start()
      */
     @Override
     public void start()
     {
-        if (this.workerCount < 1)
-        {
-            throw new IllegalArgumentException("workerCount must be >= 1");
-        }
-
-        Objects.requireNonNull(this.uri, "uri required");
-
         // @formatter:off
         TcpClient tcpClient = TcpClient.create()
                 .host(this.uri.getHost())

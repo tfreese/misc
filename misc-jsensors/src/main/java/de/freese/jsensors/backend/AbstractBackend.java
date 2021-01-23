@@ -15,20 +15,7 @@ public abstract class AbstractBackend implements Backend
     /**
     *
     */
-    private boolean exclusive;
-
-    /**
-    *
-    */
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    /**
-     * Erstellt ein neues {@link AbstractBackend} Object.
-     */
-    protected AbstractBackend()
-    {
-        super();
-    }
 
     /**
      * @return {@link Logger}
@@ -37,26 +24,6 @@ public abstract class AbstractBackend implements Backend
     {
         return this.logger;
     }
-
-    /**
-     * Das Backend ist exklusiv nur für einen Sensor.
-     *
-     * @return boolean
-     */
-    protected boolean isExclusive()
-    {
-        return this.exclusive;
-    }
-
-    // /**
-    // * Das Backend ist exklusiv nur für einen Sensor.
-    // *
-    // * @param exclusive boolean
-    // */
-    // public void setExclusive(final boolean exclusive)
-    // {
-    // this.exclusive = exclusive;
-    // }
 
     /**
      * @see de.freese.jsensors.backend.Backend#store(de.freese.jsensors.SensorValue)

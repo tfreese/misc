@@ -28,12 +28,26 @@ public class JDBCBackend extends AbstractBatchBackend
     /**
      *
      */
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     /**
-    *
-    */
-    private String tableName;
+     *
+     */
+    private final String tableName;
+
+    /**
+     * Erstellt ein neues {@link JDBCBackend} Object.
+     *
+     * @param dataSource {@link DataSource}
+     * @param tableName String
+     */
+    public JDBCBackend(final DataSource dataSource, final String tableName)
+    {
+        super();
+
+        this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
+        this.tableName = Objects.requireNonNull(tableName, "tableName required");
+    }
 
     /**
      * Erzeugt die Tabelle, falls diese noch nicht existiert.
@@ -43,7 +57,7 @@ public class JDBCBackend extends AbstractBatchBackend
      */
     protected void createTableIfNotExist(final String tableName) throws SQLException
     {
-        try (Connection con = getDataSource().getConnection())
+        try (Connection con = this.dataSource.getConnection())
         {
             DatabaseMetaData dbmd = con.getMetaData();
             boolean exist = false;
@@ -71,85 +85,27 @@ public class JDBCBackend extends AbstractBatchBackend
                     sql.append("CREATE TABLE ").append(tableName);
 
                     StringJoiner joiner = new StringJoiner(", ", " (", ")");
-
-                    if (!isExclusive())
-                    {
-                        joiner.add("NAME VARCHAR(20) NOT NULL");
-                        joiner.add("VALUE VARCHAR(20) NOT NULL");
-                        joiner.add("TIMESTAMP BIGINT NOT NULL");
-                    }
-                    else
-                    {
-                        joiner.add("VALUE VARCHAR(20) NOT NULL");
-                        joiner.add("TIMESTAMP BIGINT NOT NULL");
-                    }
+                    joiner.add("NAME VARCHAR(20) NOT NULL");
+                    joiner.add("VALUE VARCHAR(20) NOT NULL");
+                    joiner.add("TIMESTAMP BIGINT NOT NULL");
 
                     sql.append(joiner);
 
                     stmt.execute(sql.toString());
 
-                    if (!isExclusive())
-                    {
-                        // Index
-                        String index = String.format("CREATE UNIQUE INDEX %s_UNQ ON %s (NAME, TIMESTAMP);", tableName, tableName);
-                        stmt.execute(index);
+                    // Index
+                    String index = String.format("CREATE UNIQUE INDEX %s_UNQ ON %s (NAME, TIMESTAMP);", tableName, tableName);
+                    stmt.execute(index);
 
-                        // Diese Indices, existieren durch de UNIQUE INDEX.
-                        // index = String.format("CREATE INDEX NAME_IDX ON %s (NAME);", tableName);
-                        // stmt.execute(index);
-                        //
-                        // index = String.format("CREATE INDEX TIMESTAMP_IDX ON %s (TIMESTAMP);", tableName);
-                        // stmt.execute(index);
-                    }
+                    // Diese Indices, existieren durch de UNIQUE INDEX.
+                    // index = String.format("CREATE INDEX NAME_IDX ON %s (NAME);", tableName);
+                    // stmt.execute(index);
+                    //
+                    // index = String.format("CREATE INDEX TIMESTAMP_IDX ON %s (TIMESTAMP);", tableName);
+                    // stmt.execute(index);
                 }
             }
         }
-    }
-
-    /**
-     * Liefert die {@link DataSource}.
-     *
-     * @return {@link DataSource}
-     */
-    private DataSource getDataSource()
-    {
-        return this.dataSource;
-    }
-
-    /**
-     * @return String
-     */
-    private String getTableName()
-    {
-        return this.tableName;
-    }
-
-    /**
-     * @see de.freese.jsensors.backend.AbstractBackend#isExclusive()
-     */
-    @Override
-    protected boolean isExclusive()
-    {
-        // TODO Das muss hier eleganter gehen !
-        return false;
-    }
-
-    /**
-     * Setzt die {@link DataSource}.
-     *
-     * @param dataSource {@link DataSource}
-     */
-    public void setDataSource(final DataSource dataSource)
-    {
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
-    }
-
-    /**
-     * @param tableName String
-     */
-    public void setTableName(final String tableName)
-    {
-        this.tableName = Objects.requireNonNull(tableName, "tableName required");
     }
 
     /**
@@ -160,32 +116,14 @@ public class JDBCBackend extends AbstractBatchBackend
     {
         super.start();
 
-        Objects.requireNonNull(getDataSource(), "dataSource required");
-
-        if ((getTableName() == null) || getTableName().isBlank())
-        {
-            throw new IllegalArgumentException("tableName must not null or blank");
-        }
-
         try
         {
-            createTableIfNotExist(getTableName());
+            createTableIfNotExist(this.tableName);
         }
         catch (SQLException ex)
         {
             throw new RuntimeException(ex);
         }
-    }
-
-    /**
-     * @see de.freese.jsensors.utils.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        super.stop();
-
-        this.dataSource = null;
     }
 
     /**
@@ -200,37 +138,20 @@ public class JDBCBackend extends AbstractBatchBackend
         }
 
         StringBuilder sql = new StringBuilder();
-        sql.append("INSERT INTO ").append(getTableName());
+        sql.append("INSERT INTO ").append(this.tableName);
+        sql.append(" (NAME, VALUE, TIMESTAMP)");
+        sql.append(" VALUES (?, ?, ?)");
 
-        if (isExclusive())
-        {
-            sql.append(" (VALUE, TIMESTAMP)");
-            sql.append(" VALUES (?, ?)");
-        }
-        else
-        {
-            sql.append(" (NAME, VALUE, TIMESTAMP)");
-            sql.append(" VALUES (?, ?, ?)");
-        }
-
-        try (Connection con = getDataSource().getConnection();
+        try (Connection con = this.dataSource.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql.toString()))
         {
             con.setAutoCommit(false);
 
             for (SensorValue sensorValue : values)
             {
-                if (isExclusive())
-                {
-                    pstmt.setString(1, sensorValue.getValue());
-                    pstmt.setLong(2, sensorValue.getTimestamp());
-                }
-                else
-                {
-                    pstmt.setString(1, sensorValue.getName());
-                    pstmt.setString(2, sensorValue.getValue());
-                    pstmt.setLong(3, sensorValue.getTimestamp());
-                }
+                pstmt.setString(1, sensorValue.getName());
+                pstmt.setString(2, sensorValue.getValue());
+                pstmt.setLong(3, sensorValue.getTimestamp());
 
                 pstmt.addBatch();
                 // pstmt.clearParameters();

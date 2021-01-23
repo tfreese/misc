@@ -1,9 +1,9 @@
 // Created: 31.05.2017
 package de.freese.jsensors.sensor;
 
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.Backend;
 
@@ -17,32 +17,12 @@ public abstract class AbstractSensor implements Sensor
     /**
      *
      */
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private Backend backend;
 
     /**
      *
      */
-    private SensorRegistry registry;
-
-    /**
-     * Erstellt ein neues {@link AbstractSensor} Object.
-     */
-    protected AbstractSensor()
-    {
-        super();
-
-    }
-
-    /**
-     * @see de.freese.jsensors.sensor.Sensor#bindTo(de.freese.jsensors.SensorRegistry)
-     */
-    @Override
-    public void bindTo(final SensorRegistry registry)
-    {
-        this.registry = registry;
-
-        this.registry.bind(this);
-    }
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * @return {@link Logger}
@@ -76,6 +56,15 @@ public abstract class AbstractSensor implements Sensor
     protected abstract void measureImpl() throws Exception;
 
     /**
+     * @see de.freese.jsensors.sensor.Sensor#setBackend(de.freese.jsensors.backend.Backend)
+     */
+    @Override
+    public void setBackend(final Backend backend)
+    {
+        this.backend = Objects.requireNonNull(backend, "backend required");
+    }
+
+    /**
      * Speichert den Sensorwert in den Backends.
      *
      * @param name String
@@ -97,6 +86,6 @@ public abstract class AbstractSensor implements Sensor
     {
         final SensorValue sensorValue = new SensorValue(name, value, timestamp);
 
-        this.registry.store(sensorValue);
+        this.backend.store(sensorValue);
     }
 }

@@ -31,14 +31,15 @@ import org.jfree.data.time.TimeSeriesCollection;
 public class JFreeChartDemo
 {
     /**
+     * @param args String[]
      * @throws Exception Falls was schief geht.
      */
-    static void jfreeChart() throws Exception
+    public static void main(final String[] args) throws Exception
     {
         String sensor = "cpu.usage";
 
         JDBCPool dataSource = new JDBCPool();
-        dataSource.setUrl("jdbc:hsqldb:file:logs/hsqldb/sensordb;create=true;shutdown=true");
+        dataSource.setUrl("jdbc:hsqldb:file:logs/hsqldb/sensordb;create=false;shutdown=true");
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
@@ -58,8 +59,6 @@ public class JFreeChartDemo
 
                     final RegularTimePeriod timePeriod = new FixedMillisecond(timestamp);
                     timeSeries.addOrUpdate(timePeriod, value);
-
-                    // System.out.println(timePeriod + "; " + value);
                 }
             }
         }
@@ -100,24 +99,5 @@ public class JFreeChartDemo
         chartFrame.setSize(1280, 768);
         chartFrame.setLocationRelativeTo(null);
         chartFrame.setVisible(true);
-    }
-
-    /**
-     * @param args String[]
-     * @throws Exception Falls was schief geht.
-     */
-    public static void main(final String[] args) throws Exception
-    {
-        // String line = "RX packets 32997 bytes 46685918 (44.5 MiB)";
-        // String line = "TX packets 15894 bytes 1288395 (1.2 MiB)";
-        //
-        // Pattern pattern = Pattern.compile(" bytes (.+?) ");
-        // Matcher matcher = pattern.matcher(line);
-        //
-        // matcher.find();
-        // long value = Long.valueOf(matcher.group(1));
-        // System.out.println(value);
-
-        jfreeChart();
     }
 }

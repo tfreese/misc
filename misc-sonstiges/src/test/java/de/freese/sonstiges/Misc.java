@@ -780,8 +780,8 @@ public final class Misc
         // processBuilder();
         // reactor();
         // securityProviders();
-        // shift();
-        showMemory();
+        shift();
+        // showMemory();
         // splitList();
         // systemMXBean();
         // textBlocks();
@@ -1170,6 +1170,11 @@ public final class Misc
             }
 
             System.out.println();
+        }
+
+        for (int parallelism : List.of(32, 24, 16, 8, 4, 2))
+        {
+            System.out.printf("highestOneBit << 4: %d -> %d%n", parallelism, Integer.highestOneBit(parallelism) << 4);
         }
     }
 

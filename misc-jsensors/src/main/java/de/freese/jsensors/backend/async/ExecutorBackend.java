@@ -9,24 +9,23 @@ import java.util.concurrent.Executor;
 import de.freese.jsensors.SensorValue;
 import de.freese.jsensors.backend.AbstractBackend;
 import de.freese.jsensors.backend.Backend;
-import de.freese.jsensors.utils.LifeCycle;
 
 /**
  * Asynchrone-implementierung eines {@link Backend}s.
  *
  * @author Thomas Freese
  */
-public class ExecutorBackend extends AbstractBackend implements LifeCycle
+public class ExecutorBackend extends AbstractBackend
 {
     /**
      *
      */
-    private Backend delegate;
+    private final Backend delegate;
 
     /**
      *
      */
-    private Executor executor;
+    private final Executor executor;
 
     /**
      * Erstellt ein neues {@link ExecutorBackend} Object.
@@ -40,30 +39,6 @@ public class ExecutorBackend extends AbstractBackend implements LifeCycle
 
         this.delegate = Objects.requireNonNull(delegate, "delegate required");
         this.executor = Objects.requireNonNull(executor, "executor required");
-    }
-
-    /**
-     * @see de.freese.jsensors.utils.LifeCycle#start()
-     */
-    @Override
-    public void start()
-    {
-        if (this.delegate instanceof LifeCycle)
-        {
-            ((LifeCycle) this.delegate).start();
-        }
-    }
-
-    /**
-     * @see de.freese.jsensors.utils.LifeCycle#stop()
-     */
-    @Override
-    public void stop()
-    {
-        if (this.delegate instanceof LifeCycle)
-        {
-            ((LifeCycle) this.delegate).stop();
-        }
     }
 
     /**

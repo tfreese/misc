@@ -37,7 +37,7 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
             {
                 try
                 {
-                    SensorValue sensorValue = getQueue().take();
+                    SensorValue sensorValue = AsyncBackend.this.queue.take();
 
                     if ((sensorValue.getValue() == null) || sensorValue.getValue().isEmpty())
                     {
@@ -63,12 +63,12 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
     /**
      *
      */
-    private Backend delegate;
+    private final Backend delegate;
 
     /**
      *
      */
-    private int numberOfWorkers = 1;
+    private final int numberOfWorkers;
 
     /**
     *
@@ -84,6 +84,16 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
      * Erstellt ein neues {@link AsyncBackend} Object.
      *
      * @param delegate {@link Backend}
+     */
+    public AsyncBackend(final Backend delegate)
+    {
+        this(delegate, Runtime.getRuntime().availableProcessors());
+    }
+
+    /**
+     * Erstellt ein neues {@link AsyncBackend} Object.
+     *
+     * @param delegate {@link Backend}
      * @param numberOfWorkers int
      */
     public AsyncBackend(final Backend delegate, final int numberOfWorkers)
@@ -92,20 +102,12 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
 
         this.delegate = Objects.requireNonNull(delegate, "delegate required");
 
-        if (numberOfWorkers <= 0)
+        if (numberOfWorkers < 1)
         {
-            throw new IllegalArgumentException("numberOfWorkers must be > 0: " + numberOfWorkers);
+            throw new IllegalArgumentException("numberOfWorkers must be >= 1: " + numberOfWorkers);
         }
 
         this.numberOfWorkers = numberOfWorkers;
-    }
-
-    /**
-     * @return {@link BlockingQueue}
-     */
-    private BlockingQueue<SensorValue> getQueue()
-    {
-        return this.queue;
     }
 
     /**
@@ -114,11 +116,6 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
-        if (this.delegate instanceof LifeCycle)
-        {
-            ((LifeCycle) this.delegate).start();
-        }
-
         for (int i = 1; i <= this.numberOfWorkers; i++)
         {
             QueueWorker worker = new QueueWorker();
@@ -139,24 +136,19 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
         this.workers.forEach(QueueWorker::interrupt);
 
         // Save last SensorValues.
-        if (!getQueue().isEmpty())
+        if (!this.queue.isEmpty())
         {
             getLogger().info("save last sensorvalues");
 
             SensorValue sv = null;
 
-            while ((sv = getQueue().poll()) != null)
+            while ((sv = this.queue.poll()) != null)
             {
                 this.delegate.store(sv);
             }
         }
 
         this.workers.clear();
-
-        if (this.delegate instanceof LifeCycle)
-        {
-            ((LifeCycle) this.delegate).stop();
-        }
     }
 
     /**
@@ -165,6 +157,6 @@ public class AsyncBackend extends AbstractBackend implements LifeCycle
     @Override
     protected void storeValue(final SensorValue sensorValue) throws Exception
     {
-        getQueue().add(sensorValue);
+        this.queue.add(sensorValue);
     }
 }

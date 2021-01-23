@@ -3,10 +3,15 @@ package de.freese.jsensors.backend.file;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.List;
+import java.util.Objects;
 import de.freese.jsensors.SensorValue;
+import de.freese.jsensors.backend.AbstractBatchBackend;
 import de.freese.jsensors.backend.Backend;
 
 /**
@@ -14,33 +19,45 @@ import de.freese.jsensors.backend.Backend;
  *
  * @author Thomas Freese
  */
-public class CSVBackend extends AbstractFileBackend
+public class CSVBackend extends AbstractBatchBackend
 {
     /**
-     * @see de.freese.jsensors.backend.file.AbstractFileBackend#createOutputStream(java.nio.file.Path)
+    *
+    */
+    private OutputStream outputStream;
+
+    /**
+    *
+    */
+    private final Path path;
+
+    /**
+     * Erstellt ein neues {@link CSVBackend} Object.
+     *
+     * @param path {@link Path}
      */
-    @Override
+    public CSVBackend(final Path path)
+    {
+        super();
+
+        this.path = Objects.requireNonNull(path, "path required");
+    }
+
+    /**
+     * @param path {@link Path}
+     * @return {@link OutputStream}
+     * @throws IOException Falls was schief geht.
+     */
     protected OutputStream createOutputStream(final Path path) throws IOException
     {
         boolean createHeader = !Files.exists(path);
 
-        OutputStream outputStream = super.createOutputStream(path);
+        OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
         if (createHeader)
         {
             // CSV-Header schreiben
-            String header = null;
-
-            if (isExclusive())
-            {
-                // Ohne SensorName.
-                header = String.format("%s;%s;%s%n", "VALUE", "TIMESTAMP", "TIME");
-            }
-            else
-            {
-                // Mit SensorName.
-                header = String.format("%s;%s;%s;%s%n", "NAME", "VALUE", "TIMESTAMP", "TIME");
-            }
+            String header = String.format("%s;%s;%s;%s%n", "NAME", "VALUE", "TIMESTAMP", "TIME");
 
             byte[] bytes = header.getBytes(StandardCharsets.UTF_8);
 
@@ -51,24 +68,13 @@ public class CSVBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.file.AbstractFileBackend#encode(de.freese.jsensors.SensorValue)
+     * @param sensorValue {@link SensorValue}
+     * @return byte[]
      */
-    @Override
     protected byte[] encode(final SensorValue sensorValue)
     {
-        String formatted = null;
-
-        if (isExclusive())
-        {
-            // Ohne SensorName.
-            formatted = String.format("%s;%d;%s%n", sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
-        }
-        else
-        {
-            // Mit SensorName.
-            formatted =
-                    String.format("%s;%s;%d;%s%n", sensorValue.getName(), sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
-        }
+        String formatted =
+                String.format("%s;%s;%d;%s%n", sensorValue.getName(), sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
 
         byte[] bytes = formatted.getBytes(StandardCharsets.UTF_8);
 
@@ -76,12 +82,63 @@ public class CSVBackend extends AbstractFileBackend
     }
 
     /**
-     * @see de.freese.jsensors.backend.AbstractBackend#isExclusive()
+     * @see de.freese.jsensors.backend.AbstractBatchBackend#start()
      */
     @Override
-    protected boolean isExclusive()
+    public void start()
     {
-        // TODO Das muss hier eleganter gehen !
-        return false;
+        super.start();
+
+        try
+        {
+            Path parent = this.path.getParent();
+            Files.createDirectories(parent);
+
+            this.outputStream = createOutputStream(this.path);
+        }
+        catch (IOException ex)
+        {
+            throw new UncheckedIOException(ex);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBatchBackend#stop()
+     */
+    @Override
+    public void stop()
+    {
+        super.stop();
+
+        try
+        {
+            this.outputStream.flush();
+            this.outputStream.close();
+        }
+        catch (Exception ex)
+        {
+            getLogger().error(null, ex);
+        }
+    }
+
+    /**
+     * @see de.freese.jsensors.backend.AbstractBatchBackend#storeValues(java.util.List)
+     */
+    @Override
+    protected void storeValues(final List<SensorValue> values) throws Exception
+    {
+        if ((values == null) || values.isEmpty())
+        {
+            return;
+        }
+
+        for (SensorValue sensorValue : values)
+        {
+            byte[] bytes = encode(sensorValue);
+
+            this.outputStream.write(bytes);
+        }
+
+        this.outputStream.flush();
     }
 }

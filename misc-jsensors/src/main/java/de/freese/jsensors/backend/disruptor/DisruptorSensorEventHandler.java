@@ -7,12 +7,11 @@ import org.slf4j.LoggerFactory;
 import com.lmax.disruptor.EventHandler;
 import de.freese.jsensors.SensorRegistry;
 import de.freese.jsensors.SensorValue;
-import de.freese.jsensors.backend.Backend;
 
 /**
  * @author Thomas Freese
  */
-public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, Backend
+class DisruptorSensorEventHandler implements EventHandler<SensorEvent>
 {
     /**
      *
@@ -39,7 +38,7 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
      * @param parallelism int
      * @param sensorRegistry {@link SensorRegistry}
      */
-    public DisruptorSensorEventHandler(final int ordinal, final int parallelism, final SensorRegistry sensorRegistry)
+    DisruptorSensorEventHandler(final int ordinal, final int parallelism, final SensorRegistry sensorRegistry)
     {
         super();
 
@@ -73,9 +72,8 @@ public class DisruptorSensorEventHandler implements EventHandler<SensorEvent>, B
     }
 
     /**
-     * @see de.freese.jsensors.backend.Backend#store(de.freese.jsensors.SensorValue)
+     * @param sensorValue {@link SensorValue}
      */
-    @Override
     public void store(final SensorValue sensorValue)
     {
         this.sensorRegistry.store(sensorValue);

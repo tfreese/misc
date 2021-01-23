@@ -38,17 +38,17 @@ public class SensorRSocketServer implements LifeCycle
     /**
      *
      */
-    private int port;
+    private final int port;
 
     /**
      *
      */
-    private int selectCount = 1;
+    private final int selectCount;
 
     /**
      *
      */
-    private SensorRegistry sensorRegistry;
+    private final SensorRegistry sensorRegistry;
 
     /**
      *
@@ -58,14 +58,53 @@ public class SensorRSocketServer implements LifeCycle
     /**
      *
      */
-    private int workerCount = 3;
+    private final int workerCount;
 
     /**
      * Erstellt ein neues {@link SensorRSocketServer} Object.
+     *
+     * @param port int
+     * @param sensorRegistry {@link SensorRegistry}
      */
-    public SensorRSocketServer()
+    public SensorRSocketServer(final SensorRegistry sensorRegistry, final int port)
+    {
+        this(sensorRegistry, port, 1, 3);
+    }
+
+    /**
+     * Erstellt ein neues {@link SensorRSocketServer} Object.
+     *
+     * @param sensorRegistry {@link SensorRegistry}
+     * @param port int
+     * @param selectCount int
+     * @param workerCount int
+     */
+    public SensorRSocketServer(final SensorRegistry sensorRegistry, final int port, final int selectCount, final int workerCount)
     {
         super();
+
+        this.sensorRegistry = Objects.requireNonNull(sensorRegistry, "sensorRegistry required");
+
+        if (port < 1)
+        {
+            throw new IllegalArgumentException("port must be >= 1");
+        }
+
+        this.port = port;
+
+        if (selectCount < 1)
+        {
+            throw new IllegalArgumentException("selectCount must be >= 1");
+        }
+
+        this.selectCount = selectCount;
+
+        if (workerCount < 1)
+        {
+            throw new IllegalArgumentException("workerCount must be >= 1");
+        }
+
+        this.workerCount = workerCount;
     }
 
     /**
@@ -111,64 +150,11 @@ public class SensorRSocketServer implements LifeCycle
     }
 
     /**
-     * @param port int
-     */
-    public void setPort(final int port)
-    {
-        this.port = port;
-    }
-
-    /**
-     * Default: 1
-     *
-     * @param selectCount int
-     */
-    public void setSelectCount(final int selectCount)
-    {
-        this.selectCount = selectCount;
-    }
-
-    /**
-     * @param sensorRegistry {@link SensorRegistry}
-     */
-    public void setSensorRegistry(final SensorRegistry sensorRegistry)
-    {
-        this.sensorRegistry = Objects.requireNonNull(sensorRegistry, "sensorRegistry required");
-    }
-
-    /**
-     * Default: 3
-     *
-     * @param workerCount int
-     */
-    public void setWorkerCount(final int workerCount)
-    {
-        this.workerCount = workerCount;
-    }
-
-    /**
      * @see de.freese.jsensors.utils.LifeCycle#start()
      */
     @Override
     public void start()
     {
-        if (this.port < 1)
-        {
-            throw new IllegalArgumentException("port must be >= 1");
-        }
-
-        if (this.selectCount < 1)
-        {
-            throw new IllegalArgumentException("selectCount must be >= 1");
-        }
-
-        if (this.workerCount < 1)
-        {
-            throw new IllegalArgumentException("workerCount must be >= 1");
-        }
-
-        Objects.requireNonNull(this.sensorRegistry, "sensorRegistry required");
-
         getLogger().info("starting jsensor-rsocket server on port: {}", this.port);
 
         // Fehlermeldung, wenn Client die Verbindung schliesst.

@@ -24,14 +24,6 @@ public abstract class AbstractBatchBackend extends AbstractBackend implements Li
     private List<SensorValue> buffer;
 
     /**
-     * Erstellt ein neues {@link AbstractBatchBackend} Object.
-     */
-    protected AbstractBatchBackend()
-    {
-        super();
-    }
-
-    /**
      * @return {@link List}
      */
     protected synchronized List<SensorValue> flush()

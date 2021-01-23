@@ -22,7 +22,12 @@ public class NetworkSensor extends AbstractSensor implements LifeCycle
     /**
      *
      */
-    private static final Pattern PATTERN_BYTES = Pattern.compile(" bytes (.+?) ");
+    private static final Pattern PATTERN_BYTES = Pattern.compile(" bytes (.+?) ", Pattern.UNICODE_CHARACTER_CLASS);
+
+    /**
+     * "[ ]" = "\\s+" = Whitespace: einer oder mehrere
+     */
+    private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+", Pattern.UNICODE_CHARACTER_CLASS);
 
     /**
      *
@@ -114,7 +119,7 @@ public class NetworkSensor extends AbstractSensor implements LifeCycle
         String line = lines.stream().filter(l -> l.startsWith("Bytes") || l.startsWith("Octets")).findFirst().get();
         line = Utils.trimAndStripWhitespaces(line);
 
-        String[] splits = line.split("\\s+"); // Whitespace: einer oder mehrere
+        String[] splits = SPACE_PATTERN.split(line);
         String[] values = new String[]
         {
                 splits[1], splits[2]
@@ -176,7 +181,8 @@ public class NetworkSensor extends AbstractSensor implements LifeCycle
             // Beispiel: em1 lo wlp6so
             List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
 
-            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(l.split("\\s+"))).filter(s -> !s.equals("lo")).forEach(this.interfaces::add);
+            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(SPACE_PATTERN.split(l))).filter(s -> !s.equals("lo"))
+                    .forEach(this.interfaces::add);
         }
     }
 

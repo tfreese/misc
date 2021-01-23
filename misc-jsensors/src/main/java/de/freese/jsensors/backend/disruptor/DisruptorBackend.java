@@ -23,47 +23,72 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     private Disruptor<SensorEvent> disruptor;
 
     /**
+     * Default: Runtime.getRuntime().availableProcessors()
+     */
+    private final int parallelism;
+
+    /**
+     * Default: Integer.highestOneBit(Runtime.getRuntime().availableProcessors()) << 4)<br>
+     * Beispiel:<br>
+     * 32 << 4 = 512<br>
+     * 24 << 4 = 256<br>
+     * 16 << 4 = 256<br>
+     * 8 << 4 = 128<br>
+     */
+    private final int ringBufferSize;
+
+    /**
      *
      */
-    private int parallelism = 3;
+    private final SensorRegistry sensorRegistry;
 
     /**
-     * int ringBufferSize = Integer.highestOneBit(31) << 1;
-     */
-    private int ringBufferSize = 128;
-
-    /**
+     * Erstellt ein neues {@link DisruptorBackend} Object.
      *
-     */
-    private SensorRegistry sensorRegistry;
-
-    /**
-     * Default: 3
-     *
-     * @param parallelism int
-     */
-    public void setParallelism(final int parallelism)
-    {
-        this.parallelism = parallelism;
-    }
-
-    /**
-     * Default: 128<br>
-     * int ringBufferSize = Integer.highestOneBit(31) << 1;
-     *
-     * @param ringBufferSize int
-     */
-    public void setRingBufferSize(final int ringBufferSize)
-    {
-        this.ringBufferSize = ringBufferSize;
-    }
-
-    /**
      * @param sensorRegistry {@link SensorRegistry}
      */
-    public void setSensorRegistry(final SensorRegistry sensorRegistry)
+    public DisruptorBackend(final SensorRegistry sensorRegistry)
     {
-        this.sensorRegistry = sensorRegistry;
+        this(sensorRegistry, Runtime.getRuntime().availableProcessors());
+    }
+
+    /**
+     * Erstellt ein neues {@link DisruptorBackend} Object.
+     *
+     * @param sensorRegistry {@link SensorRegistry}
+     * @param parallelism int
+     */
+    public DisruptorBackend(final SensorRegistry sensorRegistry, final int parallelism)
+    {
+        this(sensorRegistry, parallelism, Integer.highestOneBit(parallelism) << 4);
+    }
+
+    /**
+     * Erstellt ein neues {@link DisruptorBackend} Object.
+     *
+     * @param sensorRegistry {@link SensorRegistry}
+     * @param parallelism int
+     * @param ringBufferSize int
+     */
+    public DisruptorBackend(final SensorRegistry sensorRegistry, final int parallelism, final int ringBufferSize)
+    {
+        super();
+
+        this.sensorRegistry = Objects.requireNonNull(sensorRegistry, "sensorRegistry required");
+
+        if (parallelism < 1)
+        {
+            throw new IllegalArgumentException("parallelism must be >= 1");
+        }
+
+        this.parallelism = parallelism;
+
+        if (ringBufferSize < 1)
+        {
+            throw new IllegalArgumentException("ringBufferSize must be >= 1");
+        }
+
+        this.ringBufferSize = ringBufferSize;
     }
 
     /**
@@ -72,13 +97,6 @@ public class DisruptorBackend extends AbstractBackend implements LifeCycle
     @Override
     public void start()
     {
-        Objects.requireNonNull(this.sensorRegistry, "sensorRegistry required");
-
-        if (this.ringBufferSize < 1)
-        {
-            throw new IllegalArgumentException("ringBufferSize must be >= 1");
-        }
-
         this.disruptor = new Disruptor<>(SensorEvent::new, this.ringBufferSize, new JSensorThreadFactory("jsensor-disruptor-"));
 
         DisruptorSensorEventHandler[] handlers = new DisruptorSensorEventHandler[this.parallelism];

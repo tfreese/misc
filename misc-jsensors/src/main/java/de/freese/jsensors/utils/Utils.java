@@ -132,28 +132,6 @@ public final class Utils
     }
 
     /**
-     * Formatiert den Sensornamen als SQL-Tabellenname.<br>
-     * Format:<br>
-     * <ul>
-     * <li>Großbuchstaben
-     * <li>' ', '-', '/', '\' werden durch '_' ersetzt
-     * </ul>
-     *
-     * @param sensorName String
-     * @return String
-     */
-    public static String sensorNameToTableName(final String sensorName)
-    {
-        String tableName = sensorName.toUpperCase();
-        tableName = tableName.replace("-", "_");
-        tableName = tableName.replace(" ", "_");
-        tableName = tableName.replace("/", "_");
-        tableName = tableName.replace("\\", "_");
-
-        return tableName;
-    }
-
-    /**
      * Trimmt den String und entfernt mehrfach vorhanden Leerzeichen.
      *
      * @param value String

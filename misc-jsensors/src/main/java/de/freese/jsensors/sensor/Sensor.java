@@ -2,7 +2,7 @@
 package de.freese.jsensors.sensor;
 
 import java.util.List;
-import de.freese.jsensors.SensorRegistry;
+import de.freese.jsensors.backend.Backend;
 
 /**
  * {@link Sensor} zum Erfassen eines oder mehrerer Werte.<br>
@@ -11,13 +11,6 @@ import de.freese.jsensors.SensorRegistry;
  */
 public interface Sensor
 {
-    /**
-     * Mit der {@link SensorRegistry} verknüpfen, zu der die Werte weitergeleitet werden.
-     *
-     * @param registry {@link SensorRegistry}
-     */
-    public void bindTo(SensorRegistry registry);
-
     /**
      * Liefert die Namen der Werte, welche der Sensor erfassen kann.<br>
      * Beispiel:<br>
@@ -29,7 +22,14 @@ public interface Sensor
     public List<String> getNames();
 
     /**
-     * Werte ermitteln und an die Registry weiterleiten.
+     * Werte ermitteln und an das Backend übergeben.
      */
     public void measure();
+
+    /**
+     * {@link Backend} an dem der Sensor die Werte übergibt.
+     *
+     * @param backend {@link Backend}
+     */
+    public void setBackend(Backend backend);
 }

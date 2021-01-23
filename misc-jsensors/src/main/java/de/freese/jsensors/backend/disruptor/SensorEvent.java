@@ -6,20 +6,12 @@ import de.freese.jsensors.SensorValue;
 /**
  * @author Thomas Freese
  */
-public class SensorEvent
+class SensorEvent
 {
     /**
      *
      */
     private SensorValue sensorValue;
-
-    /**
-     * Erstellt ein neues {@link SensorEvent} Object.
-     */
-    public SensorEvent()
-    {
-        super();
-    }
 
     /**
      * @return {@link SensorValue}
