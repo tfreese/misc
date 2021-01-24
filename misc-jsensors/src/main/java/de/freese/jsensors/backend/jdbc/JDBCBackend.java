@@ -33,6 +33,11 @@ public class JDBCBackend extends AbstractBatchBackend
     /**
      *
      */
+    private final boolean exclusive;
+
+    /**
+     *
+     */
     private final String tableName;
 
     /**
@@ -43,10 +48,23 @@ public class JDBCBackend extends AbstractBatchBackend
      */
     public JDBCBackend(final DataSource dataSource, final String tableName)
     {
+        this(dataSource, tableName, false);
+    }
+
+    /**
+     * Erstellt ein neues {@link JDBCBackend} Object.
+     *
+     * @param dataSource {@link DataSource}
+     * @param tableName String
+     * @param exclusive boolean; Tabelle exklusiv nur für einen Sensor -> keine Spalte 'NAME'
+     */
+    public JDBCBackend(final DataSource dataSource, final String tableName, final boolean exclusive)
+    {
         super();
 
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource required");
         this.tableName = Objects.requireNonNull(tableName, "tableName required");
+        this.exclusive = exclusive;
     }
 
     /**
@@ -85,24 +103,46 @@ public class JDBCBackend extends AbstractBatchBackend
                     sql.append("CREATE TABLE ").append(tableName);
 
                     StringJoiner joiner = new StringJoiner(", ", " (", ")");
-                    joiner.add("NAME VARCHAR(20) NOT NULL");
-                    joiner.add("VALUE VARCHAR(20) NOT NULL");
-                    joiner.add("TIMESTAMP BIGINT NOT NULL");
+
+                    if (this.exclusive)
+                    {
+                        // Ohne SensorName.
+                        joiner.add("VALUE VARCHAR(50) NOT NULL");
+                        joiner.add("TIMESTAMP BIGINT NOT NULL");
+                    }
+                    else
+                    {
+                        // Mit SensorName.
+                        joiner.add("NAME VARCHAR(20) NOT NULL");
+                        joiner.add("VALUE VARCHAR(50) NOT NULL");
+                        joiner.add("TIMESTAMP BIGINT NOT NULL");
+                    }
 
                     sql.append(joiner);
 
                     stmt.execute(sql.toString());
 
-                    // Index
-                    String index = String.format("CREATE UNIQUE INDEX %s_UNQ ON %s (NAME, TIMESTAMP);", tableName, tableName);
-                    stmt.execute(index);
+                    if (this.exclusive)
+                    {
+                        // Ohne SensorName.
+                        String index = String.format("ALTER TABLE %s ADD CONSTRAINT TIMESTAMP_PK PRIMARY KEY (TIMESTAMP);", tableName);
 
-                    // Diese Indices, existieren durch de UNIQUE INDEX.
-                    // index = String.format("CREATE INDEX NAME_IDX ON %s (NAME);", tableName);
-                    // stmt.execute(index);
-                    //
-                    // index = String.format("CREATE INDEX TIMESTAMP_IDX ON %s (TIMESTAMP);", tableName);
-                    // stmt.execute(index);
+                        stmt.execute(index);
+                    }
+                    else
+                    {
+                        // Mit SensorName.
+                        String index = String.format("CREATE UNIQUE INDEX %s_UNQ ON %s (NAME, TIMESTAMP);", tableName, tableName);
+
+                        stmt.execute(index);
+
+                        // Diese Indices, existieren durch de UNIQUE INDEX.
+                        // index = String.format("CREATE INDEX NAME_IDX ON %s (NAME);", tableName);
+                        // stmt.execute(index);
+                        //
+                        // index = String.format("CREATE INDEX TIMESTAMP_IDX ON %s (TIMESTAMP);", tableName);
+                        // stmt.execute(index);
+                    }
                 }
             }
         }
@@ -139,8 +179,19 @@ public class JDBCBackend extends AbstractBatchBackend
 
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ").append(this.tableName);
-        sql.append(" (NAME, VALUE, TIMESTAMP)");
-        sql.append(" VALUES (?, ?, ?)");
+
+        if (this.exclusive)
+        {
+            // Ohne SensorName.
+            sql.append(" (VALUE, TIMESTAMP)");
+            sql.append(" VALUES (?, ?)");
+        }
+        else
+        {
+            // Mit SensorName.
+            sql.append(" (NAME, VALUE, TIMESTAMP)");
+            sql.append(" VALUES (?, ?, ?)");
+        }
 
         try (Connection con = this.dataSource.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql.toString()))
@@ -149,9 +200,19 @@ public class JDBCBackend extends AbstractBatchBackend
 
             for (SensorValue sensorValue : values)
             {
-                pstmt.setString(1, sensorValue.getName());
-                pstmt.setString(2, sensorValue.getValue());
-                pstmt.setLong(3, sensorValue.getTimestamp());
+                if (this.exclusive)
+                {
+                    // Ohne SensorName.
+                    pstmt.setString(1, sensorValue.getValue());
+                    pstmt.setLong(2, sensorValue.getTimestamp());
+                }
+                else
+                {
+                    // Mit SensorName.
+                    pstmt.setString(1, sensorValue.getName());
+                    pstmt.setString(2, sensorValue.getValue());
+                    pstmt.setLong(3, sensorValue.getTimestamp());
+                }
 
                 pstmt.addBatch();
                 // pstmt.clearParameters();

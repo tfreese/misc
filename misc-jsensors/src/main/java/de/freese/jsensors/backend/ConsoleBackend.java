@@ -14,6 +14,7 @@ public class ConsoleBackend extends AbstractBackend
     @Override
     protected void storeValue(final SensorValue sensorValue) throws Exception
     {
-        System.out.println(sensorValue);
+        // System.out.println(sensorValue);
+        System.out.printf("[%s] - %s%n", Thread.currentThread().getName(), sensorValue);
     }
 }

@@ -141,9 +141,10 @@ public class SensorValue
     {
         StringBuilder builder = new StringBuilder();
         builder.append("SensorValue [");
-        builder.append("name=").append(this.name);
-        builder.append(", value=").append(this.value);
-        builder.append(", timestamp=").append(getLocalDateTime());
+        builder.append("name=").append(getName());
+        builder.append(", value=").append(getValue());
+        builder.append(", timestamp=").append(getTimestamp());
+        builder.append(", date=").append(getDate());
         builder.append("]");
 
         return builder.toString();

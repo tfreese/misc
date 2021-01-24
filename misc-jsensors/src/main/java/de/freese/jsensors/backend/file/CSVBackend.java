@@ -24,11 +24,16 @@ public class CSVBackend extends AbstractBatchBackend
     /**
     *
     */
+    private final boolean exclusive;
+
+    /**
+     *
+     */
     private OutputStream outputStream;
 
     /**
-    *
-    */
+     *
+     */
     private final Path path;
 
     /**
@@ -38,9 +43,21 @@ public class CSVBackend extends AbstractBatchBackend
      */
     public CSVBackend(final Path path)
     {
+        this(path, false);
+    }
+
+    /**
+     * Erstellt ein neues {@link CSVBackend} Object.
+     *
+     * @param path {@link Path}
+     * @param exclusive boolean; Datei exklusiv nur für einen Sensor -> keine Spalte 'NAME'
+     */
+    public CSVBackend(final Path path, final boolean exclusive)
+    {
         super();
 
         this.path = Objects.requireNonNull(path, "path required");
+        this.exclusive = exclusive;
     }
 
     /**
@@ -52,19 +69,30 @@ public class CSVBackend extends AbstractBatchBackend
     {
         boolean createHeader = !Files.exists(path);
 
-        OutputStream outputStream = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        OutputStream os = Files.newOutputStream(path, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 
         if (createHeader)
         {
             // CSV-Header schreiben
-            String header = String.format("%s;%s;%s;%s%n", "NAME", "VALUE", "TIMESTAMP", "TIME");
+            String header = null;
+
+            if (this.exclusive)
+            {
+                // Ohne SensorName.
+                header = String.format("%s;%s;%s%n", "VALUE", "TIMESTAMP", "TIME");
+            }
+            else
+            {
+                // Mit SensorName.
+                header = String.format("%s;%s;%s;%s%n", "NAME", "VALUE", "TIMESTAMP", "TIME");
+            }
 
             byte[] bytes = header.getBytes(StandardCharsets.UTF_8);
 
-            outputStream.write(bytes);
+            os.write(bytes);
         }
 
-        return outputStream;
+        return os;
     }
 
     /**
@@ -73,8 +101,19 @@ public class CSVBackend extends AbstractBatchBackend
      */
     protected byte[] encode(final SensorValue sensorValue)
     {
-        String formatted =
-                String.format("%s;%s;%d;%s%n", sensorValue.getName(), sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
+        String formatted = null;
+
+        if (this.exclusive)
+        {
+            // Ohne SensorName.
+            formatted = String.format("%s;%d;%s%n", sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
+        }
+        else
+        {
+            // Mit SensorName.
+            formatted =
+                    String.format("%s;%s;%d;%s%n", sensorValue.getName(), sensorValue.getValue(), sensorValue.getTimestamp(), sensorValue.getLocalDateTime());
+        }
 
         byte[] bytes = formatted.getBytes(StandardCharsets.UTF_8);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Configuration [
 <!ENTITY level_ROOT "INFO">
-<!ENTITY level_APPLICATION "DEBUG">
+<!ENTITY level_APPLICATION "INFO">
 ]
 >
 <configuration debug="false" scan="false" scanPeriod="60 seconds">
@@ -75,6 +75,7 @@
     <!-- ######################################################################################################################################## -->     
 
     <logger name="de.freese.jsensors" level="&level_APPLICATION;"/>
+    <logger name="de.freese.jsensors.backend.jdbc" level="DEBUG"/>
     <logger name="hsqldb.db" level="WARN"/>
 
     <root level="&level_ROOT;">

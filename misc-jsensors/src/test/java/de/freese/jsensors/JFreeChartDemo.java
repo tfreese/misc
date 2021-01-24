@@ -43,12 +43,15 @@ public class JFreeChartDemo
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
-        final TimeSeries timeSeries = new TimeSeries("cpu.usage");
+        TimeSeries timeSeries = new TimeSeries(sensor);
+
+        // String sql = "select * from SENSORS where NAME = ? order by TIMESTAMP asc";
+        String sql = String.format("select * from %s order by TIMESTAMP asc", sensor.replace('.', '_').toUpperCase());
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from SENSORS where NAME = ? order by TIMESTAMP asc");)
+             PreparedStatement statement = connection.prepareStatement(sql);)
         {
-            statement.setString(1, sensor);
+            // statement.setString(1, sensor);
 
             try (ResultSet resultSet = statement.executeQuery())
             {
@@ -65,12 +68,12 @@ public class JFreeChartDemo
 
         dataSource.close(1);
 
-        final TimeSeriesCollection dataset = new TimeSeriesCollection();
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
         dataset.addSeries(timeSeries);
 
-        final Font font = new Font("Arial", Font.BOLD, 12);
+        Font font = new Font("Arial", Font.BOLD, 12);
 
-        final ValueAxis timeAxis = new DateAxis("Zeitachse");
+        ValueAxis timeAxis = new DateAxis("Zeitachse");
         timeAxis.setLowerMargin(0.02D);
         timeAxis.setUpperMargin(0.02D);
         timeAxis.setAutoRange(true);
@@ -79,24 +82,24 @@ public class JFreeChartDemo
         timeAxis.setTickLabelFont(font);
         timeAxis.setLabelFont(font);
 
-        final NumberAxis valueAxis = new NumberAxis(sensor);
+        NumberAxis valueAxis = new NumberAxis(sensor);
         valueAxis.setAutoRangeIncludesZero(false);
         valueAxis.setTickLabelFont(font);
         valueAxis.setLabelFont(font);
 
-        final XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
         renderer.setSeriesPaint(0, Color.BLUE);
         renderer.setSeriesStroke(0, new BasicStroke(2.5F));
 
-        final XYPlot xyplot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
+        XYPlot xyplot = new XYPlot(dataset, timeAxis, valueAxis, renderer);
 
-        final JFreeChart chart = new JFreeChart(null, null, xyplot, true);
-        final LegendTitle legend = chart.getLegend();
+        JFreeChart chart = new JFreeChart(null, null, xyplot, true);
+        LegendTitle legend = chart.getLegend();
         legend.setItemFont(font);
 
-        final ChartFrame chartFrame = new ChartFrame(sensor, chart, true);
+        ChartFrame chartFrame = new ChartFrame(sensor, chart, true);
         chartFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        chartFrame.setSize(1280, 768);
+        chartFrame.setSize(1280, 800);
         chartFrame.setLocationRelativeTo(null);
         chartFrame.setVisible(true);
     }

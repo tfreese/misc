@@ -35,9 +35,9 @@ public class SensorDemo
         // Datenfluß: Sensor -> DisruptorBackend -> SensorRegistry -> Backend
 
         // Konkrete Backends definieren
-        CSVBackend csvBackendDiskRoot = new CSVBackend(Paths.get("logs", "diskRoot.csv"));
-        csvBackendDiskRoot.setBatchSize(6);
-        csvBackendDiskRoot.start();
+        CSVBackend csvBackendCpuUsage = new CSVBackend(Paths.get("logs", "cpuUsage.csv"), true);
+        csvBackendCpuUsage.setBatchSize(3);
+        csvBackendCpuUsage.start();
 
         CSVBackend csvBackendOneFileForAll = new CSVBackend(Paths.get("logs", "sensors.csv"));
         csvBackendOneFileForAll.setBatchSize(6);
@@ -48,9 +48,9 @@ public class SensorDemo
         dataSource.setUser("sa");
         dataSource.setPassword("");
 
-        JDBCBackend jdbcBackendDiskRoot = new JDBCBackend(dataSource, "DISK_ROOT");
-        jdbcBackendDiskRoot.setBatchSize(6);
-        jdbcBackendDiskRoot.start();
+        JDBCBackend jdbcBackendCpuUsage = new JDBCBackend(dataSource, "CPU_USAGE", true);
+        jdbcBackendCpuUsage.setBatchSize(3);
+        jdbcBackendCpuUsage.start();
 
         JDBCBackend jdbcBackendOneTableForAll = new JDBCBackend(dataSource, "SENSORS");
         jdbcBackendOneTableForAll.setBatchSize(6);
@@ -81,16 +81,20 @@ public class SensorDemo
         sensorNetwork.start();
 
         // Sensoren mit den konkreten Backends verknüpfen.
-        sensorDisk.getNames().forEach(name -> registry.bind(name, csvBackendDiskRoot, jdbcBackendDiskRoot, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
-        sensorCpu.getNames().forEach(name -> registry.bind(name, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
-        sensorMemory.getNames().forEach(name -> registry.bind(name, backendConsole));
+        sensorDisk.getNames().forEach(name -> registry.bind(name, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
+
+        // sensorCpu.getNames().forEach(name -> registry.bind(name, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
+        registry.bind("cpu.usage", csvBackendCpuUsage, jdbcBackendCpuUsage);
+
+        sensorMemory.getNames().forEach(name -> registry.bind(name, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
-        sensorSwap.getNames().forEach(name -> registry.bind(name, new ExecutorBackend(backendConsole, executorService)));
+        sensorSwap.getNames()
+                .forEach(name -> registry.bind(name, new ExecutorBackend(backendConsole, executorService), csvBackendOneFileForAll, jdbcBackendOneTableForAll));
 
         AsyncBackend asyncBackendConsole = new AsyncBackend(backendConsole, 2);
         asyncBackendConsole.start();
-        sensorNetwork.getNames().forEach(name -> registry.bind(name, asyncBackendConsole));
+        sensorNetwork.getNames().forEach(name -> registry.bind(name, asyncBackendConsole, csvBackendOneFileForAll, jdbcBackendOneTableForAll));
 
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(4);
 
@@ -105,9 +109,9 @@ public class SensorDemo
             disruptorBackend.stop();
             asyncBackendConsole.stop();
 
-            csvBackendDiskRoot.stop();
+            csvBackendCpuUsage.stop();
             csvBackendOneFileForAll.stop();
-            jdbcBackendDiskRoot.stop();
+            jdbcBackendCpuUsage.stop();
             jdbcBackendOneTableForAll.start();
 
             try
