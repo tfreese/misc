@@ -16,31 +16,7 @@
     <description>Alles zum ausprobieren.</description>
 
     <build>
-		<!--resources>
-			<resource>
-			<directory>src/main/other-resources</directory>
-			<includes>
-			<include>**/*</include>
-			</includes>
-			</resource>
-			</resources -->
-
         <plugins>
-            <!--plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${version.java}</source>
-                    <target>${version.java}</target>
-                    <fork>true</fork>
-                    <compilerVersion>${version.java}</compilerVersion>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <showDeprecation>true</showDeprecation>
-                    <showWarnings>true</showWarnings>
-                    <executable>/opt/jdk-11/bin/javac</executable>                
-                </configuration>
-            </plugin-->
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
