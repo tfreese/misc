@@ -110,9 +110,33 @@ public final class HazelcastJavaConfigNode1
         // Name of logging framework type to send logging events.
         config.setProperty("hazelcast.logging.type", "slf4j");
 
+        // Number of generic operation handler threads for each Hazelcast member.
+        // Its default value is the maximum of 2 and processor count / 2.
+        config.setProperty("hazelcast.operation.generic.thread.count", "2");
+
+        // Number of priority generic operation handler threads per member.
+        // Having at least 1 priority generic operation thread helps to improve cluster
+        // stability since a lot of cluster operations are generic priority operations
+        // and they should get executed as soon as possible.
+        // If there is a dedicated generic operation thread then these operations
+        // don’t get delayed because the generic threads are busy executing regular
+        // user operations.
+        // So unless memory consumption is an issue, make sure there is at least 1 thread.
+        config.setProperty("hazelcast.operation.priority.generic.thread.count", "2");
+
+        // Number of threads the process responses.
+        // The default value gives stable and good performance.
+        // If set to 0, the response threads are bypassed and the response handling is done on the IO threads.
+        // Under certain conditions this can give a higher throughput.
+        config.setProperty("hazelcast.operation.response.thread.count", "0");
+
+        // Number of partition based operation handler threads for each Hazelcast member.
+        // Its default value is the maximum of 2 and count of available processors.
+        config.setProperty("hazelcast.operation.thread.count", "2");
+
         // Total partition count.
         // Default 271
-        // config.setProperty("hazelcast.partition.count", "3");
+        config.setProperty("hazelcast.partition.count", "3");
 
         // Enable or disable the sending of phone home data to Hazelcast’s phone home server.
         config.setProperty("hazelcast.phone.home.enabled", Boolean.FALSE.toString());
