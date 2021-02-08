@@ -5,6 +5,7 @@ package de.freese.cache;
 
 import java.net.URL;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
@@ -14,7 +15,7 @@ import com.hazelcast.map.IMap;
 /**
  * @author Thomas Freese
  */
-public class Hazelcast_Node2
+public final class HazelcastNode1
 {
     /**
      * @param args String[]
@@ -22,7 +23,7 @@ public class Hazelcast_Node2
      */
     public static void main(final String[] args) throws Exception
     {
-        URL configUrl = ClassLoader.getSystemResource("hazelcast-node2.xml");
+        URL configUrl = ClassLoader.getSystemResource("hazelcast-node1.xml");
         Config config = new XmlConfigBuilder(configUrl).build();
         // config.setProperty("hazelcast.partition.count", "271");
 
@@ -32,11 +33,18 @@ public class Hazelcast_Node2
         IMap<String, String> map = hazelcastInstance.getMap("test");
         // ReplicatedMap<String, String> map = hazelcastInstance.getReplicatedMap("test1");
 
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+
         ForkJoinPool.commonPool().execute(() -> {
             while (true)
             {
                 String value = map.get("key");
-                System.out.printf("%s: cache value = %s%n", Thread.currentThread().getName(), value);
+                System.out.printf("HazelcastNode1: %s: cache value = %s%n", Thread.currentThread().getName(), value);
+
+                if (value == null)
+                {
+                    map.put("key", "value" + atomicInteger.getAndIncrement());
+                }
 
                 try
                 {
@@ -57,9 +65,9 @@ public class Hazelcast_Node2
     }
 
     /**
-     * Erstellt ein neues {@link Hazelcast_Node2} Object.
+     * Erstellt ein neues {@link HazelcastNode1} Object.
      */
-    public Hazelcast_Node2()
+    private HazelcastNode1()
     {
         super();
     }

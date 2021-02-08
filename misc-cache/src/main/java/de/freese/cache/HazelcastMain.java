@@ -18,7 +18,7 @@ import com.hazelcast.map.IMap;
  *
  * @author Thomas Freese
  */
-public class HazelcastMain
+public final class HazelcastMain
 {
     /**
      * @param args String[]
@@ -70,7 +70,7 @@ public class HazelcastMain
     /**
      * Erstellt ein neues {@link HazelcastMain} Object.
      */
-    public HazelcastMain()
+    private HazelcastMain()
     {
         super();
     }

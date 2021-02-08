@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.10.xsd"
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-4.0.xsd"
            xmlns="http://www.hazelcast.com/schema/config">
 
     <!--import resource="hazelcast-network-config.xml"/ -->
@@ -55,10 +55,9 @@
         <backup-count>0</backup-count>
         <async-backup-count>0</async-backup-count>
         <time-to-live-seconds>3</time-to-live-seconds>
-        <max-idle-seconds>0</max-idle-seconds>
-        <eviction-policy>LRU</eviction-policy>
-        <max-size policy="PER_NODE">3</max-size>
-        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy</merge-policy>
+        <max-idle-seconds>3</max-idle-seconds>
+        <eviction eviction-policy="LRU" max-size-policy="PER_NODE" size="3"/>
+        <merge-policy>com.hazelcast.spi.merge.PutIfAbsentMergePolicy</merge-policy>
         <cache-deserialized-values>INDEX-ONLY</cache-deserialized-values>
     </map>
 

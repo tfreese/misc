@@ -14,7 +14,7 @@ import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
 /**
  * @author Thomas Freese
  */
-public class EhCache2Main
+public final class EhCache2Main
 {
 
     /**
@@ -89,7 +89,7 @@ public class EhCache2Main
     /**
      * Erstellt ein neues {@link EhCache2Main} Object.
      */
-    public EhCache2Main()
+    private EhCache2Main()
     {
         super();
     }

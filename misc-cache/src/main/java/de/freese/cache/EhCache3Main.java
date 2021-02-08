@@ -12,7 +12,7 @@ import org.ehcache.xml.XmlConfiguration;
 /***
  * @author Thomas Freese
  */
-public class EhCache3Main
+public final class EhCache3Main
 {
     /**
      * @param args String[]
@@ -65,7 +65,7 @@ public class EhCache3Main
     /**
      * Erstellt ein neues {@link EhCache3Main} Object.
      */
-    public EhCache3Main()
+    private EhCache3Main()
     {
         super();
     }
