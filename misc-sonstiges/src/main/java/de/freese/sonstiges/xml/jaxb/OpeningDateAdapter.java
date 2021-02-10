@@ -19,14 +19,6 @@ public class OpeningDateAdapter extends XmlAdapter<String, Date>
     private static final DateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
-     * Erstellt ein neues {@link OpeningDateAdapter} Object.
-     */
-    public OpeningDateAdapter()
-    {
-        super();
-    }
-
-    /**
      * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
      */
     @Override

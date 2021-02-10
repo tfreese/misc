@@ -17,14 +17,6 @@ import java.awt.print.PrinterException;
 class CoverPage implements Printable
 {
     /**
-     * Erstellt ein neues {@link CoverPage} Object.
-     */
-    public CoverPage()
-    {
-        super();
-    }
-
-    /**
      * Ausgabe auf dem Drucker machen Die iPageIndex-Abfrage entfaellt, da im "book" fest eine Seite eingestellt ist.
      *
      * @see java.awt.print.Printable#print(java.awt.Graphics, java.awt.print.PageFormat, int)

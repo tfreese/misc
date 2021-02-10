@@ -35,7 +35,7 @@ public class Club
      *
      */
     @XmlAttribute
-    private int employees = 0;
+    private int employees;
 
     /**
      *
@@ -49,14 +49,6 @@ public class Club
     @XmlJavaTypeAdapter(OpeningDateAdapter.class)
     // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private final Date opening = new Date();
-
-    /**
-     * Erstellt ein neues {@link Club} Object.
-     */
-    public Club()
-    {
-        super();
-    }
 
     /**
      * @param dj {@link DJ}

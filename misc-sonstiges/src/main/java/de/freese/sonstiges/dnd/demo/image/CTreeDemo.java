@@ -68,7 +68,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
         /**
          * Cumulative left/right mouse movement
          */
-        private int leftRight = 0;
+        private int leftRight;
 
         /**
          *
@@ -94,7 +94,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
          *
          */
         @SuppressWarnings("unused")
-        private int shift = 0;
+        private int shift;
 
         /**
          *

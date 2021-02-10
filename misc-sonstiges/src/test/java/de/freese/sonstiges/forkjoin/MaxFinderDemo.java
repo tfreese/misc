@@ -15,7 +15,7 @@ import de.freese.sonstiges.forkjoin.finder.MaxFinder;
  * 
  * @author Thomas Freese
  */
-public class TestMaxFinder
+public class MaxFinderDemo
 {
 	/**
 	 * @param args String[]

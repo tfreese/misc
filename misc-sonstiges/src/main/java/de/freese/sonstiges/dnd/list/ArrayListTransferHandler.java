@@ -95,7 +95,7 @@ public class ArrayListTransferHandler extends TransferHandler
     /**
      *
      */
-    private int addCount = 0; // Number of items added
+    private int addCount; // Number of items added
 
     /**
      *

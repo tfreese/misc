@@ -27,14 +27,6 @@ public class DJ
     private String lastName;
 
     /**
-     * Erstellt ein neues {@link DJ} Object.
-     */
-    public DJ()
-    {
-        super();
-    }
-
-    /**
      * @return String
      */
     public String getFirstName()

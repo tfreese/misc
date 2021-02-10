@@ -9,7 +9,7 @@ import de.freese.sonstiges.dsl.tools.DateUtils;
 /**
  * @author Thomas Freese
  */
-public class TestDSL
+public class DslDemo
 {
 	/**
 	 * @param args String[]

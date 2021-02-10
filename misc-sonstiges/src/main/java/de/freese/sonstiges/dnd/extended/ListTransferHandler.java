@@ -21,7 +21,7 @@ public class ListTransferHandler extends StringTransferHandler
     /**
      *
      */
-    private int addCount = 0; // Number of items added.
+    private int addCount; // Number of items added.
 
     /**
      *
@@ -32,14 +32,6 @@ public class ListTransferHandler extends StringTransferHandler
      *
      */
     private int[] indices;
-
-    /**
-     * Erstellt ein neues {@link ListTransferHandler} Object.
-     */
-    public ListTransferHandler()
-    {
-        super();
-    }
 
     /**
      * @see de.freese.sonstiges.dnd.extended.StringTransferHandler#cleanup(javax.swing.JComponent, boolean)

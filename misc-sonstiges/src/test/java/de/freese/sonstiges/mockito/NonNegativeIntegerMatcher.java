@@ -11,14 +11,6 @@ import org.mockito.ArgumentMatcher;
 public class NonNegativeIntegerMatcher implements ArgumentMatcher<Integer> // CustomMatcher<Integer>
 {
     /**
-     * Erstellt ein neues {@link NonNegativeIntegerMatcher} Objekt.
-     */
-    public NonNegativeIntegerMatcher()
-    {
-        super();
-    }
-
-    /**
      * @see org.mockito.ArgumentMatcher#matches(java.lang.Object)
      */
     @Override

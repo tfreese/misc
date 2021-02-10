@@ -16,14 +16,6 @@ public class FunctionStripSameChar implements Function<String, String>
     public static final Function<String, String> INSTANCE = new FunctionStripSameChar();
 
     /**
-     * Erzeugt eine neue Instanz von {@link FunctionStripSameChar}
-     */
-    public FunctionStripSameChar()
-    {
-        super();
-    }
-
-    /**
      * @see java.util.function.Function#apply(java.lang.Object)
      */
     @Override

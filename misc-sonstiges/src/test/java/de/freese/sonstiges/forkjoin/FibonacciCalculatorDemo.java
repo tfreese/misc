@@ -12,7 +12,7 @@ import de.freese.sonstiges.forkjoin.fibonacci.FibonacciCalulator;
  *
  * @author Thomas Freese
  */
-public class TestFibonacciCalculator
+public class FibonacciCalculatorDemo
 {
     /**
      * @param args String[]

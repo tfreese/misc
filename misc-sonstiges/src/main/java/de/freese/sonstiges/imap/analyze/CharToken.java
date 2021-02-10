@@ -16,14 +16,14 @@ import java.util.Arrays;
 public class CharToken implements Appendable, CharSequence, Comparable<CharSequence>
 {
     /**
-     * 
+     *
      */
     private char[] buffer;
 
     /**
      * Cursor auf das letzte Zeichen.
      */
-    private int length = 0;
+    private int length;
 
     /**
      * Erstellt ein neues {@link CharToken} Object.
@@ -35,7 +35,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Erstellt ein neues {@link CharToken} Object.
-     * 
+     *
      * @param buffer char[]
      */
     public CharToken(final char[] buffer)
@@ -47,7 +47,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Erstellt ein neues {@link CharToken} Object.
-     * 
+     *
      * @param lenght int
      */
     public CharToken(final int lenght)
@@ -157,7 +157,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Fügt <code>['n','u','l','l']</code> dem Buffer hinzu.
-     * 
+     *
      * @return {@link CharToken}
      */
     public CharToken appendNull()
@@ -282,7 +282,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Setzt den Cursor auf das letzte Zeichen, welches kein Leerzeichen ist.
-     * 
+     *
      * @return {@link CharToken}
      */
     public CharToken resize()
@@ -334,7 +334,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Wandelt alle Zeichen in Kleinbuchstaben um.
-     * 
+     *
      * @return {@link CharToken}
      */
     public CharToken toLowerCase()
@@ -360,7 +360,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Liefert einen String ohne führende und abschliesende Leerzeichen.
-     * 
+     *
      * @return {@link CharSequence}
      */
     public CharSequence toTrimmedString()
@@ -389,7 +389,7 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
 
     /**
      * Wandelt alle Zeichen in Grossbuchstaben um.
-     * 
+     *
      * @return {@link CharToken}
      */
     public CharToken toUpperCase()

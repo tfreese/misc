@@ -23,14 +23,6 @@ public class SingleNoteChannel
     }
 
     /**
-     * Creates a new {@link SingleNoteChannel} object.
-     */
-    public SingleNoteChannel()
-    {
-        super();
-    }
-
-    /**
      * @param note int
      */
     public void playNote(final int note)

@@ -22,14 +22,6 @@ public class FunctionNormalizeGerman implements Function<String, String>
     public static final Function<String, String> INSTANCE = new FunctionNormalizeGerman();
 
     /**
-     * Erzeugt eine neue Instanz von {@link FunctionNormalizeGerman}
-     */
-    public FunctionNormalizeGerman()
-    {
-        super();
-    }
-
-    /**
      * @see java.util.function.Function#apply(java.lang.Object)
      */
     @Override

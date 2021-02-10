@@ -299,7 +299,7 @@ public class ReadImapMails
         {
             // @formatter:off
                String sql = reader.lines()
-                       .filter(line -> line != null)
+                       .filter(Objects::nonNull)
                        .map(String::trim)
                        .filter(line -> !line.isEmpty())
                        .filter(line -> !line.startsWith("#"))

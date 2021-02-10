@@ -9,14 +9,6 @@ import java.time.LocalDateTime;
 public class DateBean implements IDateBean
 {
     /**
-     * Erzeugt eine neue Instanz von {@link DateBean}
-     */
-    public DateBean()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.sonstiges.jmx.IDateBean#getDate()
      */
     @Override

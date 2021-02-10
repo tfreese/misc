@@ -38,14 +38,6 @@ public class JavaFxDemo extends Application
     }
 
     /**
-     * Erzeugt eine neue Instanz von {@link JavaFxDemo}
-     */
-    public JavaFxDemo()
-    {
-        super();
-    }
-
-    /**
      * @see javafx.application.Application#start(javafx.stage.Stage)
      */
     @Override

@@ -75,7 +75,7 @@ public class ProducerConsumerWaitNotify
         /**
          *
          */
-        private int content = 0;
+        private int content;
 
         /**
          *

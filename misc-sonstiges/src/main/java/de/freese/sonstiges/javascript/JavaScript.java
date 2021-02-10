@@ -40,14 +40,6 @@ public class JavaScript
     }
 
     /**
-     * Erstellt ein neues {@link JavaScript} Object.
-     */
-    public JavaScript()
-    {
-        super();
-    }
-
-    /**
      * @param engine {@link ScriptEngine}
      * @throws ScriptException Falls was schief geht.
      */

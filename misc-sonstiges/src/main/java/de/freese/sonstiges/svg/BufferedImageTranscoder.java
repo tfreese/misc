@@ -26,14 +26,6 @@ public class BufferedImageTranscoder extends ImageTranscoder
     private BufferedImage image;
 
     /**
-     * Erstellt ein neues {@link BufferedImageTranscoder} Object.
-     */
-    public BufferedImageTranscoder()
-    {
-        super();
-    }
-
-    /**
      * @see org.apache.batik.transcoder.image.ImageTranscoder#createImage(int, int)
      */
     @Override

@@ -24,14 +24,6 @@ import de.freese.sonstiges.server.ServerMain;
 public class HttpIoHandler extends AbstractIoHandler<SelectionKey>
 {
     /**
-     * Erstellt ein neues {@link HttpIoHandler} Object.
-     */
-    public HttpIoHandler()
-    {
-        super();
-    }
-
-    /**
      * @see de.freese.sonstiges.server.handler.IoHandler#read(java.lang.Object)
      */
     @Override

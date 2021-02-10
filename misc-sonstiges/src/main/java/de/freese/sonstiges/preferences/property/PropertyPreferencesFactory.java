@@ -55,14 +55,6 @@ public final class PropertyPreferencesFactory implements PreferencesFactory
     }
 
     /**
-     * Erstellt ein neues {@link PropertyPreferencesFactory} Object.
-     */
-    public PropertyPreferencesFactory()
-    {
-        super();
-    }
-
-    /**
      * @see java.util.prefs.PreferencesFactory#systemRoot()
      */
     @Override

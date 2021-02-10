@@ -19,14 +19,6 @@ public class HTML2Text extends HTMLEditorKit.ParserCallback
     private StringBuilder sb;
 
     /**
-     * Erstellt ein neues {@link HTML2Text} Object.
-     */
-    public HTML2Text()
-    {
-        super();
-    }
-
-    /**
      * @return String
      */
     public String getText()

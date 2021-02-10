@@ -40,14 +40,6 @@ public class ProxyBlacklist
     private static class HostComparator implements Comparator<String>
     {
         /**
-         *
-         */
-        public HostComparator()
-        {
-            super();
-        }
-
-        /**
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
@@ -118,14 +110,6 @@ public class ProxyBlacklist
         ProxyBlacklist bl = new ProxyBlacklist();
         bl.buildCommonBlacklist();
         bl.buildPrivoxyBlacklist();
-    }
-
-    /**
-     * Erstellt ein neues {@link ProxyBlacklist} Object.
-     */
-    public ProxyBlacklist()
-    {
-        super();
     }
 
     /**
@@ -388,9 +372,7 @@ public class ProxyBlacklist
         bl.addAll(set1);
 
         set1.clear();
-        set1 = null;
         set2.clear();
-        set2 = null;
 
         return bl;
     }

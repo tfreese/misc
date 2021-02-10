@@ -19,17 +19,17 @@ public final class MethodHandleDemo
         /**
          *
          */
-        int x = 0;
+        int x;
 
         /**
          *
          */
-        int y = 0;
+        int y;
 
         /**
         *
         */
-        int z = 0;
+        int z;
     }
 
     /**

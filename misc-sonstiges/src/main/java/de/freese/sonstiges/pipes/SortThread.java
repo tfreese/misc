@@ -77,6 +77,8 @@ public class SortThread extends Thread
      */
     public SortThread(final PrintWriter out, final BufferedReader in)
     {
+        super();
+
         this.out = out;
         this.in = in;
     }

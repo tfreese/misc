@@ -19,14 +19,6 @@ public class ParticleApplet extends Applet
     protected final ParticleCanvas canvas = new ParticleCanvas(800);
 
     /**
-     * Erstellt ein neues {@link ParticleApplet} Object.
-     */
-    public ParticleApplet()
-    {
-        super();
-    }
-
-    /**
      * @see java.applet.Applet#destroy()
      */
     @SuppressWarnings("javadoc")

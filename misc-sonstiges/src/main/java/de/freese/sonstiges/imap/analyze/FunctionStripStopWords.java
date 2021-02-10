@@ -19,8 +19,7 @@ import org.apache.commons.collections4.CollectionUtils;
 /**
  * Diese {@link Function} liefert einen leeren String, wenn dieser aus einem der definierten Stop-Wörtern besteht.<br>
  * Ist der String nicht in den Stop-Wörtern enthalten, wird dieser einfach zurück gegeben.<br>
- * Als Stop-Wörter werden hier (Füll)-Wörter angesehen, die keinerlei Information besitzen, z.B. wie der die das oder he
- * she it und the.
+ * Als Stop-Wörter werden hier (Füll)-Wörter angesehen, die keinerlei Information besitzen, z.B. wie der die das oder he she it und the.
  *
  * @author Thomas Freese
  */
@@ -68,11 +67,9 @@ public class FunctionStripStopWords implements Function<String, String>
 
     /**
      * Liefert das {@link Locale} dessen Stop-Wörter am häufigsten in den Text vorkommen.<br>
-     * <b>Im Mail Header 'Content-Language' ist je nach Provider das Locale schon enthalten !</b> Ist die Collection
-     * leer, wird null geliefert.<br>
+     * <b>Im Mail Header 'Content-Language' ist je nach Provider das Locale schon enthalten !</b> Ist die Collection leer, wird null geliefert.<br>
      *
      * @param texte {@link Collection}
-     *
      * @return {@link Locale}; null oder {@link Locale#GERMAN} oder {@link Locale#ENGLISH}
      */
     public static Locale guessLocale(final Collection<String> texte)
@@ -104,14 +101,6 @@ public class FunctionStripStopWords implements Function<String, String>
         }
 
         return Locale.ENGLISH;
-    }
-
-    /**
-     * Erzeugt eine neue Instanz von {@link FunctionStripStopWords}
-     */
-    public FunctionStripStopWords()
-    {
-        super();
     }
 
     /**
