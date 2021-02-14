@@ -4,10 +4,12 @@ package de.freese.sonstiges.server.multithread.dispatcher;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.freese.sonstiges.server.ServerThreadFactory;
@@ -28,12 +30,22 @@ public class DispatcherPool implements Dispatcher
     /**
      *
      */
-    private final LinkedList<DefaultDispatcher> dispatchers = new LinkedList<>();
+    private static final AtomicIntegerFieldUpdater<DispatcherPool> NEXT_INDEX = AtomicIntegerFieldUpdater.newUpdater(DispatcherPool.class, "nextIndex");
+
+    /**
+     *
+     */
+    private final List<DefaultDispatcher> dispatchers;
 
     /**
      *
      */
     private ExecutorService executorServiceWorker;
+
+    /**
+     *
+     */
+    volatile int nextIndex;
 
     /**
      *
@@ -73,6 +85,8 @@ public class DispatcherPool implements Dispatcher
 
         this.numOfDispatcher = numOfDispatcher;
         this.numOfWorker = numOfWorker;
+
+        this.dispatchers = new ArrayList<>(numOfDispatcher);
     }
 
     /**
@@ -90,13 +104,11 @@ public class DispatcherPool implements Dispatcher
      */
     private synchronized Dispatcher nextDispatcher()
     {
-        // Ersten Dispatcher entnehmen.
-        DefaultDispatcher dispatcher = this.dispatchers.poll();
+        int length = this.dispatchers.size();
 
-        // Dispatcher wieder hinten dran hängen.
-        this.dispatchers.add(dispatcher);
+        int indexToUse = Math.abs(NEXT_INDEX.getAndIncrement(this) % length);
 
-        return dispatcher;
+        return this.dispatchers.get(indexToUse);
     }
 
     /**
