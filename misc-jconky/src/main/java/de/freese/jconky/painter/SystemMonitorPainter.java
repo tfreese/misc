@@ -41,6 +41,11 @@ public class SystemMonitorPainter extends AbstractMonitorPainter
      */
     private void paintUsage(final GraphicsContext gc, final double width, final UsageInfo usageInfo)
     {
+        if (usageInfo == null)
+        {
+            return;
+        }
+
         double x = getSettings().getMarginInner().getLeft();
         double y = 0;
 

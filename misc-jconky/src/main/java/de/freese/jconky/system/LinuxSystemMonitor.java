@@ -845,7 +845,8 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             if (i == 1)
             {
                 // Speicher
-                String[] splits = SPACE_PATTERN.split(lines.get(i));
+                String line = lines.get(i).replace(":", ": ");
+                String[] splits = SPACE_PATTERN.split(line);
                 String path = "RAM";
                 long size = Long.parseLong(splits[1]);
                 long used = Long.parseLong(splits[2]);
@@ -855,7 +856,8 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
             else if (i == 2)
             {
                 // Swap
-                String[] splits = SPACE_PATTERN.split(lines.get(i));
+                String line = lines.get(i).replace(":", ": ");
+                String[] splits = SPACE_PATTERN.split(line);
                 String path = "SWAP";
                 long size = Long.parseLong(splits[1]);
                 long used = Long.parseLong(splits[2]);

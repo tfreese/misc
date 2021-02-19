@@ -214,7 +214,8 @@ public final class JConky extends Application
 
         // Auf dem 2. Monitor
         List<Screen> screens = Screen.getScreens();
-        Screen screen = screens.get(screens.size() - 1);
+        // Screen screen = screens.get(0); // Linker Monitor
+        Screen screen = screens.get(screens.size() - 1); // Rechter Monitor
         primaryStage.setX(screen.getVisualBounds().getMinX() + 1240);
         primaryStage.setY(5D);
 
