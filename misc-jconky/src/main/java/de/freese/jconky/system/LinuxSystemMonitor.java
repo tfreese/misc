@@ -816,11 +816,11 @@ public class LinuxSystemMonitor extends AbstractSystemMonitor
                 // top wollen wir nicht.
                 continue;
             }
-            else if ("java".equals(name))
-            {
-                // java wollen wir nicht.
-                continue;
-            }
+            //else if ("java".equals(name))
+            //{
+            //    // java wollen wir nicht.
+            //    continue;
+            //}
 
             ProcessInfo processInfo = new ProcessInfo(pid, state, name, owner, cpuUsage / 100D, memoryUsage / 100D);
             infos.add(processInfo);
