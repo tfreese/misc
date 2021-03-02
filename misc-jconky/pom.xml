@@ -33,37 +33,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>assembly uberjar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <skipAssembly>true</skipAssembly>
-                    <finalName>${project.artifactId}-assembly</finalName>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>                    
-                    <archive>
-                        <manifest>
-                            <mainClass>de.freese.jconky.JConkyLauncher</mainClass>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Implementation-Build-By>${project.organization.name}</Implementation-Build-By>
-                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
@@ -85,7 +54,38 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>                     
+            </plugin>               
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>assembly uberjar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skipAssembly>true</skipAssembly>
+                    <finalName>${project.artifactId}-assembled</finalName>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>                    
+                    <archive>
+                        <manifest>
+                            <mainClass>de.freese.jconky.JConkyLauncher</mainClass>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build-By>${project.organization.name}</Implementation-Build-By>
+                            <Implementation-Build>${maven.build.timestamp}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>                  
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -98,8 +98,8 @@
                         </goals>
                         <configuration>
                             <!--shadedArtifactAttached>true</shadedArtifactAttached--> <!--Uber-jar als neue Datei, Original nicht ersetzen.-->
-                            <!--shadedClassifierName>shade-jar-with-dependencies</shadedClassifierName-->
-                            <!--finalName>${project.artifactId}-shade-jar-with-dependencies</finalName-->
+                            <!--shadedClassifierName>shaded</shadedClassifierName-->
+                            <!--finalName>${project.artifactId}-shaded</finalName-->
                             <outputFile>shade/${project.artifactId}.jar</outputFile>
                             <keepDependenciesWithProvidedScope>true</keepDependenciesWithProvidedScope>
                             <minimizeJar>false</minimizeJar> <!--Alle Klassen entfernen, die nicht verwendet werden.-->
@@ -123,6 +123,7 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>de.freese.jconky.JConkyLauncher</mainClass>
                                 </transformer>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <!--transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/spring.handlers</resource>
                                 </transformer-->
