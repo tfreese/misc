@@ -61,7 +61,8 @@ public class CharToken implements Appendable, CharSequence, Comparable<CharSeque
     @Override
     public CharToken append(final char c)
     {
-        resizeBuffer(this.length + 1)[this.length++] = c;
+        this.length++;
+        resizeBuffer(this.length + 1)[this.length] = c;
 
         return this;
     }

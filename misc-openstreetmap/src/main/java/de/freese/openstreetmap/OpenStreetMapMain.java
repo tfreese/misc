@@ -35,7 +35,7 @@ public class OpenStreetMapMain
             myFrame.setLocationRelativeTo(null);
             myFrame.setVisible(true);
 
-            SwingUtilities.invokeLater(() -> myFrame.zoomToFit());
+            SwingUtilities.invokeLater(myFrame::zoomToFit);
         }
         catch (Exception ex)
         {

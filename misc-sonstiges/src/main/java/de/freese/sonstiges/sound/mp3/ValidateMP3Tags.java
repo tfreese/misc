@@ -355,10 +355,10 @@ public class ValidateMP3Tags
                     addReport(reports, audioFile.getFile(), "schreibweise");
                 }
 
-                value = value.replaceAll("\\(", "");
-                value = value.replaceAll("\\)", "");
-                value = value.replaceAll("\\.", " ");
-                value = value.replaceAll("-", " ");
+                value = value.replace("\\(", "");
+                value = value.replace("\\)", "");
+                value = value.replace("\\.", " ");
+                value = value.replace("-", " ");
 
                 String[] splits = value.split(" ");
 

@@ -56,7 +56,7 @@ public class DragFileDemo extends JPanel implements ActionListener
     {
         // Schedule a job for the event-dispatching thread:
         // creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(() -> createAndShowGUI());
+        javax.swing.SwingUtilities.invokeLater(DragFileDemo::createAndShowGUI);
     }
 
     /**

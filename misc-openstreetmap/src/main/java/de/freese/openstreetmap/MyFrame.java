@@ -22,13 +22,13 @@ public class MyFrame extends JFrame implements ActionListener
     private static final long serialVersionUID = 9060490859375473760L;
 
     /**
-     * 
+     *
      */
     private final MyPanel myPanel;
 
     /**
      * Erstellt ein neues {@link MyFrame} Object.
-     * 
+     *
      * @param model {@link OSMModel}
      */
     public MyFrame(final OSMModel model)
@@ -46,43 +46,43 @@ public class MyFrame extends JFrame implements ActionListener
     {
         String doWhat = e.getActionCommand();
 
-        if (doWhat == "ZTF")
+        if ("ZTF".equals(doWhat))
         {
             this.myPanel.zoomToFit();
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "+")
+        else if ("+".equals(doWhat))
         {
             this.myPanel.zoom(1.5);
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "-")
+        else if ("-".equals(doWhat))
         {
             this.myPanel.zoom(1 / 1.5);
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "N")
+        else if ("N".equals(doWhat))
         {
             this.myPanel.scrollVertical(-50);
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "W")
+        else if ("W".equals(doWhat))
         {
             this.myPanel.scrollHorizontal(-50);
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "E")
+        else if ("E".equals(doWhat))
         {
             this.myPanel.scrollHorizontal(50);
             // this.myPanel.repaint();
             repaint();
         }
-        else if (doWhat == "S")
+        else if ("S".equals(doWhat))
         {
             this.myPanel.scrollVertical(50);
             // this.myPanel.repaint();
@@ -91,7 +91,7 @@ public class MyFrame extends JFrame implements ActionListener
     }
 
     /**
-     * 
+     *
      */
     public void initGui()
     {
@@ -147,7 +147,7 @@ public class MyFrame extends JFrame implements ActionListener
     }
 
     /**
-     * 
+     *
      */
     public void zoomToFit()
     {

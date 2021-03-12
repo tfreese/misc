@@ -27,9 +27,9 @@ public class FunctionNormalizeGerman implements Function<String, String>
     @Override
     public String apply(final String text)
     {
-        String t = text.replaceAll("ß", "ss");
-        t = t.replaceAll("ae", "ä");
-        t = t.replaceAll("oe", "ö");
+        String t = text.replace("ß", "ss");
+        t = t.replace("ae", "ä");
+        t = t.replace("oe", "ö");
 
         int index = t.indexOf("ue");
 
@@ -43,7 +43,7 @@ public class FunctionNormalizeGerman implements Function<String, String>
             }
             else
             {
-                t = t.replaceAll("ue", "ü");
+                t = t.replace("ue", "ü");
             }
         }
 

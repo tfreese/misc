@@ -25,7 +25,7 @@ public class Day implements Serializable
     /**
      * 
      */
-    private final int day;
+    private final int dayOfMonth;
 
     /**
      * 
@@ -48,7 +48,7 @@ public class Day implements Serializable
 
         this.year = year;
         this.month = month;
-        this.day = day;
+        this.dayOfMonth = day;
     }
 
     /**
@@ -74,7 +74,7 @@ public class Day implements Serializable
 
         Day other = (Day) obj;
 
-        if (this.day != other.day)
+        if (this.dayOfMonth != other.dayOfMonth)
         {
             return false;
         }
@@ -95,9 +95,9 @@ public class Day implements Serializable
     /**
      * @return int
      */
-    public int getDay()
+    public int getDayOfMonth()
     {
-        return this.day;
+        return this.dayOfMonth;
     }
 
     /**
@@ -130,7 +130,7 @@ public class Day implements Serializable
         //
         // return result;
 
-        return (this.year * 400) + (this.month * 31) + this.day;
+        return (this.year * 400) + (this.month * 31) + this.dayOfMonth;
     }
 
     /**
@@ -141,7 +141,7 @@ public class Day implements Serializable
     {
         if (this.asString == null)
         {
-            this.asString = String.format("%d-%02d-%02d", this.year, this.month, this.day);
+            this.asString = String.format("%d-%02d-%02d", this.year, this.month, this.dayOfMonth);
         }
 
         return this.asString;

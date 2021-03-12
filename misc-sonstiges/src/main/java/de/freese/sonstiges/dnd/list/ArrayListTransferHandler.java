@@ -376,7 +376,8 @@ public class ArrayListTransferHandler extends TransferHandler
 
         for (Object element : alist)
         {
-            listModel.add(index++, element);
+            listModel.add(index, element);
+            index++;
         }
 
         return true;

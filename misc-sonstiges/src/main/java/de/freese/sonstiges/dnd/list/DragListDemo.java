@@ -12,6 +12,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 /**
@@ -26,7 +27,7 @@ public class DragListDemo extends JPanel
 
     /**
      * Create the GUI and show it. For thread safety, this method should be invoked from the event-dispatching thread.
-     * 
+     *
      * @throws ClassNotFoundException Falls was schief geht.
      */
     private static void createAndShowGUI() throws ClassNotFoundException
@@ -49,13 +50,12 @@ public class DragListDemo extends JPanel
 
     /**
      * @param args String[]
-     * @throws ClassNotFoundException Falls was schief geht.
      */
-    public static void main(final String[] args) throws ClassNotFoundException
+    public static void main(final String[] args)
     {
         // Schedule a job for the event-dispatching thread:
         // creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             try
             {
                 createAndShowGUI();
@@ -68,13 +68,13 @@ public class DragListDemo extends JPanel
     }
 
     /**
-     * 
+     *
      */
     ArrayListTransferHandler arrayListHandler;
 
     /**
      * Creates a new DragListDemo object.
-     * 
+     *
      * @throws ClassNotFoundException Falls was schief geht.
      */
     public DragListDemo() throws ClassNotFoundException

@@ -205,7 +205,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
 
             TreePath path = getClosestPathForLocation(pt.x, pt.y);
 
-            if (!(path == this.pathLast))
+            if (!(path.equals(this.pathLast)))
             {
                 this.leftRight = 0; // We've moved up or down, so reset left/right movement trend
                 this.pathLast = path;
@@ -215,7 +215,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
             // In any case draw (over the ghost image if necessary) a cue line indicating where a
             // drop will occur
             Rectangle raPath = getPathBounds(path);
-            this.rectangleCueLine.setRect(0, raPath.y + (int) raPath.getHeight(), getWidth(), 2);
+            this.rectangleCueLine.setRect(0, raPath.y + raPath.getHeight(), getWidth(), 2);
 
             g2.setColor(this.colorCueLine);
             g2.fill(this.rectangleCueLine);
@@ -486,7 +486,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
     /**
      * The 'drag image'
      */
-    private BufferedImage imageGhost;
+    private transient BufferedImage imageGhost;
 
     /**
      * The path being dragged
@@ -630,7 +630,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
         Graphics2D g2 = this.imageGhost.createGraphics();
 
         // Ask the cell renderer to paint itself into the BufferedImage
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 0.5f)); // Make the image
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, 0.5F)); // Make the image
         // ghostlike
         lbl.paint(g2);
 
@@ -638,7 +638,7 @@ public class CTreeDemo extends JTree implements DragSourceListener, DragGestureL
         // Note: this will need tweaking if your icon is not positioned to the left of the text
         Icon icon = lbl.getIcon();
         int nStartOfText = (icon == null) ? 0 : (icon.getIconWidth() + lbl.getIconTextGap());
-        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 0.5f)); // Make the
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 0.5F)); // Make the
         // gradient
         // ghostlike
         g2.setPaint(new GradientPaint(nStartOfText, 0, SystemColor.controlShadow, getWidth(), 0, new Color(255, 255, 255, 0)));

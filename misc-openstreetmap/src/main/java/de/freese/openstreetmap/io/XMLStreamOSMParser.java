@@ -222,11 +222,11 @@ public class XMLStreamOSMParser implements IOSMParser
                     {
                         long refID = Long.parseLong(reader.getAttributeValue(null, ATTR_NAME_REF));
 
-                        OSMNode node = model.getNodeMap().get(refID);
+                        OSMNode n = model.getNodeMap().get(refID);
 
-                        if (node != null)
+                        if (n != null)
                         {
-                            this.way.getNodes().add(node);
+                            this.way.getNodes().add(n);
                         }
                     }
                     else if (NODE_NAME_RELATION.equals(localName))
@@ -281,9 +281,6 @@ public class XMLStreamOSMParser implements IOSMParser
                     }
 
                     break;
-
-                default:
-                    ;
             }
         }
 

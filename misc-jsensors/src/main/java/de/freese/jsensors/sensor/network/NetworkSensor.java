@@ -181,7 +181,7 @@ public class NetworkSensor extends AbstractSensor implements LifeCycle
             // Beispiel: em1 lo wlp6so
             List<String> lines = Utils.executeCommand("ls", "/sys/class/net");
 
-            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(SPACE_PATTERN.split(l))).filter(s -> !s.equals("lo"))
+            lines.stream().limit(1).map(String::trim).flatMap(l -> Stream.of(SPACE_PATTERN.split(l))).filter(s -> !"lo".equals(s))
                     .forEach(this.interfaces::add);
         }
     }

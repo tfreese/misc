@@ -18,7 +18,7 @@ public final class JulianDayConverter
      */
     public static int calculateJD(final Day day)
     {
-        return calculateJD(day.getYear(), day.getMonth(), day.getDay());
+        return calculateJD(day.getYear(), day.getMonth(), day.getDayOfMonth());
     }
 
     /**
@@ -47,7 +47,7 @@ public final class JulianDayConverter
      */
     public static int calculateReadable(final Day day)
     {
-        return (day.getYear() * 10000) + (day.getMonth() * 100) + day.getDay();
+        return (day.getYear() * 10000) + (day.getMonth() * 100) + day.getDayOfMonth();
     }
 
     /**

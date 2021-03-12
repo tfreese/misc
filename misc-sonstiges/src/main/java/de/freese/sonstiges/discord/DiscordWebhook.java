@@ -537,7 +537,8 @@ public class DiscordWebhook
                     builder.append("]");
                 }
 
-                builder.append(++i == entrySet.size() ? "}" : ",");
+                i++;
+                builder.append(i == entrySet.size() ? "}" : ",");
             }
 
             return builder.toString();

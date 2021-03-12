@@ -33,7 +33,7 @@ public abstract class AbstractHttpRepository extends AbstractRemoteRepository im
 
         String scheme = uri.getScheme();
 
-        if ((scheme == null) || (!scheme.equalsIgnoreCase("http") && !scheme.equalsIgnoreCase("https")))
+        if ((scheme == null) || (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)))
         {
             String msg = "HTTP or HTTPS protocol required: " + scheme;
 
@@ -80,9 +80,7 @@ public abstract class AbstractHttpRepository extends AbstractRemoteRepository im
             path += resource;
         }
 
-        URI uri = baseUri.resolve(path);
-
-        return uri;
+        return baseUri.resolve(path);
     }
 
     /**

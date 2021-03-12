@@ -185,11 +185,11 @@ public class OSMContentHandler extends DefaultHandler
         {
             long refID = Long.parseLong(atts.getValue(ATTR_NAME_REF));
 
-            OSMNode node = this.osmModel.getNodeMap().get(refID);
+            OSMNode n = this.osmModel.getNodeMap().get(refID);
 
-            if (node != null)
+            if (n != null)
             {
-                this.way.getNodes().add(node);
+                this.way.getNodes().add(n);
             }
         }
         else if (NODE_NAME_RELATION.equals(localName))

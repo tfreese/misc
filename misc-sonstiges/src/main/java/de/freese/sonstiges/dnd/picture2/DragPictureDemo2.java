@@ -19,6 +19,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 
@@ -118,7 +119,7 @@ public class DragPictureDemo2 extends JPanel
     {
         // Schedule a job for the event-dispatching thread:
         // creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(() -> createAndShowGUI());
+        SwingUtilities.invokeLater(DragPictureDemo2::createAndShowGUI);
     }
 
     /**

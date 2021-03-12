@@ -34,7 +34,7 @@ class DTPicture extends Picture implements MouseMotionListener
     /**
      * @return boolean
      */
-    public static boolean getInstallInputMapBindingds()
+    public static boolean hastInstallInputMapBindingds()
     { // for completeness
 
         return installInputMapBindings;
